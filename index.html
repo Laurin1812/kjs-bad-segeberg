@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kreisjägerschaft Bad Segeberg e.V. – Ihr Ansprechpartner für Jagd, Natur und Wildtierhege im Kreis Bad Segeberg.">
+  <title>Kreisjägerschaft Bad Segeberg e.V.</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <div class="container">
+    <div class="topbar__left">
+      <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
+      <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
+    </div>
+    <div class="topbar__right">
+      <div class="topbar__social">
+        <a href="#" aria-label="Facebook" title="Facebook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram" title="Instagram">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="index.html" class="site-logo">
+      <img src="images/logo.png" alt="KJS Bad Segeberg Logo" style="height:62px;width:auto;">
+      <div class="site-logo__text">
+        <span class="site-logo__name">Kreisjägerschaft</span>
+        <span class="site-logo__sub">Bad Segeberg e.V.</span>
+      </div>
+    </a>
+
+    <nav aria-label="Hauptnavigation">
+      <ul class="main-nav">
+        <li class="active"><a href="index.html">Startseite</a></li>
+
+        <li>
+          <a href="jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+          <ul class="dropdown dropdown--wide">
+            <div class="dropdown-header">KJS Bad Segeberg</div>
+            <li><a href="jaeger/vorstand.html">Vorstand</a></li>
+            <li><a href="jaeger/obleute.html">Obleute</a></li>
+            <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
+            <li><a href="jaeger/hegegemeinschaft.html">Hegegemeinschaft</a></li>
+            <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
+            <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+            <div class="dropdown-header">Aufgaben & Wesen</div>
+            <li><a href="aufgaben/schiessen.html">Schießwesen</a></li>
+            <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+            <li><a href="aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
+            <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
+            <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+            <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
+            <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+          <ul class="dropdown">
+            <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
+            <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
+            <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+            <li><a href="verbraucher/jagd-fakten.html">Jagd Fakten</a></li>
+          </ul>
+        </li>
+
+        <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+        <li><a href="termine/index.html">Termine</a></li>
+        <li><a href="aktuelles/index.html">Aktuelles</a></li>
+        <li><a href="faq/index.html">FAQ</a></li>
+        <li><a href="kontakt/index.html">Kontakt</a></li>
+      </ul>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== MOBILE NAV ===== -->
+<nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
+  <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
+  <ul>
+    <li><a href="index.html">Startseite</a></li>
+    <li>
+      <details>
+        <summary>Jäger</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="jaeger/index.html">KJS Bad Segeberg</a></li>
+          <li><a href="jaeger/vorstand.html">Vorstand</a></li>
+          <li><a href="jaeger/obleute.html">Obleute</a></li>
+          <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <li><a href="aufgaben/schiessen.html">Schießwesen</a></li>
+          <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+          <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
+          <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+          <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>Verbraucher</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+        </ul>
+      </details>
+    </li>
+    <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+    <li><a href="termine/index.html">Termine</a></li>
+    <li><a href="aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="faq/index.html">FAQ</a></li>
+    <li><a href="kontakt/index.html">Kontakt</a></li>
+  </ul>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__overlay"></div>
+  <div class="container">
+    <div class="hero__content">
+      <span class="hero__badge">🌿 Kreis Bad Segeberg</span>
+      <h1>In der Natur –<br><span>für Wildtier, Wald und Mensch</span></h1>
+      <p class="hero__sub">
+        Die Kreisjägerschaft Bad Segeberg e.V. vertritt über 1.400 Jägerinnen und Jäger
+        im Kreis Bad Segeberg. Wir engagieren uns für nachhaltige Jagd,
+        aktiven Naturschutz und die Verbindung von Mensch und Natur.
+      </p>
+      <div class="hero__cta">
+        <a href="jaeger/jaeger-werden.html" class="btn btn-primary">Ich will Jäger werden</a>
+        <a href="jaeger/mitglied-werden.html" class="btn btn-outline">Ich will Mitglied werden</a>
+      </div>
+    </div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    Mehr entdecken
+    <span class="hero__scroll-arrow"></span>
+  </div>
+</section>
+
+<!-- ===== QUICK LINKS ===== -->
+<section class="quicklinks" aria-label="Schnellzugriff">
+  <div class="quicklinks__grid">
+    <a href="jaeger/index.html" class="quicklinks__item">
+      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo" class="quicklinks__logo"></span>
+      <div>
+        <div class="quicklinks__label">Für Mitglieder</div>
+        <div class="quicklinks__title">KJS Bad Segeberg</div>
+      </div>
+    </a>
+    <a href="verbraucher/wildfleisch.html" class="quicklinks__item">
+      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo" class="quicklinks__logo"></span>
+      <div>
+        <div class="quicklinks__label">Für Verbraucher</div>
+        <div class="quicklinks__title">Regionales Wildfleisch</div>
+      </div>
+    </a>
+    <a href="aufgaben/jugend.html" class="quicklinks__item">
+      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo" class="quicklinks__logo"></span>
+      <div>
+        <div class="quicklinks__label">Nachwuchs</div>
+        <div class="quicklinks__title">Jugendarbeit</div>
+      </div>
+    </a>
+    <a href="aufgaben/naturschutz.html" class="quicklinks__item">
+      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo" class="quicklinks__logo"></span>
+      <div>
+        <div class="quicklinks__label">Engagement</div>
+        <div class="quicklinks__title">Naturschutz</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="stats" aria-label="Zahlen und Fakten">
+  <div class="container">
+    <div class="stats__grid">
+      <div>
+        <span class="stat__number">1.400+</span>
+        <span class="stat__label">Mitglieder im Kreis</span>
+      </div>
+      <div>
+        <span class="stat__number">12</span>
+        <span class="stat__label">Hegeringe</span>
+      </div>
+      <div>
+        <span class="stat__number">seit 1952</span>
+        <span class="stat__label">Gegründet</span>
+      </div>
+      <div>
+        <span class="stat__number">100+</span>
+        <span class="stat__label">Jahreliche Termine</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WELCOME ===== -->
+<section class="welcome">
+  <div class="container">
+    <div class="welcome__image">
+      <img
+        src="images/naturschutz.webp"
+        alt="Waldlandschaft im Kreis Bad Segeberg"
+        loading="lazy">
+      <div class="welcome__img-badge">Kreis Bad Segeberg</div>
+    </div>
+    <div class="welcome__text">
+      <span class="welcome__tag">Willkommen</span>
+      <h2>Heger, Schützer und<br>Botschafter der Natur</h2>
+      <p>
+        Herzlich willkommen bei der Kreisjägerschaft Bad Segeberg e.V.!
+        Als Zusammenschluss aller Jägerinnen und Jäger im Kreis Bad Segeberg
+        sind wir Motor einer nachhaltigen Jagd und des aktiven Naturschutzes
+        in unserer Heimatregion.
+      </p>
+      <blockquote class="welcome__quote">
+        „Die Jagd ist mehr als das Erlegen von Wild – sie ist eine tiefe Verantwortung
+        gegenüber unserer Natur, unserem Wild und den kommenden Generationen.
+        Gemeinsam gestalten wir eine lebenswerte Landschaft im Kreis Bad Segeberg."
+      </blockquote>
+      <p>
+        Von der Jungwildrettung im Frühjahr über die Hundeausbildung bis hin
+        zu Naturschutzprojekten und dem Jagdhornblasen – unsere Mitglieder
+        bringen sich das ganze Jahr über aktiv ein.
+      </p>
+      <div class="welcome__signature">
+        <div class="welcome__sig-avatar">🤝</div>
+        <div>
+          <span class="welcome__sig-name">Ihr Kreisjägermeister</span>
+          <span class="welcome__sig-role">Kreisjägerschaft Bad Segeberg e.V.</span>
+        </div>
+      </div>
+      <div style="margin-top:1.75rem">
+        <a href="kreisjjaegermeister/index.html" class="btn btn-primary">Zum Kreisjägermeister</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES / AUFGABEN ===== -->
+<section class="section section--alt services">
+  <div class="container">
+    <h2 class="section-title">Was wir anbieten</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Unsere Aufgaben und Tätigkeitsbereiche im Überblick</p>
+
+    <div class="services__grid">
+      <a href="aufgaben/schiessen.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/schiessen.jpg"
+            alt="Schießwesen" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Schießwesen</div>
+          <p class="service-card__text">Regelmäßiges Übungsschießen, Schießstandbetrieb und Aus­bildung für sichere und verantwortungsvolle Jagdausübung.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/hundeausbildung.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/hundeausbildung.jpg"
+            alt="Hundeausbildung" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Hundeausbildung</div>
+          <p class="service-card__text">Ausbildung und Prüfung von Jagdhunden – von der Grundausbildung bis zur Prüfung für erfahrene Gespanne.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/schweisshunde.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/schweisshunde.jpg"
+            alt="Schweißhundeführer" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Schweißhundeführer</div>
+          <p class="service-card__text">Speziell ausgebildete Gespanne zur sicheren Nachsuche und Wildbreteinhaltung im gesamten Kreisgebiet.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/jugend.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/jugendarbeit.jpg"
+            alt="Jugendarbeit" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Jugendarbeit</div>
+          <p class="service-card__text">Naturerlebnisse, Wildtierkunde und Umweltbildung für Kinder und Jugendliche – Jagd erleben und verstehen.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/jagdhorn.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/jagdhornblasen.jpg"
+            alt="Jagdhornblasen" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Jagdhornblasen</div>
+          <p class="service-card__text">Pflege der jagdlichen Tradition durch aktive Bläsergruppen und Teilnahme an Wettbewerben auf Landes- und Bundesebene.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/naturschutz.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/naturschutz.webp"
+            alt="Naturschutz" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Naturschutz</div>
+          <p class="service-card__text">Biotoppflege, Heckenanlage und Schutzmaßnahmen für heimische Wildtiere und ihre Lebensräume.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="aufgaben/jungwildrettung.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/jungwildrettung.jpg"
+            alt="Jungwildrettung" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Jungwildrettung</div>
+          <p class="service-card__text">Koordinierte Drohneneinsätze zur Rettung von Rehkitzen und Bodenbrütern vor der Frühjahrsmahd.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+
+      <a href="termine/index.html" class="service-card">
+        <div class="service-card__img-wrap">
+          <img class="service-card__img"
+            src="images/termine.jpg"
+            alt="Termine" loading="lazy">
+        </div>
+        <div class="service-card__body">
+          <div class="service-card__icon"><img src="images/logo.png" alt="KJS Logo" class="service-card__logo"></div>
+          <div class="service-card__title">Termine & Events</div>
+          <p class="service-card__text">Alle Veranstaltungen, Schießtage, Hegering­treffen und Sonderevents der KJS Bad Segeberg auf einen Blick.</p>
+          <span class="read-more">Mehr lesen</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWS ===== -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Was passiert in der Kreisjägerschaft Bad Segeberg</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Aktuelle Nachrichten, Berichte und Hinweise aus unserer Gemeinschaft</p>
+
+    <div class="news__grid">
+      <article class="news-card">
+        <div class="news-card__img-wrap">
+          <img class="news-card__img"
+            src="images/jungwildrettung.jpg"
+            alt="Jungwildrettung 2025" loading="lazy">
+        </div>
+        <div class="news-card__body">
+          <div class="news-card__meta">
+            <span class="news-card__cat">Jungwildrettung</span>
+            <span class="news-card__date">28. April 2025</span>
+          </div>
+          <h3 class="news-card__title"><a href="aktuelles/index.html">Erfolgreiche Jungwildrettungssaison 2025 – über 120 Kitze gerettet</a></h3>
+          <p class="news-card__excerpt">Dank modernster Drohnentechnik und dem unermüdlichen Einsatz unserer Ehrenamtlichen konnten in diesem Frühjahr wieder zahlreiche Rehkitze vor der Mahd gerettet werden.</p>
+          <a href="aktuelles/index.html" class="read-more">Weiterlesen</a>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-card__img-wrap">
+          <img class="news-card__img"
+            src="images/hundeausbildung.jpg"
+            alt="Hundeprüfung" loading="lazy">
+        </div>
+        <div class="news-card__body">
+          <div class="news-card__meta">
+            <span class="news-card__cat">Hundeausbildung</span>
+            <span class="news-card__date">15. April 2025</span>
+          </div>
+          <h3 class="news-card__title"><a href="aktuelles/index.html">Frühjahrsschweißprüfung – alle Gespanne erfolgreich bewertet</a></h3>
+          <p class="news-card__excerpt">Bei strahlendem Wetter absolvierten 14 Hunde-Gespanne die diesjährige Frühjahrsschweißprüfung mit hervorragenden Ergebnissen.</p>
+          <a href="aktuelles/index.html" class="read-more">Weiterlesen</a>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-card__img-wrap">
+          <img class="news-card__img"
+            src="images/naturschutz.webp"
+            alt="Naturschutzprojekt" loading="lazy">
+        </div>
+        <div class="news-card__body">
+          <div class="news-card__meta">
+            <span class="news-card__cat">Naturschutz</span>
+            <span class="news-card__date">3. April 2025</span>
+          </div>
+          <h3 class="news-card__title"><a href="aktuelles/index.html">Frühjahrsputz – Jäger sorgen für saubere Reviere</a></h3>
+          <p class="news-card__excerpt">Über 200 Jägerinnen und Jäger beteiligten sich kreisübergreifend am diesjährigen Frühjahrsputz und sammelten tonnenweiße Abfälle aus der Landschaft.</p>
+          <a href="aktuelles/index.html" class="read-more">Weiterlesen</a>
+        </div>
+      </article>
+    </div>
+
+    <div class="news__more">
+      <a href="aktuelles/index.html" class="btn btn-outline-green">Mehr Beiträge ansehen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TERMINE PREVIEW ===== -->
+<section class="section section--alt">
+  <div class="container">
+    <h2 class="section-title">Nächste Termine</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Aktuelle Veranstaltungen der Kreisjägerschaft Bad Segeberg</p>
+
+    <div class="termine-list">
+      <div class="termine-item">
+        <div class="termine-item__date">
+          <span class="termine-item__day">12</span>
+          <span class="termine-item__month">Mai</span>
+        </div>
+        <div>
+          <div class="termine-item__title">Kreisvorstandssitzung KJS Bad Segeberg</div>
+          <div class="termine-item__info">
+            <span>🕕 18:00 Uhr</span>
+            <span>📍 Gasthaus Zum Forst, Bad Segeberg</span>
+          </div>
+        </div>
+        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
+      </div>
+
+      <div class="termine-item">
+        <div class="termine-item__date">
+          <span class="termine-item__day">18</span>
+          <span class="termine-item__month">Mai</span>
+        </div>
+        <div>
+          <div class="termine-item__title">Übungsschießen Hegering Segeberg</div>
+          <div class="termine-item__info">
+            <span>🕗 09:00 Uhr</span>
+            <span>📍 Schießstand Fredesdorf</span>
+          </div>
+        </div>
+        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
+      </div>
+
+      <div class="termine-item">
+        <div class="termine-item__date">
+          <span class="termine-item__day">24</span>
+          <span class="termine-item__month">Mai</span>
+        </div>
+        <div>
+          <div class="termine-item__title">Jagdhornbläsertreffen – Kreiswettbewerb</div>
+          <div class="termine-item__info">
+            <span>🕑 14:00 Uhr</span>
+            <span>📍 Kulturzentrum Bad Segeberg</span>
+          </div>
+        </div>
+        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
+      </div>
+
+      <div class="termine-item">
+        <div class="termine-item__date">
+          <span class="termine-item__day">07</span>
+          <span class="termine-item__month">Jun</span>
+        </div>
+        <div>
+          <div class="termine-item__title">Jungwildrettung – Koordinationstreffen Frühjahr</div>
+          <div class="termine-item__info">
+            <span>🕖 19:00 Uhr</span>
+            <span>📍 Feuerwehrhaus Leezen</span>
+          </div>
+        </div>
+        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
+      </div>
+    </div>
+
+    <div class="news__more">
+      <a href="termine/index.html" class="btn btn-primary">Alle Termine anzeigen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials">
+  <div class="container">
+    <h2 class="section-title">Was unsere Jäger und Mitglieder sagen</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Stimmen aus unserer Gemeinschaft</p>
+
+    <div class="testimonials__grid">
+      <div class="testimonial-card">
+        <p class="testimonial-card__text">
+          „Die Jungwildrettung ist für mich das Herzstück unserer Arbeit.
+          Wenn man im Frühjahr ein Kitz in den Händen hält und weiß, dass man
+          sein Leben gerettet hat – das ist unbezahlbar."
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">🌿</div>
+          <div>
+            <span class="testimonial-card__name">Thomas Meier</span>
+            <span class="testimonial-card__role">Jungwildrettung, Hegering Kaltenkirchen</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-card__text">
+          „Mein Schweißhund und ich sind seit Jahren im Kreis Bad Segeberg im Einsatz.
+          Die Kameradschaft und das gemeinsame Arbeiten für das Wild – das ist es,
+          was uns alle verbindet."
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">🐕</div>
+          <div>
+            <span class="testimonial-card__name">Hans-Peter Schulz</span>
+            <span class="testimonial-card__role">Schweißhundeführer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-card__text">
+          „Das Jagdhornblasen bewahrt ein Stück gelebte Tradition. Ich bin stolz,
+          Teil der Bläsergruppe Bad Segeberg zu sein und unsere Musik
+          bei festlichen Anlässen erklingen zu lassen."
+        </p>
+        <div class="testimonial-card__author">
+          <div class="testimonial-card__avatar">📯</div>
+          <div>
+            <span class="testimonial-card__name">Petra Hoffmann</span>
+            <span class="testimonial-card__role">Jagdhornbläserin, KJS Bad Segeberg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA BANNER ===== -->
+<section class="section" style="background: var(--green-light); padding-block: 4rem;">
+  <div class="container text-center">
+    <h2 style="color: var(--green-dark); margin-bottom: .75rem;">Werden Sie Teil der Jagdgemeinschaft</h2>
+    <div class="section-divider"></div>
+    <p style="max-width: 580px; margin: 0 auto 2rem; color: var(--text-muted);">
+      Ob als Jäger oder Fördermitglied – bei der Kreisjägerschaft Bad Segeberg
+      sind Sie Teil einer aktiven Gemeinschaft, die Natur und Jagd verantwortungsvoll lebt.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="jaeger/jaeger-werden.html" class="btn btn-primary">Jäger/in werden</a>
+      <a href="jaeger/mitglied-werden.html" class="btn btn-gold">Fördermitglied werden</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-about">
+        <img src="images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+        <span class="footer-about__name">Kreisjägerschaft Bad Segeberg e.V.</span>
+        <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+        <p>Verantwortungsvolle Jagd, aktiver Naturschutz und regionales Engagement
+           im Kreis Bad Segeberg seit 1952.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h5>Über die KJS</h5>
+        <ul>
+          <li><a href="jaeger/vorstand.html">Vorstand</a></li>
+          <li><a href="jaeger/obleute.html">Obleute</a></li>
+          <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+          <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Schnellübersicht</h5>
+        <ul>
+          <li><a href="index.html">Startseite</a></li>
+          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="downloads/index.html">Downloads</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Informationen</h5>
+        <ul>
+          <li><a href="kontakt/index.html">Kontakt</a></li>
+          <li><a href="aktuelles/index.html">Aktuelles</a></li>
+          <li><a href="termine/index.html">Termine</a></li>
+          <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="faq/index.html">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>Copyright 2025 © Kreisjägerschaft Bad Segeberg e.V.</span>
+      <div class="footer-bottom__links">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", user => {
+      if (!user) {
+        window.netlifyIdentity.on("login", () => {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+  }
+</script>
+</body>
+</html>

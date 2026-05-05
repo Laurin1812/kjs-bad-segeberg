@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kontakt zur Kreisjägerschaft Bad Segeberg e.V.">
+  <title>Kontakt – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="topbar"><div class="container">
+  <div class="topbar__left">
+    <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
+    <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
+  </div>
+</div></div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../index.html" class="site-logo">
+      <img src="../images/logo.png" alt="KJS Bad Segeberg Logo" style="height:62px;width:auto;">
+      <div class="site-logo__text">
+        <span class="site-logo__name">Kreisjägerschaft</span>
+        <span class="site-logo__sub">Bad Segeberg e.V.</span>
+      </div>
+    </a>
+    <nav aria-label="Hauptnavigation"><ul class="main-nav">
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+        <ul class="dropdown dropdown--wide">
+          <div class="dropdown-header">KJS Bad Segeberg</div>
+          <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li><li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <div class="dropdown-header">Aufgaben & Wesen</div>
+          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li><li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+        </ul>
+      </li>
+      <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+        <ul class="dropdown"><li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li></ul>
+      </li>
+      <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+      <li><a href="../termine/index.html">Termine</a></li>
+      <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+      <li class="active"><a href="index.html">Kontakt</a></li>
+    </ul></nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav__close" id="mobileNavClose">✕</button>
+  <ul>
+    <li><a href="../index.html">Startseite</a></li>
+    <li><a href="../jaeger/index.html">Jäger</a></li>
+    <li><a href="../termine/index.html">Termine</a></li>
+    <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="index.html">Kontakt</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Kontakt</h1>
+    <nav class="breadcrumb">
+      <a href="../index.html">Startseite</a><span class="sep">/</span><span>Kontakt</span>
+    </nav>
+  </div>
+</div>
+
+<div class="page-content full">
+  <div class="container">
+    <main class="main-content">
+      <h2>So erreichen Sie uns</h2>
+      <p style="color:var(--text-muted); margin-bottom:2.5rem;">
+        Haben Sie Fragen, Anregungen oder möchten Sie Mitglied werden?
+        Nehmen Sie gerne Kontakt mit uns auf – wir freuen uns auf Ihre Nachricht.
+      </p>
+
+      <div class="kontakt-grid">
+        <!-- FORM -->
+        <div class="kontakt-form">
+          <h3>Nachricht senden</h3>
+          <form id="contactForm" novalidate>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="vorname">Vorname *</label>
+                <input type="text" id="vorname" name="vorname" placeholder="Max" required>
+              </div>
+              <div class="form-group">
+                <label for="nachname">Nachname *</label>
+                <input type="text" id="nachname" name="nachname" placeholder="Mustermann" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">E-Mail-Adresse *</label>
+              <input type="email" id="email" name="email" placeholder="max@beispiel.de" required>
+            </div>
+            <div class="form-group">
+              <label for="telefon">Telefon (optional)</label>
+              <input type="tel" id="telefon" name="telefon" placeholder="04551 / ...">
+            </div>
+            <div class="form-group">
+              <label for="betreff">Betreff *</label>
+              <select id="betreff" name="betreff" required>
+                <option value="">Bitte wählen …</option>
+                <option>Allgemeine Anfrage</option>
+                <option>Mitgliedschaft</option>
+                <option>Jägerausbildung (Jagdschein)</option>
+                <option>Schießwesen</option>
+                <option>Hundeausbildung</option>
+                <option>Jagdhornblasen</option>
+                <option>Naturschutz</option>
+                <option>Jungwildrettung</option>
+                <option>Pressenanfrage</option>
+                <option>Sonstiges</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nachricht">Ihre Nachricht *</label>
+              <textarea id="nachricht" name="nachricht" placeholder="Ihre Nachricht an die KJS Bad Segeberg …" required></textarea>
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-start; gap:.75rem;">
+              <input type="checkbox" id="datenschutz" name="datenschutz" required style="width:auto; margin-top:.2rem;">
+              <label for="datenschutz" style="font-size:.84rem; font-weight:400; color:var(--text-muted);">
+                Ich habe die <a href="../datenschutz.html">Datenschutzerklärung</a> gelesen und akzeptiere sie.
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+              Nachricht senden
+            </button>
+          </form>
+        </div>
+
+        <!-- INFO -->
+        <div class="kontakt-info">
+          <h3>Geschäftsstelle</h3>
+
+          <div class="kontakt-detail">
+            <div class="kontakt-detail__icon">🏠</div>
+            <div>
+              <span class="kontakt-detail__label">Adresse</span>
+              <div class="kontakt-detail__value">
+                Kreisjägerschaft Bad Segeberg e.V.<br>
+                Musterstraße 1<br>
+                23795 Bad Segeberg
+              </div>
+            </div>
+          </div>
+
+          <div class="kontakt-detail">
+            <div class="kontakt-detail__icon">📞</div>
+            <div>
+              <span class="kontakt-detail__label">Telefon</span>
+              <div class="kontakt-detail__value">
+                <a href="tel:+494551123456">04551 / 12 34 56</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="kontakt-detail">
+            <div class="kontakt-detail__icon">📧</div>
+            <div>
+              <span class="kontakt-detail__label">E-Mail</span>
+              <div class="kontakt-detail__value">
+                <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="kontakt-detail">
+            <div class="kontakt-detail__icon">🕐</div>
+            <div>
+              <span class="kontakt-detail__label">Sprechzeiten</span>
+              <div class="kontakt-detail__value">
+                Montag &amp; Mittwoch: 10:00 – 12:00 Uhr<br>
+                Donnerstag: 15:00 – 18:00 Uhr<br>
+                oder nach Vereinbarung
+              </div>
+            </div>
+          </div>
+
+          <div class="kontakt-detail">
+            <div class="kontakt-detail__icon">👤</div>
+            <div>
+              <span class="kontakt-detail__label">Kreisjägermeister</span>
+              <div class="kontakt-detail__value">
+                <a href="../kreisjjaegermeister/index.html">Zur Seite des Kreisjägemeisters →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map Placeholder -->
+          <div class="map-placeholder" title="Kartenansicht – Platzhalter">
+            🗺️
+          </div>
+          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.5rem; text-align:center;">
+            Kartenintegration (z. B. OpenStreetMap) hier einbinden
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+      <span class="footer-about__name">Kreisjägerschaft Bad Segeberg e.V.</span>
+      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 1952.</p>
+    </div>
+    <div class="footer-col"><h5>Über die KJS</h5><ul>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+      <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
+      <li><a href="../index.html">Startseite</a></li><li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../termine/index.html">Termine</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Informationen</h5><ul>
+      <li><a href="index.html">Kontakt</a></li><li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../downloads/index.html">Downloads</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>Copyright 2025 © Kreisjägerschaft Bad Segeberg e.V.</span>
+    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
+  </div>
+</div></footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

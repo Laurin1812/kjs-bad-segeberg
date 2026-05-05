@@ -1,0 +1,88 @@
+backend:
+  name: git-gateway
+  branch: main
+
+locale: de
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+
+  # ──────────────────────────────────────────
+  # TERMINE
+  # ──────────────────────────────────────────
+  - name: "termine"
+    label: "📅 Termine"
+    files:
+      - label: "Veranstaltungskalender"
+        name: "kalender"
+        file: "content/termine.json"
+        fields:
+          - label: "Termine"
+            name: "termine"
+            widget: "list"
+            summary: "{{fields.datum}} – {{fields.veranstaltung}}"
+            fields:
+              - { label: "Datum",        name: "datum",         widget: "string", hint: "z.B. 12.05.2025" }
+              - { label: "Uhrzeit",      name: "uhrzeit",       widget: "string", hint: "z.B. 18:00 Uhr" }
+              - { label: "Veranstaltung",name: "veranstaltung", widget: "string" }
+              - { label: "Ort",          name: "ort",           widget: "string" }
+              - label: "Kategorie"
+                name: "kategorie"
+                widget: "select"
+                options:
+                  - "Vorstand"
+                  - "Schießwesen"
+                  - "Hundeausbildung"
+                  - "Jagdhornblasen"
+                  - "Jugend"
+                  - "Hegering"
+                  - "Naturschutz"
+                  - "Ausbildung"
+                  - "Kreisveranstaltung"
+                  - "Hauptversammlung"
+                  - "Tradition"
+
+  # ──────────────────────────────────────────
+  # AKTUELLES / NEWS
+  # ──────────────────────────────────────────
+  - name: "aktuelles"
+    label: "📰 Aktuelles"
+    files:
+      - label: "Newsbeiträge"
+        name: "news"
+        file: "content/aktuelles.json"
+        fields:
+          - label: "Beiträge"
+            name: "beitraege"
+            widget: "list"
+            summary: "{{fields.datum}} – {{fields.titel}}"
+            fields:
+              - { label: "Titel",          name: "titel",          widget: "string" }
+              - { label: "Datum",          name: "datum",          widget: "string", hint: "z.B. 28. April 2025" }
+              - { label: "Kategorie",      name: "kategorie",      widget: "string", hint: "z.B. Naturschutz" }
+              - { label: "Bild (Dateiname)",name: "bild",          widget: "image",  required: false }
+              - { label: "Kurzbeschreibung",name: "text",          widget: "text" }
+              - { label: "Link (optional)", name: "link",          widget: "string", required: false }
+
+  # ──────────────────────────────────────────
+  # KONTAKT & ÖFFNUNGSZEITEN
+  # ──────────────────────────────────────────
+  - name: "einstellungen"
+    label: "⚙️ Kontakt & Öffnungszeiten"
+    files:
+      - label: "Geschäftsstelle"
+        name: "kontakt"
+        file: "content/einstellungen.json"
+        fields:
+          - { label: "Telefon",      name: "telefon",  widget: "string" }
+          - { label: "E-Mail",       name: "email",    widget: "string" }
+          - { label: "Adresse",      name: "adresse",  widget: "text",   hint: "Jede Zeile = eine Zeile auf der Website" }
+          - label: "Öffnungszeiten"
+            name: "oeffnungszeiten"
+            widget: "list"
+            summary: "{{fields.tage}}: {{fields.zeiten}}"
+            fields:
+              - { label: "Tag(e)",   name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
+              - { label: "Uhrzeit",  name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }

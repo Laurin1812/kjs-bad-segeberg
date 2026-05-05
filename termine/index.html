@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Alle Termine der Kreisjägerschaft Bad Segeberg e.V.">
+  <title>Termine – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="topbar"><div class="container">
+  <div class="topbar__left">
+    <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
+    <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
+  </div>
+</div></div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../index.html" class="site-logo">
+      <img src="../images/logo.png" alt="KJS Bad Segeberg Logo" style="height:62px;width:auto;">
+      <div class="site-logo__text">
+        <span class="site-logo__name">Kreisjägerschaft</span>
+        <span class="site-logo__sub">Bad Segeberg e.V.</span>
+      </div>
+    </a>
+    <nav aria-label="Hauptnavigation"><ul class="main-nav">
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+        <ul class="dropdown dropdown--wide">
+          <div class="dropdown-header">KJS Bad Segeberg</div>
+          <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+          <li><a href="../jaeger/obleute.html">Obleute</a></li>
+          <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <div class="dropdown-header">Aufgaben & Wesen</div>
+          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
+          <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+          <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+        </ul>
+      </li>
+      <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+        <ul class="dropdown"><li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li><li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li></ul>
+      </li>
+      <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+      <li class="active"><a href="index.html">Termine</a></li>
+      <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../kontakt/index.html">Kontakt</a></li>
+    </ul></nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav__close" id="mobileNavClose">✕</button>
+  <ul>
+    <li><a href="../index.html">Startseite</a></li>
+    <li><a href="../jaeger/index.html">Jäger</a></li>
+    <li><a href="../verbraucher/index.html">Verbraucher</a></li>
+    <li><a href="index.html">Termine</a></li>
+    <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../kontakt/index.html">Kontakt</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('../images/termine.jpg')"></div>
+  <div class="container">
+    <h1>Termine</h1>
+    <nav class="breadcrumb">
+      <a href="../index.html">Startseite</a><span class="sep">/</span><span>Termine</span>
+    </nav>
+  </div>
+</div>
+
+<div class="page-content full">
+  <div class="container">
+    <main class="main-content">
+      <h2>Veranstaltungskalender 2025</h2>
+      <p>Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Bad Segeberg e.V.
+         sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können.
+      </p>
+
+      <!-- Filter-Leiste -->
+      <div style="display:flex; gap:1rem; flex-wrap:wrap; margin: 2rem 0 1.5rem; padding: 1.25rem; background: var(--bg-light); border-radius: var(--radius-md);">
+        <strong style="align-self:center; font-size:.9rem; color:var(--text-muted);">Filter:</strong>
+        <a href="#" class="btn btn-primary btn-sm termine-filter-btn" data-filter="Alle">Alle</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Vorstand">Vorstand</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Schießwesen">Schießwesen</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Hundeausbildung">Hundeausbildung</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Jagdhornblasen">Jagdhornblasen</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Jugend">Jugend</a>
+        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Hegering">Hegering</a>
+      </div>
+
+      <!-- Tabelle (wird per JavaScript aus content/termine.json geladen) -->
+      <div class="termine-table-wrap">
+        <table class="termine-table">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Uhrzeit</th>
+              <th>Veranstaltung</th>
+              <th>Ort</th>
+              <th>Kategorie</th>
+            </tr>
+          </thead>
+          <tbody id="termineTableBody">
+            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Termine werden geladen …</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 2.5rem; padding: 1.5rem; background: var(--green-light); border-radius: var(--radius-md); border-left: 4px solid var(--green-main);">
+        <h4 style="color: var(--green-dark); margin-bottom: .5rem;">📋 Termin vorschlagen</h4>
+        <p style="margin:0; font-size: .9rem;">
+          Möchten Sie einen Termin für Ihren Hegering oder Ihre Gruppe eintragen lassen?
+          Schreiben Sie uns an <a href="mailto:termine@kjs-bad-segeberg.de">termine@kjs-bad-segeberg.de</a>.
+        </p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+      <span class="footer-about__name">Kreisjägerschaft Bad Segeberg e.V.</span>
+      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 1952.</p>
+    </div>
+    <div class="footer-col"><h5>Über die KJS</h5><ul>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+      <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="index.html">Termine</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Informationen</h5><ul>
+      <li><a href="../kontakt/index.html">Kontakt</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../downloads/index.html">Downloads</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>Copyright 2025 © Kreisjägerschaft Bad Segeberg e.V.</span>
+    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
+  </div>
+</div></footer>
+
+<script src="../js/main.js"></script>
+<script>
+// Goldene Kategorien bekommen badge--gold
+const goldKategorien = ['Jagdhornblasen','Kreisveranstaltung','Hauptversammlung','Tradition'];
+let aktuellerFilter = 'Alle';
+
+function renderTermine(termine) {
+  const tbody = document.getElementById('termineTableBody');
+  if (!tbody) return;
+  const gefiltert = aktuellerFilter === 'Alle'
+    ? termine
+    : termine.filter(t => t.kategorie === aktuellerFilter);
+  if (gefiltert.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Keine Termine für diesen Filter.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = gefiltert.map(t => {
+    const gold = goldKategorien.includes(t.kategorie) ? ' badge--gold' : '';
+    return `<tr>
+      <td><strong>${t.datum}</strong></td>
+      <td>${t.uhrzeit}</td>
+      <td>${t.veranstaltung}</td>
+      <td>${t.ort}</td>
+      <td><span class="badge${gold}">${t.kategorie}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+fetch('../content/termine.json')
+  .then(r => r.json())
+  .then(data => {
+    const termine = data.termine || [];
+    renderTermine(termine);
+
+    // Filter-Buttons aktivieren
+    document.querySelectorAll('.termine-filter-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        aktuellerFilter = btn.dataset.filter;
+        document.querySelectorAll('.termine-filter-btn').forEach(b => {
+          b.classList.toggle('btn-primary', b.dataset.filter === aktuellerFilter);
+          b.classList.toggle('btn-outline-green', b.dataset.filter !== aktuellerFilter);
+        });
+        renderTermine(termine);
+      });
+    });
+  })
+  .catch(() => {
+    const tbody = document.getElementById('termineTableBody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Termine konnten nicht geladen werden.</td></tr>';
+  });
+</script>
+</body>
+</html>
