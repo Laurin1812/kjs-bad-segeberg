@@ -124,127 +124,38 @@
         Fragen rund um Jagd, Naturschutz, Ausbildung und Vereinsleben.
       </p>
 
-      <!-- Vorstandsmitglieder -->
-      <div class="persons-grid" style="margin-top: 2.5rem;">
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Kreisjägermeister</span>
-            <div class="person-card__name">Max Mustermann</div>
-            <div class="person-card__contact">
-              <a href="mailto:kreisjjaegermeister@kjs-bad-segeberg.de">kreisjjaegermeister@kjs-bad-segeberg.de</a>
-              <a href="tel:+49455112345">04551 / 1 23 45</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Stellvertretender Kreisjägermeister</span>
-            <div class="person-card__name">Hans-Georg Müller</div>
-            <div class="person-card__contact">
-              <a href="mailto:vorstand@kjs-bad-segeberg.de">vorstand@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Schatzmeister</span>
-            <div class="person-card__name">Klaus-Peter Schmidt</div>
-            <div class="person-card__contact">
-              <a href="mailto:schatzmeister@kjs-bad-segeberg.de">schatzmeister@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Schriftführer</span>
-            <div class="person-card__name">Werner Brandt</div>
-            <div class="person-card__contact">
-              <a href="mailto:schriftfuehrer@kjs-bad-segeberg.de">schriftfuehrer@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann für Schießwesen</span>
-            <div class="person-card__name">Dieter Hoffmann</div>
-            <div class="person-card__contact">
-              <a href="mailto:schiessen@kjs-bad-segeberg.de">schiessen@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obfrau für Jugendarbeit</span>
-            <div class="person-card__name">Sabine Krug</div>
-            <div class="person-card__contact">
-              <a href="mailto:jugend@kjs-bad-segeberg.de">jugend@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann für Hundeausbildung</span>
-            <div class="person-card__name">Rolf Petersen</div>
-            <div class="person-card__contact">
-              <a href="mailto:hunde@kjs-bad-segeberg.de">hunde@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann für Naturschutz</span>
-            <div class="person-card__name">Andreas Lehmann</div>
-            <div class="person-card__contact">
-              <a href="mailto:naturschutz@kjs-bad-segeberg.de">naturschutz@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="person-card">
-          <div class="person-card__avatar-wrap">
-            <div class="person-card__avatar-placeholder">👤</div>
-          </div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann für Jagdhornblasen</span>
-            <div class="person-card__name">Friedrich Wulf</div>
-            <div class="person-card__contact">
-              <a href="mailto:jagdhorn@kjs-bad-segeberg.de">jagdhorn@kjs-bad-segeberg.de</a>
-            </div>
-          </div>
-        </div>
+      <!-- Vorstandsmitglieder – dynamisch aus content/vorstand.json -->
+      <div class="persons-grid" id="vorstand-grid" style="margin-top: 2.5rem;">
+        <p style="color:var(--text-muted);">Vorstandsmitglieder werden geladen …</p>
       </div>
+
+      <script>
+        fetch('../content/vorstand.json')
+          .then(r => r.json())
+          .then(data => {
+            const grid = document.getElementById('vorstand-grid');
+            grid.innerHTML = data.mitglieder.map(m => `
+              <div class="person-card">
+                <div class="person-card__avatar-wrap">
+                  ${m.bild
+                    ? `<img src="../${m.bild}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    : `<div class="person-card__avatar-placeholder">👤</div>`}
+                </div>
+                <div class="person-card__body">
+                  <span class="person-card__role">${m.rolle}</span>
+                  <div class="person-card__name">${m.name}</div>
+                  <div class="person-card__contact">
+                    ${m.email ? `<a href="mailto:${m.email}">${m.email}</a>` : ''}
+                    ${m.telefon ? `<a href="tel:${m.telefon.replace(/\s|\/|\./g,'')}">${m.telefon}</a>` : ''}
+                  </div>
+                </div>
+              </div>`).join('');
+          })
+          .catch(() => {
+            document.getElementById('vorstand-grid').innerHTML =
+              '<p>Vorstandsdaten konnten nicht geladen werden.</p>';
+          });
+      </script>
 
       <div style="margin-top: 2.5rem; padding: 1.5rem; background: var(--green-light); border-radius: var(--radius-md); border-left: 4px solid var(--green-main);">
         <h4 style="color: var(--green-dark); margin-bottom: .5rem;">📌 Hinweis</h4>

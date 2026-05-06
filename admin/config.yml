@@ -67,6 +67,27 @@ collections:
               - { label: "Link (optional)", name: "link",          widget: "string", required: false }
 
   # ──────────────────────────────────────────
+  # VORSTAND & ANSPRECHPARTNER
+  # ──────────────────────────────────────────
+  - name: "vorstand"
+    label: "👥 Vorstand & Ansprechpartner"
+    files:
+      - label: "Vorstandsmitglieder"
+        name: "mitglieder"
+        file: "content/vorstand.json"
+        fields:
+          - label: "Mitglieder"
+            name: "mitglieder"
+            widget: "list"
+            summary: "{{fields.rolle}} – {{fields.name}}"
+            fields:
+              - { label: "Rolle / Funktion",  name: "rolle",    widget: "string", hint: "z.B. Kreisjägermeister" }
+              - { label: "Name",               name: "name",     widget: "string" }
+              - { label: "E-Mail",             name: "email",    widget: "string", required: false }
+              - { label: "Telefon",            name: "telefon",  widget: "string", required: false }
+              - { label: "Foto",               name: "bild",     widget: "image",  required: false, hint: "Optionales Portraitfoto" }
+
+  # ──────────────────────────────────────────
   # KONTAKT & ÖFFNUNGSZEITEN
   # ──────────────────────────────────────────
   - name: "einstellungen"

@@ -135,72 +135,84 @@
           </form>
         </div>
 
-        <!-- INFO -->
-        <div class="kontakt-info">
+        <!-- INFO – dynamisch aus content/einstellungen.json -->
+        <div class="kontakt-info" id="kontakt-info">
           <h3>Geschäftsstelle</h3>
-
-          <div class="kontakt-detail">
-            <div class="kontakt-detail__icon">🏠</div>
-            <div>
-              <span class="kontakt-detail__label">Adresse</span>
-              <div class="kontakt-detail__value">
-                Kreisjägerschaft Bad Segeberg e.V.<br>
-                Musterstraße 1<br>
-                23795 Bad Segeberg
-              </div>
-            </div>
-          </div>
-
-          <div class="kontakt-detail">
-            <div class="kontakt-detail__icon">📞</div>
-            <div>
-              <span class="kontakt-detail__label">Telefon</span>
-              <div class="kontakt-detail__value">
-                <a href="tel:+494551123456">04551 / 12 34 56</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="kontakt-detail">
-            <div class="kontakt-detail__icon">📧</div>
-            <div>
-              <span class="kontakt-detail__label">E-Mail</span>
-              <div class="kontakt-detail__value">
-                <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="kontakt-detail">
-            <div class="kontakt-detail__icon">🕐</div>
-            <div>
-              <span class="kontakt-detail__label">Sprechzeiten</span>
-              <div class="kontakt-detail__value">
-                Montag &amp; Mittwoch: 10:00 – 12:00 Uhr<br>
-                Donnerstag: 15:00 – 18:00 Uhr<br>
-                oder nach Vereinbarung
-              </div>
-            </div>
-          </div>
-
-          <div class="kontakt-detail">
-            <div class="kontakt-detail__icon">👤</div>
-            <div>
-              <span class="kontakt-detail__label">Kreisjägermeister</span>
-              <div class="kontakt-detail__value">
-                <a href="../kreisjjaegermeister/index.html">Zur Seite des Kreisjägemeisters →</a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Map Placeholder -->
-          <div class="map-placeholder" title="Kartenansicht – Platzhalter">
-            🗺️
-          </div>
-          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.5rem; text-align:center;">
-            Kartenintegration (z. B. OpenStreetMap) hier einbinden
-          </p>
+          <p style="color:var(--text-muted);">Daten werden geladen …</p>
         </div>
+
+        <script>
+          fetch('../content/einstellungen.json')
+            .then(r => r.json())
+            .then(d => {
+              const adresseHtml = d.adresse
+                ? d.adresse.replace(/\n/g, '<br>')
+                : '';
+              const ozeiten = (d.oeffnungszeiten || [])
+                .map(o => `${o.tage}${o.zeiten ? ': ' + o.zeiten : ''}`)
+                .join('<br>');
+
+              document.getElementById('kontakt-info').innerHTML = `
+                <h3>Geschäftsstelle</h3>
+
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">🏠</div>
+                  <div>
+                    <span class="kontakt-detail__label">Adresse</span>
+                    <div class="kontakt-detail__value">${adresseHtml}</div>
+                  </div>
+                </div>
+
+                ${d.telefon ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">📞</div>
+                  <div>
+                    <span class="kontakt-detail__label">Telefon</span>
+                    <div class="kontakt-detail__value">
+                      <a href="tel:${d.telefon.replace(/\s|\/|\./g,'')}">${d.telefon}</a>
+                    </div>
+                  </div>
+                </div>` : ''}
+
+                ${d.email ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">📧</div>
+                  <div>
+                    <span class="kontakt-detail__label">E-Mail</span>
+                    <div class="kontakt-detail__value">
+                      <a href="mailto:${d.email}">${d.email}</a>
+                    </div>
+                  </div>
+                </div>` : ''}
+
+                ${ozeiten ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">🕐</div>
+                  <div>
+                    <span class="kontakt-detail__label">Sprechzeiten</span>
+                    <div class="kontakt-detail__value">${ozeiten}</div>
+                  </div>
+                </div>` : ''}
+
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">👤</div>
+                  <div>
+                    <span class="kontakt-detail__label">Kreisjägermeister</span>
+                    <div class="kontakt-detail__value">
+                      <a href="../kreisjjaegermeister/index.html">Zur Seite des Kreisjägemeisters →</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="map-placeholder" title="Kartenansicht – Platzhalter">🗺️</div>
+                <p style="font-size:.8rem; color:var(--text-muted); margin-top:.5rem; text-align:center;">
+                  Kartenintegration (z. B. OpenStreetMap) hier einbinden
+                </p>`;
+            })
+            .catch(() => {
+              document.getElementById('kontakt-info').innerHTML += '<p>Kontaktdaten konnten nicht geladen werden.</p>';
+            });
+        </script>
       </div>
     </main>
   </div>

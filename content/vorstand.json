@@ -1,0 +1,67 @@
+{
+  "mitglieder": [
+    {
+      "rolle": "Kreisjägermeister",
+      "name": "Max Mustermann",
+      "email": "kreisjjaegermeister@kjs-bad-segeberg.de",
+      "telefon": "04551 / 1 23 45",
+      "bild": ""
+    },
+    {
+      "rolle": "Stellvertretender Kreisjägermeister",
+      "name": "Hans-Georg Müller",
+      "email": "vorstand@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Schatzmeister",
+      "name": "Klaus-Peter Schmidt",
+      "email": "schatzmeister@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Schriftführer",
+      "name": "Werner Brandt",
+      "email": "schriftfuehrer@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Obmann für Schießwesen",
+      "name": "Dieter Hoffmann",
+      "email": "schiessen@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Obfrau für Jugendarbeit",
+      "name": "Sabine Krug",
+      "email": "jugend@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Obmann für Hundeausbildung",
+      "name": "Rolf Petersen",
+      "email": "hunde@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Obmann für Naturschutz",
+      "name": "Andreas Lehmann",
+      "email": "naturschutz@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    },
+    {
+      "rolle": "Obmann für Jagdhornblasen",
+      "name": "Friedrich Wulf",
+      "email": "jagdhorn@kjs-bad-segeberg.de",
+      "telefon": "",
+      "bild": ""
+    }
+  ]
+}
