@@ -662,6 +662,7 @@
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script>
   if (window.netlifyIdentity) {
+    // Nach dem Login direkt zum Admin-Bereich weiterleiten
     window.netlifyIdentity.on("init", user => {
       if (!user) {
         window.netlifyIdentity.on("login", () => {
@@ -669,6 +670,15 @@
         });
       }
     });
+    // Einladungslink, Passwort-Reset etc. → Modal automatisch öffnen
+    const hash = window.location.hash;
+    if (hash && (
+      hash.includes('invite_token') ||
+      hash.includes('confirmation_token') ||
+      hash.includes('recovery_token')
+    )) {
+      window.netlifyIdentity.open();
+    }
   }
 </script>
 </body>
