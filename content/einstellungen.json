@@ -1,10 +1,19 @@
 {
   "telefon": "04551 / 12 34 56",
   "email": "info@kjs-bad-segeberg.de",
-  "adresse": "Kreisjägerschaft Bad Segeberg e.V.\nMusterstraße 1\n23795 Bad Segeberg",
+  "adresse": "Kreisjägerschaft Bad Segeberg e.V.\nMusterstraße 1\n23795 Bad Segeberg\nTest Laurin ",
   "oeffnungszeiten": [
-    { "tage": "Montag & Mittwoch", "zeiten": "10:00 – 12:00 Uhr" },
-    { "tage": "Donnerstag",        "zeiten": "15:00 – 18:00 Uhr" },
-    { "tage": "oder nach Vereinbarung", "zeiten": "" }
+    {
+      "tage": "Montag & Mittwoch",
+      "zeiten": "10:00 – 12:00 Uhr"
+    },
+    {
+      "tage": "Donnerstag",
+      "zeiten": "15:00 – 18:00 Uhr"
+    },
+    {
+      "zeiten": "10:00-12:00",
+      "tage": "4"
+    }
   ]
 }
