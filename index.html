@@ -662,23 +662,23 @@
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script>
   if (window.netlifyIdentity) {
-    // Nach dem Login direkt zum Admin-Bereich weiterleiten
-    window.netlifyIdentity.on("init", user => {
+    window.netlifyIdentity.on("init", function(user) {
+      // Nach Login → Admin-Bereich
       if (!user) {
-        window.netlifyIdentity.on("login", () => {
+        window.netlifyIdentity.on("login", function() {
           document.location.href = "/admin/";
         });
       }
+      // Einladungs- / Reset-Token im URL → Modal direkt öffnen
+      var hash = window.location.hash;
+      if (hash && (
+        hash.includes('invite_token') ||
+        hash.includes('confirmation_token') ||
+        hash.includes('recovery_token')
+      )) {
+        window.netlifyIdentity.open();
+      }
     });
-    // Einladungslink, Passwort-Reset etc. → Modal automatisch öffnen
-    const hash = window.location.hash;
-    if (hash && (
-      hash.includes('invite_token') ||
-      hash.includes('confirmation_token') ||
-      hash.includes('recovery_token')
-    )) {
-      window.netlifyIdentity.open();
-    }
   }
 </script>
 </body>
