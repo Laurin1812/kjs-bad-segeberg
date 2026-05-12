@@ -1,19 +1,11 @@
 {
-  "telefon": "04551 / 12 34 56",
+  "telefon": "0152-21591669",
   "email": "info@kjs-bad-segeberg.de",
-  "adresse": "Kreisjägerschaft Bad Segeberg e.V.\nMusterstraße 1\n23795 Bad Segeberg\nTest Laurin ",
+  "adresse": "Kreisjägerschaft Bad Segeberg e.V.\nAm Schießstand 1\n24640 Hasenmoor\n",
   "oeffnungszeiten": [
     {
-      "tage": "Montag & Mittwoch",
+      "tage": "Montag bis Freitag",
       "zeiten": "10:00 – 12:00 Uhr"
-    },
-    {
-      "tage": "Donnerstag",
-      "zeiten": "15:00 – 18:00 Uhr"
-    },
-    {
-      "zeiten": "10:00-12:00",
-      "tage": "4"
     }
   ]
 }
