@@ -1,24 +1,17 @@
 {
   "mitglieder": [
     {
-      "rolle": "Kreisjägermeister",
-      "name": "Max Mustermann",
+      "rolle": "Vorsitzender",
+      "name": "Oliver Jürgens",
       "email": "kreisjjaegermeister@kjs-bad-segeberg.de",
-      "telefon": "04551 / 1 23 45",
+      "telefon": "0170-3823636",
       "bild": ""
     },
     {
-      "rolle": "Stellvertretender Kreisjägermeister",
-      "name": "Hans-Georg Müller",
-      "email": "vorstand@kjs-bad-segeberg.de",
-      "telefon": "",
-      "bild": ""
-    },
-    {
-      "rolle": "Schatzmeister",
-      "name": "Klaus-Peter Schmidt",
+      "rolle": "Stellvertretender Vorsitzender",
+      "name": "Marcel Zickermann Marcel ",
       "email": "schatzmeister@kjs-bad-segeberg.de",
-      "telefon": "",
+      "telefon": "0172-9431128",
       "bild": ""
     },
     {
@@ -29,38 +22,38 @@
       "bild": ""
     },
     {
-      "rolle": "Obmann für Schießwesen",
-      "name": "Dieter Hoffmann",
+      "rolle": "Schatzmeisterin",
+      "name": "Jenny Schiller",
       "email": "schiessen@kjs-bad-segeberg.de",
-      "telefon": "",
+      "telefon": "0172-6524732",
       "bild": ""
     },
     {
-      "rolle": "Obfrau für Jugendarbeit",
-      "name": "Sabine Krug",
+      "rolle": "Beisitzer",
+      "name": "Oliver Stein",
       "email": "jugend@kjs-bad-segeberg.de",
-      "telefon": "",
+      "telefon": "0175-9305714",
       "bild": ""
     },
     {
-      "rolle": "Obmann für Hundeausbildung",
-      "name": "Rolf Petersen",
+      "rolle": "Beisitzer",
+      "name": "Arne Klees-Bruhn",
       "email": "hunde@kjs-bad-segeberg.de",
-      "telefon": "",
+      "telefon": "0170-6370938",
       "bild": ""
     },
     {
-      "rolle": "Obmann für Naturschutz",
-      "name": "Andreas Lehmann",
+      "rolle": "Beisitzer und Kreisjägermeister",
+      "name": "Klaus Rathje",
       "email": "naturschutz@kjs-bad-segeberg.de",
-      "telefon": "",
+      "telefon": "04551-8 2085",
       "bild": ""
     },
     {
-      "rolle": "Obmann für Jagdhornblasen",
-      "name": "Friedrich Wulf",
-      "email": "jagdhorn@kjs-bad-segeberg.de",
-      "telefon": "",
+      "rolle": "Jagdbehörde",
+      "name": "Mike Albrecht",
+      "email": "mike.albrecht@kreis-se.de",
+      "telefon": "04551-9519447",
       "bild": ""
     }
   ]
