@@ -566,9 +566,9 @@ p  { margin-bottom: 1rem; }
   display: flex; align-items: center; justify-content: center;
   font-size: 1.4rem; color: #fff; font-weight: 900; margin-bottom: 1rem;
 }
-.footer-about__name { color: #fff; font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: .25rem; font-family: var(--font-heading); }
-.footer-about__sub  { font-size: .75rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 1rem; }
-.footer-about p { font-size: .87rem; color: rgba(255,255,255,.55); margin-bottom: 1.25rem; max-width: 280px; }
+.footer-about__name { color: #fff; font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: .3rem; font-family: var(--font-heading); }
+.footer-about__sub  { font-size: .8rem; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 1rem; }
+.footer-about p { font-size: .9rem; color: rgba(255,255,255,.6); margin-bottom: 1.25rem; max-width: 300px; }
 .footer-social { display: flex; gap: .6rem; }
 .footer-social a {
   width: 34px; height: 34px; background: rgba(255,255,255,.07); border-radius: 50%;
@@ -655,8 +655,12 @@ p  { margin-bottom: 1rem; }
 }
 
 /* ── Header & Footer Logo-Größe ───────────────────────────────────── */
-.site-logo img    { height: 88px !important; width: auto; }
-.footer-about img { height: 100px !important; width: auto; margin-bottom: 1rem; display: block; }
+.site-logo img    { height: 100px !important; width: auto; }
+.footer-about img {
+  height: 130px !important; width: auto;
+  margin-bottom: 1.2rem; display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
 
 /* ── Logo (transparentes PNG) ─────────────────────────────────────── */
 
