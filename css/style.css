@@ -141,8 +141,8 @@ p  { margin-bottom: 1rem; }
   box-shadow: 0 2px 8px rgba(30,70,32,.3);
 }
 .site-logo__text { line-height: 1.2; }
-.site-logo__name { font-family: var(--font-heading); font-size: .98rem; font-weight: 700; color: var(--green-dark); display: block; }
-.site-logo__sub   { font-size: .68rem; color: var(--text-muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
+.site-logo__name { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: var(--green-dark); display: block; }
+.site-logo__sub   { font-size: .82rem; color: var(--text-muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
 
 .main-nav { display: flex; align-items: center; gap: .15rem; }
 .main-nav > li { position: relative; }
@@ -653,6 +653,10 @@ p  { margin-bottom: 1rem; }
   .termine-item .btn-sm { display: none; }
   .form-grid-2 { grid-template-columns: 1fr; }
 }
+
+/* ── Header & Footer Logo-Größe ───────────────────────────────────── */
+.site-logo img       { height: 75px !important; width: auto; }
+.footer-about img    { height: 72px !important; width: auto; }
 
 /* ── Logo (transparentes PNG) ─────────────────────────────────────── */
 

@@ -1,0 +1,30 @@
+backend:
+  name: git-gateway
+  branch: main
+
+locale: de
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+
+  # Nur Aktuelles – für Redakteure ohne vollen Admin-Zugriff
+  - name: "aktuelles"
+    label: "📰 Aktuelles / News"
+    files:
+      - label: "Newsbeiträge"
+        name: "news"
+        file: "content/aktuelles.json"
+        fields:
+          - label: "Beiträge"
+            name: "beitraege"
+            widget: "list"
+            summary: "{{fields.datum}} – {{fields.titel}}"
+            fields:
+              - { label: "Titel",           name: "titel",     widget: "string" }
+              - { label: "Datum",           name: "datum",     widget: "string", hint: "z.B. 28. April 2025" }
+              - { label: "Kategorie",       name: "kategorie", widget: "string", hint: "z.B. Naturschutz" }
+              - { label: "Bild",            name: "bild",      widget: "image",  required: false }
+              - { label: "Kurzbeschreibung",name: "text",      widget: "text" }
+              - { label: "Link (optional)", name: "link",      widget: "string", required: false }

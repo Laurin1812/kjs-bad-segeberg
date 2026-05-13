@@ -1,0 +1,10 @@
+{
+  "obleute": [
+    { "rolle": "Obmann Schießwesen",     "name": "Dieter Hoffmann",  "email": "schiessen@kjs-bad-segeberg.de",   "telefon": "", "bild": "" },
+    { "rolle": "Obmann Hundeausbildung", "name": "Rolf Petersen",    "email": "hunde@kjs-bad-segeberg.de",       "telefon": "", "bild": "" },
+    { "rolle": "Obfrau Jugendarbeit",    "name": "Sabine Krug",      "email": "jugend@kjs-bad-segeberg.de",      "telefon": "", "bild": "" },
+    { "rolle": "Obmann Naturschutz",     "name": "Andreas Lehmann",  "email": "naturschutz@kjs-bad-segeberg.de", "telefon": "", "bild": "" },
+    { "rolle": "Obmann Jagdhornblasen",  "name": "Friedrich Wulf",   "email": "jagdhorn@kjs-bad-segeberg.de",    "telefon": "", "bild": "" },
+    { "rolle": "Obmann Jungwildrettung", "name": "Thomas Meier",     "email": "jungwild@kjs-bad-segeberg.de",    "telefon": "", "bild": "" }
+  ]
+}

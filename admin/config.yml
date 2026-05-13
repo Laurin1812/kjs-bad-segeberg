@@ -59,18 +59,18 @@ collections:
             widget: "list"
             summary: "{{fields.datum}} – {{fields.titel}}"
             fields:
-              - { label: "Titel",          name: "titel",          widget: "string" }
-              - { label: "Datum",          name: "datum",          widget: "string", hint: "z.B. 28. April 2025" }
-              - { label: "Kategorie",      name: "kategorie",      widget: "string", hint: "z.B. Naturschutz" }
-              - { label: "Bild (Dateiname)",name: "bild",          widget: "image",  required: false }
-              - { label: "Kurzbeschreibung",name: "text",          widget: "text" }
-              - { label: "Link (optional)", name: "link",          widget: "string", required: false }
+              - { label: "Titel",           name: "titel",     widget: "string" }
+              - { label: "Datum",           name: "datum",     widget: "string", hint: "z.B. 28. April 2025" }
+              - { label: "Kategorie",       name: "kategorie", widget: "string", hint: "z.B. Naturschutz" }
+              - { label: "Bild",            name: "bild",      widget: "image",  required: false }
+              - { label: "Kurzbeschreibung",name: "text",      widget: "text" }
+              - { label: "Link (optional)", name: "link",      widget: "string", required: false }
 
   # ──────────────────────────────────────────
   # VORSTAND & ANSPRECHPARTNER
   # ──────────────────────────────────────────
   - name: "vorstand"
-    label: "👥 Vorstand & Ansprechpartner"
+    label: "👥 Vorstand"
     files:
       - label: "Vorstandsmitglieder"
         name: "mitglieder"
@@ -81,11 +81,54 @@ collections:
             widget: "list"
             summary: "{{fields.rolle}} – {{fields.name}}"
             fields:
-              - { label: "Rolle / Funktion",  name: "rolle",    widget: "string", hint: "z.B. Kreisjägermeister" }
-              - { label: "Name",               name: "name",     widget: "string" }
-              - { label: "E-Mail",             name: "email",    widget: "string", required: false }
-              - { label: "Telefon",            name: "telefon",  widget: "string", required: false }
-              - { label: "Foto",               name: "bild",     widget: "image",  required: false, hint: "Optionales Portraitfoto" }
+              - { label: "Rolle / Funktion", name: "rolle",   widget: "string" }
+              - { label: "Name",             name: "name",    widget: "string" }
+              - { label: "E-Mail",           name: "email",   widget: "string", required: false }
+              - { label: "Telefon",          name: "telefon", widget: "string", required: false }
+              - { label: "Foto",             name: "bild",    widget: "image",  required: false, hint: "Portraitfoto hochladen" }
+
+  # ──────────────────────────────────────────
+  # OBLEUTE
+  # ──────────────────────────────────────────
+  - name: "obleute"
+    label: "🎯 Obleute"
+    files:
+      - label: "Obleute"
+        name: "obleute"
+        file: "content/obleute.json"
+        fields:
+          - label: "Obleute"
+            name: "obleute"
+            widget: "list"
+            summary: "{{fields.rolle}} – {{fields.name}}"
+            fields:
+              - { label: "Funktion / Fachbereich", name: "rolle",   widget: "string" }
+              - { label: "Name",                   name: "name",    widget: "string" }
+              - { label: "E-Mail",                 name: "email",   widget: "string", required: false }
+              - { label: "Telefon",                name: "telefon", widget: "string", required: false }
+              - { label: "Foto",                   name: "bild",    widget: "image",  required: false }
+
+  # ──────────────────────────────────────────
+  # HEGERINGE
+  # ──────────────────────────────────────────
+  - name: "hegeringe"
+    label: "🌿 Hegeringe"
+    files:
+      - label: "Hegering-Übersicht"
+        name: "hegeringe"
+        file: "content/hegeringe.json"
+        fields:
+          - label: "Hegeringe"
+            name: "hegeringe"
+            widget: "list"
+            summary: "{{fields.nummer}} – {{fields.name}}"
+            fields:
+              - { label: "Bezeichnung",   name: "nummer",    widget: "string", hint: "z.B. Hegering 1" }
+              - { label: "Name",          name: "name",      widget: "string", hint: "z.B. Bad Segeberg – Stadt" }
+              - { label: "Obmann / Obfrau", name: "obmann", widget: "string" }
+              - { label: "Gemeinden",     name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
+              - { label: "E-Mail",        name: "email",     widget: "string", required: false }
+              - { label: "Telefon",       name: "telefon",   widget: "string", required: false }
 
   # ──────────────────────────────────────────
   # KONTAKT & ÖFFNUNGSZEITEN
@@ -97,13 +140,13 @@ collections:
         name: "kontakt"
         file: "content/einstellungen.json"
         fields:
-          - { label: "Telefon",      name: "telefon",  widget: "string" }
-          - { label: "E-Mail",       name: "email",    widget: "string" }
-          - { label: "Adresse",      name: "adresse",  widget: "text",   hint: "Jede Zeile = eine Zeile auf der Website" }
+          - { label: "Telefon",  name: "telefon", widget: "string" }
+          - { label: "E-Mail",   name: "email",   widget: "string" }
+          - { label: "Adresse",  name: "adresse", widget: "text",  hint: "Jede Zeile = eine Zeile auf der Website" }
           - label: "Öffnungszeiten"
             name: "oeffnungszeiten"
             widget: "list"
             summary: "{{fields.tage}}: {{fields.zeiten}}"
             fields:
-              - { label: "Tag(e)",   name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
-              - { label: "Uhrzeit",  name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }
+              - { label: "Tag(e)",  name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
+              - { label: "Uhrzeit", name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }

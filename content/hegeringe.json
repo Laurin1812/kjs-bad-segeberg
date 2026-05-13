@@ -1,0 +1,12 @@
+{
+  "hegeringe": [
+    { "nummer": "Hegering 1", "name": "Bad Segeberg – Stadt",  "obmann": "[Platzhalter Name]", "gemeinden": "Bad Segeberg, Geschendorf, Stipsdorf",           "email": "hegering1@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 2", "name": "Kaltenkirchen",         "obmann": "[Platzhalter Name]", "gemeinden": "Kaltenkirchen, Henstedt-Ulzburg, Alveslohe",    "email": "hegering2@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 3", "name": "Norderstedt-Land",      "obmann": "[Platzhalter Name]", "gemeinden": "Tangstedt, Ellerau, Quickborn-Land",             "email": "hegering3@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 4", "name": "Bramstedt",             "obmann": "[Platzhalter Name]", "gemeinden": "Bad Bramstedt, Hitzhusen, Hardebek",             "email": "hegering4@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 5", "name": "Boostedt / Rickling",   "obmann": "[Platzhalter Name]", "gemeinden": "Boostedt, Rickling, Seth, Schmalfeld",           "email": "hegering5@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 6", "name": "Kisdorf / Sülfeld",     "obmann": "[Platzhalter Name]", "gemeinden": "Kisdorf, Sülfeld, Wakendorf I, Oersdorf",       "email": "hegering6@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 7", "name": "Trappenkamp / Bark",    "obmann": "[Platzhalter Name]", "gemeinden": "Trappenkamp, Bark, Seedorf, Groß Rönnau",       "email": "hegering7@kjs-bad-segeberg.de", "telefon": "" },
+    { "nummer": "Hegering 8", "name": "Leezen / Neversdorf",   "obmann": "[Platzhalter Name]", "gemeinden": "Leezen, Neversdorf, Bebensee, Högersdorf",      "email": "hegering8@kjs-bad-segeberg.de", "telefon": "" }
+  ]
+}

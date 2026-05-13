@@ -79,56 +79,32 @@
          Sie koordinieren die Arbeit in ihrem jeweiligen Fachgebiet und sind Ansprechpartner
          für alle Mitglieder.</p>
 
-      <div class="persons-grid" style="margin-top:2rem;">
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann Schießwesen</span>
-            <div class="person-card__name">Dieter Hoffmann</div>
-            <div class="person-card__contact"><a href="mailto:schiessen@kjs-bad-segeberg.de">schiessen@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann Hundeausbildung</span>
-            <div class="person-card__name">Rolf Petersen</div>
-            <div class="person-card__contact"><a href="mailto:hunde@kjs-bad-segeberg.de">hunde@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obfrau Jugendarbeit</span>
-            <div class="person-card__name">Sabine Krug</div>
-            <div class="person-card__contact"><a href="mailto:jugend@kjs-bad-segeberg.de">jugend@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann Naturschutz</span>
-            <div class="person-card__name">Andreas Lehmann</div>
-            <div class="person-card__contact"><a href="mailto:naturschutz@kjs-bad-segeberg.de">naturschutz@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann Jagdhornblasen</span>
-            <div class="person-card__name">Friedrich Wulf</div>
-            <div class="person-card__contact"><a href="mailto:jagdhorn@kjs-bad-segeberg.de">jagdhorn@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
-        <div class="person-card">
-          <div class="person-card__avatar-wrap"><div class="person-card__avatar-placeholder">👤</div></div>
-          <div class="person-card__body">
-            <span class="person-card__role">Obmann Jungwildrettung</span>
-            <div class="person-card__name">Thomas Meier</div>
-            <div class="person-card__contact"><a href="mailto:jungwild@kjs-bad-segeberg.de">jungwild@kjs-bad-segeberg.de</a></div>
-          </div>
-        </div>
+      <!-- Obleute – dynamisch aus content/obleute.json -->
+      <div class="persons-grid" id="obleute-grid" style="margin-top:2rem;">
+        <p style="color:var(--text-muted);">Wird geladen …</p>
       </div>
+      <script>
+        fetch('../content/obleute.json')
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById('obleute-grid').innerHTML = data.obleute.map(m => `
+              <div class="person-card">
+                <div class="person-card__avatar-wrap">
+                  ${m.bild
+                    ? `<img src="${m.bild}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    : `<div class="person-card__avatar-placeholder">👤</div>`}
+                </div>
+                <div class="person-card__body">
+                  <span class="person-card__role">${m.rolle}</span>
+                  <div class="person-card__name">${m.name}</div>
+                  <div class="person-card__contact">
+                    ${m.email   ? `<a href="mailto:${m.email}">${m.email}</a>` : ''}
+                    ${m.telefon ? `<a href="tel:${m.telefon.replace(/\s|\/|\./g,'')}">${m.telefon}</a>` : ''}
+                  </div>
+                </div>
+              </div>`).join('');
+          });
+      </script>
     </main>
     <aside class="sidebar">
       <div class="sidebar-widget">
