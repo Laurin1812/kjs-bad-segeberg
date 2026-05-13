@@ -204,10 +204,13 @@
                   </div>
                 </div>
 
-                <div class="map-placeholder" title="Kartenansicht – Platzhalter">🗺️</div>
-                <p style="font-size:.8rem; color:var(--text-muted); margin-top:.5rem; text-align:center;">
-                  Kartenintegration (z. B. OpenStreetMap) hier einbinden
-                </p>`;
+                <div style="margin-top:1.5rem; border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-sm);">
+                  <iframe
+                    src="https://maps.google.com/maps?q=Am+Schie%C3%9Fstand+1%2C+24640+Hasenmoor&output=embed&z=15&hl=de"
+                    width="100%" height="280" style="border:0;display:block;"
+                    allowfullscreen="" loading="lazy"
+                    title="Standort Kreisjägerschaft Bad Segeberg"></iframe>
+                </div>`;
             })
             .catch(() => {
               document.getElementById('kontakt-info').innerHTML += '<p>Kontaktdaten konnten nicht geladen werden.</p>';
