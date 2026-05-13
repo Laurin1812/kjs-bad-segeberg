@@ -663,10 +663,15 @@
 <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", function(user) {
-      // Nach Login → Admin-Bereich
       if (!user) {
-        window.netlifyIdentity.on("login", function() {
-          document.location.href = "/admin/";
+        window.netlifyIdentity.on("login", function(loggedInUser) {
+          // Rolle prüfen → richtigen Bereich öffnen
+          var roles = loggedInUser.app_metadata && loggedInUser.app_metadata.roles;
+          if (roles && roles.includes('editor')) {
+            document.location.href = "/redaktion/";
+          } else {
+            document.location.href = "/admin/";
+          }
         });
       }
       // Einladungs- / Reset-Token im URL → Modal direkt öffnen
