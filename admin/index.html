@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin – KJS Bad Segeberg</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    // Rollenprüfung: Redakteure gehören zu /redaktion, nicht hierher
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function(user) {
+        if (user) {
+          var roles = user.app_metadata && user.app_metadata.roles;
+          var isEditor = roles && roles.some(function(r){
+            return r.toLowerCase()==='editor' || r.toLowerCase()==='redakteur';
+          });
+          if (isEditor) { window.location.href = "/redaktion/"; }
+        }
+      });
+    }
+  </script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>

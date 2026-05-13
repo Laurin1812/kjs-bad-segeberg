@@ -665,13 +665,9 @@
     window.netlifyIdentity.on("init", function(user) {
       if (!user) {
         window.netlifyIdentity.on("login", function(loggedInUser) {
-          // Rolle prüfen → richtigen Bereich öffnen
           var roles = loggedInUser.app_metadata && loggedInUser.app_metadata.roles;
-          if (roles && roles.includes('editor')) {
-            document.location.href = "/redaktion/";
-          } else {
-            document.location.href = "/admin/";
-          }
+          var isEditor = roles && roles.some(function(r){ return r.toLowerCase()==='editor'||r.toLowerCase()==='redakteur'; });
+          document.location.href = isEditor ? "/redaktion/" : "/admin/";
         });
       }
       // Einladungs- / Reset-Token im URL → Modal direkt öffnen
