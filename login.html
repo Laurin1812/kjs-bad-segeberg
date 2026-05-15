@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – KJS Bad Segeberg</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #1e4620;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      box-shadow: 0 12px 48px rgba(0,0,0,.35);
+      width: 100%;
+      max-width: 380px;
+    }
+    .card img {
+      height: 100px;
+      width: auto;
+      margin: 0 auto 1.5rem;
+      display: block;
+    }
+    h1 {
+      color: #1e4620;
+      font-size: 1.3rem;
+      margin-bottom: .4rem;
+    }
+    p {
+      color: #666;
+      font-size: .9rem;
+      margin-bottom: 2rem;
+    }
+    button {
+      background: #2e6b30;
+      color: #fff;
+      border: none;
+      padding: .9rem 2rem;
+      border-radius: 7px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    button:hover { background: #1e4620; }
+    .hint {
+      margin-top: 1.5rem;
+      font-size: .78rem;
+      color: #999;
+    }
+    .loading { color: #2e6b30; margin-top: 1rem; font-size: .9rem; display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="/images/logo.png" alt="KJS Bad Segeberg Logo">
+    <h1>KJS Bad Segeberg</h1>
+    <p>Admin-Bereich – bitte einloggen</p>
+    <button id="loginBtn" onclick="window.netlifyIdentity.open()">
+      🔐 Einloggen
+    </button>
+    <div class="loading" id="loading">Wird weitergeleitet …</div>
+    <p class="hint">Beim ersten Mal: Link aus der Einladungs-E-Mail nutzen</p>
+  </div>
+
+  <script>
+    function getRedirectUrl(user) {
+      var roles = user && user.app_metadata && user.app_metadata.roles;
+      var isEditor = roles && roles.some(function(r) {
+        return r.toLowerCase() === 'editor' || r.toLowerCase() === 'redakteur';
+      });
+      return isEditor ? '/redaktion/' : '/admin/';
+    }
+
+    if (window.netlifyIdentity) {
+      // Schon eingeloggt? Direkt weiterleiten
+      window.netlifyIdentity.on('init', function(user) {
+        if (user) {
+          document.getElementById('loading').style.display = 'block';
+          document.getElementById('loginBtn').style.display = 'none';
+          window.location.href = getRedirectUrl(user);
+        }
+      });
+
+      // Nach dem Einloggen weiterleiten
+      window.netlifyIdentity.on('login', function(user) {
+        window.netlifyIdentity.close();
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loginBtn').style.display = 'none';
+        setTimeout(function() {
+          window.location.href = getRedirectUrl(user);
+        }, 500);
+      });
+    }
+  </script>
+</body>
+</html>
