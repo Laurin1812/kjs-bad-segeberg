@@ -42,27 +42,27 @@
     },
     {
       "nummer": "Hegering 6",
-      "name": "Kisdorf / Sülfeld",
-      "obmann": "[Platzhalter Name]",
-      "gemeinden": "Kisdorf, Sülfeld, Wakendorf I, Oersdorf",
-      "email": "hegering6@kjs-bad-segeberg.de",
-      "telefon": ""
+      "name": "Hartenholm",
+      "obmann": "Andreas Wilken",
+      "gemeinden": "24628 Hartenholm",
+      "email": "hegering6@kjs-segeberg.de",
+      "telefon": "0171-6404021"
     },
     {
       "nummer": "Hegering 7",
-      "name": "Trappenkamp / Bark",
-      "obmann": "[Platzhalter Name]",
-      "gemeinden": "Trappenkamp, Bark, Seedorf, Groß Rönnau",
-      "email": "hegering7@kjs-bad-segeberg.de",
-      "telefon": ""
+      "name": "Itzstedt",
+      "obmann": "Thomas Lehmann",
+      "gemeinden": "23845 Itzstedt",
+      "email": "hegering7@kjs-segeberg.de",
+      "telefon": "0171-8298577"
     },
     {
       "nummer": "Hegering 8",
-      "name": "Leezen / Neversdorf",
-      "obmann": "[Platzhalter Name]",
-      "gemeinden": "Leezen, Neversdorf, Bebensee, Högersdorf",
-      "email": "hegering8@kjs-bad-segeberg.de",
-      "telefon": ""
+      "name": "Kisdorf",
+      "obmann": "Rolf Borkenhagen",
+      "gemeinden": "24629 Kisdorf",
+      "email": "hegering8@kjs-segeberg.de",
+      "telefon": "0173-5270293"
     }
   ]
 }
