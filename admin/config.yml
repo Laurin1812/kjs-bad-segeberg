@@ -150,6 +150,46 @@ collections:
           - { label: "Verantwortlich (§18)", name: "verantwortlich",   widget: "text" }
 
   # ──────────────────────────────────────────
+  # KREISJÄGERMEISTER
+  # ──────────────────────────────────────────
+  - name: "kreisjjaegermeister"
+    label: "🏅 Kreisjägermeister"
+    files:
+      - label: "Kreisjägermeister"
+        name: "kjm"
+        file: "content/kreisjjaegermeister.json"
+        fields:
+          - { label: "Name",      name: "name",      widget: "string" }
+          - { label: "E-Mail",    name: "email",      widget: "string" }
+          - { label: "Telefon",   name: "telefon",    widget: "string" }
+          - { label: "Foto",      name: "bild",       widget: "image",  required: false, hint: "Portraitfoto hochladen" }
+          - { label: "Grußwort",  name: "grußwort",   widget: "text",   required: false, hint: "Jede Leerzeile = neuer Absatz" }
+
+  # ──────────────────────────────────────────
+  # FAQ
+  # ──────────────────────────────────────────
+  - name: "faq"
+    label: "❓ FAQ"
+    files:
+      - label: "Häufige Fragen"
+        name: "faq"
+        file: "content/faq.json"
+        fields:
+          - label: "Kategorien"
+            name: "kategorien"
+            widget: "list"
+            summary: "{{fields.titel}}"
+            fields:
+              - { label: "Kategorie-Titel", name: "titel", widget: "string" }
+              - label: "Fragen"
+                name: "fragen"
+                widget: "list"
+                summary: "{{fields.frage}}"
+                fields:
+                  - { label: "Frage", name: "frage",   widget: "string" }
+                  - { label: "Antwort", name: "antwort", widget: "text" }
+
+  # ──────────────────────────────────────────
   # KONTAKT & ÖFFNUNGSZEITEN
   # ──────────────────────────────────────────
   - name: "einstellungen"

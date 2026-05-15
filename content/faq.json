@@ -1,0 +1,68 @@
+{
+  "kategorien": [
+    {
+      "titel": "Mitgliedschaft & Organisation",
+      "fragen": [
+        {
+          "frage": "Wie kann ich Mitglied der Kreisjägerschaft Bad Segeberg werden?",
+          "antwort": "Alle Jägerinnen und Jäger, die im Kreis Bad Segeberg ein Revier pächten oder als Gast jagen, werden automatisch Pflichtmitglied der Kreisjägerschaft. Auch Fördermitgliedschaften sind möglich."
+        },
+        {
+          "frage": "Wie hoch ist der Mitgliedsbeitrag?",
+          "antwort": "Der aktuelle Mitgliedsbeitrag beträgt für aktive Jägerinnen und Jäger [Beitrag eintragen] € pro Jahr. Für Fördermitglieder gilt ein reduzierter Beitrag."
+        },
+        {
+          "frage": "Wann findet die Jahreshauptversammlung statt?",
+          "antwort": "Die Jahreshauptversammlung findet in der Regel im November jeden Jahres statt. Den genauen Termin finden Sie im Terminkalender. Alle Mitglieder erhalten rechtzeitig eine schriftliche Einladung."
+        },
+        {
+          "frage": "Wie erreiche ich meinen zuständigen Hegering?",
+          "antwort": "Die Kontaktdaten aller Hegeringe finden Sie auf der Hegeringe-Seite. Dort sind auch die zuständigen Hegeringsleiter aufgelistet, die Ihre ersten Ansprechpartner vor Ort sind."
+        }
+      ]
+    },
+    {
+      "titel": "Jagdschein & Ausbildung",
+      "fragen": [
+        {
+          "frage": "Wie werde ich Jäger/in? Was brauche ich für den Jagdschein?",
+          "antwort": "Um Jäger oder Jägerin zu werden, müssen Sie die Jägerprüfung ablegen. Diese umfasst eine schriftliche und eine praktische Prüfung sowie einen Schießnachweis. Voraussetzung ist die Teilnahme an einem Vorbereitungskurs."
+        },
+        {
+          "frage": "Wie lange dauert die Ausbildung zum Jagdschein?",
+          "antwort": "Die Vorbereitungszeit auf die Jägerprüfung beträgt in der Regel 6 bis 12 Monate, abhängig vom gewählten Kursprogramm. Es gibt Intensivkurse und berufsbegleitende Kurse in Abendform."
+        },
+        {
+          "frage": "Gibt es Voraussetzungen für die Jagdprüfung?",
+          "antwort": "Für die Jägerprüfung in Schleswig-Holstein müssen Sie mindestens 16 Jahre alt sein. Neben dem bestandenen Vorbereitungskurs benötigen Sie einen gültigen Waffensachkundenachweis."
+        }
+      ]
+    },
+    {
+      "titel": "Schießwesen & Jagdpraxis",
+      "fragen": [
+        {
+          "frage": "Wo kann ich als Mitglied üben und schießen?",
+          "antwort": "Die KJS Bad Segeberg betreibt mehrere Schießstände im Kreisgebiet. Die Öffnungszeiten und Adressen finden Sie auf der Schießwesen-Seite sowie im Terminkalender."
+        },
+        {
+          "frage": "Was ist das Pflichtschießen und muss ich daran teilnehmen?",
+          "antwort": "Das Pflichtschießen ist für alle Mitglieder, die aktiv jagen, gesetzlich vorgeschrieben. Es dient dem Nachweis der Schießfertigkeit und muss jährlich absolviert werden."
+        }
+      ]
+    },
+    {
+      "titel": "Naturschutz & Wildtiere",
+      "fragen": [
+        {
+          "frage": "Wie kann ich bei der Jungwildrettung mitmachen?",
+          "antwort": "Wir freuen uns über jede Unterstützung! Während der Mahdzeit im Frühjahr sind ehrenamtliche Helfer gefragt, die bei Drohnenflügen und der Sicherung von Rehkitzen helfen. Melden Sie sich bei unserem Obmann für Jungwildrettung oder schreiben Sie uns an jungwild@kjs-bad-segeberg.de."
+        },
+        {
+          "frage": "Ich habe ein verletztes Wildtier gefunden – was soll ich tun?",
+          "antwort": "Bei einem verletzten Wildtier sollten Sie zunächst Abstand halten und das Tier nicht anfassen. Kontaktieren Sie sofort den zuständigen Jagdpächter oder die Polizei, die einen Jagdausübungsberechtigten benachrichtigen kann."
+        }
+      ]
+    }
+  ]
+}

@@ -73,52 +73,56 @@
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Der Kreisjägermeister</h2>
-      <p>Der Kreisjägermeister ist das höchste ehrenamtliche Amt der Kreisjägerschaft Bad Segeberg e.V.
-         Er vertritt die Interessen der Jägerinnen und Jäger im Kreis gegenüber Behörden,
-         Politik und Öffentlichkeit.</p>
-
-      <div style="display:grid; grid-template-columns: 220px 1fr; gap:2.5rem; margin: 2.5rem 0; align-items:start;">
-        <div>
-          <div style="width:100%; aspect-ratio:1; background:var(--green-light); border-radius:var(--radius-md);
-               display:flex; align-items:center; justify-content:center; font-size:5rem;
-               border: 3px solid var(--green-main);">👤</div>
-          <div style="margin-top:1rem; text-align:center;">
-            <div style="font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--green-main);">Kreisjägermeister</div>
-            <div style="font-weight:700; font-size:1.1rem; margin-top:.25rem;">[Name des KJM]</div>
-          </div>
-        </div>
-        <div>
-          <h3>Aufgaben und Zuständigkeiten</h3>
-          <p>Der Kreisjägermeister ist zuständig für:</p>
-          <ul>
-            <li>Vertretung der Jägerschaft gegenüber Behörden und Institutionen</li>
-            <li>Vorsitz im Kreisvorstand und bei Versammlungen</li>
-            <li>Koordination aller Aufgabenbereiche der KJS Bad Segeberg</li>
-            <li>Beratung der Mitglieder in jagdrechtlichen Fragen</li>
-            <li>Kontakt zum Landesjagdverband Schleswig-Holstein</li>
-            <li>Öffentlichkeitsarbeit für das Ansehen der Jagd</li>
-          </ul>
-          <h3>Kontakt</h3>
-          <p>📧 <a href="mailto:kreisjjaegermeister@kjs-bad-segeberg.de">kreisjjaegermeister@kjs-bad-segeberg.de</a><br>
-             📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
-        </div>
-      </div>
-
-      <h3>Grußwort des Kreisjägemeisters</h3>
-      <div style="border-left: 4px solid var(--gold); padding: 1.5rem 1.5rem 1.5rem 2rem; background: var(--bg-light); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-style:italic; margin-top:.75rem;">
-        <p>„Liebe Jägerinnen und Jäger, liebe Naturfreunde im Kreis Bad Segeberg,</p>
-        <p>es ist mir eine Freude und Ehre, die Kreisjägerschaft Bad Segeberg als
-        Kreisjägermeister zu vertreten. Gemeinsam setzen wir uns täglich für
-        eine nachhaltige Jagd, den Schutz unserer Wildtiere und den Erhalt
-        unserer Kulturlandschaft ein.</p>
-        <p>Die Jagd bedeutet für uns weit mehr als das Erlegen von Wild – sie ist
-        Verantwortung, Tradition und leidenschaftliches Naturengagement in einem.
-        Ich freue mich auf eine weiterhin gute und konstruktive Zusammenarbeit
-        mit allen Mitgliedern, Hegerings­obleuten und Partnern in unserer Region."</p>
-      </div>
+    <main class="main-content" id="kjm-content">
+      <p style="color:var(--text-muted);">Wird geladen …</p>
     </main>
+    <script>
+      fetch('../content/kreisjjaegermeister.json')
+        .then(r => r.json())
+        .then(d => {
+          var foto = d.bild
+            ? `<img src="${d.bild}" alt="Foto ${d.name}" style="width:100%;border-radius:var(--radius-md);border:3px solid var(--green-main);">`
+            : `<div style="width:100%;aspect-ratio:1;background:var(--green-light);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:5rem;border:3px solid var(--green-main);">👤</div>`;
+          var grußwort = d.grußwort
+            ? d.grußwort.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+            : '';
+          document.getElementById('kjm-content').innerHTML = `
+            <h2>Der Kreisjägermeister</h2>
+            <p>Der Kreisjägermeister ist das höchste ehrenamtliche Amt der Kreisjägerschaft Bad Segeberg e.V.
+               Er vertritt die Interessen der Jägerinnen und Jäger im Kreis gegenüber Behörden,
+               Politik und Öffentlichkeit.</p>
+            <div style="display:grid;grid-template-columns:220px 1fr;gap:2.5rem;margin:2.5rem 0;align-items:start;">
+              <div>
+                ${foto}
+                <div style="margin-top:1rem;text-align:center;">
+                  <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green-main);">Kreisjägermeister</div>
+                  <div style="font-weight:700;font-size:1.1rem;margin-top:.25rem;">${d.name}</div>
+                </div>
+              </div>
+              <div>
+                <h3>Aufgaben und Zuständigkeiten</h3>
+                <p>Der Kreisjägermeister ist zuständig für:</p>
+                <ul>
+                  <li>Vertretung der Jägerschaft gegenüber Behörden und Institutionen</li>
+                  <li>Vorsitz im Kreisvorstand und bei Versammlungen</li>
+                  <li>Koordination aller Aufgabenbereiche der KJS Bad Segeberg</li>
+                  <li>Beratung der Mitglieder in jagdrechtlichen Fragen</li>
+                  <li>Kontakt zum Landesjagdverband Schleswig-Holstein</li>
+                  <li>Öffentlichkeitsarbeit für das Ansehen der Jagd</li>
+                </ul>
+                <h3>Kontakt</h3>
+                <p>📧 <a href="mailto:${d.email}">${d.email}</a><br>
+                   📞 <a href="tel:${d.telefon.replace(/\s|-|\//g,'')}">${d.telefon}</a></p>
+              </div>
+            </div>
+            ${grußwort ? `
+            <h3>Grußwort des Kreisjägemeisters</h3>
+            <div style="border-left:4px solid var(--gold);padding:1.5rem 1.5rem 1.5rem 2rem;background:var(--bg-light);border-radius:0 var(--radius-md) var(--radius-md) 0;font-style:italic;margin-top:.75rem;">
+              ${grußwort}
+            </div>` : ''}
+          `;
+        });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>KJS Bad Segeberg</h4>
