@@ -131,6 +131,25 @@ collections:
               - { label: "Telefon",       name: "telefon",   widget: "string", required: false }
 
   # ──────────────────────────────────────────
+  # IMPRESSUM
+  # ──────────────────────────────────────────
+  - name: "impressum"
+    label: "📄 Impressum"
+    files:
+      - label: "Impressum"
+        name: "impressum"
+        file: "content/impressum.json"
+        fields:
+          - { label: "Vereinsname",          name: "verein",           widget: "string" }
+          - { label: "Adresse",              name: "adresse",          widget: "text",   hint: "Straße, Hausnummer, PLZ Ort" }
+          - { label: "Vertreten durch",      name: "vertreten_durch",  widget: "string", hint: "z.B. Klaus Rathje, Kreisjägermeister" }
+          - { label: "Telefon",              name: "telefon",          widget: "string" }
+          - { label: "E-Mail",               name: "email",            widget: "string" }
+          - { label: "Registergericht",      name: "registergericht",  widget: "string" }
+          - { label: "Registernummer",       name: "registernummer",   widget: "string" }
+          - { label: "Verantwortlich (§18)", name: "verantwortlich",   widget: "text" }
+
+  # ──────────────────────────────────────────
   # KONTAKT & ÖFFNUNGSZEITEN
   # ──────────────────────────────────────────
   - name: "einstellungen"
