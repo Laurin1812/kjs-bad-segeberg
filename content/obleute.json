@@ -1,10 +1,46 @@
 {
   "obleute": [
-    { "rolle": "Obmann Schießwesen",     "name": "Dieter Hoffmann",  "email": "schiessen@kjs-bad-segeberg.de",   "telefon": "", "bild": "" },
-    { "rolle": "Obmann Hundeausbildung", "name": "Rolf Petersen",    "email": "hunde@kjs-bad-segeberg.de",       "telefon": "", "bild": "" },
-    { "rolle": "Obfrau Jugendarbeit",    "name": "Sabine Krug",      "email": "jugend@kjs-bad-segeberg.de",      "telefon": "", "bild": "" },
-    { "rolle": "Obmann Naturschutz",     "name": "Andreas Lehmann",  "email": "naturschutz@kjs-bad-segeberg.de", "telefon": "", "bild": "" },
-    { "rolle": "Obmann Jagdhornblasen",  "name": "Friedrich Wulf",   "email": "jagdhorn@kjs-bad-segeberg.de",    "telefon": "", "bild": "" },
-    { "rolle": "Obmann Jungwildrettung", "name": "Thomas Meier",     "email": "jungwild@kjs-bad-segeberg.de",    "telefon": "", "bild": "" }
+    {
+      "rolle": "Kreisschießobmann KJS-Segeberg",
+      "name": "Dieter Hoffmann",
+      "email": "0171-1438352",
+      "telefon": "Björn Schlatz",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Stellvertreter und Platzwart Schießstand Wolfsberg",
+      "name": "Jens Peter Knuth",
+      "email": "",
+      "telefon": "0176-35496821",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Schießobmann vom Club für jagdliches und sportliches Schießen",
+      "name": "Björn Schlatz",
+      "email": "jugend@kjs-bad-segeberg.de",
+      "telefon": "0171-1438352",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Kreisschießobmann KJS-Stormarn",
+      "name": "Torsten Seehase",
+      "email": "",
+      "telefon": "0171-7482296",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obmann Hegering  I - Wardersee",
+      "name": "Marcel Zickermann",
+      "email": "",
+      "telefon": "0172-9431128",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obmann Hegering  II - Seedorf",
+      "name": "Florian Frank",
+      "email": "",
+      "telefon": "0173-5426396",
+      "bild": "/images/logo.png"
+    }
   ]
 }
