@@ -94,12 +94,12 @@
               grid.innerHTML = '<p>Zurzeit keine Beiträge vorhanden.</p>';
               return;
             }
-            grid.innerHTML = data.beitraege.map(b => `
-              <article class="news-card">
+            grid.innerHTML = data.beitraege.map((b, i) => `
+              <article class="news-card news-card--expandable" id="news-${i}">
                 <div class="news-card__img-wrap">
                   ${b.bild
-                    ? `<img class="news-card__img" src="../${b.bild}" alt="${b.titel}" loading="lazy">`
-                    : `<div class="news-card__img-wrap" style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">
+                    ? `<img class="news-card__img" src="${b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild}" alt="${b.titel}" loading="lazy">`
+                    : `<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">
                          <img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;">
                        </div>`}
                 </div>
@@ -109,8 +109,12 @@
                     <span class="news-card__date">${b.datum}</span>
                   </div>
                   <h3 class="news-card__title">${b.titel}</h3>
-                  <p class="news-card__excerpt">${b.text}</p>
-                  ${b.link ? `<a href="${b.link}" class="read-more" target="_blank" rel="noopener">Weiterlesen</a>` : ''}
+                  <p class="news-card__excerpt news-card__short">${b.text && b.text.length > 120 ? b.text.substring(0,120) + '…' : b.text}</p>
+                  <div class="news-card__full" style="display:none;">
+                    <p>${b.text}</p>
+                    ${b.link ? `<a href="${b.link}" class="read-more" target="_blank" rel="noopener">Mehr erfahren →</a>` : ''}
+                  </div>
+                  <button class="read-more news-toggle" onclick="toggleNews(${i})" style="background:none;border:none;cursor:pointer;padding:0;font-size:.88rem;font-weight:600;color:var(--green-main);">Weiterlesen ↓</button>
                 </div>
               </article>`).join('');
           })
@@ -118,6 +122,21 @@
             document.getElementById('news-grid').innerHTML =
               '<p>Beiträge konnten nicht geladen werden.</p>';
           });
+
+        function toggleNews(i) {
+          var full = document.querySelector('#news-' + i + ' .news-card__full');
+          var short = document.querySelector('#news-' + i + ' .news-card__short');
+          var btn = document.querySelector('#news-' + i + ' .news-toggle');
+          if (full.style.display === 'none') {
+            full.style.display = 'block';
+            short.style.display = 'none';
+            btn.textContent = 'Weniger anzeigen ↑';
+          } else {
+            full.style.display = 'none';
+            short.style.display = 'block';
+            btn.textContent = 'Weiterlesen ↓';
+          }
+        }
       </script>
     </main>
   </div>
