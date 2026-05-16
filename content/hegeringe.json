@@ -11,74 +11,74 @@
     {
       "nummer": "Hegering 2",
       "name": "Seedorf",
-      "obmann": "Florian Frank",
-      "gemeinden": "23823 Seedorf",
+      "obmann": "Morten Brötzmann",
+      "gemeinden": "23813 Nehms",
       "email": "hegering2@kjs-segeberg.de",
-      "telefon": "0173-5426396"
+      "telefon": "0174-7647794"
     },
     {
       "nummer": "Hegering 3",
       "name": " Bornhöved",
-      "obmann": "Ferdinand Führer",
-      "gemeinden": " 24619 Bornhöved",
+      "obmann": "Dirk Tensfeld",
+      "gemeinden": "24619 Tensfeld",
       "email": "hegering3@kjs-segeberg.de",
-      "telefon": "0173-9779256"
+      "telefon": "0162-6002065"
     },
     {
       "nummer": "Hegering 4",
       "name": "Bad Segeberg",
-      "obmann": "Wolfgang Harm",
-      "gemeinden": "23795 Bad Segeberg",
+      "obmann": "Dennis Schiller",
+      "gemeinden": "23813 Blunk",
       "email": "hegering4@kjs-segeberg.de",
-      "telefon": "0175-5179180"
+      "telefon": "0173-1524264"
     },
     {
       "nummer": "Hegering 5",
       "name": "Neuengörs",
-      "obmann": "Horst Penzlin",
-      "gemeinden": "23818 Neuengörs",
+      "obmann": "Hans-Jürgen Hamann",
+      "gemeinden": "23845 Bühnsdorf",
       "email": "hegering5@kjs-segeberg.de",
-      "telefon": "0151-21551170"
+      "telefon": "01719715295"
     },
     {
       "nummer": "Hegering 6",
       "name": "Hartenholm",
-      "obmann": "Andreas Wilken",
+      "obmann": "Frank Zabel",
       "gemeinden": "24628 Hartenholm",
       "email": "hegering6@kjs-segeberg.de",
-      "telefon": "0171-6404021"
+      "telefon": "0151-50564975"
     },
     {
       "nummer": "Hegering 7",
       "name": "Itzstedt",
-      "obmann": "Thomas Lehmann",
-      "gemeinden": "23845 Itzstedt",
+      "obmann": "Jörg Einfeldt",
+      "gemeinden": "23866 Nahe",
       "email": "hegering7@kjs-segeberg.de",
-      "telefon": "0171-8298577"
+      "telefon": "0176-62135524"
     },
     {
       "nummer": "Hegering 8",
       "name": "Kisdorf",
-      "obmann": "Rolf Borkenhagen",
-      "gemeinden": "24629 Kisdorf",
+      "obmann": "Thomas Liedtke",
+      "gemeinden": "24641 Sievershütten",
       "email": "hegering8@kjs-segeberg.de",
-      "telefon": "0173-5270293"
+      "telefon": "0172/6220121"
     },
     {
       "nummer": "Hegering 9",
       "obmann": "Kaltenkirchen",
-      "name": "Björn Schlatz",
-      "gemeinden": "24568 Kaltenkirchen",
+      "name": "Henning Schwartinsky",
+      "gemeinden": "24640 Schmalfeld",
       "email": "hegering9@kjs-segeberg.de",
-      "telefon": "0171-1438352"
+      "telefon": "01749635042"
     },
     {
       "name": "Bad Bramstedt",
-      "gemeinden": "24576 Bad Bramstedt",
+      "gemeinden": "24616 Armstedt",
       "nummer": "Hegering 10",
-      "obmann": "Jens Saggau",
+      "obmann": "Andreas Falk",
       "email": "hegering10@kjs-segeberg.de",
-      "telefon": "0172-5642250"
+      "telefon": "0173-3655038"
     }
   ]
 }
