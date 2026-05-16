@@ -77,37 +77,28 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Dynamische Seiten in Navigation einbinden
+// Eigene Seiten dynamisch ins Flyout-Menü laden
 (function() {
   fetch('/content/seiten.json')
-    .then(function(r) { return r.json(); })
+    .then(function(r){ return r.json(); })
     .then(function(data) {
       var seiten = (data.seiten || []).filter(function(s) {
         return s.veroeffentlicht === true && s.in_navigation === true;
       });
-      if (!seiten.length) return;
-
-      var dropdown = document.getElementById('jaeger-dropdown');
-      if (!dropdown) {
-        dropdown = document.querySelector('.main-nav .dropdown--wide');
-      }
-      if (!dropdown) return;
-
-      var header = document.createElement('div');
-      header.className = 'dropdown-header';
-      header.textContent = 'Weitere Themen';
-      dropdown.appendChild(header);
-
-      seiten.forEach(function(seite) {
+      var item = document.getElementById('weitere-themen-item');
+      var sub  = document.getElementById('weitere-themen-sub');
+      if (!item || !sub || !seiten.length) return;
+      seiten.forEach(function(s) {
         var li = document.createElement('li');
-        var a = document.createElement('a');
-        a.href = '/seiten/?s=' + seite.slug;
-        a.textContent = seite.nav_label || seite.titel;
+        var a  = document.createElement('a');
+        a.href = '/seiten/?s=' + encodeURIComponent(s.slug);
+        a.textContent = s.nav_label || s.titel;
         li.appendChild(a);
-        dropdown.appendChild(li);
+        sub.appendChild(li);
       });
+      item.style.display = '';
     })
-    .catch(function() {});
+    .catch(function(){});
 })();
 
 // Contact form handler (Netlify Forms)

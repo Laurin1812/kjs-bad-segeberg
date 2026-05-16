@@ -25,21 +25,30 @@
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
       <li><a href="../index.html">Startseite</a></li>
       <li><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
-        <ul class="dropdown dropdown--wide" id="jaeger-dropdown">
-          <div class="dropdown-header">KJS Bad Segeberg</div>
-          <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-          <li><a href="../jaeger/obleute.html">Obleute</a></li>
-          <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
-          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
-          <li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <div class="dropdown-header">Aufgaben</div>
-          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
-          <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-          <li><a href="../aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
-          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
-          <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-          <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
-          <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+        <ul class="dropdown" id="jaeger-dropdown">
+          <li class="has-sub"><a href="../jaeger/index.html">KJS Bad Segeberg <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+              <li><a href="../jaeger/obleute.html">Obleute</a></li>
+              <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+              <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+              <li><a href="../jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
+            </ul>
+          </li>
+          <li class="has-sub"><a href="#">Aufgaben <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../aufgaben/schiessen.html">Schie&#223;wesen</a></li>
+              <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+              <li><a href="../aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
+              <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+              <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+              <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+              <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+            </ul>
+          </li>
+          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
+          </li>
         </ul>
       </li>
       <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
