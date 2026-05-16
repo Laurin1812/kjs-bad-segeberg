@@ -29,71 +29,83 @@
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Obmann Hegering  I - Wardersee",
+      "rolle": "Obmann Hegering 1 - Wardersee",
       "name": "Marcel Zickermann",
       "email": "",
       "telefon": "0172-9431128",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Obmann Hegering  II - Seedorf",
+      "rolle": "Obmann Hegering 2 - Seedorf",
       "name": "Florian Frank",
       "email": "",
       "telefon": "0173-5426396",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  III - Bornhöved",
+      "rolle": "Obmann Hegering 3 - Bornhöved",
       "name": "Ferdinand Führer",
       "telefon": "0173-9779256",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  IV - Bad Segeberg",
+      "rolle": "Obmann Hegering 4 - Bad Segeberg",
       "name": "Wolfgang Harm",
       "telefon": "0175-5179180",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  V - Neuengörs",
+      "rolle": "Obmann Hegering 5 - Neuengörs",
       "name": "Horst Penzlin",
       "telefon": "0151-21551170",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  VI - Hartenholm",
+      "rolle": "Obmann Hegering 6 - Hartenholm",
       "name": "Andreas Wilken",
       "telefon": "0171-6404021",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  VII - Itzstedt",
+      "rolle": "Obmann Hegering 7 - Itzstedt",
       "name": "Thomas Lehmann",
       "telefon": "0171-8298577",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  VIII - Kisdorf",
+      "rolle": "Obmann Hegering 8 - Kisdorf",
       "name": "Rolf Borkenhagen",
       "telefon": "0173-5270293",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  IX - Kaltenkirchen",
+      "rolle": "Obmann Hegering 9 - Kaltenkirchen",
       "name": "Björn Schlatz",
       "telefon": "0171-1438352",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  X - Bad Bramstedt",
+      "rolle": "Obmann Hegering 10 - Bad Bramstedt",
       "name": "Jens Saggau",
       "telefon": "0172-5642250",
       "bild": "/images/logo.png"
     },
     {
-      "rolle": "Hegering  XI - Großenaspe",
+      "rolle": "Obmann Hegering 11 - Großenaspe",
       "name": "Joern Karow",
       "telefon": "0152-05821903",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obmann Hegering 12 - Leezen",
+      "name": "Heiner Hahn",
+      "telefon": "0160-94944779",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obfrau Hegering 13 - Norderstedt",
+      "name": "Wanja Ellerbrock",
+      "telefon": "0177-2927121",
       "bild": "/images/logo.png"
     }
   ]
