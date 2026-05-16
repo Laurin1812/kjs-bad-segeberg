@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mein Profil – KJS Bad Segeberg Admin</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: #fff; border-radius: 14px; padding: 2.5rem; width: 100%; max-width: 440px; box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+    .card h1 { color: #1e4620; font-size: 1.4rem; margin-bottom: .3rem; }
+    .card p.sub { color: #888; font-size: .88rem; margin-bottom: 2rem; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: .75rem 0; border-bottom: 1px solid #eee; font-size: .95rem; }
+    .info-row:last-of-type { border-bottom: none; }
+    .info-row label { color: #555; font-weight: 600; }
+    .info-row span { color: #222; }
+    .btn { display: block; width: 100%; padding: .85rem; border: none; border-radius: 8px; font-size: .95rem; font-weight: 600; cursor: pointer; margin-top: .75rem; transition: background .2s; }
+    .btn-green { background: #2e6b30; color: #fff; }
+    .btn-green:hover { background: #1e4620; }
+    .btn-outline { background: transparent; color: #2e6b30; border: 2px solid #2e6b30; }
+    .btn-outline:hover { background: #e8f5e9; }
+    .btn-back { background: transparent; color: #888; border: none; font-size: .85rem; cursor: pointer; margin-top: 1rem; text-decoration: underline; }
+    .hint { background: #e8f5e9; border-radius: 8px; padding: 1rem; font-size: .84rem; color: #2e6b30; margin-top: 1.5rem; line-height: 1.6; }
+    #loading { color: #888; text-align: center; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="loading">Wird geladen …</div>
+    <div id="content" style="display:none;">
+      <h1>👤 Mein Profil</h1>
+      <p class="sub">Angemeldet als Admin – KJS Bad Segeberg</p>
+
+      <div class="info-row">
+        <label>Name</label>
+        <span id="user-name">–</span>
+      </div>
+      <div class="info-row">
+        <label>E-Mail</label>
+        <span id="user-email">–</span>
+      </div>
+      <div class="info-row">
+        <label>Rolle</label>
+        <span id="user-role">–</span>
+      </div>
+
+      <button class="btn btn-green" id="changePasswordBtn" style="margin-top:1.5rem;">
+        🔑 Passwort ändern
+      </button>
+      <button class="btn btn-outline" onclick="window.netlifyIdentity.open()">
+        ✏️ Profil bearbeiten
+      </button>
+
+      <div class="hint">
+        💡 <strong>Passwort vergessen?</strong> Klicke auf „Passwort ändern" – du bekommst eine E-Mail mit einem Link zum Zurücksetzen.<br><br>
+        <strong>Name ändern:</strong> Klicke auf „Profil bearbeiten" um deinen Anzeigenamen zu ändern.
+      </div>
+
+      <button class="btn-back" onclick="window.location.href='/admin/'">← Zurück zum Admin</button>
+    </div>
+  </div>
+
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on('init', function(user) {
+        if (!user) {
+          window.location.href = '/login';
+          return;
+        }
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('user-name').textContent = user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : '(kein Name)';
+        document.getElementById('user-email').textContent = user.email || '–';
+        var roles = user.app_metadata && user.app_metadata.roles;
+        document.getElementById('user-role').textContent = roles && roles.length ? roles.join(', ') : 'Admin';
+      });
+
+      document.getElementById('changePasswordBtn').addEventListener('click', function() {
+        // Passwort-Reset E-Mail senden
+        var email = document.getElementById('user-email').textContent;
+        if (!email || email === '–') return;
+        fetch('/.netlify/identity/recover', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        }).then(function() {
+          document.getElementById('changePasswordBtn').textContent = '✅ E-Mail gesendet! Bitte Postfach prüfen.';
+          document.getElementById('changePasswordBtn').style.background = '#388e3c';
+          document.getElementById('changePasswordBtn').disabled = true;
+        }).catch(function() {
+          window.netlifyIdentity.open();
+        });
+      });
+    }
+  </script>
+</body>
+</html>

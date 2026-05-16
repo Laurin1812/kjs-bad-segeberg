@@ -57,7 +57,8 @@ collections:
           - label: "Beiträge"
             name: "beitraege"
             widget: "list"
-            summary: "{{fields.datum}} – {{fields.titel}}"
+            summary: "{{fields.titel}} ({{fields.datum}})"
+            hint: "➕ Hinzufügen = neuer Beitrag | 🗑️ Löschen = auf den Pfeil klicken, dann Eintrag aufklappen und unten 'Entfernen' drücken, danach Speichern/Veröffentlichen nicht vergessen!"
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
               - { label: "Datum",           name: "datum",     widget: "date",   format: "DD. MMMM YYYY", hint: "Datum aus Kalender wählen" }
@@ -134,19 +135,19 @@ collections:
           - label: "Hegeringe"
             name: "hegeringe"
             widget: "list"
-            summary: "{{fields.nummer}} – {{fields.name}}"
+            summary: "{{fields.nummer}} – {{fields.name}} ({{fields.obmann}})"
             fields:
-              - { label: "Bezeichnung",   name: "nummer",    widget: "string", hint: "z.B. Hegering 1" }
-              - { label: "Name",          name: "name",      widget: "string", hint: "z.B. Bad Segeberg – Stadt" }
-              - label: "Geschlecht (Titel)"
+              - { label: "Hegering-Nummer", name: "nummer",    widget: "string", hint: "z.B. Hegering 1" }
+              - { label: "Hegering-Name (Gebietsname)", name: "name", widget: "string", hint: "z.B. Bad Segeberg – Stadt" }
+              - { label: "Name der Leitung", name: "obmann", widget: "string", hint: "Vor- und Nachname" }
+              - label: "Titel der Leitung"
                 name: "geschlecht"
                 widget: "select"
                 default: "Hegeringsleiter/in"
                 options:
-                  - { label: "Hegeringsleiter (männlich)", value: "Hegeringsleiter" }
-                  - { label: "Hegeringsleiterin (weiblich)", value: "Hegeringsleiterin" }
-                  - { label: "Hegeringsleiter/in (divers/offen)", value: "Hegeringsleiter/in" }
-              - { label: "Name Hegeringsleiter/in", name: "obmann", widget: "string" }
+                  - { label: "Hegeringsleiter (Mann)", value: "Hegeringsleiter" }
+                  - { label: "Hegeringsleiterin (Frau)", value: "Hegeringsleiterin" }
+                  - { label: "Hegeringsleiter/in", value: "Hegeringsleiter/in" }
               - { label: "Gemeinden",     name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
               - { label: "E-Mail",        name: "email",     widget: "string", required: false }
               - { label: "Telefon",       name: "telefon",   widget: "string", required: false }
@@ -176,11 +177,11 @@ collections:
   - name: "kreisjjaegermeister"
     label: "🏅 Kreisjägermeister"
     files:
-      - label: "Kreisjägermeister"
+      - label: "✏️ Kreisjägermeister bearbeiten"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
-          - { label: "Name",      name: "name",      widget: "string" }
+          - { label: "Name",      name: "name",      widget: "string",  hint: "⚠️ Denk daran: Denselben Namen auch im Vorstand aktualisieren!" }
           - { label: "E-Mail",    name: "email",      widget: "string" }
           - { label: "Telefon",   name: "telefon",    widget: "string" }
           - { label: "Foto",      name: "bild",       widget: "image",  required: false, hint: "Portraitfoto hochladen" }
