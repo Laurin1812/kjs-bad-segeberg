@@ -71,6 +71,30 @@
       "name": "Thomas Lehmann",
       "telefon": "0171-8298577",
       "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Hegering  VIII - Kisdorf",
+      "name": "Rolf Borkenhagen",
+      "telefon": "0173-5270293",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Hegering  IX - Kaltenkirchen",
+      "name": "Björn Schlatz",
+      "telefon": "0171-1438352",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Hegering  X - Bad Bramstedt",
+      "name": "Jens Saggau",
+      "telefon": "0172-5642250",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Hegering  XI - Großenaspe",
+      "name": "Joern Karow",
+      "telefon": "0152-05821903",
+      "bild": "/images/logo.png"
     }
   ]
 }
