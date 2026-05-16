@@ -27,7 +27,7 @@
   --font-heading:  'Georgia', 'Times New Roman', serif;
   --transition:    .25s ease;
   --container:     1180px;
-  --header-h:      96px;
+  --header-h:      112px;
 }
 
 /* ----- Reset & Base ----- */
@@ -676,7 +676,7 @@ p  { margin-bottom: 1rem; }
 }
 
 /* ── Header & Footer Logo-Größe ───────────────────────────────────── */
-.site-logo img    { height: 90px !important; width: auto; }
+.site-logo img    { height: 104px !important; width: auto; }
 .footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block; }
 
 /* ── Logo (transparentes PNG) ─────────────────────────────────────── */
