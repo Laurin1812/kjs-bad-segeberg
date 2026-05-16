@@ -560,8 +560,8 @@ p  { margin-bottom: 1rem; }
 /* =========================================================
    FOOTER
    ========================================================= */
-.site-footer { background: #1e3d20; color: rgba(255,255,255,.82); padding-top: 4.5rem; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,.12); }
+.site-footer { background: #2e6b30; color: rgba(255,255,255,.92); padding-top: 4.5rem; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,.2); }
 .footer-logo-emblem {
   width: 58px; height: 58px; background: var(--green-dark); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -569,7 +569,7 @@ p  { margin-bottom: 1rem; }
 }
 .footer-about__name { color: #fff; font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: .3rem; font-family: var(--font-heading); }
 .footer-about__sub  { font-size: .8rem; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 1rem; }
-.footer-about p { font-size: .9rem; color: rgba(255,255,255,.6); margin-bottom: 1.25rem; max-width: 300px; }
+.footer-about p { font-size: .9rem; color: rgba(255,255,255,.85); margin-bottom: 1.25rem; max-width: 300px; }
 .footer-social { display: flex; gap: .6rem; }
 .footer-social a {
   width: 34px; height: 34px; background: rgba(255,255,255,.07); border-radius: 50%;
@@ -583,7 +583,7 @@ p  { margin-bottom: 1rem; }
   border-bottom: 2px solid var(--green-main); display: inline-block; font-family: var(--font-sans);
 }
 .footer-col ul li { margin-bottom: .5rem; }
-.footer-col ul li a { color: rgba(255,255,255,.55); font-size: .86rem; transition: all var(--transition); display: flex; align-items: center; gap: .4rem; }
+.footer-col ul li a { color: rgba(255,255,255,.85); font-size: .86rem; transition: all var(--transition); display: flex; align-items: center; gap: .4rem; }
 .footer-col ul li a::before { content: '›'; color: var(--green-mid); }
 .footer-col ul li a:hover { color: #fff; padding-left: .35rem; }
 .footer-bottom {
