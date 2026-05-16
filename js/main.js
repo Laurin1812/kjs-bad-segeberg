@@ -77,6 +77,39 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
+// Dynamische Seiten in Navigation einbinden
+(function() {
+  fetch('/content/seiten.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var seiten = (data.seiten || []).filter(function(s) {
+        return s.veroeffentlicht === true && s.in_navigation === true;
+      });
+      if (!seiten.length) return;
+
+      var dropdown = document.getElementById('jaeger-dropdown');
+      if (!dropdown) {
+        dropdown = document.querySelector('.main-nav .dropdown--wide');
+      }
+      if (!dropdown) return;
+
+      var header = document.createElement('div');
+      header.className = 'dropdown-header';
+      header.textContent = 'Weitere Themen';
+      dropdown.appendChild(header);
+
+      seiten.forEach(function(seite) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = '/seiten/?s=' + seite.slug;
+        a.textContent = seite.nav_label || seite.titel;
+        li.appendChild(a);
+        dropdown.appendChild(li);
+      });
+    })
+    .catch(function() {});
+})();
+
 // Contact form handler (Netlify Forms)
 var contactForm = document.getElementById('contactForm');
 if (contactForm) {

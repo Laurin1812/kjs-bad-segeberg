@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Häufige Fragen zur Kreisjägerschaft Bad Segeberg e.V.">
-  <title>FAQ – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <meta name="description" content="Kreisjägerschaft Bad Segeberg e.V.">
+  <title>Seite – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -42,7 +42,7 @@
       <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
       <li><a href="../termine/index.html">Termine</a></li>
       <li><a href="../aktuelles/index.html">Aktuelles</a></li>
-      <li class="active"><a href="index.html">FAQ</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
       <li><a href="../kontakt/index.html">Kontakt</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
@@ -56,54 +56,24 @@
     <li><a href="../jaeger/index.html">Jäger</a></li>
     <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../aktuelles/index.html">Aktuelles</a></li>
-    <li><a href="index.html">FAQ</a></li>
+    <li><a href="../faq/index.html">FAQ</a></li>
     <li><a href="../kontakt/index.html">Kontakt</a></li>
   </ul>
 </nav>
 
-<div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+<div class="page-hero" id="page-hero">
   <div class="container">
-    <h1>FAQ – Häufige Fragen</h1>
+    <h1 id="seite-titel">Wird geladen …</h1>
     <nav class="breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span><span>FAQ</span>
+      <a href="../index.html">Startseite</a><span class="sep">/</span><span id="breadcrumb-label">Seite</span>
     </nav>
   </div>
 </div>
 
 <div class="page-content full">
   <div class="container">
-    <main class="main-content">
-      <h2>Antworten auf häufige Fragen</h2>
-      <p style="color:var(--text-muted); margin-bottom:2.5rem;">
-        Hier haben wir die häufigsten Fragen rund um Jagd, Mitgliedschaft und unsere
-        Kreisjägerschaft für Sie zusammengestellt.
-      </p>
-
-      <div id="faq-content"><p style="color:var(--text-muted);">Wird geladen …</p></div>
-
-      <script>
-        fetch('../content/faq.json')
-          .then(r => r.json())
-          .then(data => {
-            var html = data.kategorien.map(kat => `
-              <h3 style="color:var(--green-dark);margin:2rem 0 1.25rem;">${kat.titel}</h3>
-              <div class="faq-list">
-                ${kat.fragen.map(f => `
-                  <details class="faq-item">
-                    <summary>${f.frage}</summary>
-                    <div class="faq-item__body">${f.antwort}</div>
-                  </details>`).join('')}
-              </div>`).join('');
-            html += `
-              <div style="margin-top:2.5rem;padding:1.75rem;background:var(--green-light);border-radius:var(--radius-md);text-align:center;">
-                <h3 style="color:var(--green-dark);margin-bottom:.75rem;">Keine Antwort gefunden?</h3>
-                <p style="margin-bottom:1.25rem;color:var(--text-muted);">Wir helfen gerne weiter. Schreiben Sie uns einfach eine Nachricht.</p>
-                <a href="../kontakt/index.html" class="btn btn-primary">Jetzt Kontakt aufnehmen</a>
-              </div>`;
-            document.getElementById('faq-content').innerHTML = html;
-          });
-      </script>
+    <main class="main-content" id="seite-inhalt">
+      <p style="color:var(--text-muted);">Wird geladen …</p>
     </main>
   </div>
 </div>
@@ -123,7 +93,7 @@
       <li><a href="../index.html">Startseite</a></li><li><a href="../termine/index.html">Termine</a></li>
     </ul></div>
     <div class="footer-col"><h5>Informationen</h5><ul>
-      <li><a href="../kontakt/index.html">Kontakt</a></li><li><a href="index.html">FAQ</a></li>
+      <li><a href="../kontakt/index.html">Kontakt</a></li><li><a href="../faq/index.html">FAQ</a></li>
     </ul></div>
   </div>
   <div class="footer-bottom">
@@ -131,6 +101,87 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
   </div>
 </div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var slug = params.get('s');
+
+  function zeigeFehlermeldung(msg) {
+    document.getElementById('seite-titel').textContent = 'Seite nicht gefunden';
+    document.getElementById('breadcrumb-label').textContent = 'Nicht gefunden';
+    document.title = 'Seite nicht gefunden – Kreisjägerschaft Bad Segeberg e.V.';
+    document.getElementById('seite-inhalt').innerHTML =
+      '<div style="text-align:center;padding:3rem 1rem;">' +
+      '<p style="font-size:3rem;margin-bottom:1rem;">🍃</p>' +
+      '<h2 style="color:var(--green-dark);margin-bottom:.75rem;">' + (msg || 'Diese Seite wurde nicht gefunden.') + '</h2>' +
+      '<p style="color:var(--text-muted);margin-bottom:1.5rem;">Die gesuchte Seite existiert nicht oder wurde entfernt.</p>' +
+      '<a href="../index.html" class="btn btn-primary">Zur Startseite</a>' +
+      '</div>';
+  }
+
+  if (!slug) {
+    zeigeFehlermeldung('Kein Seiten-Kürzel angegeben.');
+    return;
+  }
+
+  fetch('../content/seiten.json')
+    .then(function(r) {
+      if (!r.ok) throw new Error('Fehler beim Laden');
+      return r.json();
+    })
+    .then(function(data) {
+      var seite = (data.seiten || []).find(function(s) {
+        return s.slug === slug && s.veroeffentlicht === true;
+      });
+
+      if (!seite) {
+        // Versuche auch einzelne JSON-Dateien aus /content/seiten/
+        return fetch('../content/seiten/' + slug + '.json')
+          .then(function(r2) {
+            if (!r2.ok) throw new Error('Nicht gefunden');
+            return r2.json();
+          })
+          .then(function(einzelseite) {
+            if (!einzelseite.veroeffentlicht) throw new Error('Nicht veröffentlicht');
+            renderSeite(einzelseite);
+          });
+      }
+
+      renderSeite(seite);
+    })
+    .catch(function() {
+      zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+    });
+
+  function renderSeite(seite) {
+    var titel = seite.titel || 'Seite';
+    document.getElementById('seite-titel').textContent = titel;
+    document.getElementById('breadcrumb-label').textContent = seite.nav_label || titel;
+    document.title = titel + ' – Kreisjägerschaft Bad Segeberg e.V.';
+
+    var inhaltEl = document.getElementById('seite-inhalt');
+    var html = '';
+
+    if (seite.datum) {
+      html += '<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.5rem;">📅 ' + seite.datum + '</p>';
+    }
+
+    if (seite.inhalt) {
+      if (typeof marked !== 'undefined') {
+        html += marked.parse(seite.inhalt);
+      } else {
+        html += '<div>' + seite.inhalt.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</div>';
+      }
+    } else {
+      html += '<p style="color:var(--text-muted);">Kein Inhalt vorhanden.</p>';
+    }
+
+    inhaltEl.innerHTML = html;
+  }
+})();
+</script>
 </body>
 </html>

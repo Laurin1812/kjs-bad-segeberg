@@ -259,3 +259,28 @@ collections:
                   - { label: "⏳ Offen",     value: "offen" }
                   - { label: "🔄 In Arbeit", value: "in-arbeit" }
                   - { label: "✅ Erledigt",  value: "erledigt" }
+
+  # ──────────────────────────────────────────
+  # EIGENE SEITEN
+  # ──────────────────────────────────────────
+  - name: "seiten"
+    label: "📝 Eigene Seiten"
+    folder: "content/seiten"
+    create: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
+    summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
+    fields:
+      - { label: "Seitentitel",        name: "titel",           widget: "string" }
+      - { label: "Navigations-Label",  name: "nav_label",       widget: "string", hint: "Kurzer Text für das Menü, z.B. 'Warum Jagd?'" }
+      - { label: "URL-Kürzel (Slug)",  name: "slug",            widget: "string", hint: "Kleinbuchstaben, keine Leerzeichen, z.B. 'warum-jagd'" }
+      - label: "Im Menü anzeigen?"
+        name: "in_navigation"
+        widget: "boolean"
+        default: true
+      - label: "Veröffentlicht?"
+        name: "veroeffentlicht"
+        widget: "boolean"
+        default: false
+      - { label: "Inhalt",             name: "inhalt",          widget: "markdown", hint: "Vollständiger Seiteninhalt. Hier kann Text formatiert werden." }

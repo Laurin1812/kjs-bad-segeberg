@@ -162,24 +162,26 @@ p  { margin-bottom: 1rem; }
 }
 .dropdown {
   position: absolute; top: calc(100% + .1rem); left: 0; min-width: 230px;
-  background: var(--bg-white); border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  background: var(--bg-white); border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.08);
   opacity: 0; pointer-events: none; transform: translateY(-8px);
-  transition: all var(--transition); border-top: 3px solid var(--green-main); z-index: 100;
+  transition: all var(--transition); border-top: 4px solid var(--green-main); z-index: 100;
 }
 .dropdown--wide { min-width: 480px; display: grid; grid-template-columns: 1fr 1fr; }
 .dropdown--right { left: auto; right: 0; }
 .main-nav > li:hover > .dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
 .dropdown li a {
-  display: block; padding: .6rem 1.2rem; font-size: .86rem;
+  display: block; padding: .75rem 1.4rem; font-size: .86rem;
   color: var(--text-body); border-bottom: 1px solid var(--border);
-  transition: background var(--transition), color var(--transition), padding var(--transition);
+  border-left: 3px solid transparent;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 .dropdown li:last-child a { border-bottom: none; }
-.dropdown li a:hover { background: var(--green-light); color: var(--green-dark); padding-left: 1.6rem; }
+.dropdown li a:hover { background: var(--green-light); color: var(--green-dark); border-left-color: var(--green-main); }
 .dropdown .dropdown-header {
-  padding: .75rem 1.2rem .3rem; font-size: .7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted);
-  background: var(--bg-light); border-bottom: 1px solid var(--border);
+  padding: .55rem 1.4rem; font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--green-dark);
+  background: var(--green-light); border-bottom: 1px solid var(--border);
 }
 
 .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: .5rem; }
