@@ -45,14 +45,59 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// Contact form handler
-const contactForm = document.getElementById('contactForm');
+// Topbar & Geschäftsstelle dynamisch laden (aus content/einstellungen.json)
+(function() {
+  var boxes = document.querySelectorAll('.contact-box');
+  if (!boxes.length) return;
+  fetch('/content/einstellungen.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      // Topbar aktualisieren
+      var topbarLinks = document.querySelectorAll('.topbar__left a');
+      topbarLinks.forEach(function(a) {
+        if (a.href.indexOf('mailto:') > -1 && d.email) {
+          a.href = 'mailto:' + d.email;
+          a.textContent = d.email;
+        }
+        if (a.href.indexOf('tel:') > -1 && d.telefon) {
+          a.href = 'tel:' + d.telefon.replace(/\s|-/g,'');
+          a.textContent = d.telefon;
+        }
+      });
+      // Geschäftsstelle-Boxen aktualisieren
+      var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
+      boxes.forEach(function(box) {
+        box.innerHTML =
+          '<h4>Geschäftsstelle</h4>' +
+          (d.email    ? '<p>📧 <a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
+          (d.telefon  ? '<p>📞 <a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
+          (adresseHtml ? '<p>🏠 ' + adresseHtml + '</p>' : '');
+      });
+    })
+    .catch(function() {});
+})();
+
+// Contact form handler (Netlify Forms)
+var contactForm = document.getElementById('contactForm');
 if (contactForm) {
-  contactForm.addEventListener('submit', e => {
+  contactForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const btn = contactForm.querySelector('button[type="submit"]');
-    btn.textContent = 'Nachricht gesendet ✓';
-    btn.disabled = true;
-    btn.style.background = 'var(--green-mid)';
+    var btn = contactForm.querySelector('button[type="submit"]');
+    var data = new FormData(contactForm);
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(data).toString()
+    })
+    .then(function() {
+      btn.textContent = 'Nachricht gesendet ✓';
+      btn.disabled = true;
+      btn.style.background = 'var(--green-mid)';
+      contactForm.reset();
+    })
+    .catch(function() {
+      btn.textContent = 'Fehler – bitte erneut versuchen';
+      btn.style.background = '#c0392b';
+    });
   });
 }

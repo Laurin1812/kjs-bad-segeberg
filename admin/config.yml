@@ -230,3 +230,30 @@ collections:
             fields:
               - { label: "Tag(e)",  name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
               - { label: "Uhrzeit", name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }
+
+  # ──────────────────────────────────────────
+  # WUNSCHLISTE / AUFGABEN
+  # ──────────────────────────────────────────
+  - name: "wunschliste"
+    label: "📋 Wunschliste & Aufgaben"
+    files:
+      - label: "Aufgaben & Wünsche"
+        name: "aufgaben"
+        file: "content/wunschliste.json"
+        fields:
+          - label: "Aufgaben"
+            name: "aufgaben"
+            widget: "list"
+            summary: "[{{fields.status}}] {{fields.titel}}"
+            fields:
+              - { label: "Titel / Aufgabe",  name: "titel",        widget: "string" }
+              - { label: "Beschreibung",     name: "beschreibung", widget: "text",   required: false }
+              - { label: "Bild / Screenshot",name: "bild",         widget: "image",  required: false }
+              - label: "Status"
+                name: "status"
+                widget: "select"
+                default: "offen"
+                options:
+                  - { label: "⏳ Offen",     value: "offen" }
+                  - { label: "🔄 In Arbeit", value: "in-arbeit" }
+                  - { label: "✅ Erledigt",  value: "erledigt" }
