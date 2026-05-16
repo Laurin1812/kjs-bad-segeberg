@@ -177,15 +177,16 @@ collections:
   - name: "kreisjjaegermeister"
     label: "🏅 Kreisjägermeister"
     files:
-      - label: "✏️ Kreisjägermeister bearbeiten"
+      - label: "✏️ Grußwort bearbeiten"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
-          - { label: "Name",      name: "name",      widget: "string",  hint: "⚠️ Denk daran: Denselben Namen auch im Vorstand aktualisieren!" }
-          - { label: "E-Mail",    name: "email",      widget: "string" }
-          - { label: "Telefon",   name: "telefon",    widget: "string" }
-          - { label: "Foto",      name: "bild",       widget: "image",  required: false, hint: "Portraitfoto hochladen" }
-          - { label: "Grußwort",  name: "grußwort",   widget: "text",   required: false, hint: "Jede Leerzeile = neuer Absatz" }
+          - label: "ℹ️ Hinweis"
+            name: "hinweis"
+            widget: "hidden"
+            default: ""
+            hint: "Name, E-Mail, Telefon und Foto werden automatisch aus dem Vorstand-Eintrag mit 'Kreisjägermeister' in der Rolle übernommen. Hier nur das Grußwort pflegen."
+          - { label: "Grußwort",  name: "grußwort",   widget: "text",   required: false, hint: "Jede Leerzeile = neuer Absatz. Name, Foto & Kontakt kommen automatisch aus dem Vorstand." }
 
   # ──────────────────────────────────────────
   # FAQ
