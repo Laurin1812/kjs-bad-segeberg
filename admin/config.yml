@@ -265,22 +265,20 @@ collections:
   # ──────────────────────────────────────────
   - name: "seiten"
     label: "📝 Eigene Seiten"
-    folder: "content/seiten"
-    create: true
-    slug: "{{slug}}"
-    extension: "json"
-    format: "json"
-    summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
-    fields:
-      - { label: "Seitentitel",        name: "titel",           widget: "string" }
-      - { label: "Navigations-Label",  name: "nav_label",       widget: "string", hint: "Kurzer Text für das Menü, z.B. 'Warum Jagd?'" }
-      - { label: "URL-Kürzel (Slug)",  name: "slug",            widget: "string", hint: "Kleinbuchstaben, keine Leerzeichen, z.B. 'warum-jagd'" }
-      - label: "Im Menü anzeigen?"
-        name: "in_navigation"
-        widget: "boolean"
-        default: true
-      - label: "Veröffentlicht?"
-        name: "veroeffentlicht"
-        widget: "boolean"
-        default: false
-      - { label: "Inhalt",             name: "inhalt",          widget: "markdown", hint: "Vollständiger Seiteninhalt. Hier kann Text formatiert werden." }
+    files:
+      - label: "Alle eigenen Seiten verwalten"
+        name: "seiten"
+        file: "content/seiten.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
+            hint: "➕ Neue Seite hinzufügen | Slug = URL-Kürzel, nur Kleinbuchstaben und Bindestriche, z.B. warum-jagd"
+            fields:
+              - { label: "Seitentitel",         name: "titel",          widget: "string" }
+              - { label: "Navigations-Label",   name: "nav_label",      widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
+              - { label: "URL-Kürzel (Slug)",   name: "slug",           widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
+              - { label: "Im Menü anzeigen?",   name: "in_navigation",  widget: "boolean",  default: true }
+              - { label: "Veröffentlicht?",     name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",              name: "inhalt",         widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung (Fett, Kursiv, Überschriften, Listen usw.)" }
