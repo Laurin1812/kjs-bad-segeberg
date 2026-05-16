@@ -27,7 +27,7 @@
   --font-heading:  'Georgia', 'Times New Roman', serif;
   --transition:    .25s ease;
   --container:     1180px;
-  --header-h:      110px;
+  --header-h:      96px;
 }
 
 /* ----- Reset & Base ----- */
@@ -239,7 +239,7 @@ p  { margin-bottom: 1rem; }
   position: absolute; inset: 0;
   background: linear-gradient(135deg, rgba(30,70,32,.88) 0%, rgba(30,70,32,.55) 55%, rgba(0,0,0,.15) 100%);
 }
-.hero .container { position: relative; z-index: 1; }
+.hero .container { position: relative; z-index: 1; padding-top: 2.5rem; }
 .hero__content { max-width: 680px; }
 .hero__badge {
   display: inline-flex; align-items: center; gap: .5rem;
