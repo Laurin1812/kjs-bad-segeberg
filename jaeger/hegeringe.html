@@ -36,10 +36,9 @@
           <li><a href="vorstand.html">Vorstand</a></li>
           <li><a href="obleute.html">Obleute</a></li>
           <li><a href="hegeringe.html">Hegeringe</a></li>
-          <li><a href="hegegemeinschaft.html">Hegegemeinschaft</a></li>
           <li><a href="mitglied-werden.html">Mitglied werden</a></li>
           <li><a href="jaeger-werden.html">Jäger/in werden</a></li>
-          <div class="dropdown-header">Aufgaben & Wesen</div>
+          <div class="dropdown-header">Aufgaben</div>
           <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
           <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
           <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
@@ -113,7 +112,7 @@
               <div class="hegering-card">
                 <span class="hegering-card__num">${h.nummer}</span>
                 <h4>${h.name}</h4>
-                <p><strong>Hegeringsleiter/in:</strong> ${h.obmann}</p>
+                <p><strong>${h.geschlecht || 'Hegeringsleiter/in'}:</strong> ${h.obmann}</p>
                 <p><strong>Gemeinden:</strong> ${h.gemeinden}</p>
                 ${h.telefon ? `<p><strong>Telefon:</strong> <a href="tel:${h.telefon.replace(/\s|\/|\./g,'')}">${h.telefon}</a></p>` : ''}
                 ${h.email ? `<p><strong>Kontakt:</strong> <a href="mailto:${h.email}">${h.email}</a></p>` : ''}
@@ -138,7 +137,6 @@
           <li><a href="vorstand.html">Vorstand</a></li>
           <li><a href="obleute.html">Obleute</a></li>
           <li class="active"><a href="hegeringe.html">Hegeringe</a></li>
-          <li><a href="hegegemeinschaft.html">Hegegemeinschaft</a></li>
           <li><a href="mitglied-werden.html">Mitglied werden</a></li>
           <li><a href="jaeger-werden.html">Jäger/in werden</a></li>
         </ul>
@@ -174,7 +172,7 @@
     </ul></div>
   </div>
   <div class="footer-bottom">
-    <span>Copyright 2025 © Kreisjägerschaft Bad Segeberg e.V.</span>
+    <span>Copyright 2026 © Kreisjägerschaft Bad Segeberg e.V.</span>
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
   </div>
 </div></footer>

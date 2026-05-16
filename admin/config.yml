@@ -24,7 +24,7 @@ collections:
             widget: "list"
             summary: "{{fields.datum}} – {{fields.veranstaltung}}"
             fields:
-              - { label: "Datum",        name: "datum",         widget: "string", hint: "z.B. 12.05.2025" }
+              - { label: "Datum",        name: "datum",         widget: "date",   format: "DD.MM.YYYY", hint: "Datum aus Kalender wählen" }
               - { label: "Uhrzeit",      name: "uhrzeit",       widget: "string", hint: "z.B. 18:00 Uhr" }
               - { label: "Veranstaltung",name: "veranstaltung", widget: "string" }
               - { label: "Ort",          name: "ort",           widget: "string" }
@@ -60,10 +60,23 @@ collections:
             summary: "{{fields.datum}} – {{fields.titel}}"
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
-              - { label: "Datum",           name: "datum",     widget: "string", hint: "z.B. 28. April 2025" }
-              - { label: "Kategorie",       name: "kategorie", widget: "string", hint: "z.B. Naturschutz" }
+              - { label: "Datum",           name: "datum",     widget: "date",   format: "DD. MMMM YYYY", hint: "Datum aus Kalender wählen" }
+              - label: "Kategorie"
+                name: "kategorie"
+                widget: "select"
+                options:
+                  - "Allgemein"
+                  - "Naturschutz"
+                  - "Jagd"
+                  - "Jungwildrettung"
+                  - "Hundeausbildung"
+                  - "Schießwesen"
+                  - "Jugend"
+                  - "Jagdhornblasen"
+                  - "Veranstaltung"
+                  - "Pressemitteilung"
               - { label: "Bild",            name: "bild",      widget: "image",  required: false }
-              - { label: "Kurzbeschreibung",name: "text",      widget: "text" }
+              - { label: "Kurzbeschreibung",name: "text",      widget: "markdown" }
               - { label: "Link (optional)", name: "link",      widget: "string", required: false }
 
   # ──────────────────────────────────────────
@@ -125,7 +138,15 @@ collections:
             fields:
               - { label: "Bezeichnung",   name: "nummer",    widget: "string", hint: "z.B. Hegering 1" }
               - { label: "Name",          name: "name",      widget: "string", hint: "z.B. Bad Segeberg – Stadt" }
-              - { label: "Obmann / Obfrau", name: "obmann", widget: "string" }
+              - label: "Geschlecht (Titel)"
+                name: "geschlecht"
+                widget: "select"
+                default: "Hegeringsleiter/in"
+                options:
+                  - { label: "Hegeringsleiter (männlich)", value: "Hegeringsleiter" }
+                  - { label: "Hegeringsleiterin (weiblich)", value: "Hegeringsleiterin" }
+                  - { label: "Hegeringsleiter/in (divers/offen)", value: "Hegeringsleiter/in" }
+              - { label: "Name Hegeringsleiter/in", name: "obmann", widget: "string" }
               - { label: "Gemeinden",     name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
               - { label: "E-Mail",        name: "email",     widget: "string", required: false }
               - { label: "Telefon",       name: "telefon",   widget: "string", required: false }

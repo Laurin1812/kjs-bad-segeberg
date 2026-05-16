@@ -32,7 +32,7 @@
           <div class="dropdown-header">KJS Bad Segeberg</div>
           <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
           <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li><li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <div class="dropdown-header">Aufgaben & Wesen</div>
+          <div class="dropdown-header">Aufgaben</div>
           <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li><li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
           <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
         </ul>
@@ -84,7 +84,10 @@
         <!-- FORM -->
         <div class="kontakt-form">
           <h3>Nachricht senden</h3>
-          <form id="contactForm" novalidate>
+          <form id="contactForm" name="kontakt" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+            <input type="hidden" name="form-name" value="kontakt">
+            <input type="hidden" name="_to" value="frank.huelser@kjs-bad-segeberg.de">
+            <p style="display:none;"><label>Nicht ausfüllen: <input name="bot-field"></label></p>
             <div class="form-grid-2">
               <div class="form-group">
                 <label for="vorname">Vorname *</label>
@@ -243,7 +246,7 @@
     </ul></div>
   </div>
   <div class="footer-bottom">
-    <span>Copyright 2025 © Kreisjägerschaft Bad Segeberg e.V.</span>
+    <span>Copyright 2026 © Kreisjägerschaft Bad Segeberg e.V.</span>
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
   </div>
 </div></footer>
