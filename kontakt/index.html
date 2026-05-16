@@ -105,9 +105,10 @@
         <!-- FORM -->
         <div class="kontakt-form">
           <h3>Nachricht senden</h3>
-          <form id="contactForm" name="kontakt" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
-            <input type="hidden" name="form-name" value="kontakt">
-            <p style="display:none;"><label>Nicht ausfüllen: <input name="bot-field"></label></p>
+          <form id="contactForm" novalidate>
+            <input type="hidden" name="_subject" value="Neue Kontaktanfrage – KJS Bad Segeberg">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="text" name="_honey" style="display:none;" tabindex="-1" autocomplete="off">
             <div class="form-grid-2">
               <div class="form-group">
                 <label for="vorname">Vorname *</label>

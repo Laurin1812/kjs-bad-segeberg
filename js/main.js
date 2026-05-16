@@ -101,27 +101,51 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function(){});
 })();
 
-// Contact form handler (Netlify Forms)
+// Contact form handler (Formsubmit.co)
 var contactForm = document.getElementById('contactForm');
 if (contactForm) {
   contactForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var btn = contactForm.querySelector('button[type="submit"]');
+
+    // Pflichtfelder prüfen
+    var required = contactForm.querySelectorAll('[required]');
+    var valid = true;
+    required.forEach(function(field) {
+      if (!field.value.trim()) { field.style.borderColor = '#c0392b'; valid = false; }
+      else { field.style.borderColor = ''; }
+    });
+    if (!valid) return;
+
+    btn.textContent = 'Wird gesendet …';
+    btn.disabled = true;
+
     var data = new FormData(contactForm);
-    fetch('/', {
+    var json = {
+      _subject: 'Neue Kontaktanfrage – KJS Bad Segeberg',
+      _captcha: 'false'
+    };
+    data.forEach(function(val, key) {
+      if (!key.startsWith('_') && key !== '_honey') json[key] = val;
+    });
+
+    fetch('https://formsubmit.co/ajax/frank.huelser@kjs-segeberg.de', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(data).toString()
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(json)
     })
-    .then(function() {
-      btn.textContent = 'Nachricht gesendet ✓';
-      btn.disabled = true;
-      btn.style.background = 'var(--green-mid)';
-      contactForm.reset();
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.success === 'true' || res.success === true) {
+        btn.textContent = '✓ Nachricht gesendet!';
+        btn.style.background = 'var(--green-main)';
+        contactForm.reset();
+      } else { throw new Error(); }
     })
     .catch(function() {
       btn.textContent = 'Fehler – bitte erneut versuchen';
       btn.style.background = '#c0392b';
+      btn.disabled = false;
     });
   });
 }
