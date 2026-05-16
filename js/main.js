@@ -69,9 +69,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       boxes.forEach(function(box) {
         box.innerHTML =
           '<h4>Geschäftsstelle</h4>' +
-          (d.email    ? '<p>📧 <a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
-          (d.telefon  ? '<p>📞 <a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
-          (adresseHtml ? '<p>🏠 ' + adresseHtml + '</p>' : '');
+          (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
+          (d.telefon  ? '<p><span class="cb-icon">📞</span><a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
+          (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '');
       });
     })
     .catch(function() {});
