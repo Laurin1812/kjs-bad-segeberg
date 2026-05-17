@@ -107,6 +107,13 @@
       "name": "Wanja Ellerbrock",
       "telefon": "0177-2927121",
       "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obmann Jugendarbeit",
+      "name": "Maike Albrecht",
+      "email": "mike.albrecht@kreis-segeberg.de",
+      "telefon": "04551-9519447",
+      "bild": "/images/mike_albrecht_jugendobmann.jpg"
     }
   ]
 }
