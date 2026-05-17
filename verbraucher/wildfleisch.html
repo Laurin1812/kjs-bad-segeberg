@@ -98,77 +98,36 @@
 
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Natürlich, regional, gesund</h2>
-      <p>
-        Wildfleisch aus dem Kreis Bad Segeberg ist ein echtes Naturprodukt –
-        frei lebend, artgerecht und ohne Antibiotika oder Hormone aufgewachsen.
-        Es ist reich an Proteinen, arm an Fett und besonders aromatisch.
-      </p>
-
-      <h3>Warum Wildfleisch?</h3>
-      <p>
-        Wild lebt in unseren heimischen Wäldern und Feldern, ernährt sich natürlich
-        und wird mit einem kurzen Transport­weg vermarktet. Das schont die Umwelt
-        und garantiert höchste Frische.
-      </p>
-
-      <!-- Vorteile Grid -->
-      <div class="grid-3" style="margin: 2rem 0;">
-        <div style="padding: 1.5rem; background: var(--green-light); border-radius: var(--radius-md); text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">🌿</div>
-          <strong style="color:var(--green-dark);">100% Natur</strong>
-          <p style="font-size:.86rem; margin-top:.5rem; margin-bottom:0;">Kein Einsatz von Antibiotika, Hormonen oder Pestiziden</p>
-        </div>
-        <div style="padding: 1.5rem; background: var(--green-light); border-radius: var(--radius-md); text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">📍</div>
-          <strong style="color:var(--green-dark);">Aus der Region</strong>
-          <p style="font-size:.86rem; margin-top:.5rem; margin-bottom:0;">Kurze Transportwege, frisch und nachvollziehbar</p>
-        </div>
-        <div style="padding: 1.5rem; background: var(--green-light); border-radius: var(--radius-md); text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">💪</div>
-          <strong style="color:var(--green-dark);">Besonders gesund</strong>
-          <p style="font-size:.86rem; margin-top:.5rem; margin-bottom:0;">Viel Protein, wenig Fett, reich an Omega-3-Fettsäuren</p>
-        </div>
-      </div>
-
-      <h3>Welches Wild gibt es im Kreis Bad Segeberg?</h3>
-      <ul>
-        <li>🦌 <strong>Rehwild</strong> – zart, mager, aromatisch</li>
-        <li>🐗 <strong>Schwarzwild (Wildschwein)</strong> – kräftig im Geschmack</li>
-        <li>🦆 <strong>Wasserwild</strong> – Wildente, Blässhuhn</li>
-        <li>🐇 <strong>Hasen und Kaninchen</strong> – saisonal</li>
-        <li>🦃 <strong>Federwild</strong> – Fasan, Rebhuhn</li>
-      </ul>
-
-      <h3>Wo bekomme ich Wildfleisch im Kreis?</h3>
-      <p>
-        Regionales Wildfleisch aus dem Kreis Bad Segeberg erhalten Sie direkt bei
-        Jägerinnen und Jägern, an Wildbret­ausgabestellen sowie in ausgewählten
-        Metzgereien und Restaurants der Region.
-      </p>
-
-      <!-- Kontakt für Anfragen -->
-      <div style="background: var(--gold-light); border: 1px solid var(--gold); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 2rem;">
-        <h4 style="color: #7a5900; margin-bottom:.75rem;">🛍️ Wildfleisch anfragen</h4>
-        <p style="margin-bottom:.5rem; font-size:.9rem;">
-          Möchten Sie frisches Wildfleisch direkt vom Jäger aus dem Kreis Bad Segeberg beziehen?
-          Kontaktieren Sie uns – wir vermitteln gerne Kontakt zu Ihrem nächsten Revierinhaber.
-        </p>
-        <a href="../kontakt/index.html" class="btn btn-gold btn-sm">Jetzt anfragen</a>
-      </div>
-
-      <h3 style="margin-top:2rem">Wissenswertes für die Küche</h3>
-      <p>
-        Wild muss nicht lange hängen und kann frisch zubereitet werden. Die Reifezeit
-        hängt von der Tierart und der Außentemperatur ab. Rotwild und Schwarzwild profitieren
-        von einigen Tagen Abhängezeit, Rehwild kann recht frisch verarbeitet werden.
-      </p>
-      <p>
-        Wild lässt sich hervorragend einfrieren und ist so das ganze Jahr über genießbar.
-        Klassische Zubereitungen sind Braten, Gulasch, Schnitzel oder Wildwurst.
-      </p>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/verbraucher/wildfleisch.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel}</h2>
+          <p>${d.intro}</p>
+          ${bild}
+          <div id="page-inhalt"></div>
+          ${kontakt}
+          <div style="margin-top:2rem">
+            <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
+            <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
+          </div>
+        `;
+        if(d.inhalt){
+          const html = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>')
+            .replace(/^(?!<[hul])/gm,'');
+          document.getElementById('page-inhalt').innerHTML = '<p>' + html + '</p>';
+        }
+      });
+    </script>
 
     <aside class="sidebar">
       <div class="sidebar-widget">

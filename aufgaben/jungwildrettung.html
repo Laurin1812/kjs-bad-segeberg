@@ -103,34 +103,36 @@
 
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Jungwildrettung im Kreis Bad Segeberg</h2>
-      
-      <p>Jedes Jahr im Frühjahr droht zahlreichen Rehkitzen und anderen Bodenbrütern
-         der Tod durch Mähmaschinen. Durch den koordinierten Einsatz von Wärmebilddrohnen
-         können wir diese Tiere vor der Mahd aufspüren und sichern.</p>
-      <h3>Wie funktioniert die Jungwildrettung?</h3>
-      <p>In den frühen Morgenstunden, wenn die Tiere noch die Wärme des Bodens speichern,
-         fliegen wir die Felder mit Wärmebildkameras ab. Gefundene Kitze werden vorsichtig
-         mit Handschuhen aufgenommen und nach der Mahd wieder ausgesetzt.</p>
-      <h3>Unsere Ergebnisse 2024</h3>
-      <ul>
-        <li>🚁 847 Drohneneinsätze</li>
-        <li>🦌 118 Rehkitze gerettet</li>
-        <li>🥚 23 Bodenbrüternester gesichert</li>
-        <li>👥 42 ehrenamtliche Helfer im Einsatz</li>
-      </ul>
-      <h3>Mitmachen und helfen</h3>
-      <p>Wir freuen uns über Unterstützung – sowohl bei den Drohnenflügen
-         als auch bei der Koordination mit Landwirten. Drohnenführerschein wird benötigt
-         oder kann erworben werden.</p>
-      <p>Melden Sie sich bei: <a href="mailto:jungwild@kjs-bad-segeberg.de">jungwild@kjs-bad-segeberg.de</a></p>
-
-      <div style="margin-top:2rem">
-        <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
-        <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
-      </div>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/aufgaben/jungwildrettung.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel}</h2>
+          <p>${d.intro}</p>
+          ${bild}
+          <div id="page-inhalt"></div>
+          ${kontakt}
+          <div style="margin-top:2rem">
+            <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
+            <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
+          </div>
+        `;
+        if(d.inhalt){
+          const html = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>')
+            .replace(/^(?!<[hul])/gm,'');
+          document.getElementById('page-inhalt').innerHTML = '<p>' + html + '</p>';
+        }
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Aufgaben des Hegerings</h4>

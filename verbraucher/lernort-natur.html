@@ -87,35 +87,36 @@
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Natur erleben – Natur verstehen</h2>
-      <p>Unser Projekt „Lernort Natur" bringt Schulklassen und Kindergärten direkt
-         in die Natur des Kreises Bad Segeberg. Erfahrene Jägerinnen und Jäger
-         begleiten die Gruppen und vermitteln spielerisch Wissen über heimische Tiere und Pflanzen.</p>
-      <h3>Angebote für Schulen und Kindergärten</h3>
-      <div class="grid-2" style="margin:1.5rem 0;">
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; border-left:4px solid var(--green-main);">
-          <h4 style="color:var(--green-dark); margin-bottom:.75rem;">🏫 Grünes Klassenzimmer</h4>
-          <p style="font-size:.88rem; margin:0;">Unterricht im Freien – wir kommen in Ihre Schule oder Sie besuchen uns im Revier. Themen: Wildtierkunde, Wald, Nahrungskreisläufe.</p>
-        </div>
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; border-left:4px solid var(--green-main);">
-          <h4 style="color:var(--green-dark); margin-bottom:.75rem;">🚌 Naturerlebnismobil</h4>
-          <p style="font-size:.88rem; margin:0;">Unser mobiles Programm kommt zu Ihnen – mit Tierpräparaten, Spuren­material und spannenden Geschichten aus dem Wald.</p>
-        </div>
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; border-left:4px solid var(--green-main);">
-          <h4 style="color:var(--green-dark); margin-bottom:.75rem;">🌙 Hochsitz statt Tiefschlaf</h4>
-          <p style="font-size:.88rem; margin:0;">Nachterlebnisse für Jugendgruppen: Gemeinsam erleben wir die Natur in der Dämmerung und beobachten heimische Wildtiere.</p>
-        </div>
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; border-left:4px solid var(--green-main);">
-          <h4 style="color:var(--green-dark); margin-bottom:.75rem;">🎓 Lehrpfad Bad Segeberg</h4>
-          <p style="font-size:.88rem; margin:0;">Geführte Wanderungen auf unserem Naturlehrpfad mit informativen Stationen zu Wildtieren und ihren Lebensräumen.</p>
-        </div>
-      </div>
-      <h3>Buchung und Anfragen</h3>
-      <p>Alle Veranstaltungen sind kostenfrei für Schulen und Kindergärten im Kreis Bad Segeberg.
-         Wir bitten um vorherige Anmeldung per E-Mail oder Telefon.</p>
-      <a href="../kontakt/index.html" class="btn btn-primary">Jetzt Termin anfragen</a>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/verbraucher/lernort-natur.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel}</h2>
+          <p>${d.intro}</p>
+          ${bild}
+          <div id="page-inhalt"></div>
+          ${kontakt}
+          <div style="margin-top:2rem">
+            <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
+            <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
+          </div>
+        `;
+        if(d.inhalt){
+          const html = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>')
+            .replace(/^(?!<[hul])/gm,'');
+          document.getElementById('page-inhalt').innerHTML = '<p>' + html + '</p>';
+        }
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Verbraucher</h4>

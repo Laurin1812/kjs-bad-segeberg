@@ -261,6 +261,140 @@ collections:
                   - { label: "✅ Erledigt",  value: "erledigt" }
 
   # ──────────────────────────────────────────
+  # AUFGABEN-SEITEN
+  # ──────────────────────────────────────────
+  - name: "aufgaben"
+    label: "🎯 Aufgaben-Seiten"
+    files:
+      - label: "Schießwesen"
+        name: "schiessen"
+        file: "content/aufgaben/schiessen.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Hundeausbildung"
+        name: "hundeausbildung"
+        file: "content/aufgaben/hundeausbildung.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Schweißhundeführer"
+        name: "schweisshunde"
+        file: "content/aufgaben/schweisshunde.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Jugendarbeit"
+        name: "jugend"
+        file: "content/aufgaben/jugend.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Jagdhornblasen"
+        name: "jagdhorn"
+        file: "content/aufgaben/jagdhorn.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Naturschutz"
+        name: "naturschutz"
+        file: "content/aufgaben/naturschutz.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Jungwildrettung"
+        name: "jungwildrettung"
+        file: "content/aufgaben/jungwildrettung.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+
+  # ──────────────────────────────────────────
+  # VERBRAUCHER-SEITEN
+  # ──────────────────────────────────────────
+  - name: "verbraucher_seiten"
+    label: "🛒 Verbraucher-Seiten"
+    files:
+      - label: "Wildfleisch"
+        name: "wildfleisch"
+        file: "content/verbraucher/wildfleisch.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Lernort Natur"
+        name: "lernort_natur"
+        file: "content/verbraucher/lernort-natur.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "Grünes Klassenzimmer"
+        name: "gruenes_klassenzimmer"
+        file: "content/verbraucher/gruenes-klassenzimmer.json"
+        fields:
+          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
+          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text" }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+
+  # ──────────────────────────────────────────
   # EIGENE SEITEN
   # ──────────────────────────────────────────
   - name: "seiten"

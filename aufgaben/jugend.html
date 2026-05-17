@@ -103,28 +103,36 @@
 
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Jugendarbeit der KJS Bad Segeberg</h2>
-      
-      <p>Die Nachwuchsförderung liegt uns besonders am Herzen. Mit vielfältigen Programmen
-         begeistern wir Kinder und Jugendliche für Natur, Wald und Wildtiere.</p>
-      <h3>Naturerlebnistage</h3>
-      <p>Regelmäßig veranstalten wir Naturerlebnistage für Schulklassen, bei denen
-         Kinder heimische Wildtiere kennenlernen und den Wald auf spannende Weise entdecken.</p>
-      <h3>Grünes Klassenzimmer</h3>
-      <p>Unser „Grünes Klassenzimmer" bietet Schulen und Kindergärten ein praxisnahes
-         Outdoor-Lernprogramm direkt in der Natur. Angebote für alle Altersstufen verfügbar.</p>
-      <h3>Jagdjugend</h3>
-      <p>Die Kreisjugendgruppe der KJS Bad Segeberg trifft sich regelmäßig zu Veranstaltungen
-         rund um Jagd und Natur. Junge Jägerinnen und Jäger bis 30 Jahre sind herzlich willkommen.</p>
-      <h3>Kontakt Jugendarbeit</h3>
-      <p>Sabine Krug · <a href="mailto:jugend@kjs-bad-segeberg.de">jugend@kjs-bad-segeberg.de</a></p>
-
-      <div style="margin-top:2rem">
-        <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
-        <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
-      </div>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/aufgaben/jugend.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel}</h2>
+          <p>${d.intro}</p>
+          ${bild}
+          <div id="page-inhalt"></div>
+          ${kontakt}
+          <div style="margin-top:2rem">
+            <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
+            <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
+          </div>
+        `;
+        if(d.inhalt){
+          const html = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>')
+            .replace(/^(?!<[hul])/gm,'');
+          document.getElementById('page-inhalt').innerHTML = '<p>' + html + '</p>';
+        }
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Aufgaben des Hegerings</h4>
