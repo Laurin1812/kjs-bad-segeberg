@@ -43,6 +43,13 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Obmann Jagdschutz",
+      "name": "Wolfram Witte",
+      "email": "amaruk@web.de",
+      "telefon": "0157-84107195",
+      "bild": "/images/logo.png"
+    },
+    {
       "rolle": "Obmann Hegering 1 - Wardersee",
       "name": "Marcel Zickermann",
       "email": "",
@@ -120,13 +127,6 @@
       "rolle": "Obfrau Hegering 13 - Norderstedt",
       "name": "Wanja Ellerbrock",
       "telefon": "0177-2927121",
-      "bild": "/images/logo.png"
-    },
-    {
-      "rolle": "Obmann Jagdschutz",
-      "name": "Wolfram Witte",
-      "email": "amaruk@web.de",
-      "telefon": "0157-84107195",
       "bild": "/images/logo.png"
     }
   ]
