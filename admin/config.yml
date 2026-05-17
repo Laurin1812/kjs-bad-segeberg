@@ -24,7 +24,7 @@ collections:
             widget: "list"
             summary: "{{fields.datum}} – {{fields.veranstaltung}}"
             fields:
-              - { label: "Datum",        name: "datum",         widget: "date",   format: "DD.MM.YYYY", hint: "Datum aus Kalender wählen" }
+              - { label: "Datum",        name: "datum",         widget: "datetime", date_format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
               - { label: "Uhrzeit",      name: "uhrzeit",       widget: "string", hint: "z.B. 18:00 Uhr" }
               - { label: "Veranstaltung",name: "veranstaltung", widget: "string" }
               - { label: "Ort",          name: "ort",           widget: "string" }
@@ -61,7 +61,7 @@ collections:
             hint: "➕ Hinzufügen = neuer Beitrag | 🗑️ Löschen = auf den Pfeil klicken, dann Eintrag aufklappen und unten 'Entfernen' drücken, danach Speichern/Veröffentlichen nicht vergessen!"
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
-              - { label: "Datum",           name: "datum",     widget: "date",   format: "DD. MMMM YYYY", hint: "Datum aus Kalender wählen" }
+              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD. MMMM YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
               - label: "Kategorie"
                 name: "kategorie"
                 widget: "select"
