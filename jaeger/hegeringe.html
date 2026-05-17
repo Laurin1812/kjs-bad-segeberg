@@ -128,7 +128,7 @@
                 <span class="hegering-card__num">${h.nummer}</span>
                 <h4>${h.name}</h4>
                 <p><strong>${h.geschlecht || 'Hegeringsleiter/in'}:</strong> ${h.obmann}</p>
-                <p><strong>Gemeinden:</strong> ${h.gemeinden}</p>
+                <p><strong>Gemeinde:</strong> ${h.gemeinden}</p>
                 ${h.telefon ? `<p><strong>Telefon:</strong> <a href="tel:${h.telefon.replace(/\s|\/|\./g,'')}">${h.telefon}</a></p>` : ''}
                 ${h.email ? `<p><strong>Kontakt:</strong> <a href="mailto:${h.email}">${h.email}</a></p>` : ''}
               </div>`).join('');
@@ -188,7 +188,7 @@
   </div>
   <div class="footer-bottom">
     <span>Copyright 2026 © Kreisjägerschaft Bad Segeberg e.V.</span>
-    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></div>
+    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
   </div>
 </div></footer>
 
