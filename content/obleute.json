@@ -43,10 +43,37 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Nachsuchenwart - Glashütte",
+      "name": "Marcel Zickermann",
+      "telefon": "0172-9431128",
+      "bild": "/images/logo.png",
+      "email": "oliver.zickermann@kjs-segeberg.de"
+    },
+    {
       "rolle": "Obmann Jagdschutz - Hartenholm",
       "name": "Wolfram Witte",
       "email": "amaruk@web.de",
       "telefon": "0157-84107195",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Kreishundeobfrau - Borstel",
+      "name": "Heidi Fitzner",
+      "email": "heidi-fitzner@t-online.de",
+      "telefon": "0172-6077645",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Öffentlichkeitsarbeit des KJS Badsegeberg",
+      "name": "Nicole Scholmann",
+      "email": "nicole.Scholmann@kjs-segeberg.de",
+      "telefon": "0176-53957646",
+      "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Kreisbläserobfrau - Schackendorf",
+      "name": "Christiane Stock",
+      "telefon": "0172-4208808",
       "bild": "/images/logo.png"
     },
     {
