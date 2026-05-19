@@ -6,6 +6,16 @@
   <meta name="description" content="Kreisjägerschaft Bad Segeberg e.V. – Ihr Ansprechpartner für Jagd, Natur und Wildtierhege im Kreis Bad Segeberg.">
   <title>Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+  }).catch(()=>{});
+</script>
 </head>
 <body>
 

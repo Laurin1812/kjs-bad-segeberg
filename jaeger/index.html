@@ -5,6 +5,16 @@
   <meta name="description" content="Jäger – Kreisjägerschaft Bad Segeberg e.V.">
   <title>Jäger – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+  }).catch(()=>{});
+</script>
 </head>
 <body>
 <div class="topbar"><div class="container">
@@ -87,68 +97,87 @@
 </div>
 <div class="page-content full">
   <div class="container">
-    <main class="main-content">
-      <h2>Die Kreisjägerschaft Bad Segeberg</h2>
-      <p>Die Kreisjägerschaft Bad Segeberg e.V. ist der Zusammenschluss aller Jägerinnen
-         und Jäger im Kreis Bad Segeberg. Als Mitglied des Landesjagdverbandes Schleswig-Holstein
-         vertreten wir die Interessen der Jagd und des Naturschutzes in unserer Region.</p>
-      <div class="grid-3" style="margin: 2.5rem 0;">
-        <a href="vorstand.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Vorstand" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">👥</div>
-            <div class="service-card__title">Vorstand</div>
-            <p class="service-card__text">Unser ehrenamtlicher Vorstand – Ihre Ansprechpartner für alle jagdlichen Fragen.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-        <a href="hegeringe.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=70" alt="Hegeringe" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">🗺️</div>
-            <div class="service-card__title">Hegeringe</div>
-            <p class="service-card__text">12 Hegeringe im Kreis Bad Segeberg – Ihr regionaler Ansprechpartner vor Ort.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-        <a href="obleute.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=70" alt="Obleute" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">📋</div>
-            <div class="service-card__title">Obleute</div>
-            <p class="service-card__text">Fachbeauftragte für Schießwesen, Hundeausbildung, Jugend, Naturschutz und mehr.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-        <a href="mitglied-werden.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Mitglied werden" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">🤝</div>
-            <div class="service-card__title">Mitglied werden</div>
-            <p class="service-card__text">Aktiv oder als Fördermitglied – werden Sie Teil unserer Gemeinschaft.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-        <a href="jaeger-werden.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=70" alt="Jäger werden" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">🎯</div>
-            <div class="service-card__title">Jäger/in werden</div>
-            <p class="service-card__text">Alles zum Jagdschein, der Ausbildung und dem Einstieg in die Jagd.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-        <a href="../kreisjjaegermeister/index.html" class="service-card">
-          <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Kreisjägermeister" loading="lazy"></div>
-          <div class="service-card__body">
-            <div class="service-card__icon">🏛️</div>
-            <div class="service-card__title">Kreisjägermeister</div>
-            <p class="service-card__text">Der Kreisjägermeister – höchstes Amt der KJS Bad Segeberg.</p>
-            <span class="read-more">Mehr lesen</span>
-          </div>
-        </a>
-      </div>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/jaeger/uebersicht.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        let inhalt = '';
+        if(d.inhalt){
+          inhalt = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>');
+        }
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel||''}</h2>
+          <p>${d.intro||''}</p>
+          ${bild}
+          ${inhalt ? '<div>' + inhalt + '</div>' : ''}
+          <div class="grid-3" style="margin: 2.5rem 0;">
+            <a href="vorstand.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Vorstand" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">👥</div>
+                <div class="service-card__title">Vorstand</div>
+                <p class="service-card__text">Unser ehrenamtlicher Vorstand – Ihre Ansprechpartner für alle jagdlichen Fragen.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+            <a href="hegeringe.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=70" alt="Hegeringe" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">🗺️</div>
+                <div class="service-card__title">Hegeringe</div>
+                <p class="service-card__text">12 Hegeringe im Kreis Bad Segeberg – Ihr regionaler Ansprechpartner vor Ort.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+            <a href="obleute.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=70" alt="Obleute" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">📋</div>
+                <div class="service-card__title">Obleute</div>
+                <p class="service-card__text">Fachbeauftragte für Schießwesen, Hundeausbildung, Jugend, Naturschutz und mehr.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+            <a href="mitglied-werden.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Mitglied werden" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">🤝</div>
+                <div class="service-card__title">Mitglied werden</div>
+                <p class="service-card__text">Aktiv oder als Fördermitglied – werden Sie Teil unserer Gemeinschaft.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+            <a href="jaeger-werden.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=70" alt="Jäger werden" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">🎯</div>
+                <div class="service-card__title">Jäger/in werden</div>
+                <p class="service-card__text">Alles zum Jagdschein, der Ausbildung und dem Einstieg in die Jagd.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+            <a href="../kreisjjaegermeister/index.html" class="service-card">
+              <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Kreisjägermeister" loading="lazy"></div>
+              <div class="service-card__body">
+                <div class="service-card__icon">🏛️</div>
+                <div class="service-card__title">Kreisjägermeister</div>
+                <p class="service-card__text">Der Kreisjägermeister – höchstes Amt der KJS Bad Segeberg.</p>
+                <span class="read-more">Mehr lesen</span>
+              </div>
+            </a>
+          </div>
+        `;
+      }).catch(()=>{
+        document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+      });
+    </script>
   </div>
 </div>
 <footer class="site-footer"><div class="container">

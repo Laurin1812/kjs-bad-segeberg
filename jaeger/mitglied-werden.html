@@ -5,6 +5,16 @@
   <meta name="description" content="Mitglied werden bei der Kreisjägerschaft Bad Segeberg e.V.">
   <title>Mitglied werden – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+  }).catch(()=>{});
+</script>
 </head>
 <body>
 <div class="topbar"><div class="container">
@@ -87,57 +97,35 @@
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Werden Sie Teil unserer Gemeinschaft</h2>
-      <p>Die Kreisjägerschaft Bad Segeberg e.V. freut sich über jedes neue Mitglied –
-         egal ob aktiver Jäger oder Naturbegeisterter, der unsere Arbeit unterstützen möchte.</p>
-
-      <h3>Pflichtmitgliedschaft für Jäger</h3>
-      <p>Alle Jägerinnen und Jäger, die im Kreis Bad Segeberg jagdlich tätig sind –
-         als Jagdpächter, Erlaubnisscheininhaber oder in anderer Form –
-         sind automatisch Mitglied der Kreisjägerschaft Bad Segeberg.</p>
-
-      <h3>Fördermitgliedschaft</h3>
-      <p>Auch ohne Jagdschein können Sie unsere Arbeit als Fördermitglied unterstützen.
-         Fördermitglieder erhalten regelmäßige Informationen über unsere Aktivitäten,
-         können an Veranstaltungen teilnehmen und unterstützen damit die Jagd und den Naturschutz.</p>
-
-      <div class="grid-2" style="margin: 2rem 0;">
-        <div style="background: var(--green-light); border-radius: var(--radius-md); padding: 1.75rem; border-top: 4px solid var(--green-main);">
-          <h4 style="color:var(--green-dark); margin-bottom:1rem;">🎯 Aktive Mitgliedschaft</h4>
-          <ul style="list-style:disc; padding-left:1.5rem; color:var(--text-body); font-size:.9rem;">
-            <li>Teilnahme an allen Veranstaltungen</li>
-            <li>Nutzung der Schießstände</li>
-            <li>Beratung und Unterstützung durch den Vorstand</li>
-            <li>Mitgestaltung der Kreisjagtschaft</li>
-            <li>Stimmrecht bei der Jahreshauptversammlung</li>
-          </ul>
-        </div>
-        <div style="background: var(--gold-light); border-radius: var(--radius-md); padding: 1.75rem; border-top: 4px solid var(--gold);">
-          <h4 style="color:#7a5900; margin-bottom:1rem;">🌿 Fördermitgliedschaft</h4>
-          <ul style="list-style:disc; padding-left:1.5rem; color:var(--text-body); font-size:.9rem;">
-            <li>Unterstützung unserer Naturschutz­arbeit</li>
-            <li>Regelmäßiger Newsletter</li>
-            <li>Einladungen zu öffentlichen Veranstaltungen</li>
-            <li>Imageblatt und Informations­materialien</li>
-            <li>Reduzierter Jahresbeitrag</li>
-          </ul>
-        </div>
-      </div>
-
-      <h3>So werden Sie Mitglied</h3>
-      <ol style="list-style:decimal; padding-left:1.5rem; color:var(--text-body);">
-        <li style="margin-bottom:.5rem;">Aufnahmeantrag herunterladen und ausfüllen</li>
-        <li style="margin-bottom:.5rem;">SEPA-Lastschriftmandat beilegen (optional)</li>
-        <li style="margin-bottom:.5rem;">Antrag per Post oder E-Mail einsenden</li>
-        <li style="margin-bottom:.5rem;">Bestätigung durch den Vorstand erhalten</li>
-      </ol>
-
-      <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
-        <a href="../downloads/index.html" class="btn btn-primary">Aufnahmeantrag herunterladen</a>
-        <a href="../kontakt/index.html" class="btn btn-outline-green">Fragen? Kontakt aufnehmen</a>
-      </div>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/jaeger/mitglied-werden.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        let inhalt = '';
+        if(d.inhalt){
+          inhalt = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>');
+        }
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel||''}</h2>
+          <p>${d.intro||''}</p>
+          ${bild}
+          ${inhalt ? '<div><p>' + inhalt + '</p></div>' : ''}
+          <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
+            <a href="../downloads/index.html" class="btn btn-primary">Aufnahmeantrag herunterladen</a>
+            <a href="../kontakt/index.html" class="btn btn-outline-green">Fragen? Kontakt aufnehmen</a>
+          </div>
+        `;
+      }).catch(()=>{
+        document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>KJS Bad Segeberg</h4>

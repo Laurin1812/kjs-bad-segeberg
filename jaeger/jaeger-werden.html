@@ -5,6 +5,16 @@
   <meta name="description" content="Jäger/in werden im Kreis Bad Segeberg – alle Infos zur Jägerprüfung.">
   <title>Jäger/in werden – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+  }).catch(()=>{});
+</script>
 </head>
 <body>
 <div class="topbar"><div class="container">
@@ -87,59 +97,35 @@
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Ihr Weg zur Jägerprüfung</h2>
-      <p>
-        Sie möchten Jäger oder Jägerin werden? Die Kreisjägerschaft Bad Segeberg unterstützt
-        Sie dabei und vermittelt Ihnen den Kontakt zu geeigneten Ausbildern und Jagdschulen
-        in der Region Schleswig-Holstein.
-      </p>
-
-      <h3>Was erwartet mich?</h3>
-      <p>Die Jägerprüfung besteht aus:</p>
-      <div class="grid-3" style="margin:1.5rem 0;">
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">📝</div>
-          <strong style="color:var(--green-dark); display:block; margin-bottom:.5rem;">Schriftliche Prüfung</strong>
-          <p style="font-size:.85rem; margin:0; color:var(--text-muted);">Wildbiologie, Jagdrecht, Waffenkunde, Hege, Naturschutz</p>
-        </div>
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">🎯</div>
-          <strong style="color:var(--green-dark); display:block; margin-bottom:.5rem;">Schießprüfung</strong>
-          <p style="font-size:.85rem; margin:0; color:var(--text-muted);">Kugelschießen auf Entfernungen bis 100 m, Schrotschießen</p>
-        </div>
-        <div style="background:var(--green-light); border-radius:var(--radius-md); padding:1.5rem; text-align:center;">
-          <div style="font-size:2rem; margin-bottom:.5rem;">🌿</div>
-          <strong style="color:var(--green-dark); display:block; margin-bottom:.5rem;">Praktische Prüfung</strong>
-          <p style="font-size:.85rem; margin:0; color:var(--text-muted);">Jagdpraxis, Wildkunde, Wildbrut­behandlung, Hundewesen</p>
-        </div>
-      </div>
-
-      <h3>Voraussetzungen</h3>
-      <ul>
-        <li>Mindestalter: 16 Jahre (mit Zustimmung der Erziehungsberechtigten)</li>
-        <li>Gesundheitliche Eignung</li>
-        <li>Zuverlässigkeit (keine schwerwiegenden Vorstrafen)</li>
-        <li>Waffensachkunde (Nachweis über Schulung)</li>
-      </ul>
-
-      <h3>Ausbildungszeit und Kosten</h3>
-      <p>
-        Die Ausbildung dauert in der Regel 6 bis 12 Monate.
-        Die Kosten für einen Vorbereitungskurs liegen je nach Anbieter zwischen
-        ca. 1.800 und 3.500 €. Hinzu kommen Prüfungsgebühren und Ausrüstungskosten.
-      </p>
-
-      <h3>Jetzt Informationen anfordern</h3>
-      <p>
-        Kontaktieren Sie uns – wir beraten Sie gerne und vermitteln
-        Kontakt zu Ausbildungsbetrieben und Jagdpachtgebieten in der Region.
-      </p>
-      <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
-        <a href="../kontakt/index.html" class="btn btn-primary">Jetzt Kontakt aufnehmen</a>
-        <a href="../faq/index.html" class="btn btn-outline-green">Häufige Fragen (FAQ)</a>
-      </div>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/jaeger/jaeger-werden.json').then(r=>r.json()).then(d=>{
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        let inhalt = '';
+        if(d.inhalt){
+          inhalt = d.inhalt
+            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
+            .replace(/^\* (.+)$/gm,'<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+            .replace(/\n\n/g,'</p><p>');
+        }
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel||''}</h2>
+          <p>${d.intro||''}</p>
+          ${bild}
+          ${inhalt ? '<div><p>' + inhalt + '</p></div>' : ''}
+          <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
+            <a href="../kontakt/index.html" class="btn btn-primary">Jetzt Kontakt aufnehmen</a>
+            <a href="../faq/index.html" class="btn btn-outline-green">Häufige Fragen (FAQ)</a>
+          </div>
+        `;
+      }).catch(()=>{
+        document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>KJS Bad Segeberg</h4>

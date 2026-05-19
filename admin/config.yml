@@ -15,108 +15,34 @@ collections:
   - name: "startseite"
     label: "🏠 Startseite"
     files:
-      - label: "Startseite & Hero"
+      - label: "Startseite"
         name: "startseite"
         file: "content/startseite.json"
         fields:
-          - { label: "Hero Titel (Zeile 1)", name: "hero_titel", widget: "string" }
-          - { label: "Hero Titel (Zeile 2)", name: "hero_titel_zeile2", widget: "string", required: false }
-          - { label: "Hero Untertitel", name: "hero_untertitel", widget: "text" }
-          - { label: "Hero Button Text", name: "hero_button_text", widget: "string", default: "Mehr entdecken" }
-          - { label: "Hero Hintergrundbild", name: "hero_bild", widget: "image", required: false }
-          - { label: "Statistik 1 – Zahl", name: "statistik_1_zahl", widget: "string" }
-          - { label: "Statistik 1 – Beschriftung", name: "statistik_1_label", widget: "string" }
-          - { label: "Statistik 2 – Zahl", name: "statistik_2_zahl", widget: "string" }
-          - { label: "Statistik 2 – Beschriftung", name: "statistik_2_label", widget: "string" }
-          - { label: "Statistik 3 – Zahl", name: "statistik_3_zahl", widget: "string" }
-          - { label: "Statistik 3 – Beschriftung", name: "statistik_3_label", widget: "string" }
-          - { label: "Quicklink 1 – Label", name: "quicklink_1_label", widget: "string" }
-          - { label: "Quicklink 1 – Titel", name: "quicklink_1_titel", widget: "string" }
-          - { label: "Quicklink 2 – Label", name: "quicklink_2_label", widget: "string" }
-          - { label: "Quicklink 2 – Titel", name: "quicklink_2_titel", widget: "string" }
-          - { label: "Quicklink 3 – Label", name: "quicklink_3_label", widget: "string" }
-          - { label: "Quicklink 3 – Titel", name: "quicklink_3_titel", widget: "string" }
-          - { label: "Quicklink 4 – Label", name: "quicklink_4_label", widget: "string" }
-          - { label: "Quicklink 4 – Titel", name: "quicklink_4_titel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
 
   # ──────────────────────────────────────────
-  # TERMINE
+  # JÄGER – KJS BAD SEGEBERG
   # ──────────────────────────────────────────
-  - name: "termine"
-    label: "📅 Termine"
+  - name: "jaeger_kjs"
+    label: "🦌 Jäger – KJS Bad Segeberg"
     files:
-      - label: "Veranstaltungskalender"
-        name: "kalender"
-        file: "content/termine.json"
+      - label: "Übersicht"
+        name: "uebersicht"
+        file: "content/jaeger/uebersicht.json"
         fields:
-          - label: "Termine"
-            name: "termine"
-            widget: "list"
-            summary: "{{fields.datum}} – {{fields.veranstaltung}}"
-            fields:
-              - { label: "Datum",        name: "datum",         widget: "datetime", date_format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
-              - { label: "Uhrzeit",      name: "uhrzeit",       widget: "string", hint: "z.B. 18:00 Uhr" }
-              - { label: "Veranstaltung",name: "veranstaltung", widget: "string" }
-              - { label: "Ort",          name: "ort",           widget: "string" }
-              - label: "Kategorie"
-                name: "kategorie"
-                widget: "select"
-                options:
-                  - "Vorstand"
-                  - "Schießwesen"
-                  - "Hundeausbildung"
-                  - "Jagdhornblasen"
-                  - "Jugend"
-                  - "Hegering"
-                  - "Naturschutz"
-                  - "Ausbildung"
-                  - "Kreisveranstaltung"
-                  - "Hauptversammlung"
-                  - "Tradition"
-
-  # ──────────────────────────────────────────
-  # AKTUELLES / NEWS
-  # ──────────────────────────────────────────
-  - name: "aktuelles"
-    label: "📰 Aktuelles"
-    files:
-      - label: "Newsbeiträge"
-        name: "news"
-        file: "content/aktuelles.json"
-        fields:
-          - label: "Beiträge"
-            name: "beitraege"
-            widget: "list"
-            summary: "{{fields.titel}} ({{fields.datum}})"
-            hint: "➕ Hinzufügen = neuer Beitrag | 🗑️ Löschen = auf den Pfeil klicken, dann Eintrag aufklappen und unten 'Entfernen' drücken, danach Speichern/Veröffentlichen nicht vergessen!"
-            fields:
-              - { label: "Titel",           name: "titel",     widget: "string" }
-              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD. MMMM YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
-              - label: "Kategorie"
-                name: "kategorie"
-                widget: "select"
-                options:
-                  - "Allgemein"
-                  - "Naturschutz"
-                  - "Jagd"
-                  - "Jungwildrettung"
-                  - "Hundeausbildung"
-                  - "Schießwesen"
-                  - "Jugend"
-                  - "Jagdhornblasen"
-                  - "Veranstaltung"
-                  - "Pressemitteilung"
-              - { label: "Bild",            name: "bild",      widget: "image",  required: false }
-              - { label: "Kurzbeschreibung",name: "text",      widget: "markdown" }
-              - { label: "Link (optional)", name: "link",      widget: "string", required: false }
-
-  # ──────────────────────────────────────────
-  # VORSTAND & ANSPRECHPARTNER
-  # ──────────────────────────────────────────
-  - name: "vorstand"
-    label: "👥 Vorstand"
-    files:
-      - label: "Vorstandsmitglieder"
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - label: "Vorstand"
         name: "mitglieder"
         file: "content/vorstand.json"
         fields:
@@ -130,13 +56,6 @@ collections:
               - { label: "E-Mail",           name: "email",   widget: "string", required: false }
               - { label: "Telefon",          name: "telefon", widget: "string", required: false }
               - { label: "Foto",             name: "bild",    widget: "image",  required: false, hint: "Portraitfoto hochladen" }
-
-  # ──────────────────────────────────────────
-  # OBLEUTE
-  # ──────────────────────────────────────────
-  - name: "obleute"
-    label: "🎯 Obleute"
-    files:
       - label: "Obleute"
         name: "obleute"
         file: "content/obleute.json"
@@ -151,14 +70,7 @@ collections:
               - { label: "E-Mail",                 name: "email",   widget: "string", required: false }
               - { label: "Telefon",                name: "telefon", widget: "string", required: false }
               - { label: "Foto",                   name: "bild",    widget: "image",  required: false }
-
-  # ──────────────────────────────────────────
-  # HEGERINGE
-  # ──────────────────────────────────────────
-  - name: "hegeringe"
-    label: "🌿 Hegeringe"
-    files:
-      - label: "Hegering-Übersicht"
+      - label: "Hegeringe"
         name: "hegeringe"
         file: "content/hegeringe.json"
         fields:
@@ -181,37 +93,31 @@ collections:
               - { label: "Gemeinden",     name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
               - { label: "E-Mail",        name: "email",     widget: "string", required: false }
               - { label: "Telefon",       name: "telefon",   widget: "string", required: false }
-
-  # ──────────────────────────────────────────
-  # IMPRESSUM
-  # ──────────────────────────────────────────
-  - name: "impressum"
-    label: "📄 Impressum"
-    files:
-      - label: "Impressum"
-        name: "impressum"
-        file: "content/impressum.json"
+      - label: "Mitglied werden"
+        name: "mitglied_werden"
+        file: "content/jaeger/mitglied-werden.json"
         fields:
-          - { label: "Vereinsname",          name: "verein",           widget: "string" }
-          - { label: "Adresse",              name: "adresse",          widget: "text",   hint: "Straße, Hausnummer, PLZ Ort" }
-          - { label: "Vertreten durch",      name: "vertreten_durch",  widget: "string", hint: "z.B. Klaus Rathje, Kreisjägermeister" }
-          - { label: "Telefon",              name: "telefon",          widget: "string" }
-          - { label: "E-Mail",               name: "email",            widget: "string" }
-          - { label: "Registergericht",      name: "registergericht",  widget: "string" }
-          - { label: "Registernummer",       name: "registernummer",   widget: "string" }
-          - { label: "Verantwortlich (§18)", name: "verantwortlich",   widget: "text" }
-
-  # ──────────────────────────────────────────
-  # KREISJÄGERMEISTER
-  # ──────────────────────────────────────────
-  - name: "kreisjjaegermeister"
-    label: "🏅 Kreisjägermeister"
-    files:
-      - label: "✏️ Grußwort bearbeiten"
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - label: "Jäger/in werden"
+        name: "jaeger_werden"
+        file: "content/jaeger/jaeger-werden.json"
+        fields:
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - label: "Kreisjägermeister – Grußwort bearbeiten"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
-          - label: "ℹ️ Hinweis"
+          - label: "Hinweis"
             name: "hinweis"
             widget: "hidden"
             default: ""
@@ -219,82 +125,10 @@ collections:
           - { label: "Grußwort",  name: "grußwort",   widget: "text",   required: false, hint: "Jede Leerzeile = neuer Absatz. Name, Foto & Kontakt kommen automatisch aus dem Vorstand." }
 
   # ──────────────────────────────────────────
-  # FAQ
-  # ──────────────────────────────────────────
-  - name: "faq"
-    label: "❓ FAQ"
-    files:
-      - label: "Häufige Fragen"
-        name: "faq"
-        file: "content/faq.json"
-        fields:
-          - label: "Kategorien"
-            name: "kategorien"
-            widget: "list"
-            summary: "{{fields.titel}}"
-            fields:
-              - { label: "Kategorie-Titel", name: "titel", widget: "string" }
-              - label: "Fragen"
-                name: "fragen"
-                widget: "list"
-                summary: "{{fields.frage}}"
-                fields:
-                  - { label: "Frage", name: "frage",   widget: "string" }
-                  - { label: "Antwort", name: "antwort", widget: "text" }
-
-  # ──────────────────────────────────────────
-  # KONTAKT & ÖFFNUNGSZEITEN
-  # ──────────────────────────────────────────
-  - name: "einstellungen"
-    label: "⚙️ Kontakt & Öffnungszeiten"
-    files:
-      - label: "Geschäftsstelle"
-        name: "kontakt"
-        file: "content/einstellungen.json"
-        fields:
-          - { label: "Telefon",  name: "telefon", widget: "string" }
-          - { label: "E-Mail",   name: "email",   widget: "string" }
-          - { label: "Adresse",  name: "adresse", widget: "text",  hint: "Jede Zeile = eine Zeile auf der Website" }
-          - label: "Öffnungszeiten"
-            name: "oeffnungszeiten"
-            widget: "list"
-            summary: "{{fields.tage}}: {{fields.zeiten}}"
-            fields:
-              - { label: "Tag(e)",  name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
-              - { label: "Uhrzeit", name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }
-
-  # ──────────────────────────────────────────
-  # WUNSCHLISTE / AUFGABEN
-  # ──────────────────────────────────────────
-  - name: "wunschliste"
-    label: "📋 Wunschliste & Aufgaben"
-    files:
-      - label: "Aufgaben & Wünsche"
-        name: "aufgaben"
-        file: "content/wunschliste.json"
-        fields:
-          - label: "Aufgaben"
-            name: "aufgaben"
-            widget: "list"
-            summary: "[{{fields.status}}] {{fields.titel}}"
-            fields:
-              - { label: "Titel / Aufgabe",  name: "titel",        widget: "string" }
-              - { label: "Beschreibung",     name: "beschreibung", widget: "text",   required: false }
-              - { label: "Bild / Screenshot",name: "bild",         widget: "image",  required: false }
-              - label: "Status"
-                name: "status"
-                widget: "select"
-                default: "offen"
-                options:
-                  - { label: "⏳ Offen",     value: "offen" }
-                  - { label: "🔄 In Arbeit", value: "in-arbeit" }
-                  - { label: "✅ Erledigt",  value: "erledigt" }
-
-  # ──────────────────────────────────────────
-  # AUFGABEN-SEITEN
+  # JÄGER – AUFGABEN
   # ──────────────────────────────────────────
   - name: "aufgaben"
-    label: "🎯 Aufgaben-Seiten"
+    label: "🎯 Jäger – Aufgaben"
     files:
       - label: "Schießwesen"
         name: "schiessen"
@@ -382,10 +216,10 @@ collections:
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
 
   # ──────────────────────────────────────────
-  # VERBRAUCHER-SEITEN
+  # VERBRAUCHER
   # ──────────────────────────────────────────
   - name: "verbraucher_seiten"
-    label: "🛒 Verbraucher-Seiten"
+    label: "🌿 Verbraucher"
     files:
       - label: "Wildfleisch"
         name: "wildfleisch"
@@ -423,6 +257,200 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+
+  # ──────────────────────────────────────────
+  # TERMINE
+  # ──────────────────────────────────────────
+  - name: "termine"
+    label: "📅 Termine"
+    files:
+      - label: "Veranstaltungskalender"
+        name: "kalender"
+        file: "content/termine.json"
+        fields:
+          - label: "Termine"
+            name: "termine"
+            widget: "list"
+            summary: "{{fields.datum}} – {{fields.veranstaltung}}"
+            fields:
+              - { label: "Datum",        name: "datum",         widget: "datetime", date_format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
+              - { label: "Uhrzeit",      name: "uhrzeit",       widget: "string", hint: "z.B. 18:00 Uhr" }
+              - { label: "Veranstaltung",name: "veranstaltung", widget: "string" }
+              - { label: "Ort",          name: "ort",           widget: "string" }
+              - label: "Kategorie"
+                name: "kategorie"
+                widget: "select"
+                options:
+                  - "Vorstand"
+                  - "Schießwesen"
+                  - "Hundeausbildung"
+                  - "Jagdhornblasen"
+                  - "Jugend"
+                  - "Hegering"
+                  - "Naturschutz"
+                  - "Ausbildung"
+                  - "Kreisveranstaltung"
+                  - "Hauptversammlung"
+                  - "Tradition"
+
+  # ──────────────────────────────────────────
+  # AKTUELLES / NEWS
+  # ──────────────────────────────────────────
+  - name: "aktuelles"
+    label: "📰 Aktuelles"
+    files:
+      - label: "Newsbeiträge"
+        name: "news"
+        file: "content/aktuelles.json"
+        fields:
+          - label: "Beiträge"
+            name: "beitraege"
+            widget: "list"
+            summary: "{{fields.titel}} ({{fields.datum}})"
+            hint: "➕ Hinzufügen = neuer Beitrag | 🗑️ Löschen = auf den Pfeil klicken, dann Eintrag aufklappen und unten 'Entfernen' drücken, danach Speichern/Veröffentlichen nicht vergessen!"
+            fields:
+              - { label: "Titel",           name: "titel",     widget: "string" }
+              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD. MMMM YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
+              - label: "Kategorie"
+                name: "kategorie"
+                widget: "select"
+                options:
+                  - "Allgemein"
+                  - "Naturschutz"
+                  - "Jagd"
+                  - "Jungwildrettung"
+                  - "Hundeausbildung"
+                  - "Schießwesen"
+                  - "Jugend"
+                  - "Jagdhornblasen"
+                  - "Veranstaltung"
+                  - "Pressemitteilung"
+              - { label: "Bild",            name: "bild",      widget: "image",  required: false }
+              - { label: "Kurzbeschreibung",name: "text",      widget: "markdown" }
+              - { label: "Link (optional)", name: "link",      widget: "string", required: false }
+
+  # ──────────────────────────────────────────
+  # FAQ
+  # ──────────────────────────────────────────
+  - name: "faq"
+    label: "❓ FAQ"
+    files:
+      - label: "Häufige Fragen"
+        name: "faq"
+        file: "content/faq.json"
+        fields:
+          - label: "Kategorien"
+            name: "kategorien"
+            widget: "list"
+            summary: "{{fields.titel}}"
+            fields:
+              - { label: "Kategorie-Titel", name: "titel", widget: "string" }
+              - label: "Fragen"
+                name: "fragen"
+                widget: "list"
+                summary: "{{fields.frage}}"
+                fields:
+                  - { label: "Frage", name: "frage",   widget: "string" }
+                  - { label: "Antwort", name: "antwort", widget: "text" }
+
+  # ──────────────────────────────────────────
+  # KONTAKT & ÖFFNUNGSZEITEN
+  # ──────────────────────────────────────────
+  - name: "einstellungen"
+    label: "⚙️ Kontakt & Öffnungszeiten"
+    files:
+      - label: "Geschäftsstelle"
+        name: "kontakt"
+        file: "content/einstellungen.json"
+        fields:
+          - { label: "Telefon",  name: "telefon", widget: "string" }
+          - { label: "E-Mail",   name: "email",   widget: "string" }
+          - { label: "Adresse",  name: "adresse", widget: "text",  hint: "Jede Zeile = eine Zeile auf der Website" }
+          - label: "Öffnungszeiten"
+            name: "oeffnungszeiten"
+            widget: "list"
+            summary: "{{fields.tage}}: {{fields.zeiten}}"
+            fields:
+              - { label: "Tag(e)",  name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
+              - { label: "Uhrzeit", name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }
+
+  # ──────────────────────────────────────────
+  # IMPRESSUM
+  # ──────────────────────────────────────────
+  - name: "impressum"
+    label: "📄 Impressum"
+    files:
+      - label: "Impressum"
+        name: "impressum"
+        file: "content/impressum.json"
+        fields:
+          - { label: "Vereinsname",          name: "verein",           widget: "string" }
+          - { label: "Adresse",              name: "adresse",          widget: "text",   hint: "Straße, Hausnummer, PLZ Ort" }
+          - { label: "Vertreten durch",      name: "vertreten_durch",  widget: "string", hint: "z.B. Klaus Rathje, Kreisjägermeister" }
+          - { label: "Telefon",              name: "telefon",          widget: "string" }
+          - { label: "E-Mail",               name: "email",            widget: "string" }
+          - { label: "Registergericht",      name: "registergericht",  widget: "string" }
+          - { label: "Registernummer",       name: "registernummer",   widget: "string" }
+          - { label: "Verantwortlich (§18)", name: "verantwortlich",   widget: "text" }
+
+  # ──────────────────────────────────────────
+  # DESIGN & FARBEN
+  # ──────────────────────────────────────────
+  - name: "design"
+    label: "🎨 Design & Farben"
+    files:
+      - label: "Farben & Schriften"
+        name: "design"
+        file: "content/design.json"
+        fields:
+          - { label: "Hauptfarbe Grün", name: "farbe_gruen", widget: "string", hint: "Hex-Farbwert z.B. #2e6b30" }
+          - { label: "Dunkelgrün (Header/Footer)", name: "farbe_dunkelgruen", widget: "string" }
+          - { label: "Akzentfarbe (Gold)", name: "farbe_akzent", widget: "string" }
+          - label: "Überschrift-Schrift"
+            name: "schrift_ueberschrift"
+            widget: "select"
+            options:
+              - "Playfair Display"
+              - "Georgia"
+              - "Merriweather"
+              - "Lora"
+              - "EB Garamond"
+          - label: "Text-Schrift"
+            name: "schrift_text"
+            widget: "select"
+            options:
+              - "Inter"
+              - "Open Sans"
+              - "Roboto"
+              - "Lato"
+              - "Source Sans Pro"
+
+  # ──────────────────────────────────────────
+  # WUNSCHLISTE / AUFGABEN
+  # ──────────────────────────────────────────
+  - name: "wunschliste"
+    label: "📋 Wunschliste & Aufgaben"
+    files:
+      - label: "Aufgaben & Wünsche"
+        name: "aufgaben"
+        file: "content/wunschliste.json"
+        fields:
+          - label: "Aufgaben"
+            name: "aufgaben"
+            widget: "list"
+            summary: "[{{fields.status}}] {{fields.titel}}"
+            fields:
+              - { label: "Titel / Aufgabe",  name: "titel",        widget: "string" }
+              - { label: "Beschreibung",     name: "beschreibung", widget: "text",   required: false }
+              - { label: "Bild / Screenshot",name: "bild",         widget: "image",  required: false }
+              - label: "Status"
+                name: "status"
+                widget: "select"
+                default: "offen"
+                options:
+                  - { label: "⏳ Offen",     value: "offen" }
+                  - { label: "🔄 In Arbeit", value: "in-arbeit" }
+                  - { label: "✅ Erledigt",  value: "erledigt" }
 
   # ──────────────────────────────────────────
   # EIGENE SEITEN
