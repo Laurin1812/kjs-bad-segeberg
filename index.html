@@ -662,6 +662,49 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+  fetch('/content/startseite.json').then(function(r){return r.json();}).then(function(d){
+    // Hero Titel (Zeile 1 + Zeile 2)
+    var heroH1 = document.querySelector('.hero__content h1');
+    if(heroH1){
+      if(d.hero_titel || d.hero_titel_zeile2){
+        var t1 = d.hero_titel || '';
+        var t2 = d.hero_titel_zeile2 || '';
+        heroH1.innerHTML = t1 + (t1 && t2 ? '<br>' : '') + (t2 ? '<span>' + t2 + '</span>' : '');
+      }
+    }
+    // Hero Untertitel
+    var heroSub = document.querySelector('.hero__sub');
+    if(heroSub && d.hero_untertitel) heroSub.textContent = d.hero_untertitel;
+    // Hero Scroll-Text
+    var heroScroll = document.querySelector('.hero__scroll');
+    if(heroScroll && d.hero_button_text){
+      var arrow = heroScroll.querySelector('.hero__scroll-arrow');
+      heroScroll.textContent = d.hero_button_text + ' ';
+      if(arrow) heroScroll.appendChild(arrow);
+    }
+    // Statistiken
+    var statNums = document.querySelectorAll('.stat__number');
+    var statLabels = document.querySelectorAll('.stat__label');
+    if(statNums[0] && d.statistik_1_zahl) statNums[0].textContent = d.statistik_1_zahl;
+    if(statLabels[0] && d.statistik_1_label) statLabels[0].textContent = d.statistik_1_label;
+    if(statNums[1] && d.statistik_2_zahl) statNums[1].textContent = d.statistik_2_zahl;
+    if(statLabels[1] && d.statistik_2_label) statLabels[1].textContent = d.statistik_2_label;
+    if(statNums[2] && d.statistik_3_zahl) statNums[2].textContent = d.statistik_3_zahl;
+    if(statLabels[2] && d.statistik_3_label) statLabels[2].textContent = d.statistik_3_label;
+    // Quicklinks
+    var qlTitles = document.querySelectorAll('.quicklinks__title');
+    var qlLabels = document.querySelectorAll('.quicklinks__label');
+    if(qlTitles[0] && d.quicklink_1_titel) qlTitles[0].textContent = d.quicklink_1_titel;
+    if(qlTitles[1] && d.quicklink_2_titel) qlTitles[1].textContent = d.quicklink_2_titel;
+    if(qlTitles[2] && d.quicklink_3_titel) qlTitles[2].textContent = d.quicklink_3_titel;
+    if(qlTitles[3] && d.quicklink_4_titel) qlTitles[3].textContent = d.quicklink_4_titel;
+    if(qlLabels[0] && d.quicklink_1_label) qlLabels[0].textContent = d.quicklink_1_label;
+    if(qlLabels[1] && d.quicklink_2_label) qlLabels[1].textContent = d.quicklink_2_label;
+    if(qlLabels[2] && d.quicklink_3_label) qlLabels[2].textContent = d.quicklink_3_label;
+    if(qlLabels[3] && d.quicklink_4_label) qlLabels[3].textContent = d.quicklink_4_label;
+  }).catch(function(){});
+</script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script>
   if (window.netlifyIdentity) {

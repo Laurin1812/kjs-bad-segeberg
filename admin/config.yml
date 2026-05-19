@@ -10,6 +10,36 @@ public_folder: "/images"
 collections:
 
   # ──────────────────────────────────────────
+  # STARTSEITE
+  # ──────────────────────────────────────────
+  - name: "startseite"
+    label: "🏠 Startseite"
+    files:
+      - label: "Startseite & Hero"
+        name: "startseite"
+        file: "content/startseite.json"
+        fields:
+          - { label: "Hero Titel (Zeile 1)", name: "hero_titel", widget: "string" }
+          - { label: "Hero Titel (Zeile 2)", name: "hero_titel_zeile2", widget: "string", required: false }
+          - { label: "Hero Untertitel", name: "hero_untertitel", widget: "text" }
+          - { label: "Hero Button Text", name: "hero_button_text", widget: "string", default: "Mehr entdecken" }
+          - { label: "Hero Hintergrundbild", name: "hero_bild", widget: "image", required: false }
+          - { label: "Statistik 1 – Zahl", name: "statistik_1_zahl", widget: "string" }
+          - { label: "Statistik 1 – Beschriftung", name: "statistik_1_label", widget: "string" }
+          - { label: "Statistik 2 – Zahl", name: "statistik_2_zahl", widget: "string" }
+          - { label: "Statistik 2 – Beschriftung", name: "statistik_2_label", widget: "string" }
+          - { label: "Statistik 3 – Zahl", name: "statistik_3_zahl", widget: "string" }
+          - { label: "Statistik 3 – Beschriftung", name: "statistik_3_label", widget: "string" }
+          - { label: "Quicklink 1 – Label", name: "quicklink_1_label", widget: "string" }
+          - { label: "Quicklink 1 – Titel", name: "quicklink_1_titel", widget: "string" }
+          - { label: "Quicklink 2 – Label", name: "quicklink_2_label", widget: "string" }
+          - { label: "Quicklink 2 – Titel", name: "quicklink_2_titel", widget: "string" }
+          - { label: "Quicklink 3 – Label", name: "quicklink_3_label", widget: "string" }
+          - { label: "Quicklink 3 – Titel", name: "quicklink_3_titel", widget: "string" }
+          - { label: "Quicklink 4 – Label", name: "quicklink_4_label", widget: "string" }
+          - { label: "Quicklink 4 – Titel", name: "quicklink_4_titel", widget: "string" }
+
+  # ──────────────────────────────────────────
   # TERMINE
   # ──────────────────────────────────────────
   - name: "termine"
