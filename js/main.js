@@ -77,51 +77,86 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Weitere Themen: feste Seiten + eigene Seiten dynamisch ins Flyout-Menü laden
+// Weitere Themen: Infomobil fest + eigene Seiten nach Bereich verteilen
 (function() {
-  var item = document.getElementById('weitere-themen-item');
-  var sub  = document.getElementById('weitere-themen-sub');
-  if (!item || !sub) return;
+  var weitereItem = document.getElementById('weitere-themen-item');
+  var weltereSub  = document.getElementById('weitere-themen-sub');
+  if (!weitereItem || !weltereSub) return;
 
-  // Feste Seiten unter "Weitere Themen"
-  var festSeiten = [
-    { label: 'Infomobil', href: '/jaeger/infomobil.html' }
-  ];
-
-  // Prüfen ob wir uns bereits auf der Infomobil-Seite befinden
   var currentPath = window.location.pathname;
 
-  festSeiten.forEach(function(s) {
-    // Nicht doppelt einfügen – prüfe alle möglichen href-Varianten
-    var exists = sub.querySelector('a[href="' + s.href + '"]') ||
-                 sub.querySelector('a[href="../jaeger/infomobil.html"]') ||
-                 sub.querySelector('a[href="infomobil.html"]');
-    if (exists) return;
-    var li = document.createElement('li');
-    var a  = document.createElement('a');
-    a.href = s.href;
-    a.textContent = s.label;
-    if (currentPath.includes('infomobil')) a.classList.add('active');
-    li.appendChild(a);
-    sub.insertBefore(li, sub.firstChild);
+  // Infomobil immer als festen ersten Eintrag einfügen
+  var infomobilHrefs = ['/jaeger/infomobil.html', '../jaeger/infomobil.html', 'infomobil.html'];
+  var infomobilExists = infomobilHrefs.some(function(h) {
+    return weltereSub.querySelector('a[href="' + h + '"]');
   });
+  if (!infomobilExists) {
+    var li0 = document.createElement('li');
+    var a0  = document.createElement('a');
+    a0.href = '/jaeger/infomobil.html';
+    a0.textContent = 'Infomobil';
+    if (currentPath.includes('infomobil')) a0.classList.add('active');
+    li0.appendChild(a0);
+    weltereSub.insertBefore(li0, weltereSub.firstChild);
+  }
+  weitereItem.style.display = '';
 
-  item.style.display = '';
+  // Hilfsfunktion: Unter-Dropdown im Jäger-Menü per Link-Text finden
+  function findJaegerSub(textSnippet) {
+    var dd = document.getElementById('jaeger-dropdown');
+    if (!dd) return null;
+    var hasSubs = dd.querySelectorAll('.has-sub');
+    for (var i = 0; i < hasSubs.length; i++) {
+      var a = hasSubs[i].querySelector(':scope > a');
+      if (a && a.textContent.includes(textSnippet)) {
+        return hasSubs[i].querySelector('ul.dropdown--sub');
+      }
+    }
+    return null;
+  }
 
-  // Dynamische eigene Seiten
+  // Hilfsfunktion: Top-Level-Dropdown per Link-Text finden
+  function findTopDropdown(textSnippet) {
+    var items = document.querySelectorAll('.main-nav > li');
+    for (var i = 0; i < items.length; i++) {
+      var a = items[i].querySelector(':scope > a');
+      if (a && a.textContent.includes(textSnippet)) {
+        return items[i].querySelector('ul.dropdown');
+      }
+    }
+    return null;
+  }
+
+  // Eigene Seiten laden und nach Bereich verteilen
   fetch('/content/seiten.json')
     .then(function(r){ return r.json(); })
     .then(function(data) {
       var seiten = (data.seiten || []).filter(function(s) {
         return s.veroeffentlicht === true && s.in_navigation === true;
       });
+
       seiten.forEach(function(s) {
         var li = document.createElement('li');
         var a  = document.createElement('a');
         a.href = '/seiten/?s=' + encodeURIComponent(s.slug);
         a.textContent = s.nav_label || s.titel;
         li.appendChild(a);
-        sub.appendChild(li);
+
+        var bereich = s.bereich || 'weitere-themen';
+        var target = null;
+
+        if (bereich === 'kjs') {
+          target = findJaegerSub('KJS Bad Segeberg');
+        } else if (bereich === 'aufgaben') {
+          target = findJaegerSub('Aufgaben');
+        } else if (bereich === 'verbraucher') {
+          target = findTopDropdown('Verbraucher');
+        } else {
+          // Standard: Weitere Themen
+          target = weltereSub;
+        }
+
+        if (target) target.appendChild(li);
       });
     })
     .catch(function(){});

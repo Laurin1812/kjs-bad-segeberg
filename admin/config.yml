@@ -27,6 +27,39 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
 
   # ──────────────────────────────────────────
+  # EIGENE SEITEN (erscheinen im gewählten Menübereich)
+  # ──────────────────────────────────────────
+  - name: "seiten"
+    label: "📝 Eigene Seiten"
+    files:
+      - label: "Alle eigenen Seiten verwalten"
+        name: "seiten"
+        file: "content/seiten.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.titel}} → {{fields.bereich}}"
+            hint: "➕ Neue Seite hinzufügen. Wähle den Bereich, in dem die Seite im Menü erscheinen soll."
+            fields:
+              - { label: "Seitentitel",       name: "titel",           widget: "string" }
+              - { label: "Menü-Label",        name: "nav_label",       widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
+              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
+              - label: "Menübereich (wo erscheint die Seite?)"
+                name: "bereich"
+                widget: "select"
+                default: "weitere-themen"
+                hint: "Wähle, unter welchem Menüpunkt die Seite erscheinen soll."
+                options:
+                  - { label: "🦌 Jäger › KJS Bad Segeberg", value: "kjs" }
+                  - { label: "🎯 Jäger › Aufgaben",          value: "aufgaben" }
+                  - { label: "📋 Jäger › Weitere Themen",    value: "weitere-themen" }
+                  - { label: "🌿 Verbraucher",               value: "verbraucher" }
+              - { label: "Im Menü anzeigen?",  name: "in_navigation",   widget: "boolean",  default: true }
+              - { label: "Veröffentlicht?",    name: "veroeffentlicht",  widget: "boolean",  default: false }
+              - { label: "Inhalt",             name: "inhalt",           widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung" }
+
+  # ──────────────────────────────────────────
   # JÄGER › KJS BAD SEGEBERG
   # ──────────────────────────────────────────
   - name: "jaeger_kjs"
@@ -234,22 +267,12 @@ collections:
         fields:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-      - label: "Eigene Seiten (Weitere Themen Menü)"
-        name: "seiten"
-        file: "content/seiten.json"
+      - label: "Infomobil"
+        name: "infomobil"
+        file: "content/jaeger/infomobil.json"
         fields:
-          - label: "Seiten"
-            name: "seiten"
-            widget: "list"
-            summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
-            hint: "➕ Neue Seite hinzufügen | Slug = URL-Kürzel, nur Kleinbuchstaben und Bindestriche, z.B. warum-jagd"
-            fields:
-              - { label: "Seitentitel",         name: "titel",          widget: "string" }
-              - { label: "Navigations-Label",   name: "nav_label",      widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
-              - { label: "URL-Kürzel (Slug)",   name: "slug",           widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
-              - { label: "Im Menü anzeigen?",   name: "in_navigation",  widget: "boolean",  default: true }
-              - { label: "Veröffentlicht?",     name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",              name: "inhalt",         widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung (Fett, Kursiv, Überschriften, Listen usw.)" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
 
   # ──────────────────────────────────────────
   # VERBRAUCHER
