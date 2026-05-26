@@ -77,17 +77,42 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Eigene Seiten dynamisch ins Flyout-Menü laden
+// Weitere Themen: feste Seiten + eigene Seiten dynamisch ins Flyout-Menü laden
 (function() {
+  var item = document.getElementById('weitere-themen-item');
+  var sub  = document.getElementById('weitere-themen-sub');
+  if (!item || !sub) return;
+
+  // Feste Seiten unter "Weitere Themen"
+  var festSeiten = [
+    { label: 'Infomobil', href: '/jaeger/infomobil.html' }
+  ];
+
+  // Prüfen ob wir uns bereits auf der Infomobil-Seite befinden
+  var currentPath = window.location.pathname;
+
+  festSeiten.forEach(function(s) {
+    // Nicht doppelt einfügen wenn bereits im HTML vorhanden
+    if (sub.querySelector('a[href="' + s.href + '"]') ||
+        sub.querySelector('a[href="../jaeger/infomobil.html"]')) return;
+    var li = document.createElement('li');
+    var a  = document.createElement('a');
+    a.href = s.href;
+    a.textContent = s.label;
+    if (currentPath.includes('infomobil')) a.classList.add('active');
+    li.appendChild(a);
+    sub.insertBefore(li, sub.firstChild);
+  });
+
+  item.style.display = '';
+
+  // Dynamische eigene Seiten
   fetch('/content/seiten.json')
     .then(function(r){ return r.json(); })
     .then(function(data) {
       var seiten = (data.seiten || []).filter(function(s) {
         return s.veroeffentlicht === true && s.in_navigation === true;
       });
-      var item = document.getElementById('weitere-themen-item');
-      var sub  = document.getElementById('weitere-themen-sub');
-      if (!item || !sub || !seiten.length) return;
       seiten.forEach(function(s) {
         var li = document.createElement('li');
         var a  = document.createElement('a');
@@ -96,7 +121,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         li.appendChild(a);
         sub.appendChild(li);
       });
-      item.style.display = '';
     })
     .catch(function(){});
 })();
