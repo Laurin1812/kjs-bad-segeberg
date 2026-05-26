@@ -139,6 +139,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -151,6 +152,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -163,6 +165,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -175,6 +178,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -187,6 +191,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -199,6 +204,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -211,6 +217,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -230,6 +237,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -242,6 +250,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -254,6 +263,7 @@ collections:
           - { label: "Einleitungstext", name: "intro", widget: "text" }
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
@@ -424,6 +434,57 @@ collections:
               - "Roboto"
               - "Lato"
               - "Source Sans Pro"
+          - { label: "Schriftgröße H1 (Haupttitel)", name: "schriftgroesse_h1", widget: "string", hint: "z.B. 2.8rem oder 44px", required: false }
+          - { label: "Schriftgröße H2 (Abschnittstitel)", name: "schriftgroesse_h2", widget: "string", hint: "z.B. 2rem oder 32px", required: false }
+          - { label: "Schriftgröße H3 (Unterabschnitt)", name: "schriftgroesse_h3", widget: "string", hint: "z.B. 1.4rem oder 22px", required: false }
+          - { label: "Schriftgröße Text (Fließtext)", name: "schriftgroesse_text", widget: "string", hint: "z.B. 1rem oder 16px", required: false }
+
+  # ──────────────────────────────────────────
+  # FUSSZEILE
+  # ──────────────────────────────────────────
+  - name: "footer"
+    label: "🦶 Fußzeile"
+    files:
+      - label: "Fußzeile"
+        name: "footer"
+        file: "content/footer.json"
+        fields:
+          - { label: "Über-uns Text", name: "ueber_text", widget: "text" }
+          - { label: "Facebook URL", name: "facebook_url", widget: "string", required: false, hint: "Leer lassen = kein Link" }
+          - { label: "Instagram URL", name: "instagram_url", widget: "string", required: false }
+          - { label: "Copyright-Text", name: "copyright", widget: "string" }
+
+  # ──────────────────────────────────────────
+  # DOWNLOADS
+  # ──────────────────────────────────────────
+  - name: "downloads"
+    label: "📥 Downloads"
+    files:
+      - label: "Downloads"
+        name: "downloads"
+        file: "content/downloads.json"
+        fields:
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - label: "Kategorien"
+            name: "kategorien"
+            widget: "list"
+            summary: "{{fields.titel}}"
+            fields:
+              - { label: "Kategorie-Titel", name: "titel", widget: "string" }
+              - label: "Downloads"
+                name: "downloads"
+                widget: "list"
+                summary: "{{fields.name}}"
+                fields:
+                  - { label: "Dateiname / Titel", name: "name", widget: "string" }
+                  - { label: "Beschreibung", name: "beschreibung", widget: "string", required: false }
+                  - { label: "Datei hochladen", name: "url", widget: "file", required: false }
+                  - label: "Typ"
+                    name: "typ"
+                    widget: "select"
+                    default: "PDF"
+                    options: ["PDF", "Word", "Excel", "ZIP", "Sonstiges"]
 
   # ──────────────────────────────────────────
   # WUNSCHLISTE / AUFGABEN

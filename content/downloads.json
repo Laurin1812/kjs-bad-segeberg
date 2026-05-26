@@ -1,0 +1,28 @@
+{
+  "titel": "Downloads",
+  "intro": "Hier finden Sie wichtige Dokumente und Formulare der Kreisjägerschaft Bad Segeberg e.V. zum Herunterladen.",
+  "kategorien": [
+    {
+      "titel": "Formulare & Anträge",
+      "downloads": [
+        {
+          "name": "Mitgliedsantrag KJS Bad Segeberg",
+          "beschreibung": "Antrag auf Mitgliedschaft in der Kreisjägerschaft",
+          "url": "",
+          "typ": "PDF"
+        }
+      ]
+    },
+    {
+      "titel": "Informationen & Merkblätter",
+      "downloads": [
+        {
+          "name": "Jagdrecht Schleswig-Holstein",
+          "beschreibung": "Aktuelle Regelungen zum Jagdrecht",
+          "url": "",
+          "typ": "PDF"
+        }
+      ]
+    }
+  ]
+}

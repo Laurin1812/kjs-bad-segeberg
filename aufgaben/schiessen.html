@@ -108,6 +108,7 @@
     </main>
     <script>
       fetch('../content/aufgaben/schiessen.json').then(r=>r.json()).then(d=>{
+        if(d.hero_bild){const bg=document.querySelector('.page-hero__bg');if(bg)bg.style.backgroundImage=`url('${d.hero_bild}')`;}
         const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
         const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
         document.getElementById('page-main').innerHTML = `
@@ -186,5 +187,17 @@
   </div>
 </div></footer>
 <script src="../js/main.js"></script>
+<script>
+  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
+    const ft = document.querySelector('.footer-about p');
+    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
+    const cp = document.querySelector('.footer-bottom span');
+    if(cp && d.copyright) cp.textContent = d.copyright;
+    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
+    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
+    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
+    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
+  }).catch(()=>{});
+</script>
 </body>
 </html>

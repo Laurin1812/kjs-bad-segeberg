@@ -14,6 +14,10 @@
     if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
     if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
     if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
   }).catch(()=>{});
 </script>
 </head>
@@ -104,14 +108,31 @@
 
 <div class="page-content full">
   <div class="container">
-    <main class="main-content">
-      <h2>Dokumente zum Herunterladen</h2>
-      <p style="color:var(--text-muted); margin-bottom:2rem;">
-        Hier finden Sie alle aktuellen Formulare, Satzungen, Protokolle und
-        Informationsblätter der Kreisjägerschaft Bad Segeberg e.V.
-      </p>
+    <main class="main-content" id="downloads-main">
+      <div class="loading-spinner">Lädt…</div>
+    </main>
+    <script>
+      const icons = { PDF: '📄', Word: '📝', Excel: '📊', ZIP: '🗜️', Sonstiges: '📁' };
+      fetch('/content/downloads.json').then(r=>r.json()).then(d=>{
+        const el = document.getElementById('downloads-main');
+        let html = `<h2>${d.titel||'Downloads'}</h2>`;
+        if(d.intro) html += `<p style="color:var(--text-muted);margin-bottom:2rem;">${d.intro}</p>`;
+        (d.kategorien||[]).forEach(kat=>{
+          html += `<div class="download-section-title">${kat.titel}</div><div class="downloads-list">`;
+          (kat.downloads||[]).forEach(dl=>{
+            const icon = icons[dl.typ]||'📁';
+            const link = dl.url ? `<a href="${dl.url}" class="btn btn-sm btn-outline-green" download>⬇ Download</a>` : `<span class="btn btn-sm btn-outline-green" style="opacity:.4">⬇ Folgt</span>`;
+            html += `<div class="download-item"><div class="download-item__icon">${icon}</div><div class="download-item__meta"><div class="download-item__name">${dl.name}</div>${dl.beschreibung?`<div class="download-item__info">${dl.beschreibung}</div>`:''}</div>${link}</div>`;
+          });
+          html += `</div>`;
+        });
+        el.innerHTML = html;
+      }).catch(()=>{
+        document.getElementById('downloads-main').innerHTML = '<p>Downloads konnten nicht geladen werden.</p>';
+      });
+    </script>
 
-      <!-- Satzung & Ordnungen -->
+      <!-- Satzung & Ordnungen (Fallback, wird durch JS ersetzt) -->
       <div class="download-section-title">Satzung & Ordnungen</div>
       <div class="downloads-list">
         <div class="download-item">
@@ -293,5 +314,17 @@
   </div>
 </div></footer>
 <script src="../js/main.js"></script>
+<script>
+  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
+    const ft = document.querySelector('.footer-about p');
+    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
+    const cp = document.querySelector('.footer-bottom span');
+    if(cp && d.copyright) cp.textContent = d.copyright;
+    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
+    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
+    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
+    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
+  }).catch(()=>{});
+</script>
 </body>
 </html>
