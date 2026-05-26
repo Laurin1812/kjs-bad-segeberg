@@ -267,12 +267,6 @@ collections:
         fields:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-      - label: "Infomobil"
-        name: "infomobil"
-        file: "content/jaeger/infomobil.json"
-        fields:
-          - { label: "Seitentitel", name: "titel", widget: "string" }
-          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
 
   # ──────────────────────────────────────────
   # VERBRAUCHER
