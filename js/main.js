@@ -92,9 +92,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   var currentPath = window.location.pathname;
 
   festSeiten.forEach(function(s) {
-    // Nicht doppelt einfügen wenn bereits im HTML vorhanden
-    if (sub.querySelector('a[href="' + s.href + '"]') ||
-        sub.querySelector('a[href="../jaeger/infomobil.html"]')) return;
+    // Nicht doppelt einfügen – prüfe alle möglichen href-Varianten
+    var exists = sub.querySelector('a[href="' + s.href + '"]') ||
+                 sub.querySelector('a[href="../jaeger/infomobil.html"]') ||
+                 sub.querySelector('a[href="infomobil.html"]');
+    if (exists) return;
     var li = document.createElement('li');
     var a  = document.createElement('a');
     a.href = s.href;
