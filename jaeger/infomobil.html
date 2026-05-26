@@ -120,7 +120,7 @@
   <div class="container">
     <main class="main-content" id="page-main">
       <h2 id="infomobil-titel">Infomobil</h2>
-      <p id="infomobil-intro"></p>
+      <p id="infomobil-intro">Das Infomobil der Kreisjägerschaft Bad Segeberg steht für Aufklärung und Information rund um das Thema Jagd und Naturschutz.</p>
 
       <!-- Google Kalender – wird angezeigt wenn URL in Einstellungen hinterlegt -->
       <div id="google-kalender-block" style="display:none; margin-top:2rem;">
@@ -203,6 +203,12 @@
 
 <script src="../js/main.js"></script>
 <script>
+  // Infomobil-Inhalt aus JSON laden
+  fetch('/content/jaeger/infomobil.json').then(r=>r.json()).then(d=>{
+    if(d.titel) document.getElementById('infomobil-titel').textContent = d.titel;
+    if(d.intro) document.getElementById('infomobil-intro').textContent = d.intro;
+  }).catch(()=>{});
+
   // Google Kalender aus Einstellungen laden
   fetch('/content/einstellungen.json').then(r=>r.json()).then(d=>{
     if(d.google_kalender_url) {

@@ -27,13 +27,12 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
 
   # ──────────────────────────────────────────
-  # JÄGER (alle Unterseiten in einer Collection)
+  # JÄGER › KJS BAD SEGEBERG
   # ──────────────────────────────────────────
-  - name: "jaeger"
-    label: "🦌 Jäger"
+  - name: "jaeger_kjs"
+    label: "🦌 Jäger › KJS Bad Segeberg"
     files:
-      # ── KJS Bad Segeberg ──────────────────
-      - label: "› Übersicht"
+      - label: "Übersicht"
         name: "uebersicht"
         file: "content/jaeger/uebersicht.json"
         fields:
@@ -43,7 +42,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "› Vorstand"
+      - label: "Vorstand"
         name: "mitglieder"
         file: "content/vorstand.json"
         fields:
@@ -57,7 +56,7 @@ collections:
               - { label: "E-Mail",           name: "email",   widget: "string", required: false }
               - { label: "Telefon",          name: "telefon", widget: "string", required: false }
               - { label: "Foto",             name: "bild",    widget: "image",  required: false, hint: "Portraitfoto hochladen" }
-      - label: "› Obleute"
+      - label: "Obleute"
         name: "obleute"
         file: "content/obleute.json"
         fields:
@@ -71,7 +70,7 @@ collections:
               - { label: "E-Mail",                 name: "email",   widget: "string", required: false }
               - { label: "Telefon",                name: "telefon", widget: "string", required: false }
               - { label: "Foto",                   name: "bild",    widget: "image",  required: false }
-      - label: "› Hegeringe"
+      - label: "Hegeringe"
         name: "hegeringe"
         file: "content/hegeringe.json"
         fields:
@@ -94,7 +93,7 @@ collections:
               - { label: "Gemeinden", name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
               - { label: "E-Mail",    name: "email",     widget: "string", required: false }
               - { label: "Telefon",   name: "telefon",   widget: "string", required: false }
-      - label: "› Mitglied werden"
+      - label: "Mitglied werden"
         name: "mitglied_werden"
         file: "content/jaeger/mitglied-werden.json"
         fields:
@@ -104,7 +103,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "› Jäger/in werden"
+      - label: "Jäger/in werden"
         name: "jaeger_werden"
         file: "content/jaeger/jaeger-werden.json"
         fields:
@@ -114,7 +113,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "› Kreisjägermeister – Grußwort"
+      - label: "Kreisjägermeister – Grußwort"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
@@ -124,8 +123,14 @@ collections:
             default: ""
             hint: "Name, Foto & Kontakt kommen automatisch aus dem Vorstand-Eintrag. Hier nur das Grußwort pflegen."
           - { label: "Grußwort", name: "grußwort", widget: "text", required: false }
-      # ── Aufgaben ──────────────────────────
-      - label: "🎯 Schießwesen"
+
+  # ──────────────────────────────────────────
+  # JÄGER › AUFGABEN
+  # ──────────────────────────────────────────
+  - name: "aufgaben"
+    label: "🎯 Jäger › Aufgaben"
+    files:
+      - label: "Schießwesen"
         name: "schiessen"
         file: "content/aufgaben/schiessen.json"
         fields:
@@ -138,7 +143,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Hundeausbildung"
+      - label: "Hundeausbildung"
         name: "hundeausbildung"
         file: "content/aufgaben/hundeausbildung.json"
         fields:
@@ -151,7 +156,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Schweißhundeführer"
+      - label: "Schweißhundeführer"
         name: "schweisshunde"
         file: "content/aufgaben/schweisshunde.json"
         fields:
@@ -164,7 +169,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Jugendarbeit"
+      - label: "Jugendarbeit"
         name: "jugend"
         file: "content/aufgaben/jugend.json"
         fields:
@@ -177,7 +182,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Jagdhornblasen"
+      - label: "Jagdhornblasen"
         name: "jagdhorn"
         file: "content/aufgaben/jagdhorn.json"
         fields:
@@ -190,7 +195,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Naturschutz"
+      - label: "Naturschutz"
         name: "naturschutz"
         file: "content/aufgaben/naturschutz.json"
         fields:
@@ -203,7 +208,7 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "🎯 Jungwildrettung"
+      - label: "Jungwildrettung"
         name: "jungwildrettung"
         file: "content/aufgaben/jungwildrettung.json"
         fields:
@@ -216,6 +221,35 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+
+  # ──────────────────────────────────────────
+  # JÄGER › WEITERE THEMEN
+  # ──────────────────────────────────────────
+  - name: "weitere_themen"
+    label: "📋 Jäger › Weitere Themen"
+    files:
+      - label: "Infomobil"
+        name: "infomobil"
+        file: "content/jaeger/infomobil.json"
+        fields:
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - label: "Eigene Seiten (Weitere Themen Menü)"
+        name: "seiten"
+        file: "content/seiten.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
+            hint: "➕ Neue Seite hinzufügen | Slug = URL-Kürzel, nur Kleinbuchstaben und Bindestriche, z.B. warum-jagd"
+            fields:
+              - { label: "Seitentitel",         name: "titel",          widget: "string" }
+              - { label: "Navigations-Label",   name: "nav_label",      widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
+              - { label: "URL-Kürzel (Slug)",   name: "slug",           widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
+              - { label: "Im Menü anzeigen?",   name: "in_navigation",  widget: "boolean",  default: true }
+              - { label: "Veröffentlicht?",     name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",              name: "inhalt",         widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung (Fett, Kursiv, Überschriften, Listen usw.)" }
 
   # ──────────────────────────────────────────
   # VERBRAUCHER
@@ -510,25 +544,3 @@ collections:
                   - { label: "🔄 In Arbeit", value: "in-arbeit" }
                   - { label: "✅ Erledigt",  value: "erledigt" }
 
-  # ──────────────────────────────────────────
-  # EIGENE SEITEN
-  # ──────────────────────────────────────────
-  - name: "seiten"
-    label: "📝 Eigene Seiten"
-    files:
-      - label: "Alle eigenen Seiten verwalten"
-        name: "seiten"
-        file: "content/seiten.json"
-        fields:
-          - label: "Seiten"
-            name: "seiten"
-            widget: "list"
-            summary: "{{fields.titel}} ({{fields.veroeffentlicht}})"
-            hint: "➕ Neue Seite hinzufügen | Slug = URL-Kürzel, nur Kleinbuchstaben und Bindestriche, z.B. warum-jagd"
-            fields:
-              - { label: "Seitentitel",         name: "titel",          widget: "string" }
-              - { label: "Navigations-Label",   name: "nav_label",      widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
-              - { label: "URL-Kürzel (Slug)",   name: "slug",           widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
-              - { label: "Im Menü anzeigen?",   name: "in_navigation",  widget: "boolean",  default: true }
-              - { label: "Veröffentlicht?",     name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",              name: "inhalt",         widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung (Fett, Kursiv, Überschriften, Listen usw.)" }
