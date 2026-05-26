@@ -156,7 +156,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           target = weltereSub;
         }
 
-        if (target) target.appendChild(li);
+        // Nicht einfügen, wenn Link mit dieser href schon existiert
+        if (target && !target.querySelector('a[href="' + a.href + '"]')) {
+          target.appendChild(li);
+        }
       });
     })
     .catch(function(){});
