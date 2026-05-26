@@ -383,6 +383,8 @@ collections:
             fields:
               - { label: "Tag(e)",  name: "tage",   widget: "string", hint: "z.B. Montag & Mittwoch" }
               - { label: "Uhrzeit", name: "zeiten", widget: "string", hint: "z.B. 10:00 – 12:00 Uhr" }
+          - { label: "Google Kalender URL", name: "google_kalender_url", widget: "string", required: false, hint: "Einbettungs-URL aus Google Kalender (Einstellungen → Kalender einbetten → src=... URL kopieren). Leer lassen = nicht anzeigen." }
+          - { label: "Google Kalender Überschrift", name: "google_kalender_titel", widget: "string", required: false, default: "Terminbuchung", hint: "Titel der über dem Kalender angezeigt wird" }
 
   # ──────────────────────────────────────────
   # IMPRESSUM

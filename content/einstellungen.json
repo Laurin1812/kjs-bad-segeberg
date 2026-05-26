@@ -7,5 +7,7 @@
       "tage": "Montag bis Freitag",
       "zeiten": "10:00 – 12:00 Uhr"
     }
-  ]
+  ],
+  "google_kalender_url": "",
+  "google_kalender_titel": "Terminbuchung"
 }
