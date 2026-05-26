@@ -27,12 +27,13 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
 
   # ──────────────────────────────────────────
-  # JÄGER – KJS BAD SEGEBERG
+  # JÄGER (alle Unterseiten in einer Collection)
   # ──────────────────────────────────────────
-  - name: "jaeger_kjs"
-    label: "🦌 Jäger – KJS Bad Segeberg"
+  - name: "jaeger"
+    label: "🦌 Jäger"
     files:
-      - label: "Übersicht"
+      # ── KJS Bad Segeberg ──────────────────
+      - label: "› Übersicht"
         name: "uebersicht"
         file: "content/jaeger/uebersicht.json"
         fields:
@@ -42,7 +43,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "Vorstand"
+      - label: "› Vorstand"
         name: "mitglieder"
         file: "content/vorstand.json"
         fields:
@@ -56,7 +57,7 @@ collections:
               - { label: "E-Mail",           name: "email",   widget: "string", required: false }
               - { label: "Telefon",          name: "telefon", widget: "string", required: false }
               - { label: "Foto",             name: "bild",    widget: "image",  required: false, hint: "Portraitfoto hochladen" }
-      - label: "Obleute"
+      - label: "› Obleute"
         name: "obleute"
         file: "content/obleute.json"
         fields:
@@ -70,7 +71,7 @@ collections:
               - { label: "E-Mail",                 name: "email",   widget: "string", required: false }
               - { label: "Telefon",                name: "telefon", widget: "string", required: false }
               - { label: "Foto",                   name: "bild",    widget: "image",  required: false }
-      - label: "Hegeringe"
+      - label: "› Hegeringe"
         name: "hegeringe"
         file: "content/hegeringe.json"
         fields:
@@ -80,8 +81,8 @@ collections:
             summary: "{{fields.nummer}} – {{fields.name}} ({{fields.obmann}})"
             fields:
               - { label: "Hegering-Nummer", name: "nummer",    widget: "string", hint: "z.B. Hegering 1" }
-              - { label: "Hegering-Name (Gebietsname)", name: "name", widget: "string", hint: "z.B. Bad Segeberg – Stadt" }
-              - { label: "Name der Leitung", name: "obmann", widget: "string", hint: "Vor- und Nachname" }
+              - { label: "Hegering-Name (Gebietsname)", name: "name", widget: "string" }
+              - { label: "Name der Leitung", name: "obmann", widget: "string" }
               - label: "Titel der Leitung"
                 name: "geschlecht"
                 widget: "select"
@@ -90,10 +91,10 @@ collections:
                   - { label: "Hegeringsleiter (Mann)", value: "Hegeringsleiter" }
                   - { label: "Hegeringsleiterin (Frau)", value: "Hegeringsleiterin" }
                   - { label: "Hegeringsleiter/in", value: "Hegeringsleiter/in" }
-              - { label: "Gemeinden",     name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
-              - { label: "E-Mail",        name: "email",     widget: "string", required: false }
-              - { label: "Telefon",       name: "telefon",   widget: "string", required: false }
-      - label: "Mitglied werden"
+              - { label: "Gemeinden", name: "gemeinden", widget: "string", hint: "Kommagetrennte Liste" }
+              - { label: "E-Mail",    name: "email",     widget: "string", required: false }
+              - { label: "Telefon",   name: "telefon",   widget: "string", required: false }
+      - label: "› Mitglied werden"
         name: "mitglied_werden"
         file: "content/jaeger/mitglied-werden.json"
         fields:
@@ -103,7 +104,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "Jäger/in werden"
+      - label: "› Jäger/in werden"
         name: "jaeger_werden"
         file: "content/jaeger/jaeger-werden.json"
         fields:
@@ -113,7 +114,7 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "Kreisjägermeister – Grußwort bearbeiten"
+      - label: "› Kreisjägermeister – Grußwort"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
@@ -121,101 +122,95 @@ collections:
             name: "hinweis"
             widget: "hidden"
             default: ""
-            hint: "Name, E-Mail, Telefon und Foto werden automatisch aus dem Vorstand-Eintrag mit 'Kreisjägermeister' in der Rolle übernommen. Hier nur das Grußwort pflegen."
-          - { label: "Grußwort",  name: "grußwort",   widget: "text",   required: false, hint: "Jede Leerzeile = neuer Absatz. Name, Foto & Kontakt kommen automatisch aus dem Vorstand." }
-
-  # ──────────────────────────────────────────
-  # JÄGER – AUFGABEN
-  # ──────────────────────────────────────────
-  - name: "aufgaben"
-    label: "🎯 Jäger – Aufgaben"
-    files:
-      - label: "Schießwesen"
+            hint: "Name, Foto & Kontakt kommen automatisch aus dem Vorstand-Eintrag. Hier nur das Grußwort pflegen."
+          - { label: "Grußwort", name: "grußwort", widget: "text", required: false }
+      # ── Aufgaben ──────────────────────────
+      - label: "🎯 Schießwesen"
         name: "schiessen"
         file: "content/aufgaben/schiessen.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Hundeausbildung"
+      - label: "🎯 Hundeausbildung"
         name: "hundeausbildung"
         file: "content/aufgaben/hundeausbildung.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Schweißhundeführer"
+      - label: "🎯 Schweißhundeführer"
         name: "schweisshunde"
         file: "content/aufgaben/schweisshunde.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Jugendarbeit"
+      - label: "🎯 Jugendarbeit"
         name: "jugend"
         file: "content/aufgaben/jugend.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Jagdhornblasen"
+      - label: "🎯 Jagdhornblasen"
         name: "jagdhorn"
         file: "content/aufgaben/jagdhorn.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Naturschutz"
+      - label: "🎯 Naturschutz"
         name: "naturschutz"
         file: "content/aufgaben/naturschutz.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
-      - label: "Jungwildrettung"
+      - label: "🎯 Jungwildrettung"
         name: "jungwildrettung"
         file: "content/aufgaben/jungwildrettung.json"
         fields:
-          - { label: "Seitentitel (H1)", name: "titel", widget: "string" }
-          - { label: "Untertitel (H2)", name: "untertitel", widget: "string" }
+          - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text" }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
