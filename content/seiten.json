@@ -3,7 +3,7 @@
     {
       "bereich": "kjs",
       "in_navigation": true,
-      "veroeffentlicht": false,
+      "veroeffentlicht": true,
       "titel": "Test Seite",
       "nav_label": "Hundetest",
       "slug": "Hundeseiteprivat",
