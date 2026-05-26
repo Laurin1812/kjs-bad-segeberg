@@ -1,3 +1,13 @@
 {
-  "seiten": []
+  "seiten": [
+    {
+      "bereich": "kjs",
+      "in_navigation": true,
+      "veroeffentlicht": false,
+      "titel": "Test Seite",
+      "nav_label": "Hundetest",
+      "slug": "Hundeseiteprivat",
+      "inhalt": "Test für die Seite"
+    }
+  ]
 }
