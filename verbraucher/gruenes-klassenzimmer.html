@@ -105,7 +105,7 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('../content/verbraucher/gruenes-klassenzimmer.json')
+      fetch('/content/verbraucher/gruenes-klassenzimmer.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var main = document.getElementById('page-main');

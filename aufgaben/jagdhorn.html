@@ -121,7 +121,7 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('../content/aufgaben/jagdhorn.json')
+      fetch('/content/aufgaben/jagdhorn.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var main = document.getElementById('page-main');

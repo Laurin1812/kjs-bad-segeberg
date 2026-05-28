@@ -106,7 +106,7 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('../content/verbraucher/lernort-natur.json')
+      fetch('/content/verbraucher/lernort-natur.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var main = document.getElementById('page-main');
