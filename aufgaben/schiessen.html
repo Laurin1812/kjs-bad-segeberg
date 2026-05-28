@@ -122,7 +122,7 @@
             <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
           </div>
         `;
-        if(d.inhalt){ document.getElementById('page-inhalt').innerHTML = marked.parse(d.inhalt); }
+        if(d.inhalt){ var el=document.getElementById('page-inhalt'); if(el){ el.innerHTML = typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>'+d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>'; } }
         });
     </script>
     <aside class="sidebar">
