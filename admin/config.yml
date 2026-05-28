@@ -113,16 +113,24 @@ collections:
           - { label: "Bild", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
-      - label: "Kreisjägermeister – Grußwort"
+      - label: "Kreisjägermeister"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
         fields:
-          - label: "Hinweis"
-            name: "hinweis"
-            widget: "hidden"
-            default: ""
-            hint: "Name, Foto & Kontakt kommen automatisch aus dem Vorstand-Eintrag. Hier nur das Grußwort pflegen."
-          - { label: "Grußwort", name: "grußwort", widget: "text", required: false }
+          - { label: "Name",            name: "name",     widget: "string",   required: false }
+          - { label: "Foto",            name: "bild",     widget: "image",    required: false }
+          - { label: "E-Mail",          name: "email",    widget: "string",   required: false }
+          - { label: "Telefon",         name: "telefon",  widget: "string",   required: false }
+          - label: "Aufgaben & Zuständigkeiten (Markdown)"
+            name: "aufgaben"
+            widget: "markdown"
+            required: false
+            hint: "Hier können Aufgaben, Listen und Texte zum Kreisjägermeister eingetragen werden."
+          - label: "Grußwort"
+            name: "grußwort"
+            widget: "text"
+            required: false
+            hint: "Persönliches Grußwort, erscheint kursiv auf der Seite."
       - label: "➕ Neue KJS-Seite hinzufügen"
         name: "seiten_kjs"
         file: "content/seiten-kjs.json"
