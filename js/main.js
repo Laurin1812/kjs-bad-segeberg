@@ -184,6 +184,61 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 })();
 
+// Eigene Hauptpunkte aus navigation-extra.json in die Hauptnavigation einfügen
+(function() {
+  fetch('/content/navigation-extra.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var nav = document.querySelector('.main-nav');
+      if (!nav || !data.hauptpunkte || !data.hauptpunkte.length) return;
+
+      data.hauptpunkte.forEach(function(hp) {
+        var seiten = (hp.seiten || []).filter(function(s) {
+          return s.veroeffentlicht === true && s.in_navigation === true;
+        });
+        if (!seiten.length) return;
+
+        var li = document.createElement('li');
+
+        if (seiten.length === 1) {
+          // Einzelne Seite → direkt verlinken
+          var a = document.createElement('a');
+          a.href = '/seiten/?s=' + encodeURIComponent(seiten[0].slug);
+          a.textContent = hp.label;
+          li.appendChild(a);
+        } else {
+          // Mehrere Seiten → Dropdown
+          var a = document.createElement('a');
+          a.href = '#';
+          a.innerHTML = hp.label + ' <span class="arrow">&#9662;</span>';
+          li.appendChild(a);
+          var ul = document.createElement('ul');
+          ul.className = 'dropdown';
+          seiten.forEach(function(s) {
+            var sli = document.createElement('li');
+            var sa = document.createElement('a');
+            sa.href = '/seiten/?s=' + encodeURIComponent(s.slug);
+            sa.textContent = s.nav_label || s.titel;
+            sli.appendChild(sa);
+            ul.appendChild(sli);
+          });
+          li.appendChild(ul);
+        }
+
+        // Vor FAQ einfügen (oder am Ende der Nav)
+        var faqItem = Array.from(nav.querySelectorAll(':scope > li > a')).find(function(a) {
+          return a.textContent.trim() === 'FAQ';
+        });
+        if (faqItem) {
+          nav.insertBefore(li, faqItem.closest('li'));
+        } else {
+          nav.appendChild(li);
+        }
+      });
+    })
+    .catch(function() {});
+})();
+
 // Contact form handler (Formsubmit.co)
 var contactForm = document.getElementById('contactForm');
 if (contactForm) {

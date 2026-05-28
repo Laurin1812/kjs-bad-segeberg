@@ -169,7 +169,8 @@
     '../content/seiten-aufgaben.json',
     '../content/seiten-weitere.json',
     '../content/seiten-verbraucher.json',
-    '../content/seiten.json'  // Legacy
+    '../content/seiten.json',           // Legacy
+    '../content/navigation-extra.json'  // Eigene Hauptpunkte
   ];
 
   Promise.all(sektionsDateien.map(function(url) {
@@ -177,8 +178,16 @@
   }))
   .then(function(results) {
     var alleSeiten = [];
-    results.forEach(function(data) {
-      if (data.seiten) alleSeiten = alleSeiten.concat(data.seiten);
+    results.forEach(function(data, idx) {
+      if (data.seiten) {
+        alleSeiten = alleSeiten.concat(data.seiten);
+      }
+      // navigation-extra.json hat eine andere Struktur: hauptpunkte[].seiten[]
+      if (data.hauptpunkte) {
+        data.hauptpunkte.forEach(function(hp) {
+          if (hp.seiten) alleSeiten = alleSeiten.concat(hp.seiten);
+        });
+      }
     });
     var seite = alleSeiten.find(function(s) {
       return s.slug === slug && s.veroeffentlicht === true;

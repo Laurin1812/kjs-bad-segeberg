@@ -600,3 +600,31 @@ collections:
                   - { label: "🔄 In Arbeit", value: "in-arbeit" }
                   - { label: "✅ Erledigt",  value: "erledigt" }
 
+
+
+- name: "extra_navigation"
+  label: "🌐 Eigene Hauptpunkte (Navigation)"
+  files:
+    - label: "Eigene Hauptpunkte"
+      name: "navigation_extra"
+      file: "content/navigation-extra.json"
+      fields:
+        - label: "Hauptpunkte"
+          name: "hauptpunkte"
+          widget: "list"
+          summary: "{{fields.label}}"
+          hint: "Hier kannst du komplett neue Navigationspunkte anlegen, die oben in der Menüleiste erscheinen."
+          fields:
+            - { label: "Menü-Label (Bezeichnung)", name: "label", widget: "string", hint: "z.B. 'Jagdrecht' oder 'Veranstaltungen'" }
+            - label: "Unterseiten"
+              name: "seiten"
+              widget: "list"
+              summary: "{{fields.nav_label}} ({{fields.slug}})"
+              hint: "Mindestens eine Seite anlegen. Hat nur eine Seite → direkter Link, mehrere → Dropdown."
+              fields:
+                - { label: "Seitentitel",         name: "titel",           widget: "string" }
+                - { label: "Menü-Label",           name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
+                - { label: "URL-Kürzel (Slug)",    name: "slug",            widget: "string", hint: "Nur Buchstaben und Bindestriche, z.B. 'jagdrecht-info'" }
+                - { label: "Im Menü anzeigen?",    name: "in_navigation",   widget: "boolean", default: true }
+                - { label: "Veröffentlicht?",      name: "veroeffentlicht", widget: "boolean", default: false }
+                - { label: "Inhalt (Markdown)",    name: "inhalt",          widget: "markdown", required: false }
