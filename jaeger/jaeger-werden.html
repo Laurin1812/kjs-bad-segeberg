@@ -108,14 +108,7 @@
       fetch('../content/jaeger/jaeger-werden.json').then(r=>r.json()).then(d=>{
         const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
         let inhalt = '';
-        if(d.inhalt){
-          inhalt = d.inhalt
-            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
-            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
-            .replace(/^\* (.+)$/gm,'<li>$1</li>')
-            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
-            .replace(/\n\n/g,'</p><p>');
-        }
+        if(d.inhalt){ inhalt = marked.parse(d.inhalt); }
         document.getElementById('page-main').innerHTML = `
           <h2>${d.untertitel||''}</h2>
           <p>${d.intro||''}</p>
@@ -177,6 +170,7 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
   </div>
 </div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{

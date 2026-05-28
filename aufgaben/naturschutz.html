@@ -136,17 +136,7 @@
             <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
           </div>
         `;
-        if(d.inhalt){
-          const html = d.inhalt
-            .replace(/^## (.+)$/gm,'<h3>$1</h3>')
-            .replace(/^### (.+)$/gm,'<h4>$1</h4>')
-            .replace(/^\* (.+)$/gm,'<li>$1</li>')
-            .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
-            .replace(/\n\n/g,'</p><p>')
-            .replace(/^(?!<[hul])/gm,'');
-          document.getElementById('page-inhalt').innerHTML = '<p>' + html + '</p>';
-        }
-      });
+        if(d.inhalt){ document.getElementById('page-inhalt').innerHTML = marked.parse(d.inhalt); });
     </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
@@ -200,6 +190,7 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
   </div>
 </div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
