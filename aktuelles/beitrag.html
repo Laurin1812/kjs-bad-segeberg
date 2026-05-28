@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Aktuelle Neuigkeiten der Kreisjägerschaft Bad Segeberg e.V.">
-  <title>Aktuelles – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <meta name="description" content="Aktuelles – Kreisjägerschaft Bad Segeberg e.V.">
+  <title>Beitrag – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
@@ -96,77 +96,30 @@
   </ul>
 </nav>
 
-<div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=50')"></div>
+<div class="page-hero" id="beitrag-hero">
+  <div class="page-hero__bg" id="beitrag-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=50')"></div>
   <div class="container">
-    <h1>Aktuelles</h1>
+    <h1 id="beitrag-titel">Wird geladen …</h1>
     <nav class="breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span><span>Aktuelles</span>
+      <a href="../index.html">Startseite</a><span class="sep">/</span>
+      <a href="index.html">Aktuelles</a><span class="sep">/</span>
+      <span id="beitrag-breadcrumb">Beitrag</span>
     </nav>
   </div>
 </div>
 
-<div class="page-content full">
+<div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Aktuelles aus unserer Kreisjägerschaft</h2>
-      <p style="color: var(--text-muted); margin-bottom: 2.5rem;">
-        Berichte, Neuigkeiten und Hinweise der Kreisjägerschaft Bad Segeberg e.V.
-      </p>
-
-      <!-- News-Karten – dynamisch aus content/aktuelles.json -->
-      <div class="news__grid" id="news-grid">
-        <p style="color:var(--text-muted);">Beiträge werden geladen …</p>
-      </div>
-
-      <script>
-        // Kurz-Zusammenfassung aus Markdown extrahieren (erste ~150 Zeichen ohne Markdown-Syntax)
-        function kurztext(md) {
-          if (!md) return '';
-          var plain = md
-            .replace(/!\[.*?\]\(.*?\)/g, '')   // Bilder entfernen
-            .replace(/\[([^\]]+)\]\(.*?\)/g, '$1') // Links → nur Text
-            .replace(/[#*_>`~]/g, '')           // Markdown-Zeichen entfernen
-            .replace(/\n+/g, ' ').trim();
-          return plain.length > 150 ? plain.substring(0, 150) + ' …' : plain;
-        }
-
-        fetch('../content/aktuelles.json')
-          .then(r => r.json())
-          .then(data => {
-            const grid = document.getElementById('news-grid');
-            if (!data.beitraege || data.beitraege.length === 0) {
-              grid.innerHTML = '<p>Zurzeit keine Beiträge vorhanden.</p>';
-              return;
-            }
-            grid.innerHTML = data.beitraege.map((b, i) => `
-              <article class="news-card" id="news-${i}">
-                <a href="beitrag.html?i=${i}" style="text-decoration:none;color:inherit;display:block;">
-                  <div class="news-card__img-wrap">
-                    ${b.bild
-                      ? `<img class="news-card__img" src="${b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild}" alt="${b.titel}" loading="lazy">`
-                      : `<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">
-                           <img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;">
-                         </div>`}
-                  </div>
-                  <div class="news-card__body">
-                    <div class="news-card__meta">
-                      <span class="news-card__cat">${b.kategorie}</span>
-                      <span class="news-card__date">${b.datum}</span>
-                    </div>
-                    <h3 class="news-card__title">${b.titel}</h3>
-                    <p class="news-card__excerpt">${kurztext(b.text)}</p>
-                    <span class="read-more" style="font-size:.88rem;font-weight:600;color:var(--green-main);">Weiterlesen →</span>
-                  </div>
-                </a>
-              </article>`).join('');
-          })
-          .catch(() => {
-            document.getElementById('news-grid').innerHTML =
-              '<p>Beiträge konnten nicht geladen werden.</p>';
-          });
-      </script>
+    <main class="main-content" id="beitrag-inhalt">
+      <p style="color:var(--text-muted);">Wird geladen …</p>
     </main>
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Weitere Beiträge</h4>
+        <ul class="sidebar-nav" id="weitere-beitraege"></ul>
+      </div>
+      <div class="contact-box"></div>
+    </aside>
   </div>
 </div>
 
@@ -179,33 +132,112 @@
       <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
     </div>
     <div class="footer-col"><h5>Über die KJS</h5><ul>
-      <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
       <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
     </ul></div>
     <div class="footer-col"><h5>Schnellübersicht</h5><ul>
-      <li><a href="../index.html">Startseite</a></li><li><a href="index.html">Aktuelles</a></li>
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="index.html">Aktuelles</a></li>
       <li><a href="../termine/index.html">Termine</a></li>
     </ul></div>
     <div class="footer-col"><h5>Informationen</h5><ul>
-      <li><a href="../kontakt/index.html">Kontakt</a></li><li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../kontakt/index.html">Kontakt</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../downloads/index.html">Downloads</a></li>
     </ul></div>
   </div>
   <div class="footer-bottom">
     <span>Copyright 2026 © Kreisjägerschaft Bad Segeberg e.V.</span>
-    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
+    <div class="footer-bottom__links">
+      <a href="../impressum.html">Impressum</a>
+      <a href="../datenschutz.html">Datenschutz</a>
+      <a href="/admin/" class="admin-login-link">Login</a>
+    </div>
   </div>
 </div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var idx = parseInt(params.get('i'), 10);
+
+  function zeigeFehlermeldung() {
+    document.getElementById('beitrag-titel').textContent = 'Beitrag nicht gefunden';
+    document.getElementById('beitrag-inhalt').innerHTML =
+      '<div style="text-align:center;padding:3rem 1rem;">' +
+      '<p style="font-size:3rem;margin-bottom:1rem;">🍃</p>' +
+      '<h2 style="color:var(--green-dark);margin-bottom:.75rem;">Dieser Beitrag wurde nicht gefunden.</h2>' +
+      '<a href="index.html" class="btn btn-primary">Zurück zu Aktuelles</a>' +
+      '</div>';
+  }
+
+  if (isNaN(idx)) { zeigeFehlermeldung(); return; }
+
+  fetch('../content/aktuelles.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var beitraege = data.beitraege || [];
+      var b = beitraege[idx];
+      if (!b) { zeigeFehlermeldung(); return; }
+
+      // Seitentitel & Breadcrumb
+      document.title = b.titel + ' – Kreisjägerschaft Bad Segeberg e.V.';
+      document.getElementById('beitrag-titel').textContent = b.titel;
+      document.getElementById('beitrag-breadcrumb').textContent = b.titel;
+
+      // Hero-Bild wenn vorhanden
+      if (b.bild) {
+        var heroSrc = b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild;
+        document.getElementById('beitrag-hero-bg').style.backgroundImage = "url('" + heroSrc + "')";
+      }
+
+      // Inhalt rendern
+      var html = '<div class="news-card__meta" style="margin-bottom:1.5rem;">' +
+        '<span class="news-card__cat">' + (b.kategorie || '') + '</span>' +
+        '<span class="news-card__date" style="margin-left:1rem;">' + (b.datum || '') + '</span>' +
+        '</div>';
+
+      if (b.bild) {
+        var imgSrc = b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild;
+        html += '<img src="' + imgSrc + '" alt="' + b.titel + '" style="width:100%;border-radius:var(--radius-md);box-shadow:var(--shadow-md);margin-bottom:2rem;">';
+      }
+
+      if (b.text) {
+        html += marked.parse(b.text);
+      }
+
+      if (b.link) {
+        html += '<p style="margin-top:2rem;"><a href="' + b.link + '" class="btn btn-primary" target="_blank" rel="noopener">Mehr erfahren →</a></p>';
+      }
+
+      html += '<p style="margin-top:2.5rem;"><a href="index.html" class="btn btn-outline-green">← Zurück zu Aktuelles</a></p>';
+
+      document.getElementById('beitrag-inhalt').innerHTML = html;
+
+      // Sidebar: weitere Beiträge (außer dem aktuellen)
+      var sidebar = document.getElementById('weitere-beitraege');
+      var andere = beitraege.slice(0, 5).filter(function(_, i) { return i !== idx; }).slice(0, 4);
+      if (andere.length) {
+        sidebar.innerHTML = andere.map(function(a, j) {
+          var realIdx = beitraege.indexOf(a);
+          return '<li><a href="beitrag.html?i=' + realIdx + '">' + a.titel + '</a></li>';
+        }).join('');
+      } else {
+        sidebar.closest('.sidebar-widget').style.display = 'none';
+      }
+    })
+    .catch(zeigeFehlermeldung);
+})();
+</script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
     const ft = document.querySelector('.footer-about p');
     if(ft && d.ueber_text) ft.textContent = d.ueber_text;
     const cp = document.querySelector('.footer-bottom span');
     if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
   }).catch(()=>{});
 </script>
 </body>
