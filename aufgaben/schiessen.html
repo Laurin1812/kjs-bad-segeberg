@@ -138,10 +138,7 @@
             if (el) {
               el.innerHTML = typeof marked !== 'undefined'
                 ? marked.parse(d.inhalt)
-                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/
-
-/g,'</p><p>').replace(/
-/g,'<br>');
+                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
             }
           }
         })
