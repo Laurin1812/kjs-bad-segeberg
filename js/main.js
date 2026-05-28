@@ -127,42 +127,61 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     return null;
   }
 
-  // Eigene Seiten laden und nach Bereich verteilen
-  fetch('/content/seiten.json')
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      var seiten = (data.seiten || []).filter(function(s) {
-        return s.veroeffentlicht === true && s.in_navigation === true;
-      });
-
-      seiten.forEach(function(s) {
+  // Hilfsfunktion: Seiten-Liste in Ziel-Dropdown einfügen
+  function einfuegenInNav(seiten, target) {
+    (seiten || []).filter(function(s) {
+      return s.veroeffentlicht === true && s.in_navigation === true;
+    }).forEach(function(s) {
+      var href = '/seiten/?s=' + encodeURIComponent(s.slug);
+      if (target && !target.querySelector('a[href="' + href + '"]')) {
         var li = document.createElement('li');
         var a  = document.createElement('a');
-        a.href = '/seiten/?s=' + encodeURIComponent(s.slug);
+        a.href = href;
         a.textContent = s.nav_label || s.titel;
         li.appendChild(a);
+        target.appendChild(li);
+      }
+    });
+  }
 
-        var bereich = s.bereich || 'weitere-themen';
-        var target = null;
+  // Alle 4 Sektions-Dateien parallel laden
+  var sektionen = [
+    { url: '/content/seiten-kjs.json',         target: function() { return findJaegerSub('KJS Bad Segeberg'); } },
+    { url: '/content/seiten-aufgaben.json',     target: function() { return findJaegerSub('Aufgaben'); } },
+    { url: '/content/seiten-weitere.json',      target: function() { return weltereSub; } },
+    { url: '/content/seiten-verbraucher.json',  target: function() { return findTopDropdown('Verbraucher'); } },
+    // Legacy: alte seiten.json mit bereich-Feld
+    { url: '/content/seiten.json', bereich: true }
+  ];
 
-        if (bereich === 'kjs') {
-          target = findJaegerSub('KJS Bad Segeberg');
-        } else if (bereich === 'aufgaben') {
-          target = findJaegerSub('Aufgaben');
-        } else if (bereich === 'verbraucher') {
-          target = findTopDropdown('Verbraucher');
+  sektionen.forEach(function(s) {
+    fetch(s.url)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        if (s.bereich) {
+          // Legacy seiten.json: bereich-Feld auswerten
+          (data.seiten || []).filter(function(p) {
+            return p.veroeffentlicht === true && p.in_navigation === true;
+          }).forEach(function(p) {
+            var bereich = p.bereich || 'weitere-themen';
+            var t = bereich === 'kjs' ? findJaegerSub('KJS Bad Segeberg')
+                  : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
+                  : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
+                  : weltereSub;
+            var href = '/seiten/?s=' + encodeURIComponent(p.slug);
+            if (t && !t.querySelector('a[href="' + href + '"]')) {
+              var li = document.createElement('li');
+              var a  = document.createElement('a');
+              a.href = href; a.textContent = p.nav_label || p.titel;
+              li.appendChild(a); t.appendChild(li);
+            }
+          });
         } else {
-          // Standard: Weitere Themen
-          target = weltereSub;
+          einfuegenInNav(data.seiten, s.target());
         }
-
-        // Nicht einfügen, wenn Link mit dieser href schon existiert
-        if (target && !target.querySelector('a[href="' + a.href + '"]')) {
-          target.appendChild(li);
-        }
-      });
-    })
-    .catch(function(){});
+      })
+      .catch(function(){});
+  });
 })();
 
 // Contact form handler (Formsubmit.co)

@@ -123,6 +123,22 @@ collections:
             default: ""
             hint: "Name, Foto & Kontakt kommen automatisch aus dem Vorstand-Eintrag. Hier nur das Grußwort pflegen."
           - { label: "Grußwort", name: "grußwort", widget: "text", required: false }
+      - label: "➕ Neue KJS-Seite hinzufügen"
+        name: "seiten_kjs"
+        file: "content/seiten-kjs.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.nav_label}} ({{fields.slug}})"
+            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'KJS Bad Segeberg' anzulegen."
+            fields:
+              - { label: "Seitentitel",       name: "titel",           widget: "string" }
+              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
+              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
+              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
 
   # ──────────────────────────────────────────
   # JÄGER › AUFGABEN
@@ -221,6 +237,22 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "➕ Neue Aufgaben-Seite hinzufügen"
+        name: "seiten_aufgaben"
+        file: "content/seiten-aufgaben.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.nav_label}} ({{fields.slug}})"
+            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'Aufgaben' anzulegen."
+            fields:
+              - { label: "Seitentitel",       name: "titel",           widget: "string" }
+              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
+              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
+              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
 
   # ──────────────────────────────────────────
   # JÄGER › WEITERE THEMEN
@@ -234,32 +266,22 @@ collections:
         fields:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-      - label: "➕ Eigene Seiten verwalten"
-        name: "seiten"
-        file: "content/seiten.json"
+      - label: "➕ Neue Weitere-Themen-Seite hinzufügen"
+        name: "seiten_weitere"
+        file: "content/seiten-weitere.json"
         fields:
           - label: "Seiten"
             name: "seiten"
             widget: "list"
-            summary: "{{fields.titel}} → {{fields.bereich}}"
-            hint: "Hier neue Seiten anlegen. Wähle bei jeder Seite den Menübereich, wo sie erscheinen soll."
+            summary: "{{fields.nav_label}} ({{fields.slug}})"
+            hint: "Klicke auf '+ Hinzufügen' um eine neue Seite unter 'Weitere Themen' anzulegen."
             fields:
               - { label: "Seitentitel",       name: "titel",           widget: "string" }
-              - { label: "Menü-Label",        name: "nav_label",       widget: "string",   hint: "Kurzer Text fürs Menü, z.B. 'Warum Jagd?'" }
-              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string",   hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'warum-jagd'" }
-              - label: "Menübereich (wo erscheint die Seite?)"
-                name: "bereich"
-                widget: "select"
-                default: "weitere-themen"
-                hint: "Wähle, unter welchem Menüpunkt die Seite erscheinen soll."
-                options:
-                  - { label: "🦌 Jäger › KJS Bad Segeberg", value: "kjs" }
-                  - { label: "🎯 Jäger › Aufgaben",          value: "aufgaben" }
-                  - { label: "📋 Jäger › Weitere Themen",    value: "weitere-themen" }
-                  - { label: "🌿 Verbraucher",               value: "verbraucher" }
-              - { label: "Im Menü anzeigen?",  name: "in_navigation",   widget: "boolean",  default: true }
-              - { label: "Veröffentlicht?",    name: "veroeffentlicht",  widget: "boolean",  default: false }
-              - { label: "Inhalt",             name: "inhalt",           widget: "markdown", hint: "Vollständiger Seiteninhalt mit Formatierung" }
+              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
+              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
+              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
 
   # ──────────────────────────────────────────
   # VERBRAUCHER
@@ -306,6 +328,22 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "➕ Neue Verbraucher-Seite hinzufügen"
+        name: "seiten_verbraucher"
+        file: "content/seiten-verbraucher.json"
+        fields:
+          - label: "Seiten"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.nav_label}} ({{fields.slug}})"
+            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'Verbraucher' anzulegen."
+            fields:
+              - { label: "Seitentitel",       name: "titel",           widget: "string" }
+              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
+              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdfleisch'" }
+              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
+              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
 
   # ──────────────────────────────────────────
   # TERMINE

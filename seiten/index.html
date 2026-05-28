@@ -163,34 +163,35 @@
     return;
   }
 
-  fetch('../content/seiten.json')
-    .then(function(r) {
-      if (!r.ok) throw new Error('Fehler beim Laden');
-      return r.json();
-    })
-    .then(function(data) {
-      var seite = (data.seiten || []).find(function(s) {
-        return s.slug === slug && s.veroeffentlicht === true;
-      });
+  // Alle Sektions-Dateien durchsuchen
+  var sektionsDateien = [
+    '../content/seiten-kjs.json',
+    '../content/seiten-aufgaben.json',
+    '../content/seiten-weitere.json',
+    '../content/seiten-verbraucher.json',
+    '../content/seiten.json'  // Legacy
+  ];
 
-      if (!seite) {
-        // Versuche auch einzelne JSON-Dateien aus /content/seiten/
-        return fetch('../content/seiten/' + slug + '.json')
-          .then(function(r2) {
-            if (!r2.ok) throw new Error('Nicht gefunden');
-            return r2.json();
-          })
-          .then(function(einzelseite) {
-            if (!einzelseite.veroeffentlicht) throw new Error('Nicht veröffentlicht');
-            renderSeite(einzelseite);
-          });
-      }
-
-      renderSeite(seite);
-    })
-    .catch(function() {
-      zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+  Promise.all(sektionsDateien.map(function(url) {
+    return fetch(url).then(function(r) { return r.ok ? r.json() : {seiten:[]}; }).catch(function() { return {seiten:[]}; });
+  }))
+  .then(function(results) {
+    var alleSeiten = [];
+    results.forEach(function(data) {
+      if (data.seiten) alleSeiten = alleSeiten.concat(data.seiten);
     });
+    var seite = alleSeiten.find(function(s) {
+      return s.slug === slug && s.veroeffentlicht === true;
+    });
+    if (seite) {
+      renderSeite(seite);
+    } else {
+      zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+    }
+  })
+  .catch(function() {
+    zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+  });
 
   function renderSeite(seite) {
     var titel = seite.titel || 'Seite';
