@@ -121,22 +121,48 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('../content/aufgaben/hundeausbildung.json').then(r=>r.json()).then(d=>{
-        if(d.hero_bild){const bg=document.querySelector('.page-hero__bg');if(bg)bg.style.backgroundImage=`url('${d.hero_bild}')`;}
-        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
-        const kontakt = d.kontakt_name || d.kontakt_email ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email ? ` · <a href="mailto:${d.kontakt_email}">${d.kontakt_email}</a>` : ''}</p>` : '';
-        document.getElementById('page-main').innerHTML = `
-          <h2>${d.untertitel}</h2>
-          <p>${d.intro}</p>
-          ${bild}
-          <div id="page-inhalt"></div>
-          ${kontakt}
-          <div style="margin-top:2rem">
-            <a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>
-            <a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>
-          </div>
-        `;
-        if(d.inhalt){ var el=document.getElementById('page-inhalt'); if(el){ el.innerHTML = typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>'+d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>'; } }
+      fetch('../content/aufgaben/hundeausbildung.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var main = document.getElementById('page-main');
+          if (!main) return;
+          if (d.hero_bild) {
+            var bg = document.querySelector('.page-hero__bg');
+            if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
+          }
+          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">' : '';
+          var kontaktStr = '';
+          if (d.kontakt_name || d.kontakt_email) {
+            kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name||'');
+            if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
+            kontaktStr += '</p>';
+          }
+          main.innerHTML =
+            '<h2>' + (d.untertitel||'') + '</h2>' +
+            '<p>' + (d.intro||'') + '</p>' +
+            bild +
+            '<div id="page-inhalt"></div>' +
+            kontaktStr +
+            '<div style="margin-top:2rem">' +
+              '<a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>' +
+              '<a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>' +
+            '</div>';
+          if (d.inhalt) {
+            var el = document.getElementById('page-inhalt');
+            if (el) {
+              el.innerHTML = typeof marked !== 'undefined'
+                ? marked.parse(d.inhalt)
+                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/
+
+/g,'</p><p>').replace(/
+/g,'<br>');
+            }
+          }
+        })
+        .catch(function(err) {
+          var main = document.getElementById('page-main');
+          if (main) main.innerHTML = '<p style="color:var(--text-muted)">Inhalt konnte nicht geladen werden.</p>';
+          console.error(err);
         });
     </script>
     <aside class="sidebar">
