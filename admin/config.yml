@@ -453,7 +453,7 @@ collections:
             hint: "➕ Hinzufügen = neuer Beitrag | 🗑️ Löschen = auf den Pfeil klicken, dann Eintrag aufklappen und unten 'Entfernen' drücken, danach Speichern/Veröffentlichen nicht vergessen!"
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
-              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD. MMMM YYYY", format: "DD. MMMM YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
+              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD.MM.YYYY", format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
               - label: "Kategorie"
                 name: "kategorie"
                 widget: "select"
