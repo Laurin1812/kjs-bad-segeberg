@@ -224,53 +224,49 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Navigationsreihenfolge aus JSON anwenden (Drag & Drop Sortierung aus Admin)
+// Navigationsreihenfolge aus Admin-JSON anwenden
 (function() {
-  fetch('/content/nav-reihenfolge.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      function reorderSub(sub, items) {
-        if (!sub || !items || !items.length) return;
-        items.forEach(function(item) {
-          var filename = item.href.split('/').pop();
-          var match = null;
-          sub.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector('a');
-            if (a && a.getAttribute('href') && a.getAttribute('href').indexOf(filename) !== -1) {
-              match = li;
-            }
-          });
-          if (match) sub.appendChild(match);
-        });
-      }
+  function reorderSub(sub, items) {
+    if (!sub || !items || !items.length) return;
+    items.forEach(function(item) {
+      var filename = item.href.split('/').pop();
+      sub.querySelectorAll(':scope > li').forEach(function(li) {
+        var a = li.querySelector('a');
+        if (a && a.getAttribute('href') && a.getAttribute('href').indexOf(filename) !== -1) {
+          sub.appendChild(li);
+        }
+      });
+    });
+  }
 
-      // Aufgaben-Untermenü
-      var jaegerDD = document.getElementById('jaeger-dropdown');
-      if (jaegerDD) {
-        jaegerDD.querySelectorAll('.has-sub').forEach(function(hasSub) {
-          var label = hasSub.querySelector(':scope > a');
-          if (!label) return;
-          var sub = hasSub.querySelector('ul.dropdown--sub');
-          if (label.textContent.indexOf('Aufgaben') !== -1 && data.aufgaben) {
-            reorderSub(sub, data.aufgaben);
-          }
-          if (label.textContent.indexOf('KJS') !== -1 && data.kjs) {
-            reorderSub(sub, data.kjs);
-          }
-        });
-      }
+  var jaegerDD = document.getElementById('jaeger-dropdown');
 
-      // Verbraucher-Dropdown
-      if (data.verbraucher) {
-        document.querySelectorAll('.main-nav > li').forEach(function(li) {
-          var a = li.querySelector(':scope > a');
-          if (a && a.textContent.indexOf('Verbraucher') !== -1) {
-            reorderSub(li.querySelector('ul.dropdown'), data.verbraucher);
-          }
-        });
-      }
-    })
-    .catch(function() {});
+  // KJS Bad Segeberg
+  fetch('/content/nav-reihenfolge-kjs.json').then(function(r){return r.json();}).then(function(d){
+    if (!jaegerDD || !d.reihenfolge) return;
+    jaegerDD.querySelectorAll('.has-sub').forEach(function(hs){
+      var a = hs.querySelector(':scope > a');
+      if (a && a.textContent.indexOf('KJS') !== -1) reorderSub(hs.querySelector('ul.dropdown--sub'), d.reihenfolge);
+    });
+  }).catch(function(){});
+
+  // Aufgaben der Kreisjägerschaft
+  fetch('/content/nav-reihenfolge-aufgaben.json').then(function(r){return r.json();}).then(function(d){
+    if (!jaegerDD || !d.reihenfolge) return;
+    jaegerDD.querySelectorAll('.has-sub').forEach(function(hs){
+      var a = hs.querySelector(':scope > a');
+      if (a && a.textContent.indexOf('Aufgaben') !== -1) reorderSub(hs.querySelector('ul.dropdown--sub'), d.reihenfolge);
+    });
+  }).catch(function(){});
+
+  // Verbraucher
+  fetch('/content/nav-reihenfolge-verbraucher.json').then(function(r){return r.json();}).then(function(d){
+    if (!d.reihenfolge) return;
+    document.querySelectorAll('.main-nav > li').forEach(function(li){
+      var a = li.querySelector(':scope > a');
+      if (a && a.textContent.indexOf('Verbraucher') !== -1) reorderSub(li.querySelector('ul.dropdown'), d.reihenfolge);
+    });
+  }).catch(function(){});
 })();
 
 // Contact form handler (Formsubmit.co)

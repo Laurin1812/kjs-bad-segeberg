@@ -1,0 +1,11 @@
+{
+  "reihenfolge": [
+    {"label": "Schießwesen", "href": "/aufgaben/schiessen.html"},
+    {"label": "Hundeausbildung", "href": "/aufgaben/hundeausbildung.html"},
+    {"label": "Schweißhundeführer", "href": "/aufgaben/schweisshunde.html"},
+    {"label": "Jugendarbeit", "href": "/aufgaben/jugend.html"},
+    {"label": "Jagdhornblasen", "href": "/aufgaben/jagdhorn.html"},
+    {"label": "Naturschutz", "href": "/aufgaben/naturschutz.html"},
+    {"label": "Jungwildrettung", "href": "/aufgaben/jungwildrettung.html"}
+  ]
+}

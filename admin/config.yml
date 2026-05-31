@@ -131,6 +131,18 @@ collections:
             widget: "text"
             required: false
             hint: "Persönliches Grußwort, erscheint kursiv auf der Seite."
+      - label: "🔀 Reihenfolge verschieben"
+        name: "reihenfolge_kjs"
+        file: "content/nav-reihenfolge-kjs.json"
+        fields:
+          - label: "Menüpunkte (per Drag & Drop sortieren)"
+            name: "reihenfolge"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string" }
       - label: "➕ Neue KJS-Seite hinzufügen"
         name: "seiten_kjs"
         file: "content/seiten-kjs.json"
@@ -245,6 +257,18 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "🔀 Reihenfolge verschieben"
+        name: "reihenfolge_aufgaben"
+        file: "content/nav-reihenfolge-aufgaben.json"
+        fields:
+          - label: "Menüpunkte (per Drag & Drop sortieren)"
+            name: "reihenfolge"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string" }
       - label: "➕ Neue Aufgaben-Seite hinzufügen"
         name: "seiten_aufgaben"
         file: "content/seiten-aufgaben.json"
@@ -336,6 +360,18 @@ collections:
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
           - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
           - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "🔀 Reihenfolge verschieben"
+        name: "reihenfolge_verbraucher"
+        file: "content/nav-reihenfolge-verbraucher.json"
+        fields:
+          - label: "Menüpunkte (per Drag & Drop sortieren)"
+            name: "reihenfolge"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string" }
       - label: "➕ Neue Verbraucher-Seite hinzufügen"
         name: "seiten_verbraucher"
         file: "content/seiten-verbraucher.json"
@@ -599,41 +635,6 @@ collections:
                   - { label: "⏳ Offen",     value: "offen" }
                   - { label: "🔄 In Arbeit", value: "in-arbeit" }
                   - { label: "✅ Erledigt",  value: "erledigt" }
-
-  # ──────────────────────────────────────────
-  # NAVIGATIONSREIHENFOLGE
-  # ──────────────────────────────────────────
-  - name: "nav_reihenfolge"
-    label: "🔀 Navigationsreihenfolge"
-    files:
-      - label: "Reihenfolge aller Menüpunkte"
-        name: "reihenfolge"
-        file: "content/nav-reihenfolge.json"
-        fields:
-          - label: "Aufgaben der Kreisjägerschaft"
-            name: "aufgaben"
-            widget: "list"
-            summary: "{{fields.label}}"
-            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
-            fields:
-              - { label: "Name", name: "label", widget: "string" }
-              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
-          - label: "KJS Bad Segeberg"
-            name: "kjs"
-            widget: "list"
-            summary: "{{fields.label}}"
-            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
-            fields:
-              - { label: "Name", name: "label", widget: "string" }
-              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
-          - label: "Verbraucher"
-            name: "verbraucher"
-            widget: "list"
-            summary: "{{fields.label}}"
-            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
-            fields:
-              - { label: "Name", name: "label", widget: "string" }
-              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
 
   - name: "extra_navigation"
     label: "🌐 Eigene Hauptpunkte (Navigation)"
