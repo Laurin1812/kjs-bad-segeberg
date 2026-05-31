@@ -1,12 +1,3 @@
 {
-  "seiten": [
-    {
-      "titel": "Test Seite",
-      "nav_label": "Hundetest",
-      "slug": "Hundeseiteprivat",
-      "in_navigation": true,
-      "veroeffentlicht": true,
-      "inhalt": "Test für die Seite"
-    }
-  ]
+  "seiten": []
 }
