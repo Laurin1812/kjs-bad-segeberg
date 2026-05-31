@@ -77,29 +77,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Weitere Themen: Infomobil fest + eigene Seiten nach Bereich verteilen
+// Eigene Seiten nach Bereich in die Navigation verteilen
 (function() {
   var weitereItem = document.getElementById('weitere-themen-item');
   var weltereSub  = document.getElementById('weitere-themen-sub');
   if (!weitereItem || !weltereSub) return;
 
-  var currentPath = window.location.pathname;
-
-  // Infomobil immer als festen ersten Eintrag einfügen
-  var infomobilHrefs = ['/jaeger/infomobil.html', '../jaeger/infomobil.html', 'infomobil.html'];
-  var infomobilExists = infomobilHrefs.some(function(h) {
-    return weltereSub.querySelector('a[href="' + h + '"]');
-  });
-  if (!infomobilExists) {
-    var li0 = document.createElement('li');
-    var a0  = document.createElement('a');
-    a0.href = '/jaeger/infomobil.html';
-    a0.textContent = 'Infomobil';
-    if (currentPath.includes('infomobil')) a0.classList.add('active');
-    li0.appendChild(a0);
-    weltereSub.insertBefore(li0, weltereSub.firstChild);
-  }
-  weitereItem.style.display = '';
+  // "Weitere Themen"-Unterpunkt bleibt versteckt –
+  // Seiten aus seiten-weitere.json erscheinen direkt im Jäger-Dropdown
 
   // Hilfsfunktion: Unter-Dropdown im Jäger-Menü per Link-Text finden
   function findJaegerSub(textSnippet) {
@@ -148,7 +133,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   var sektionen = [
     { url: '/content/seiten-kjs.json',         target: function() { return findJaegerSub('KJS Bad Segeberg'); } },
     { url: '/content/seiten-aufgaben.json',     target: function() { return findJaegerSub('Aufgaben'); } },
-    { url: '/content/seiten-weitere.json',      target: function() { return weltereSub; } },
+    { url: '/content/seiten-weitere.json',      target: function() { return document.getElementById('jaeger-dropdown'); } },
     { url: '/content/seiten-verbraucher.json',  target: function() { return findTopDropdown('Verbraucher'); } },
     // Legacy: alte seiten.json mit bereich-Feld
     { url: '/content/seiten.json', bereich: true }
@@ -167,7 +152,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
             var t = bereich === 'kjs' ? findJaegerSub('KJS Bad Segeberg')
                   : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
                   : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
-                  : weltereSub;
+                  : document.getElementById('jaeger-dropdown');
             var href = '/seiten/?s=' + encodeURIComponent(p.slug);
             if (t && !t.querySelector('a[href="' + href + '"]')) {
               var li = document.createElement('li');
