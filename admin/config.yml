@@ -600,6 +600,41 @@ collections:
                   - { label: "🔄 In Arbeit", value: "in-arbeit" }
                   - { label: "✅ Erledigt",  value: "erledigt" }
 
+  # ──────────────────────────────────────────
+  # NAVIGATIONSREIHENFOLGE
+  # ──────────────────────────────────────────
+  - name: "nav_reihenfolge"
+    label: "🔀 Navigationsreihenfolge"
+    files:
+      - label: "Reihenfolge aller Menüpunkte"
+        name: "reihenfolge"
+        file: "content/nav-reihenfolge.json"
+        fields:
+          - label: "Aufgaben der Kreisjägerschaft"
+            name: "aufgaben"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
+          - label: "KJS Bad Segeberg"
+            name: "kjs"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
+          - label: "Verbraucher"
+            name: "verbraucher"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge per Drag & Drop in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link (nicht ändern)", name: "href", widget: "string" }
+
   - name: "extra_navigation"
     label: "🌐 Eigene Hauptpunkte (Navigation)"
     files:
