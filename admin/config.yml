@@ -152,7 +152,7 @@ collections:
   # JÄGER › AUFGABEN
   # ──────────────────────────────────────────
   - name: "aufgaben"
-    label: "🎯 Jäger › Aufgaben"
+    label: "🎯 Jäger › Aufgaben der Kreisjägerschaft"
     files:
       - label: "Schießwesen"
         name: "schiessen"
