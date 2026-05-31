@@ -1,12 +1,3 @@
 {
-  "seiten": [
-    {
-      "in_navigation": true,
-      "veroeffentlicht": true,
-      "titel": "test1",
-      "nav_label": "test1",
-      "slug": "test ",
-      "inhalt": "ffff"
-    }
-  ]
+  "seiten": []
 }
