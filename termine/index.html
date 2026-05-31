@@ -218,6 +218,17 @@
 
 <script src="../js/main.js"></script>
 <script>
+// ISO-Datum (2025-12-25) → Deutsch (25.12.2025)
+function formatDatum(raw) {
+  if (!raw) return '';
+  // Bereits deutsches Format: DD.MM.YYYY oder "25. Dezember 2025"
+  if (/^\d{2}\.\d{2}\.\d{4}/.test(raw) || /^\d{1,2}\. /.test(raw)) return raw;
+  // ISO-Format YYYY-MM-DD oder mit Zeitanteil
+  var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[3] + '.' + m[2] + '.' + m[1];
+  return raw;
+}
+
 // Goldene Kategorien bekommen badge--gold
 const goldKategorien = ['Jagdhornblasen','Kreisveranstaltung','Hauptversammlung','Tradition'];
 let aktuellerFilter = 'Alle';
@@ -235,7 +246,7 @@ function renderTermine(termine) {
   tbody.innerHTML = gefiltert.map(t => {
     const gold = goldKategorien.includes(t.kategorie) ? ' badge--gold' : '';
     return `<tr>
-      <td><strong>${t.datum}</strong></td>
+      <td><strong>${formatDatum(t.datum)}</strong></td>
       <td>${t.uhrzeit}</td>
       <td>${t.veranstaltung}</td>
       <td>${t.ort}</td>
