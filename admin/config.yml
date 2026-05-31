@@ -298,6 +298,18 @@ collections:
         fields:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - label: "🔀 Reihenfolge verschieben"
+        name: "reihenfolge_weitere"
+        file: "content/nav-reihenfolge-weitere.json"
+        fields:
+          - label: "Menüpunkte (per Drag & Drop sortieren)"
+            name: "reihenfolge"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge. Neue Seiten hier nach dem Erstellen eintragen."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string" }
       - label: "➕ Neue Weitere-Themen-Seite hinzufügen"
         name: "seiten_weitere"
         file: "content/seiten-weitere.json"

@@ -267,6 +267,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       if (a && a.textContent.indexOf('Verbraucher') !== -1) reorderSub(li.querySelector('ul.dropdown'), d.reihenfolge);
     });
   }).catch(function(){});
+
+  // Weitere Themen (dynamisch eingefügte Seiten aus seiten-weitere.json)
+  fetch('/content/nav-reihenfolge-weitere.json').then(function(r){return r.json();}).then(function(d){
+    if (!jaegerDD || !d.reihenfolge || !d.reihenfolge.length) return;
+    // Kleine Verzögerung damit die dynamisch eingefügten Seiten bereits im DOM sind
+    setTimeout(function() {
+      reorderSub(jaegerDD, d.reihenfolge);
+    }, 300);
+  }).catch(function(){});
 })();
 
 // Contact form handler (Formsubmit.co)
