@@ -92,6 +92,7 @@
       { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
+    { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
   ];
 
   /* ────────────────────────────────────────────────────────────
@@ -384,6 +385,11 @@
       return;
     }
 
+    if (def.form === 'medien') {
+      renderMedian();
+      return;
+    }
+
     if (!def.file) return;
 
     showPanelLoading(def.label);
@@ -560,6 +566,20 @@
       '</div>' +
       '</div>';
   }
+  // Dropdown mit freier Texteingabe (datalist)
+  function fCombobox(id, label, val, options) {
+    var listId = 'dl-' + id;
+    var opts = options.map(function(o) {
+      return '<option value="' + escAttr(o) + '">';
+    }).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label" for="f-' + id + '">' + escHtml(label) + '</label>' +
+      '<input class="field-input" list="' + listId + '" id="f-' + id + '" value="' + escAttr(val || '') + '" placeholder="Auswählen oder eigene Kategorie eingeben">' +
+      '<datalist id="' + listId + '">' + opts + '</datalist>' +
+      '<p class="field-hint">Vorschläge aus der Liste oder eigenen Text eingeben.</p>' +
+    '</div>';
+  }
+
   function fDate(id, label, val) {
     // Convert DD.MM.YYYY to YYYY-MM-DD for input[type=date]
     var iso = datumToIso(val || '');
@@ -714,7 +734,7 @@
         '<div class="form-card">' +
           fText('b-titel', 'Titel', b.titel) +
           fDate('b-datum', 'Datum', b.datum) +
-          fSelect('b-kategorie', 'Kategorie', b.kategorie, KAT_NEWS) +
+          fCombobox('b-kategorie', 'Kategorie', b.kategorie, KAT_NEWS) +
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
           fText('b-link', 'Externer Link (optional)', b.link) +
@@ -796,7 +816,7 @@
         fText('t-uhrzeit', 'Uhrzeit', t.uhrzeit, 'z.B. 18:00 Uhr') +
         fText('t-veranstaltung', 'Veranstaltung', t.veranstaltung) +
         fText('t-ort', 'Ort', t.ort) +
-        fSelect('t-kategorie', 'Kategorie', t.kategorie, KAT_TERMINE) +
+        fCombobox('t-kategorie', 'Kategorie', t.kategorie, KAT_TERMINE) +
       '</div></div>';
     id('admin-main').innerHTML = html;
   };
@@ -1345,6 +1365,78 @@
     });
     return data;
   }
+
+  /* ────────────────────────────────────────────────────────────
+     MEDIEN & BILDER (standalone gallery panel)
+  ──────────────────────────────────────────────────────────── */
+  function renderMedian() {
+    var html = '<div class="panel-header"><h2>🖼️ Medien & Bilder</h2></div>' +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Bild hochladen</div>' +
+          '<div class="upload-row" style="margin-bottom:1.25rem;">' +
+            '<label class="btn btn-primary" for="medien-upload-input">📤 Bild hochladen</label>' +
+            '<input type="file" id="medien-upload-input" accept="image/*" style="display:none">' +
+            '<span id="medien-upload-status" style="margin-left:.75rem;color:var(--text-muted);font-size:.85rem;"></span>' +
+          '</div>' +
+          '<div class="form-card-title">Alle Bilder</div>' +
+          '<div class="img-gallery" id="medien-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+      '</div>';
+    id('admin-main').innerHTML = html;
+    loadMedianGallery();
+
+    id('medien-upload-input').addEventListener('change', async function() {
+      var file = this.files[0];
+      if (!file) return;
+      var status = id('medien-upload-status');
+      status.textContent = '⏳ Wird hochgeladen…';
+      try {
+        var b64 = await fileToBase64(file);
+        await apiUploadImage(file.name, b64);
+        status.textContent = '✅ Hochgeladen!';
+        loadMedianGallery();
+      } catch(e) {
+        status.textContent = '❌ ' + e.message;
+      }
+    });
+  }
+
+  async function loadMedianGallery() {
+    var gallery = id('medien-gallery');
+    if (!gallery) return;
+    gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
+    try {
+      var files = await apiGetDir('images');
+      var imgs = files.filter(function(f) {
+        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+      });
+      if (!imgs.length) {
+        gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
+        return;
+      }
+      gallery.innerHTML = imgs.map(function(f) {
+        var url = '/images/' + f.name;
+        return '<div class="gallery-img-wrap">' +
+          '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
+          '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
+          '<div style="text-align:center;margin-top:.25rem">' +
+            '<button class="btn btn-sm btn-outline" onclick="medienCopyUrl(\'' + escAttr(url) + '\')">📋 URL kopieren</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      gallery.innerHTML = '<div class="gallery-loading">Fehler: ' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  window.medienCopyUrl = function(url) {
+    navigator.clipboard.writeText(url).then(function() {
+      toast('📋 URL kopiert: ' + url, 'ok');
+    }).catch(function() {
+      prompt('URL zum Kopieren:', url);
+    });
+  };
 
   /* ────────────────────────────────────────────────────────────
      NAVIGATION EXTRA (Neue Hauptnavigationspunkte)

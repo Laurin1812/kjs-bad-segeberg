@@ -152,6 +152,10 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   border-radius: var(--radius); padding: 1.25rem 1.5rem;
   min-width: 150px; text-align: center; font-size: .9rem;
   color: var(--text); line-height: 1.6;
+  transition: border-color .15s, box-shadow .15s;
+}
+.hint-card:hover {
+  border-color: var(--green); box-shadow: 0 2px 8px rgba(46,107,48,.15);
 }
 
 /* Panel header */

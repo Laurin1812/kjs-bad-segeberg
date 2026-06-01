@@ -51,9 +51,9 @@
         <h2>Willkommen im Admin-Bereich</h2>
         <p>Wählen Sie links einen Bereich aus, um Inhalte zu bearbeiten.</p>
         <div class="welcome-hints">
-          <div class="hint-card">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>
-          <div class="hint-card">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>
-          <div class="hint-card">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>
+          <div class="hint-card" onclick="document.querySelector('[data-navkey=aktuelles]').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>
+          <div class="hint-card" onclick="document.querySelector('[data-navkey=termine]').click()" style="cursor:pointer">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>
+          <div class="hint-card" onclick="document.querySelector('[data-navkey=jaeger]').click()" style="cursor:pointer">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>
         </div>
       </div>
     </main>
