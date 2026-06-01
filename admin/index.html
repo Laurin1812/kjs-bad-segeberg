@@ -4,34 +4,110 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin – KJS Bad Segeberg</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script>
-    // Rollenprüfung: Redakteure gehören zu /redaktion, nicht hierher
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", function(user) {
-        if (user) {
-          var roles = user.app_metadata && user.app_metadata.roles;
-          var isEditor = roles && roles.some(function(r){
-            return r.toLowerCase()==='editor' || r.toLowerCase()==='redakteur';
-          });
-          if (isEditor) { window.location.href = "/redaktion/"; }
-        }
-      });
-    }
-  </script>
+  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  <style>
-    #profil-btn {
-      position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-      background: #2e6b30; color: #fff; border: none; border-radius: 50px;
-      padding: .6rem 1.2rem; font-size: .85rem; font-weight: 600;
-      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25);
-      text-decoration: none; display: flex; align-items: center; gap: .4rem;
-    }
-    #profil-btn:hover { background: #1e4620; }
-  </style>
-  <a id="profil-btn" href="/admin/profil.html">👤 Mein Profil</a>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🦌</div>
+    <h1>KJS Bad Segeberg</h1>
+    <p class="login-sub">Admin-Bereich</p>
+    <button id="login-btn" class="btn btn-primary btn-lg">🔐 Anmelden</button>
+    <p class="login-hint">Anmeldung mit Ihrem E-Mail-Konto</p>
+  </div>
+</div>
+
+<!-- ── ADMIN APP ──────────────────────────────────────────────── -->
+<div id="admin-app" style="display:none">
+
+  <!-- Topbar -->
+  <header class="admin-topbar">
+    <div class="topbar-brand">
+      <span class="topbar-icon">🦌</span>
+      <span class="topbar-title">KJS Admin</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="topbar-user" id="user-name"></span>
+      <a href="/" target="_blank" rel="noopener" class="btn btn-sm btn-outline">🌐 Website ansehen</a>
+      <button id="logout-btn" class="btn btn-sm btn-ghost">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="admin-body">
+
+    <!-- Sidebar -->
+    <nav class="admin-sidebar" id="admin-sidebar" aria-label="Navigation">
+      <div class="sidebar-loading">Wird geladen…</div>
+    </nav>
+
+    <!-- Main panel -->
+    <main class="admin-main" id="admin-main">
+      <div class="welcome-screen">
+        <div class="welcome-icon">🦌</div>
+        <h2>Willkommen im Admin-Bereich</h2>
+        <p>Wählen Sie links einen Bereich aus, um Inhalte zu bearbeiten.</p>
+        <div class="welcome-hints">
+          <div class="hint-card">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>
+          <div class="hint-card">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>
+          <div class="hint-card">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ── BILD-PICKER MODAL ──────────────────────────────────────── -->
+<div id="img-modal" class="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Bild wählen">
+  <div class="modal-backdrop" id="img-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Bild wählen</h3>
+      <button class="modal-close-btn" id="img-close" aria-label="Schließen">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="upload-row">
+        <label class="btn btn-primary" for="img-upload-input">
+          📤 Neues Bild hochladen
+        </label>
+        <input type="file" id="img-upload-input" accept="image/*" style="display:none">
+        <span id="img-upload-status"></span>
+      </div>
+      <div class="img-gallery" id="img-gallery">
+        <div class="gallery-loading">Bilder werden geladen…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BESTÄTIGUNGSDIALOG ─────────────────────────────────────── -->
+<div id="confirm-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="confirm-backdrop"></div>
+  <div class="modal-box modal-box--sm">
+    <div class="modal-head">
+      <h3 id="confirm-title">Bestätigung</h3>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-outline" id="confirm-cancel">Abbrechen</button>
+        <button class="btn btn-danger" id="confirm-ok">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────────────────── -->
+<div id="toast" class="toast" role="status" aria-live="polite" style="display:none"></div>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────────── -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>
