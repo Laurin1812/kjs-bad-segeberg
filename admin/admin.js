@@ -186,8 +186,52 @@
   ──────────────────────────────────────────────────────────── */
   function initApp() {
     renderSidebar(NAV);
-    // Load dynamic "Weitere Themen" children
-    loadDynamicChildren();
+    loadDynamicChildren();       // "Weitere Themen" (dynamicChildren:true)
+    loadAllManifestItems();      // KJS / Aufgaben / Verbraucher custom pages
+  }
+
+  // Inserts custom pages created via "Neue Unterseite" into the sidebar
+  async function loadAllManifestItems() {
+    var sections = [
+      { insertBeforeKey: 'new-kjs',         file: 'content/seiten-kjs.json',         dir: 'content/seiten-kjs',         keyPrefix: 'kjs-dyn',         level: 2 },
+      { insertBeforeKey: 'new-aufgaben',    file: 'content/seiten-aufgaben.json',    dir: 'content/seiten-aufgaben',    keyPrefix: 'aufgaben-dyn',    level: 2 },
+      { insertBeforeKey: 'new-verbraucher', file: 'content/seiten-verbraucher.json', dir: 'content/seiten-verbraucher', keyPrefix: 'verbraucher-dyn', level: 2 },
+    ];
+
+    for (var i = 0; i < sections.length; i++) {
+      var sec = sections[i];
+      try {
+        var resp = await apiGet(sec.file);
+        var data = JSON.parse(fromBase64(resp.content));
+        var seiten = (data.seiten || []).filter(function(s) {
+          return s.veroeffentlicht !== false;
+        });
+        if (!seiten.length) continue;
+
+        var addBtn = document.querySelector('[data-navkey="' + sec.insertBeforeKey + '"]');
+        if (!addBtn) continue;
+
+        seiten.forEach(function(s) {
+          // Skip if already in sidebar (avoid duplicates on re-render)
+          var dynKey = sec.keyPrefix + '-' + s.slug;
+          if (document.querySelector('[data-navkey="' + dynKey + '"]')) return;
+
+          var def = {
+            key:   dynKey,
+            label: s.nav_label || s.slug,
+            file:  sec.dir + '/' + s.slug + '.json',
+            form:  'standard',
+          };
+          var li = navItemEl(def, sec.level, true);
+          li.addEventListener('click', (function(d) {
+            return function() { selectSection(d); };
+          }(def)));
+          addBtn.parentNode.insertBefore(li, addBtn);
+        });
+      } catch(e) {
+        // Manifest not yet present — no pages created yet, silently ignore
+      }
+    }
   }
 
   function renderSidebar(items, container) {
