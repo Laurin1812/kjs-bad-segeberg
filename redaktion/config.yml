@@ -23,8 +23,21 @@ collections:
             summary: "{{fields.datum}} – {{fields.titel}}"
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
-              - { label: "Datum",           name: "datum",     widget: "string", hint: "z.B. 28. April 2025" }
-              - { label: "Kategorie",       name: "kategorie", widget: "string", hint: "z.B. Naturschutz" }
-              - { label: "Bild",            name: "bild",      widget: "image",  required: false }
-              - { label: "Kurzbeschreibung",name: "text",      widget: "text" }
-              - { label: "Link (optional)", name: "link",      widget: "string", required: false }
+              - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD.MM.YYYY", format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
+              - label: "Kategorie"
+                name: "kategorie"
+                widget: "select"
+                options:
+                  - "Allgemein"
+                  - "Naturschutz"
+                  - "Jagd"
+                  - "Jungwildrettung"
+                  - "Hundeausbildung"
+                  - "Schießwesen"
+                  - "Jugend"
+                  - "Jagdhornblasen"
+                  - "Veranstaltung"
+                  - "Pressemitteilung"
+              - { label: "Bild",            name: "bild",      widget: "image",    required: false }
+              - { label: "Kurzbeschreibung",name: "text",      widget: "markdown" }
+              - { label: "Link (optional)", name: "link",      widget: "string",   required: false }

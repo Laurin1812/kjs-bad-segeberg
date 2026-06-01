@@ -164,44 +164,63 @@
     return;
   }
 
-  // Alle Sektions-Dateien durchsuchen
-  var sektionsDateien = [
-    '../content/seiten-kjs.json',
-    '../content/seiten-aufgaben.json',
-    '../content/seiten-weitere.json',
-    '../content/seiten-verbraucher.json',
-    '../content/seiten.json',           // Legacy
-    '../content/navigation-extra.json'  // Eigene Hauptpunkte
+  // 1. Zuerst in Ordner-Sammlungen suchen (neue Seiten, einzelne JSON-Dateien)
+  var ordnerPfade = [
+    '../content/seiten-kjs/',
+    '../content/seiten-aufgaben/',
+    '../content/seiten-weitere/',
+    '../content/seiten-verbraucher/'
   ];
 
-  Promise.all(sektionsDateien.map(function(url) {
-    return fetch(url).then(function(r) { return r.ok ? r.json() : {seiten:[]}; }).catch(function() { return {seiten:[]}; });
-  }))
-  .then(function(results) {
-    var alleSeiten = [];
-    results.forEach(function(data, idx) {
-      if (data.seiten) {
-        alleSeiten = alleSeiten.concat(data.seiten);
-      }
-      // navigation-extra.json hat eine andere Struktur: hauptpunkte[].seiten[]
-      if (data.hauptpunkte) {
-        data.hauptpunkte.forEach(function(hp) {
-          if (hp.seiten) alleSeiten = alleSeiten.concat(hp.seiten);
+  function versucheOrdner(i) {
+    if (i >= ordnerPfade.length) {
+      // 2. Fallback: In Manifest-Dateien suchen (Legacy-Format mit eingebettetem Inhalt)
+      var sektionsDateien = [
+        '../content/seiten-kjs.json',
+        '../content/seiten-aufgaben.json',
+        '../content/seiten-weitere.json',
+        '../content/seiten-verbraucher.json',
+        '../content/seiten.json',
+        '../content/navigation-extra.json'
+      ];
+      Promise.all(sektionsDateien.map(function(url) {
+        return fetch(url).then(function(r) { return r.ok ? r.json() : {seiten:[]}; }).catch(function() { return {seiten:[]}; });
+      }))
+      .then(function(results) {
+        var alleSeiten = [];
+        results.forEach(function(data) {
+          if (data.seiten) alleSeiten = alleSeiten.concat(data.seiten);
+          if (data.hauptpunkte) {
+            data.hauptpunkte.forEach(function(hp) {
+              if (hp.seiten) alleSeiten = alleSeiten.concat(hp.seiten);
+            });
+          }
         });
-      }
-    });
-    var seite = alleSeiten.find(function(s) {
-      return s.slug === slug && s.veroeffentlicht === true;
-    });
-    if (seite) {
-      renderSeite(seite);
-    } else {
-      zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+        var seite = alleSeiten.find(function(s) {
+          return s.slug === slug && s.veroeffentlicht === true;
+        });
+        if (seite) {
+          renderSeite(seite);
+        } else {
+          zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
+        }
+      })
+      .catch(function() { zeigeFehlermeldung('Diese Seite wurde nicht gefunden.'); });
+      return;
     }
-  })
-  .catch(function() {
-    zeigeFehlermeldung('Diese Seite wurde nicht gefunden.');
-  });
+    fetch(ordnerPfade[i] + slug + '.json')
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(s) {
+        if (s.veroeffentlicht === true) {
+          renderSeite(s);
+        } else {
+          versucheOrdner(i + 1);
+        }
+      })
+      .catch(function() { versucheOrdner(i + 1); });
+  }
+
+  versucheOrdner(0);
 
   function renderSeite(seite) {
     var titel = seite.titel || 'Seite';
@@ -209,21 +228,46 @@
     document.getElementById('breadcrumb-label').textContent = seite.nav_label || titel;
     document.title = titel + ' – Kreisjägerschaft Bad Segeberg e.V.';
 
+    // Hero-Bild setzen falls vorhanden
+    if (seite.hero_bild) {
+      var heroEl = document.getElementById('page-hero');
+      if (heroEl) heroEl.style.backgroundImage = "url('" + seite.hero_bild + "')";
+    }
+
     var inhaltEl = document.getElementById('seite-inhalt');
     var html = '';
 
+    // Datum (Legacy-Format)
     if (seite.datum) {
       html += '<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.5rem;">📅 ' + seite.datum + '</p>';
     }
 
+    // Einleitungstext
+    if (seite.intro) {
+      html += '<p style="font-size:1.1rem;margin-bottom:1.5rem;">' + seite.intro + '</p>';
+    }
+
+    // Bild
+    if (seite.bild) {
+      html += '<img src="' + seite.bild + '" alt="' + (seite.bild_alt || '') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">';
+    }
+
+    // Hauptinhalt (Markdown)
     if (seite.inhalt) {
       if (typeof marked !== 'undefined') {
         html += marked.parse(seite.inhalt);
       } else {
         html += '<div>' + seite.inhalt.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</div>';
       }
-    } else {
+    } else if (!seite.intro) {
       html += '<p style="color:var(--text-muted);">Kein Inhalt vorhanden.</p>';
+    }
+
+    // Kontakt
+    if (seite.kontakt_name || seite.kontakt_email) {
+      html += '<p style="margin-top:1.5rem;"><strong>Kontakt:</strong> ' + (seite.kontakt_name || '');
+      if (seite.kontakt_email) html += ' &middot; <a href="mailto:' + seite.kontakt_email + '">' + seite.kontakt_email + '</a>';
+      html += '</p>';
     }
 
     inhaltEl.innerHTML = html;

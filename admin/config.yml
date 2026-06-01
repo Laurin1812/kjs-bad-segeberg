@@ -39,9 +39,12 @@ collections:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
       - label: "Vorstand"
         name: "mitglieder"
         file: "content/vorstand.json"
@@ -100,9 +103,12 @@ collections:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
       - label: "Jäger/in werden"
         name: "jaeger_werden"
         file: "content/jaeger/jaeger-werden.json"
@@ -110,9 +116,68 @@ collections:
           - { label: "Seitentitel", name: "titel", widget: "string" }
           - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
-          - { label: "Bild", name: "bild", widget: "image", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
           - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
           - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - label: "🔀 Reihenfolge verschieben"
+        name: "reihenfolge_kjs"
+        file: "content/nav-reihenfolge-kjs.json"
+        fields:
+          - label: "Menüpunkte (per Drag & Drop sortieren)"
+            name: "reihenfolge"
+            widget: "list"
+            summary: "{{fields.label}}"
+            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge."
+            fields:
+              - { label: "Name", name: "label", widget: "string" }
+              - { label: "Link", name: "href", widget: "string" }
+      - label: "🔗 KJS-Unterseiten in Navigation eintragen"
+        name: "seiten_kjs"
+        file: "content/seiten-kjs.json"
+        fields:
+          - label: "Navigationseinträge"
+            name: "seiten"
+            widget: "list"
+            summary: "{{fields.nav_label}} ({{fields.slug}})"
+            hint: "Seiten werden unter '📝 KJS – Neue Unterseiten' erstellt. Hier danach den Slug eintragen, damit die Seite im Menü erscheint."
+            fields:
+              - { label: "URL-Slug (exakt wie beim Erstellen angegeben)", name: "slug",            widget: "string" }
+              - { label: "Menü-Label",                                    name: "nav_label",       widget: "string" }
+              - { label: "Im Menü anzeigen?",                             name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",                               name: "veroeffentlicht", widget: "boolean", default: true }
+
+  # ──────────────────────────────────────────
+  # KJS – NEUE UNTERSEITEN (Ordner-Sammlung)
+  # ──────────────────────────────────────────
+  - name: "kjs_unterseiten"
+    label: "📝 KJS – Neue Unterseiten"
+    folder: "content/seiten-kjs"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "titel"
+    fields:
+      - { label: "Seitentitel", name: "titel", widget: "string" }
+      - { label: "Menü-Label", name: "nav_label", widget: "string", hint: "Kurzer Text fürs Menü" }
+      - { label: "URL-Kürzel (Slug)", name: "slug", widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'. Wird als Dateiname und URL verwendet." }
+      - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
+      - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+      - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
+      - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+      - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - { label: "Im Menü anzeigen?", name: "in_navigation", widget: "boolean", default: true }
+      - { label: "Veröffentlicht?", name: "veroeffentlicht", widget: "boolean", default: false }
+
+  # ──────────────────────────────────────────
+  # KREISJÄGERMEISTER (eigener Menüpunkt unter Jäger)
+  # ──────────────────────────────────────────
+  - name: "kreisjjaegermeister"
+    label: "🏛️ Kreisjägermeister"
+    files:
       - label: "Kreisjägermeister"
         name: "kjm"
         file: "content/kreisjjaegermeister.json"
@@ -131,34 +196,6 @@ collections:
             widget: "text"
             required: false
             hint: "Persönliches Grußwort, erscheint kursiv auf der Seite."
-      - label: "🔀 Reihenfolge verschieben"
-        name: "reihenfolge_kjs"
-        file: "content/nav-reihenfolge-kjs.json"
-        fields:
-          - label: "Menüpunkte (per Drag & Drop sortieren)"
-            name: "reihenfolge"
-            widget: "list"
-            summary: "{{fields.label}}"
-            hint: "Ziehe die Einträge mit dem = Symbol in die gewünschte Reihenfolge."
-            fields:
-              - { label: "Name", name: "label", widget: "string" }
-              - { label: "Link", name: "href", widget: "string" }
-      - label: "➕ Neue KJS-Seite hinzufügen"
-        name: "seiten_kjs"
-        file: "content/seiten-kjs.json"
-        fields:
-          - label: "Seiten"
-            name: "seiten"
-            widget: "list"
-            summary: "{{fields.nav_label}} ({{fields.slug}})"
-            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'KJS Bad Segeberg' anzulegen."
-            fields:
-              - { label: "Seitentitel",       name: "titel",           widget: "string" }
-              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
-              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
-              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
-              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
 
   # ──────────────────────────────────────────
   # JÄGER › AUFGABEN
@@ -269,22 +306,43 @@ collections:
             fields:
               - { label: "Name", name: "label", widget: "string" }
               - { label: "Link", name: "href", widget: "string" }
-      - label: "➕ Neue Aufgaben-Seite hinzufügen"
+      - label: "🔗 Aufgaben-Unterseiten in Navigation eintragen"
         name: "seiten_aufgaben"
         file: "content/seiten-aufgaben.json"
         fields:
-          - label: "Seiten"
+          - label: "Navigationseinträge"
             name: "seiten"
             widget: "list"
             summary: "{{fields.nav_label}} ({{fields.slug}})"
-            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'Aufgaben' anzulegen."
+            hint: "Seiten werden unter '📝 Aufgaben – Neue Unterseiten' erstellt. Hier danach den Slug eintragen, damit die Seite im Menü erscheint."
             fields:
-              - { label: "Seitentitel",       name: "titel",           widget: "string" }
-              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
-              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
-              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
-              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
+              - { label: "URL-Slug (exakt wie beim Erstellen angegeben)", name: "slug",            widget: "string" }
+              - { label: "Menü-Label",                                    name: "nav_label",       widget: "string" }
+              - { label: "Im Menü anzeigen?",                             name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",                               name: "veroeffentlicht", widget: "boolean", default: true }
+
+  # ──────────────────────────────────────────
+  # AUFGABEN – NEUE UNTERSEITEN (Ordner-Sammlung)
+  # ──────────────────────────────────────────
+  - name: "aufgaben_unterseiten"
+    label: "📝 Aufgaben – Neue Unterseiten"
+    folder: "content/seiten-aufgaben"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "titel"
+    fields:
+      - { label: "Seitentitel", name: "titel", widget: "string" }
+      - { label: "Menü-Label", name: "nav_label", widget: "string", hint: "Kurzer Text fürs Menü" }
+      - { label: "URL-Kürzel (Slug)", name: "slug", widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'. Wird als Dateiname und URL verwendet." }
+      - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
+      - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+      - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
+      - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+      - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - { label: "Im Menü anzeigen?", name: "in_navigation", widget: "boolean", default: true }
+      - { label: "Veröffentlicht?", name: "veroeffentlicht", widget: "boolean", default: false }
 
   # ──────────────────────────────────────────
   # JÄGER › WEITERE THEMEN
@@ -317,22 +375,43 @@ collections:
             fields:
               - { label: "Name", name: "label", widget: "string" }
               - { label: "Link", name: "href", widget: "string" }
-      - label: "➕ Neue Weitere-Themen-Seite hinzufügen"
+      - label: "🔗 Weitere-Themen-Seiten in Navigation eintragen"
         name: "seiten_weitere"
         file: "content/seiten-weitere.json"
         fields:
-          - label: "Seiten"
+          - label: "Navigationseinträge"
             name: "seiten"
             widget: "list"
             summary: "{{fields.nav_label}} ({{fields.slug}})"
-            hint: "Klicke auf '+ Hinzufügen' um eine neue Seite unter 'Weitere Themen' anzulegen."
+            hint: "Seiten werden unter '📝 Weitere Themen – Neue Seiten' erstellt. Hier danach den Slug eintragen, damit die Seite im Menü erscheint."
             fields:
-              - { label: "Seitentitel",       name: "titel",           widget: "string" }
-              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
-              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'" }
-              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
-              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
+              - { label: "URL-Slug (exakt wie beim Erstellen angegeben)", name: "slug",            widget: "string" }
+              - { label: "Menü-Label",                                    name: "nav_label",       widget: "string" }
+              - { label: "Im Menü anzeigen?",                             name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",                               name: "veroeffentlicht", widget: "boolean", default: true }
+
+  # ──────────────────────────────────────────
+  # WEITERE THEMEN – NEUE UNTERSEITEN (Ordner-Sammlung)
+  # ──────────────────────────────────────────
+  - name: "weitere_unterseiten"
+    label: "📝 Weitere Themen – Neue Seiten"
+    folder: "content/seiten-weitere"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "titel"
+    fields:
+      - { label: "Seitentitel", name: "titel", widget: "string" }
+      - { label: "Menü-Label", name: "nav_label", widget: "string", hint: "Kurzer Text fürs Menü" }
+      - { label: "URL-Kürzel (Slug)", name: "slug", widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdrecht'. Wird als Dateiname und URL verwendet." }
+      - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
+      - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+      - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
+      - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+      - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - { label: "Im Menü anzeigen?", name: "in_navigation", widget: "boolean", default: true }
+      - { label: "Veröffentlicht?", name: "veroeffentlicht", widget: "boolean", default: false }
 
   # ──────────────────────────────────────────
   # VERBRAUCHER
@@ -391,22 +470,43 @@ collections:
             fields:
               - { label: "Name", name: "label", widget: "string" }
               - { label: "Link", name: "href", widget: "string" }
-      - label: "➕ Neue Verbraucher-Seite hinzufügen"
+      - label: "🔗 Verbraucher-Unterseiten in Navigation eintragen"
         name: "seiten_verbraucher"
         file: "content/seiten-verbraucher.json"
         fields:
-          - label: "Seiten"
+          - label: "Navigationseinträge"
             name: "seiten"
             widget: "list"
             summary: "{{fields.nav_label}} ({{fields.slug}})"
-            hint: "Klicke auf '+ Hinzufügen' um eine neue Unterseite unter 'Verbraucher' anzulegen."
+            hint: "Seiten werden unter '📝 Verbraucher – Neue Unterseiten' erstellt. Hier danach den Slug eintragen, damit die Seite im Menü erscheint."
             fields:
-              - { label: "Seitentitel",       name: "titel",           widget: "string" }
-              - { label: "Menü-Label",        name: "nav_label",       widget: "string", hint: "Kurzer Text fürs Menü" }
-              - { label: "URL-Kürzel (Slug)", name: "slug",            widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'jagdfleisch'" }
-              - { label: "Im Menü anzeigen?", name: "in_navigation",   widget: "boolean", default: true }
-              - { label: "Veröffentlicht?",   name: "veroeffentlicht", widget: "boolean", default: false }
-              - { label: "Inhalt",            name: "inhalt",          widget: "markdown", hint: "Seiteninhalt – Bilder können über den Bild-Button eingefügt werden" }
+              - { label: "URL-Slug (exakt wie beim Erstellen angegeben)", name: "slug",            widget: "string" }
+              - { label: "Menü-Label",                                    name: "nav_label",       widget: "string" }
+              - { label: "Im Menü anzeigen?",                             name: "in_navigation",   widget: "boolean", default: true }
+              - { label: "Veröffentlicht?",                               name: "veroeffentlicht", widget: "boolean", default: true }
+
+  # ──────────────────────────────────────────
+  # VERBRAUCHER – NEUE UNTERSEITEN (Ordner-Sammlung)
+  # ──────────────────────────────────────────
+  - name: "verbraucher_unterseiten"
+    label: "📝 Verbraucher – Neue Unterseiten"
+    folder: "content/seiten-verbraucher"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "titel"
+    fields:
+      - { label: "Seitentitel", name: "titel", widget: "string" }
+      - { label: "Menü-Label", name: "nav_label", widget: "string", hint: "Kurzer Text fürs Menü" }
+      - { label: "URL-Kürzel (Slug)", name: "slug", widget: "string", hint: "Nur Kleinbuchstaben und Bindestriche, z.B. 'wildbret'. Wird als Dateiname und URL verwendet." }
+      - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+      - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
+      - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+      - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
+      - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+      - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+      - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
+      - { label: "Im Menü anzeigen?", name: "in_navigation", widget: "boolean", default: true }
+      - { label: "Veröffentlicht?", name: "veroeffentlicht", widget: "boolean", default: false }
 
   # ──────────────────────────────────────────
   # TERMINE

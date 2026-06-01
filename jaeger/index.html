@@ -107,14 +107,17 @@
     </main>
     <script>
       fetch('../content/jaeger/uebersicht.json').then(r=>r.json()).then(d=>{
+        if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
         const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
         let inhalt = '';
         if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
+        const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p style="margin-top:1rem;"><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
         document.getElementById('page-main').innerHTML = `
           <h2>${d.untertitel||''}</h2>
           <p>${d.intro||''}</p>
           ${bild}
           ${inhalt ? '<div>' + inhalt + '</div>' : ''}
+          ${kontakt}
           <div class="grid-3" style="margin: 2.5rem 0;">
             <a href="vorstand.html" class="service-card">
               <div class="service-card__img-wrap"><img class="service-card__img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=70" alt="Vorstand" loading="lazy"></div>
