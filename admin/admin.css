@@ -23,7 +23,7 @@
   --shadow-md:   0 4px 16px rgba(0,0,0,.12);
 }
 
-html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
+html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
 
 /* ── BUTTONS ──────────────────────────────────────────────────── */
 .btn {
@@ -78,22 +78,23 @@ html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size:
 .topbar-user  { font-size: .85rem; opacity: .85; }
 
 /* ── LAYOUT ───────────────────────────────────────────────────── */
-#admin-app { display: flex; flex-direction: column; }
+#admin-app { height: 100%; }
 .admin-body {
   display: flex;
   position: fixed;
   top: var(--topbar-h);
   left: 0; right: 0; bottom: 0;
-  overflow: hidden;
 }
 
 /* ── SIDEBAR ──────────────────────────────────────────────────── */
 .admin-sidebar {
-  width: var(--sidebar-w); flex-shrink: 0;
-  background: var(--white); border-right: 1px solid var(--border);
-  overflow-y: auto; overflow-x: hidden;
-  display: flex; flex-direction: column;
-  min-height: 0; height: 100%;
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--white);
+  border-right: 1px solid var(--border);
 }
 .sidebar-loading { padding: 1.5rem 1rem; color: var(--text-muted); }
 
@@ -130,9 +131,11 @@ html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size:
 
 /* ── MAIN PANEL ───────────────────────────────────────────────── */
 .admin-main {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg);
-  min-height: 0; height: 100%;
 }
 
 /* Welcome */
