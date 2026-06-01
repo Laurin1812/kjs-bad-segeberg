@@ -297,7 +297,14 @@ collections:
         file: "content/jaeger/infomobil.json"
         fields:
           - { label: "Seitentitel", name: "titel", widget: "string" }
+          - { label: "Untertitel", name: "untertitel", widget: "string", required: false }
           - { label: "Einleitungstext", name: "intro", widget: "text", required: false }
+          - { label: "Bild (Inhalt)", name: "bild", widget: "image", required: false }
+          - { label: "Bild Beschreibung", name: "bild_alt", widget: "string", required: false }
+          - { label: "Hero-Hintergrundbild", name: "hero_bild", widget: "image", required: false, hint: "Großes Bild oben auf der Seite" }
+          - { label: "Inhalt (Markdown)", name: "inhalt", widget: "markdown", required: false }
+          - { label: "Kontakt Name", name: "kontakt_name", widget: "string", required: false }
+          - { label: "Kontakt E-Mail", name: "kontakt_email", widget: "string", required: false }
       - label: "🔀 Reihenfolge verschieben"
         name: "reihenfolge_weitere"
         file: "content/nav-reihenfolge-weitere.json"

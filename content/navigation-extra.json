@@ -1,17 +1,3 @@
 {
-  "hauptpunkte": [
-    {
-      "label": "Jagdrecht",
-      "seiten": [
-        {
-          "in_navigation": true,
-          "veroeffentlicht": true,
-          "titel": "test",
-          "nav_label": "Test",
-          "slug": "test",
-          "inhalt": "Test"
-        }
-      ]
-    }
-  ]
+  "hauptpunkte": []
 }
