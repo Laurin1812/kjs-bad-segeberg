@@ -78,8 +78,14 @@ html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size:
 .topbar-user  { font-size: .85rem; opacity: .85; }
 
 /* ── LAYOUT ───────────────────────────────────────────────────── */
-#admin-app { height: 100vh; display: flex; flex-direction: column; }
-.admin-body { display: flex; flex: 1; margin-top: var(--topbar-h); overflow: hidden; }
+#admin-app { display: flex; flex-direction: column; }
+.admin-body {
+  display: flex;
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
 
 /* ── SIDEBAR ──────────────────────────────────────────────────── */
 .admin-sidebar {

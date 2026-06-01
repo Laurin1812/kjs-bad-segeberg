@@ -155,6 +155,30 @@
           <li class="active"><a href="lernort-natur.html">Lernort Natur</a></li>
           <li><a href="gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
         </ul>
+        <script>
+          fetch('/content/seiten-verbraucher.json').then(function(r){return r.json();}).then(function(d){
+            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
+            if (!nav) return;
+            (d.seiten || []).forEach(function(s) {
+              if (s.veroeffentlicht === false || s.in_navigation === false) return;
+              var li = document.createElement('li');
+              li.innerHTML = '<a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
+              nav.appendChild(li);
+            });
+          }).catch(function(){});
+          // Sub-pages for Lernort Natur
+          fetch('/content/seiten-sub-lernort-natur.json').then(function(r){return r.json();}).then(function(d){
+            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
+            if (!nav) return;
+            (d.seiten || []).forEach(function(s) {
+              if (s.veroeffentlicht === false || s.in_navigation === false) return;
+              var li = document.createElement('li');
+              li.style.paddingLeft = '1rem';
+              li.innerHTML = '↳ <a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
+              nav.appendChild(li);
+            });
+          }).catch(function(){});
+        </script>
       </div>
       <div class="contact-box">
         <h4>Buchungsanfragen</h4>

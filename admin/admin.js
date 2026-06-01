@@ -60,9 +60,24 @@
         newItemKey:'new-weitere' },
     ]},
     { key:'verbraucher', label:'🌿 Verbraucher', group:true, open:false, children:[
-      { key:'verbraucher-wild',  label:'Wildfleisch',           file:'content/verbraucher/wildfleisch.json',          form:'standard' },
-      { key:'verbraucher-lernort', label:'Lernort Natur',       file:'content/verbraucher/lernort-natur.json',        form:'standard' },
-      { key:'verbraucher-gruen', label:'Grünes Klassenzimmer',  file:'content/verbraucher/gruenes-klassenzimmer.json',form:'standard' },
+      { key:'verbraucher-wild', label:'Wildfleisch', group:true, open:false, children:[
+        { key:'verbraucher-wild-inhalt', label:'Seiteninhalt', file:'content/verbraucher/wildfleisch.json', form:'standard' },
+        { key:'new-sub-wild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+          navFile:'content/seiten-sub-wildfleisch.json', navKey:'seiten', dir:'content/seiten-sub-wildfleisch',
+          parentSlug:'wildfleisch' },
+      ]},
+      { key:'verbraucher-lernort', label:'Lernort Natur', group:true, open:false, children:[
+        { key:'verbraucher-lernort-inhalt', label:'Seiteninhalt', file:'content/verbraucher/lernort-natur.json', form:'standard' },
+        { key:'new-sub-lernort', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+          navFile:'content/seiten-sub-lernort-natur.json', navKey:'seiten', dir:'content/seiten-sub-lernort-natur',
+          parentSlug:'lernort-natur' },
+      ]},
+      { key:'verbraucher-gruen', label:'Grünes Klassenzimmer', group:true, open:false, children:[
+        { key:'verbraucher-gruen-inhalt', label:'Seiteninhalt', file:'content/verbraucher/gruenes-klassenzimmer.json', form:'standard' },
+        { key:'new-sub-gruen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+          navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
+          parentSlug:'gruenes-klassenzimmer' },
+      ]},
       { key:'new-verbraucher', label:'➕ Neue Verbraucher-Seite', form:'neueSeite', isAdd:true,
         navFile:'content/seiten-verbraucher.json', navKey:'seiten', dir:'content/seiten-verbraucher' },
     ]},
@@ -70,10 +85,11 @@
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
-      { key:'kontakt',   label:'Kontakt & Öffnungszeiten', file:'content/einstellungen.json', form:'einstellungen' },
-      { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',       form:'footer' },
-      { key:'design',    label:'Design & Farben',           file:'content/design.json',       form:'design' },
-      { key:'impressum', label:'Impressum',                  file:'content/impressum.json',    form:'impressum' },
+      { key:'kontakt',   label:'Kontakt & Öffnungszeiten', file:'content/einstellungen.json',    form:'einstellungen' },
+      { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
+      { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
+      { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
+      { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
   ];
@@ -193,9 +209,13 @@
   // Inserts custom pages created via "Neue Unterseite" into the sidebar
   async function loadAllManifestItems() {
     var sections = [
-      { insertBeforeKey: 'new-kjs',         file: 'content/seiten-kjs.json',         dir: 'content/seiten-kjs',         keyPrefix: 'kjs-dyn',         level: 2 },
-      { insertBeforeKey: 'new-aufgaben',    file: 'content/seiten-aufgaben.json',    dir: 'content/seiten-aufgaben',    keyPrefix: 'aufgaben-dyn',    level: 2 },
-      { insertBeforeKey: 'new-verbraucher', file: 'content/seiten-verbraucher.json', dir: 'content/seiten-verbraucher', keyPrefix: 'verbraucher-dyn', level: 2 },
+      { insertBeforeKey: 'new-kjs',         file: 'content/seiten-kjs.json',         navKey:'seiten', dir: 'content/seiten-kjs',         keyPrefix: 'kjs-dyn',         level: 2 },
+      { insertBeforeKey: 'new-aufgaben',    file: 'content/seiten-aufgaben.json',    navKey:'seiten', dir: 'content/seiten-aufgaben',    keyPrefix: 'aufgaben-dyn',    level: 2 },
+      { insertBeforeKey: 'new-verbraucher', file: 'content/seiten-verbraucher.json', navKey:'seiten', dir: 'content/seiten-verbraucher', keyPrefix: 'verbraucher-dyn', level: 2 },
+      // Sub-pages under specific Verbraucher pages
+      { insertBeforeKey: 'new-sub-wild',    file: 'content/seiten-sub-wildfleisch.json',            navKey:'seiten', dir: 'content/seiten-sub-wildfleisch',            keyPrefix: 'sub-wild-dyn',    level: 3 },
+      { insertBeforeKey: 'new-sub-lernort', file: 'content/seiten-sub-lernort-natur.json',          navKey:'seiten', dir: 'content/seiten-sub-lernort-natur',          keyPrefix: 'sub-lernort-dyn', level: 3 },
+      { insertBeforeKey: 'new-sub-gruen',   file: 'content/seiten-sub-gruenes-klassenzimmer.json',  navKey:'seiten', dir: 'content/seiten-sub-gruenes-klassenzimmer',  keyPrefix: 'sub-gruen-dyn',   level: 3 },
     ];
 
     for (var i = 0; i < sections.length; i++) {
@@ -217,10 +237,15 @@
           if (document.querySelector('[data-navkey="' + dynKey + '"]')) return;
 
           var def = {
-            key:   dynKey,
-            label: s.nav_label || s.slug,
-            file:  sec.dir + '/' + s.slug + '.json',
-            form:  'standard',
+            key:      dynKey,
+            label:    s.nav_label || s.slug,
+            file:     sec.dir + '/' + s.slug + '.json',
+            form:     'standard',
+            isDynamic: true,
+            navFile:  sec.file,
+            navKey:   sec.navKey || 'seiten',
+            slug:     s.slug,
+            dir:      sec.dir,
           };
           var li = navItemEl(def, sec.level, true);
           li.addEventListener('click', (function(d) {
@@ -379,12 +404,77 @@
       '<div class="panel-loading"><div class="spinner"></div> Wird geladen…</div>';
   }
   function showPanelError(msg) {
+    var extra = '';
+    if (S.section && S.section.isDynamic) {
+      extra = '<p class="mt-1"><button class="btn btn-danger-outline" onclick="dynSeiteRemoveFromManifest()">🗑️ Aus Menü entfernen</button>' +
+        ' <span style="color:var(--text-muted);font-size:.8rem">Entfernt den Eintrag aus der Navigation (Datei bleibt ggf. im Repo)</span></p>';
+    }
     id('admin-main').innerHTML =
       '<div class="panel-body"><div class="form-card">' +
       '<p style="color:var(--danger)">⚠️ Fehler: ' + escHtml(msg) + '</p>' +
       '<p class="mt-1"><button class="btn btn-outline" onclick="location.reload()">Seite neu laden</button></p>' +
+      extra +
       '</div></div>';
   }
+
+  // Remove a dynamic page from its nav manifest (without deleting the file)
+  window.dynSeiteRemoveFromManifest = async function() {
+    var def = S.section;
+    if (!def || !def.isDynamic) return;
+    showConfirm('Aus Menü entfernen',
+      'Den Eintrag „' + (def.label || def.slug) + '" aus dem Menü entfernen?',
+      async function() {
+        try {
+          var manifestResp = await apiGet(def.navFile);
+          var manifestData = JSON.parse(fromBase64(manifestResp.content));
+          var key = def.navKey || 'seiten';
+          manifestData[key] = (manifestData[key] || []).filter(function(s) { return s.slug !== def.slug; });
+          await apiPut(def.navFile, manifestData, manifestResp.sha, '🗑️ Navigation: ' + (def.label || def.slug) + ' entfernt');
+          toast('✅ Eintrag aus Menü entfernt. Seite lädt neu…', 'ok');
+          setTimeout(function() { location.reload(); }, 1500);
+        } catch(e) {
+          toast('❌ Fehler: ' + e.message, 'err');
+        }
+      }
+    );
+  };
+
+  // Delete a dynamic page fully (content file + manifest entry)
+  window.dynSeiteDelete = async function() {
+    var def = S.section;
+    if (!def || !def.isDynamic) return;
+    showConfirm('Seite löschen',
+      'Seite „' + (def.label || def.slug) + '" wirklich dauerhaft löschen?',
+      async function() {
+        try {
+          // 1. Remove from manifest
+          var manifestResp = await apiGet(def.navFile);
+          var manifestData = JSON.parse(fromBase64(manifestResp.content));
+          var key = def.navKey || 'seiten';
+          manifestData[key] = (manifestData[key] || []).filter(function(s) { return s.slug !== def.slug; });
+          await apiPut(def.navFile, manifestData, manifestResp.sha, '🗑️ Navigation: ' + (def.label || def.slug) + ' entfernt');
+
+          // 2. Delete content file (requires its SHA)
+          try {
+            var fileResp = await apiGet(def.file);
+            var tok = await getToken();
+            await fetch(GIT + '/' + def.file, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: '🗑️ Seite gelöscht: ' + (def.label || def.slug), sha: fileResp.sha, branch: BRANCH })
+            });
+          } catch(e2) {
+            // File may not exist — ignore
+          }
+
+          toast('✅ Seite gelöscht. Seite lädt neu…', 'ok');
+          setTimeout(function() { location.reload(); }, 1500);
+        } catch(e) {
+          toast('❌ Fehler: ' + e.message, 'err');
+        }
+      }
+    );
+  };
 
   /* ────────────────────────────────────────────────────────────
      FORM DISPATCH
@@ -404,6 +494,7 @@
       case 'design':       renderDesign(def, data);        break;
       case 'impressum':    renderImpressum(def, data);     break;
       case 'downloads':    renderDownloads(def, data);     break;
+      case 'navExtra':     renderNavExtra(def, data);      break;
       default:             renderStandard(def, data);
     }
   }
@@ -482,7 +573,10 @@
      STANDARD SEITE FORM
   ──────────────────────────────────────────────────────────── */
   function renderStandard(def, data) {
-    var html = panelHeader(def.label) +
+    var extraBtns = def.isDynamic
+      ? '<button class="btn btn-sm btn-danger-outline" onclick="dynSeiteDelete()">🗑️ Seite löschen</button>'
+      : '';
+    var html = panelHeader(def.label, extraBtns) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Seiteninhalt</div>' +
@@ -1253,6 +1347,98 @@
   }
 
   /* ────────────────────────────────────────────────────────────
+     NAVIGATION EXTRA (Neue Hauptnavigationspunkte)
+  ──────────────────────────────────────────────────────────── */
+  function renderNavExtra(def, data) {
+    var punkte = data.hauptpunkte || [];
+    var html = panelHeader('🧭 Hauptnavigation erweitern',
+      '<button class="btn btn-primary btn-sm" onclick="navExtraNeu()">➕ Nav-Punkt hinzufügen</button>') +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Erklärung</div>' +
+          '<p class="text-muted" style="margin-bottom:.5rem;">Hier können Sie neue Hauptnavigationspunkte hinzufügen, die <strong>vor FAQ</strong> in der Hauptmenüleiste erscheinen.</p>' +
+          '<p class="text-muted">Jeder Punkt enthält eine oder mehrere Seiten. Die Seiteninhalte werden im Bereich <strong>„Weitere Themen"</strong> erstellt und verwaltet.</p>' +
+        '</div>';
+
+    if (punkte.length === 0) {
+      html += '<div class="form-card"><p class="text-muted">Noch keine zusätzlichen Navigationspunkte vorhanden.</p></div>';
+    } else {
+      punkte.forEach(function(hp, hi) {
+        var seiten = hp.seiten || [];
+        html += '<div class="form-card" id="navex-card-' + hi + '">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">' +
+            '<div class="form-card-title" style="margin-bottom:0;">Navigationspunkt ' + (hi + 1) + '</div>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="navExtraDelete(' + hi + ')">🗑️ Entfernen</button>' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<label class="field-label">Menü-Bezeichnung *</label>' +
+            '<input class="field-input" id="navex-label-' + hi + '" value="' + escAttr(hp.label || '') + '" placeholder="z.B. Jagdrecht">' +
+          '</div>' +
+          '<div class="field-row"><label class="field-label">Unterseiten in diesem Punkt</label></div>';
+
+        seiten.forEach(function(s, si) {
+          html += '<div class="list-item" style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:center;">' +
+            '<input class="field-input" style="flex:1" id="navex-slug-' + hi + '-' + si + '" value="' + escAttr(s.slug || '') + '" placeholder="URL-Kürzel (Slug)">' +
+            '<input class="field-input" style="flex:1" id="navex-nav-' + hi + '-' + si + '" value="' + escAttr(s.nav_label || '') + '" placeholder="Menü-Bezeichnung">' +
+            '<button class="btn btn-sm btn-ghost" onclick="navExtraSeiteDelete(' + hi + ',' + si + ')">✕</button>' +
+          '</div>';
+        });
+
+        html += '<button class="list-add-btn" onclick="navExtraSeiteAdd(' + hi + ')">+ Seite hinzufügen</button>' +
+          '<p class="field-hint" style="margin-top:.5rem;">Der Slug muss mit einer Seite in „Weitere Themen" oder einer anderen Unterseite übereinstimmen.</p>' +
+        '</div>';
+      });
+    }
+
+    html += '</div>' + saveBar();
+    id('admin-main').innerHTML = html;
+    bindSaveBtn();
+  }
+
+  window.navExtraNeu = function() {
+    S.data.hauptpunkte = S.data.hauptpunkte || [];
+    S.data.hauptpunkte.push({ label: '', seiten: [] });
+    renderNavExtra(S.section, S.data);
+  };
+
+  window.navExtraDelete = function(hi) {
+    showConfirm('Navigationspunkt entfernen', 'Diesen Navigationspunkt wirklich entfernen?', function() {
+      S.data.hauptpunkte.splice(hi, 1);
+      renderNavExtra(S.section, S.data);
+    });
+  };
+
+  window.navExtraSeiteAdd = function(hi) {
+    S.data.hauptpunkte[hi].seiten = S.data.hauptpunkte[hi].seiten || [];
+    S.data.hauptpunkte[hi].seiten.push({ slug: '', nav_label: '', veroeffentlicht: true, in_navigation: true });
+    renderNavExtra(S.section, S.data);
+  };
+
+  window.navExtraSeiteDelete = function(hi, si) {
+    S.data.hauptpunkte[hi].seiten.splice(si, 1);
+    renderNavExtra(S.section, S.data);
+  };
+
+  function collectNavExtra(data) {
+    var punkte = data.hauptpunkte || [];
+    punkte.forEach(function(hp, hi) {
+      var labelEl = id('navex-label-' + hi);
+      if (labelEl) hp.label = labelEl.value.trim();
+      (hp.seiten || []).forEach(function(s, si) {
+        var slugEl = id('navex-slug-' + hi + '-' + si);
+        var navEl  = id('navex-nav-' + hi + '-' + si);
+        if (slugEl) s.slug = makeSlug(slugEl.value.trim()) || slugEl.value.trim();
+        if (navEl)  s.nav_label = navEl.value.trim();
+      });
+      // Remove empty seiten
+      hp.seiten = (hp.seiten || []).filter(function(s) { return s.slug; });
+    });
+    // Remove punkten without label
+    data.hauptpunkte = punkte.filter(function(hp) { return hp.label; });
+    return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
      NEUE SEITE
   ──────────────────────────────────────────────────────────── */
   function renderNeueSeite(def) {
@@ -1372,6 +1558,7 @@
       case 'design':        data = collectDesign(data); break;
       case 'impressum':     data = collectImpressum(data); break;
       case 'downloads':     data = collectDownloads(data); break;
+      case 'navExtra':      data = collectNavExtra(data); break;
     }
 
     setSaving(true);
