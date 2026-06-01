@@ -93,6 +93,7 @@ html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size:
   background: var(--white); border-right: 1px solid var(--border);
   overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column;
+  min-height: 0; height: 100%;
 }
 .sidebar-loading { padding: 1.5rem 1rem; color: var(--text-muted); }
 
@@ -131,6 +132,7 @@ html, body { height: 100%; font-family: Inter, system-ui, sans-serif; font-size:
 .admin-main {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   background: var(--bg);
+  min-height: 0; height: 100%;
 }
 
 /* Welcome */
