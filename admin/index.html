@@ -28,13 +28,27 @@
     <div class="topbar-brand">
       <span class="topbar-icon">🦌</span>
       <span class="topbar-title">KJS Admin</span>
+      <button id="home-btn" class="topbar-home-btn" title="Zurück zur Startübersicht">🏠 Start</button>
     </div>
     <div class="topbar-actions">
+      <button id="search-btn" class="topbar-search-btn" title="Suchen">🔍</button>
       <span class="topbar-user" id="user-name"></span>
-      <a href="/" target="_blank" rel="noopener" class="btn btn-sm btn-outline">🌐 Website ansehen</a>
+      <a href="/" target="_blank" rel="noopener" class="btn btn-sm btn-outline">🌐 Website</a>
       <button id="logout-btn" class="btn btn-sm btn-ghost">Abmelden</button>
     </div>
   </header>
+
+  <!-- Suchoverlay -->
+  <div id="search-overlay" style="display:none" role="search" aria-label="Admin-Suche">
+    <div id="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="search-input" class="search-input"
+        placeholder="Seiten, Beiträge, FAQ, Termine…" autocomplete="off" aria-label="Suchbegriff eingeben">
+      <button id="search-close-btn" class="search-close-btn" aria-label="Suche schließen">✕</button>
+    </div>
+    <div id="search-results" class="search-results"></div>
+    <div id="search-backdrop" class="search-backdrop"></div>
+  </div>
 
   <!-- Layout -->
   <div class="admin-body">

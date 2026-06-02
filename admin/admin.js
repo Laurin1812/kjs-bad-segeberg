@@ -205,6 +205,29 @@
     renderSidebar(NAV);
     loadDynamicChildren();       // "Weitere Themen" (dynamicChildren:true)
     loadAllManifestItems();      // KJS / Aufgaben / Verbraucher custom pages
+    initSearch();                // Suchfunktion initialisieren
+    id('home-btn').addEventListener('click', showWelcome);
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     WELCOME / DASHBOARD
+  ──────────────────────────────────────────────────────────── */
+  function showWelcome() {
+    destroyMDE();
+    S.section = null;
+    S.dirty = false;
+    setActiveNav('');
+    id('admin-main').innerHTML =
+      '<div class="welcome-screen">' +
+        '<div class="welcome-icon">🦌</div>' +
+        '<h2>Willkommen im Admin-Bereich</h2>' +
+        '<p>Wählen Sie links einen Bereich aus, um Inhalte zu bearbeiten.</p>' +
+        '<div class="welcome-hints">' +
+          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=aktuelles]\').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>' +
+          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=termine]\').click()" style="cursor:pointer">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>' +
+          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=jaeger]\').click()" style="cursor:pointer">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>' +
+        '</div>' +
+      '</div>';
   }
 
   // Inserts custom pages created via "Neue Unterseite" into the sidebar
@@ -1917,6 +1940,218 @@
       }
     }
     return null;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     SUCHE
+  ──────────────────────────────────────────────────────────── */
+  var _searchIndex  = [];
+  var _activeResult = -1;
+
+  function initSearch() {
+    id('search-btn').addEventListener('click', openSearch);
+    id('search-close-btn').addEventListener('click', closeSearch);
+    id('search-backdrop').addEventListener('click', closeSearch);
+    id('search-input').addEventListener('input', onSearchInput);
+    id('search-input').addEventListener('keydown', onSearchKeyDown);
+    buildSearchIndex();
+  }
+
+  function openSearch() {
+    id('search-overlay').style.display = 'flex';
+    id('search-input').value = '';
+    id('search-results').innerHTML = '';
+    id('search-results').style.display = 'none';
+    _activeResult = -1;
+    setTimeout(function() { id('search-input').focus(); }, 50);
+  }
+
+  function closeSearch() {
+    id('search-overlay').style.display = 'none';
+    id('search-results').innerHTML = '';
+    _activeResult = -1;
+  }
+
+  function onSearchInput() {
+    var q = id('search-input').value.trim();
+    _activeResult = -1;
+    if (q.length < 2) {
+      id('search-results').style.display = 'none';
+      id('search-results').innerHTML = '';
+      return;
+    }
+    var results = doSearch(q);
+    renderSearchResults(results, q);
+  }
+
+  function onSearchKeyDown(e) {
+    var items = id('search-results').querySelectorAll('.search-result-item');
+    if (e.key === 'Escape') { closeSearch(); return; }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _activeResult = Math.min(_activeResult + 1, items.length - 1);
+      updateActiveResult(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _activeResult = Math.max(_activeResult - 1, 0);
+      updateActiveResult(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (_activeResult >= 0 && items[_activeResult]) items[_activeResult].click();
+      else if (items.length === 1) items[0].click();
+    }
+  }
+
+  function updateActiveResult(items) {
+    items.forEach(function(el, i) {
+      el.classList.toggle('active', i === _activeResult);
+      if (i === _activeResult) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function doSearch(q) {
+    var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var results = [];
+    _searchIndex.forEach(function(entry) {
+      var score = 0;
+      terms.forEach(function(t) {
+        if (entry.match.indexOf(t) !== -1) score++;
+        if ((entry.label || '').toLowerCase().indexOf(t) !== -1) score += 2; // title boost
+      });
+      if (score > 0) results.push({ entry: entry, score: score });
+    });
+    results.sort(function(a, b) { return b.score - a.score; });
+    return results.slice(0, 10).map(function(r) { return r.entry; });
+  }
+
+  function highlight(text, q) {
+    var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var escaped = escHtml(text);
+    terms.forEach(function(t) {
+      var re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      escaped = escaped.replace(re, '<mark>$1</mark>');
+    });
+    return escaped;
+  }
+
+  function renderSearchResults(results, q) {
+    var el = id('search-results');
+    if (!results.length) {
+      el.innerHTML = '<div class="search-no-results">Keine Ergebnisse für „' + escHtml(q) + '"</div>';
+      el.style.display = 'block';
+      return;
+    }
+    el.innerHTML = results.map(function(entry, i) {
+      return '<div class="search-result-item" data-idx="' + i + '" tabindex="-1">' +
+        '<div class="search-result-icon">' + (entry.icon || '📄') + '</div>' +
+        '<div class="search-result-body">' +
+          '<div class="search-result-label">' + highlight(entry.label, q) + '</div>' +
+          (entry.sub ? '<div class="search-result-sub">' + escHtml(entry.sub) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    el.style.display = 'block';
+    el.querySelectorAll('.search-result-item').forEach(function(item, i) {
+      item.addEventListener('click', function() {
+        closeSearch();
+        results[i].action();
+      });
+    });
+  }
+
+  // ── Index aufbauen ──────────────────────────────────────────
+  function buildSearchIndex() {
+    _searchIndex = [];
+
+    // 1. Alle statischen NAV-Items traversieren
+    function traverseNav(items, path) {
+      items.forEach(function(item) {
+        if (item.isAdd) return;
+        var label = (item.label || '').replace(/^[🏠🦌🌿📅📰❓⚙️📥🖼️➕]\s*/u, '');
+        if (item.group || item.dynamicChildren) {
+          if (item.children) traverseNav(item.children, path);
+          return;
+        }
+        if (!item.file && item.form !== 'medien') return;
+        var bereich = path || label;
+        _searchIndex.push({
+          icon: item.label.match(/^./u)?.[0] || '📄',
+          label: label,
+          sub: 'Bereich: ' + bereich,
+          match: [label, item.key || '', item.file || ''].join(' ').toLowerCase(),
+          action: function() { selectSection(item); }
+        });
+      });
+    }
+    traverseNav(NAV, '');
+
+    // 2. Aktuelles-Beiträge
+    var aktDef = findByKey(NAV, 'aktuelles');
+    fetch('/content/aktuelles.json').then(function(r){return r.json();}).then(function(d){
+      (d.beitraege || []).forEach(function(b, i) {
+        _searchIndex.push({
+          icon: '📰',
+          label: b.titel || '(Kein Titel)',
+          sub: 'Aktuelles' + (b.datum ? ' · ' + b.datum : '') + (b.kategorie ? ' · ' + b.kategorie : ''),
+          match: [b.titel, b.kategorie, b.text].filter(Boolean).join(' ').toLowerCase(),
+          action: function() {
+            selectSection(aktDef).then(function() { window.aktuellesEdit(i); });
+          }
+        });
+      });
+    }).catch(function(){});
+
+    // 3. FAQ
+    var faqDef = findByKey(NAV, 'faq');
+    fetch('/content/faq.json').then(function(r){return r.json();}).then(function(d){
+      (d.fragen || []).forEach(function(f, i) {
+        _searchIndex.push({
+          icon: '❓',
+          label: f.frage || '(Keine Frage)',
+          sub: 'FAQ',
+          match: [f.frage, f.antwort].filter(Boolean).join(' ').toLowerCase(),
+          action: function() { selectSection(faqDef); }
+        });
+      });
+    }).catch(function(){});
+
+    // 4. Termine
+    var termDef = findByKey(NAV, 'termine');
+    fetch('/content/termine.json').then(function(r){return r.json();}).then(function(d){
+      (d.termine || []).forEach(function(t, i) {
+        _searchIndex.push({
+          icon: '📅',
+          label: t.veranstaltung || '(Kein Titel)',
+          sub: 'Termine' + (t.datum ? ' · ' + t.datum : '') + (t.ort ? ' · ' + t.ort : ''),
+          match: [t.veranstaltung, t.ort, t.kategorie].filter(Boolean).join(' ').toLowerCase(),
+          action: function() {
+            selectSection(termDef).then(function() { window.termineEdit(i); });
+          }
+        });
+      });
+    }).catch(function(){});
+
+    // 5. Dynamische Seiten (Manifeste)
+    var manifeste = [
+      { url: '/content/seiten-kjs.json',        icon: '🦌', bereich: 'Jäger / KJS',          dir: 'content/seiten-kjs',         form: 'standard' },
+      { url: '/content/seiten-aufgaben.json',    icon: '🦌', bereich: 'Jäger / Aufgaben',      dir: 'content/seiten-aufgaben',    form: 'standard' },
+      { url: '/content/seiten-weitere.json',     icon: '🦌', bereich: 'Jäger / Weitere Themen',dir: 'content/seiten-weitere',     form: 'standard' },
+      { url: '/content/seiten-verbraucher.json', icon: '🌿', bereich: 'Verbraucher',            dir: 'content/seiten-verbraucher', form: 'standard' },
+    ];
+    manifeste.forEach(function(m) {
+      fetch(m.url).then(function(r){return r.json();}).then(function(d){
+        (d.seiten || []).filter(function(s){ return s.veroeffentlicht !== false; }).forEach(function(s) {
+          var def = { key: 'dyn-' + s.slug, label: s.nav_label || s.slug, file: m.dir + '/' + s.slug + '.json', form: m.form, isDynamic: true, navFile: m.url.replace('/content/','content/'), navKey: 'seiten', slug: s.slug, dir: m.dir };
+          _searchIndex.push({
+            icon: m.icon,
+            label: s.nav_label || s.slug,
+            sub: m.bereich + ' (Seite)',
+            match: [s.nav_label, s.slug].filter(Boolean).join(' ').toLowerCase(),
+            action: function() { selectSection(def); }
+          });
+        });
+      }).catch(function(){});
+    });
   }
 
   /* ────────────────────────────────────────────────────────────
