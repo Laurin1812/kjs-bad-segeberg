@@ -129,12 +129,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     });
   }
 
-  // Alle 4 Sektions-Dateien parallel laden
+  // Alle Sektions-Dateien laden
   var sektionen = [
-    { url: '/content/seiten-kjs.json',         target: function() { return findJaegerSub('KJS Bad Segeberg'); } },
-    { url: '/content/seiten-aufgaben.json',     target: function() { return findJaegerSub('Aufgaben'); } },
-    { url: '/content/seiten-weitere.json',      target: function() { return document.getElementById('jaeger-dropdown'); } },
-    { url: '/content/seiten-verbraucher.json',  target: function() { return findTopDropdown('Verbraucher'); } },
+    { url: '/content/seiten-kjs.json',        target: function() { return findJaegerSub('KJS Bad Segeberg'); } },
+    { url: '/content/seiten-aufgaben.json',    target: function() { return findJaegerSub('Aufgaben'); } },
+    { url: '/content/seiten-verbraucher.json', target: function() { return findTopDropdown('Verbraucher'); } },
     // Legacy: alte seiten.json mit bereich-Feld
     { url: '/content/seiten.json', bereich: true }
   ];
@@ -152,7 +151,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
             var t = bereich === 'kjs' ? findJaegerSub('KJS Bad Segeberg')
                   : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
                   : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
-                  : document.getElementById('jaeger-dropdown');
+                  : document.getElementById('weitere-themen-sub');
             var href = '/seiten/?s=' + encodeURIComponent(p.slug);
             if (t && !t.querySelector('a[href="' + href + '"]')) {
               var li = document.createElement('li');
@@ -167,6 +166,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       })
       .catch(function(){});
   });
+
+  // seiten-weitere.json → "Weitere Themen"-Flyout im Jäger-Menü
+  fetch('/content/seiten-weitere.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var publishedSeiten = (data.seiten || []).filter(function(s) {
+        return s.veroeffentlicht === true && s.in_navigation === true;
+      });
+      if (!publishedSeiten.length) return;
+      var weitereItem = document.getElementById('weitere-themen-item');
+      var weltereSub  = document.getElementById('weitere-themen-sub');
+      if (!weitereItem || !weltereSub) return;
+      weitereItem.style.display = '';   // Flyout-Punkt sichtbar machen
+      einfuegenInNav(publishedSeiten, weltereSub);
+    })
+    .catch(function() {});
 })();
 
 // Eigene Hauptpunkte aus navigation-extra.json in die Hauptnavigation einfügen

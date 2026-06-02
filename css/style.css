@@ -462,10 +462,13 @@ p  { margin-bottom: 1rem; }
 .main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
 .main-content a:not(.btn):hover { color: var(--green-dark); }
 .main-content strong { color: var(--green-dark); }
-/* Bilder im Markdown-Inhalt */
-.main-content img {
+/* Bilder im Markdown-Inhalt und dynamisch geladenen Seiten */
+.main-content img,
+#seite-inhalt img,
+#page-inhalt img {
   max-width: 100%;
   height: auto;
+  object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   margin: 1.5rem 0;
@@ -720,10 +723,34 @@ p  { margin-bottom: 1rem; }
   .form-grid-2 { grid-template-columns: 1fr; }
 }
 
+/* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
+@media (max-width: 420px) {
+  :root { --fs-h1: 1.65rem; --fs-h2: 1.3rem; --fs-h3: 1.1rem; }
+  .container { padding-inline: 1rem; }
+  .services__grid { grid-template-columns: 1fr; }
+  .quicklinks__grid { grid-template-columns: 1fr; }
+  .persons-grid { grid-template-columns: 1fr; }
+  .hero { min-height: 55vh; }
+  .hero__sub { font-size: .95rem; }
+  .page-hero h1 { font-size: 1.5rem; }
+  .news-card { border-radius: var(--radius-sm); }
+  .download-item { flex-direction: column; align-items: flex-start; gap: .75rem; }
+}
+
 /* ── Header & Footer Logo-Größe ───────────────────────────────────── */
 .site-logo img    { height: 114px !important; width: auto; }
 .footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block;
   filter: drop-shadow(0 0 6px rgba(255,255,255,.35)) drop-shadow(0 2px 8px rgba(0,0,0,.3)); }
+
+/* Mobile: Logo kleiner */
+@media (max-width: 900px) {
+  .site-logo img    { height: 50px !important; }
+  .footer-about img { height: 90px !important; }
+}
+@media (max-width: 600px) {
+  .site-logo img    { height: 42px !important; }
+  .footer-about img { height: 70px !important; }
+}
 
 /* ── Logo (transparentes PNG) ─────────────────────────────────────── */
 
