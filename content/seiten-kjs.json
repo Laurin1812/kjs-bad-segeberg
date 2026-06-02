@@ -1,12 +1,3 @@
 {
-  "seiten": [
-    {
-      "in_navigation": true,
-      "veroeffentlicht": true,
-      "titel": "hallo",
-      "nav_label": "sss",
-      "slug": "sss",
-      "inhalt": "sss"
-    }
-  ]
+  "seiten": []
 }
