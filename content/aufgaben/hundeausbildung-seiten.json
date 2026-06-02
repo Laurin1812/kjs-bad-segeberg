@@ -1,0 +1,25 @@
+{
+  "seiten": [
+    { "slug": "hegeringhundewarte", "nav_label": "Hegeringhundewarte", "veroeffentlicht": true },
+    { "slug": "kurs-1-junghunde", "nav_label": "Kurs 1: Junghunde", "veroeffentlicht": true },
+    { "slug": "kurs-2-anlagenpruefung", "nav_label": "Kurs 2: Anlagenprüfung", "veroeffentlicht": true },
+    { "slug": "kurs-3-gesellenpruefung", "nav_label": "Kurs 3: Gesellenprüfung", "veroeffentlicht": true },
+    { "slug": "kurs-4-meisterpruefung", "nav_label": "Kurs 4: Meisterprüfung", "veroeffentlicht": true },
+    { "slug": "kurs-5-schweisspruefungen", "nav_label": "Kurs 5: Schweißprüfungen", "veroeffentlicht": true },
+    { "slug": "kurs-6-bringtreue-bauarbeit", "nav_label": "Kurs 6: Bringtreue und Bauarbeit", "veroeffentlicht": true },
+    { "slug": "hegeringhundetage", "nav_label": "Hegeringhundetage", "veroeffentlicht": true },
+    { "slug": "nachsuchen", "nav_label": "Nachsuchenführer", "veroeffentlicht": true },
+    { "slug": "anerkennung-faehrtenhund", "nav_label": "Anerkennung Fährtenhund", "veroeffentlicht": true },
+    { "slug": "stoeberhunde", "nav_label": "Stöberhunde", "veroeffentlicht": true },
+    { "slug": "bauhunde", "nav_label": "Bauhunde", "veroeffentlicht": true },
+    { "slug": "asp-kadaversuchhunde", "nav_label": "ASP-Kadaversuchhunde", "veroeffentlicht": true },
+    { "slug": "schwarzwildgatter", "nav_label": "Schwarzwildgatter", "veroeffentlicht": true },
+    { "slug": "entschaedigungsfond", "nav_label": "Entschädigungsfond", "veroeffentlicht": true },
+    { "slug": "brauchbarkeit", "nav_label": "Brauchbarkeit", "veroeffentlicht": true },
+    { "slug": "vgp-vps-wanderpokal", "nav_label": "VGP/VPS-Wanderpokal", "veroeffentlicht": true },
+    { "slug": "vgp-preistraeger", "nav_label": "Bisherige VGP-Preisträger", "veroeffentlicht": true },
+    { "slug": "vps-preistraeger", "nav_label": "Bisherige VPS-Preisträger", "veroeffentlicht": true },
+    { "slug": "veranstaltungen-hundewesen", "nav_label": "Veranstaltungen Hundewesen", "veroeffentlicht": true },
+    { "slug": "hunde-welpen-abzugeben", "nav_label": "Hunde/Welpen abzugeben", "veroeffentlicht": true }
+  ]
+}
