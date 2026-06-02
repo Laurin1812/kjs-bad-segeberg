@@ -45,7 +45,13 @@
       { key:'kjm', label:'Kreisjägermeister', file:'content/kreisjjaegermeister.json', form:'kjm' },
       { key:'aufgaben', label:'Aufgaben der KJS', group:true, open:false, children:[
         { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard' },
-        { key:'auf-hunde',      label:'Hundeausbildung',       file:'content/aufgaben/hundeausbildung.json',form:'standard' },
+        { key:'auf-hunde', label:'Hundeausbildung', group:true, open:false, children:[
+          { key:'auf-hunde-uebersicht', label:'Übersichtsseite', file:'content/aufgaben/hundeausbildung.json', form:'standard' },
+          { key:'jagdhundeschule-gruppe', label:'🐕 Jagdhundeschule (21 Seiten)', group:true, open:false, children:[
+            { key:'new-jagdhundeschule', label:'➕ Neue Seite', form:'neueSeite', isAdd:true,
+              navFile:'content/aufgaben/hundeausbildung-seiten.json', navKey:'seiten', dir:'content/aufgaben/hundeausbildung' },
+          ]},
+        ]},
         { key:'auf-schweiss',   label:'Schweißhundeführer',    file:'content/aufgaben/schweisshunde.json',  form:'standard' },
         { key:'auf-jugend',     label:'Jugendarbeit',          file:'content/aufgaben/jugend.json',         form:'standard' },
         { key:'auf-jagdhorn',   label:'Jagdhornblasen',        file:'content/aufgaben/jagdhorn.json',       form:'standard' },
@@ -240,6 +246,8 @@
       { insertBeforeKey: 'new-sub-wild',    file: 'content/seiten-sub-wildfleisch.json',            navKey:'seiten', dir: 'content/seiten-sub-wildfleisch',            keyPrefix: 'sub-wild-dyn',    level: 3 },
       { insertBeforeKey: 'new-sub-lernort', file: 'content/seiten-sub-lernort-natur.json',          navKey:'seiten', dir: 'content/seiten-sub-lernort-natur',          keyPrefix: 'sub-lernort-dyn', level: 3 },
       { insertBeforeKey: 'new-sub-gruen',   file: 'content/seiten-sub-gruenes-klassenzimmer.json',  navKey:'seiten', dir: 'content/seiten-sub-gruenes-klassenzimmer',  keyPrefix: 'sub-gruen-dyn',   level: 3 },
+      // Jagdhundeschule sub-pages
+      { insertBeforeKey: 'new-jagdhundeschule', file: 'content/aufgaben/hundeausbildung-seiten.json', navKey:'seiten', dir: 'content/aufgaben/hundeausbildung', keyPrefix: 'jagdhundeschule-dyn', level: 3 },
     ];
 
     for (var i = 0; i < sections.length; i++) {
@@ -2137,6 +2145,7 @@
       { url: '/content/seiten-aufgaben.json',    icon: '🦌', bereich: 'Jäger / Aufgaben',      dir: 'content/seiten-aufgaben',    form: 'standard' },
       { url: '/content/seiten-weitere.json',     icon: '🦌', bereich: 'Jäger / Weitere Themen',dir: 'content/seiten-weitere',     form: 'standard' },
       { url: '/content/seiten-verbraucher.json', icon: '🌿', bereich: 'Verbraucher',            dir: 'content/seiten-verbraucher', form: 'standard' },
+      { url: '/content/aufgaben/hundeausbildung-seiten.json', icon: '🐕', bereich: 'Aufgaben / Jagdhundeschule', dir: 'content/aufgaben/hundeausbildung', form: 'standard' },
     ];
     manifeste.forEach(function(m) {
       fetch(m.url).then(function(r){return r.json();}).then(function(d){

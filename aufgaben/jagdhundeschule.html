@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hundeausbildung – Kreisjägerschaft Bad Segeberg e.V.">
-  <title>Hundeausbildung – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <meta name="description" content="Jagdhundeschule – Kreisjägerschaft Bad Segeberg e.V.">
+  <title id="page-title-meta">Jagdhundeschule – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
@@ -93,6 +93,7 @@
     <li><details><summary>Jäger / Aufgaben</summary><ul class="mobile-nav__sub">
       <li><a href="schiessen.html">Schießwesen</a></li>
       <li><a href="hundeausbildung.html">Hundeausbildung</a></li>
+      <li><a href="jagdhundeschule.html">Jagdhundeschule</a></li>
       <li><a href="jugend.html">Jugendarbeit</a></li>
       <li><a href="naturschutz.html">Naturschutz</a></li>
       <li><a href="jungwildrettung.html">Jungwildrettung</a></li>
@@ -104,14 +105,16 @@
   </ul>
 </nav>
 
-<div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('../images/hundeausbildung.jpg')"></div>
+<!-- Hero wird per JS gesetzt -->
+<div class="page-hero" id="page-hero">
+  <div class="page-hero__bg" id="page-hero-bg" style="background-image: url('../images/hundeausbildung.jpg')"></div>
   <div class="container">
-    <h1>Hundeausbildung</h1>
-    <nav class="breadcrumb">
+    <h1 id="page-hero-h1">Jagdhundeschule</h1>
+    <nav class="breadcrumb" id="page-breadcrumb">
       <a href="../index.html">Startseite</a><span class="sep">/</span>
       <a href="../jaeger/index.html">Jäger</a><span class="sep">/</span>
-      <span>Hundeausbildung</span>
+      <a href="hundeausbildung.html">Hundeausbildung</a><span class="sep">/</span>
+      <span id="breadcrumb-current">Jagdhundeschule</span>
     </nav>
   </div>
 </div>
@@ -121,53 +124,12 @@
     <main class="main-content" id="page-main">
       <div class="loading-spinner">Lädt...</div>
     </main>
-    <script>
-      fetch('/content/aufgaben/hundeausbildung.json')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var main = document.getElementById('page-main');
-          if (!main) return;
-          if (d.hero_bild) {
-            var bg = document.querySelector('.page-hero__bg');
-            if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
-          }
-          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">' : '';
-          var kontaktStr = '';
-          if (d.kontakt_name || d.kontakt_email) {
-            kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name||'');
-            if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
-            kontaktStr += '</p>';
-          }
-          main.innerHTML =
-            '<h2>' + (d.untertitel||'') + '</h2>' +
-            '<p>' + (d.intro||'') + '</p>' +
-            bild +
-            '<div id="page-inhalt"></div>' +
-            kontaktStr +
-            '<div style="margin-top:2rem">' +
-              '<a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>' +
-              '<a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>' +
-            '</div>';
-          if (d.inhalt) {
-            var el = document.getElementById('page-inhalt');
-            if (el) {
-              el.innerHTML = typeof marked !== 'undefined'
-                ? marked.parse(d.inhalt)
-                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
-            }
-          }
-        })
-        .catch(function(err) {
-          var main = document.getElementById('page-main');
-          if (main) main.innerHTML = '<p style="color:var(--text-muted)">Inhalt konnte nicht geladen werden.</p>';
-          console.error(err);
-        });
-    </script>
+
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Jagdhundeschule</h4>
-        <ul class="sidebar-nav">
-          <li><a href="jagdhundeschule.html">🐕 Alle Themen & Kurse</a></li>
+        <ul class="sidebar-nav" id="jagdhundeschule-nav">
+          <li><div class="gallery-loading" style="font-size:.85rem;padding:.5rem 0;">Wird geladen…</div></li>
         </ul>
       </div>
       <div class="sidebar-widget">
@@ -220,18 +182,131 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
   </div>
 </div></footer>
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
+<script>
+(function() {
+  var MANIFEST = '/content/aufgaben/hundeausbildung-seiten.json';
+  var CONTENT_DIR = '/content/aufgaben/hundeausbildung/';
+  var BASE_URL = '/aufgaben/jagdhundeschule.html';
+
+  // Aktiven Slug aus URL-Param lesen
+  var params = new URLSearchParams(window.location.search);
+  var activeSlug = params.get('s') || '';
+
+  // Sidebar-Navigation befüllen (alle Seiten aus Manifest)
+  fetch(MANIFEST)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var seiten = (data.seiten || []).filter(function(s) {
+        return s.veroeffentlicht !== false;
+      });
+      var navEl = document.getElementById('jagdhundeschule-nav');
+      if (!navEl) return;
+      if (!seiten.length) {
+        navEl.innerHTML = '<li><em style="color:var(--text-muted);font-size:.85rem;">Keine Seiten vorhanden</em></li>';
+        return;
+      }
+      navEl.innerHTML = seiten.map(function(s) {
+        var active = s.slug === activeSlug ? ' class="active"' : '';
+        return '<li' + active + '><a href="' + BASE_URL + '?s=' + encodeURIComponent(s.slug) + '">' +
+          s.nav_label.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</a></li>';
+      }).join('') +
+      '<li style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem;">' +
+        '<a href="hundeausbildung.html" style="font-size:.85rem;color:var(--text-muted);">← Zurück zur Übersicht</a></li>';
+    })
+    .catch(function() {
+      var navEl = document.getElementById('jagdhundeschule-nav');
+      if (navEl) navEl.innerHTML = '';
+    });
+
+  // Seiteninhalt laden
+  var main = document.getElementById('page-main');
+
+  if (activeSlug) {
+    // ── Sub-Seite laden ──────────────────────────────────────
+    fetch(CONTENT_DIR + activeSlug + '.json')
+      .then(function(r) {
+        if (!r.ok) throw new Error('Seite nicht gefunden');
+        return r.json();
+      })
+      .then(function(d) {
+        // Titel & Breadcrumb aktualisieren
+        var titel = d.titel || 'Jagdhundeschule';
+        document.title = titel + ' – Kreisjägerschaft Bad Segeberg e.V.';
+        var h1 = document.getElementById('page-hero-h1');
+        if (h1) h1.textContent = titel;
+        var bc = document.getElementById('breadcrumb-current');
+        if (bc) bc.textContent = titel;
+
+        // Markdown rendern
+        var inhaltHtml = '';
+        if (d.inhalt) {
+          inhaltHtml = typeof marked !== 'undefined'
+            ? marked.parse(d.inhalt)
+            : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
+        }
+
+        main.innerHTML =
+          '<nav class="seiten-nav-back" style="margin-bottom:1.5rem;">' +
+            '<a href="jagdhundeschule.html" style="color:var(--green-main);font-weight:600;">← Alle Themen</a>' +
+          '</nav>' +
+          '<h2 style="margin-top:0">' + titel.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</h2>' +
+          '<div id="page-inhalt">' + inhaltHtml + '</div>' +
+          '<div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">' +
+            '<a href="jagdhundeschule.html" class="btn btn-outline-green">← Alle Themen</a>' +
+            '<a href="../kontakt/index.html" class="btn btn-primary" style="margin-left:.75rem">Kontakt aufnehmen</a>' +
+          '</div>';
+      })
+      .catch(function(err) {
+        main.innerHTML =
+          '<p style="color:var(--text-muted)">Diese Seite konnte nicht geladen werden.</p>' +
+          '<a href="jagdhundeschule.html" class="btn btn-outline-green" style="margin-top:1rem">← Zurück zur Übersicht</a>';
+      });
+
+  } else {
+    // ── Übersichtsseite: alle Seiten als Kacheln ─────────────
+    fetch(MANIFEST)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var seiten = (data.seiten || []).filter(function(s) {
+          return s.veroeffentlicht !== false;
+        });
+
+        if (!seiten.length) {
+          main.innerHTML = '<p class="text-muted">Noch keine Seiten vorhanden.</p>';
+          return;
+        }
+
+        var html = '<h2 style="margin-top:0">Jagdhundeschule KJS Bad Segeberg</h2>' +
+          '<p style="color:var(--text-muted);margin-bottom:2rem;">Informationen zu Ausbildungskursen, Prüfungen, Spezialthemen und Veranstaltungen rund um den Jagdhund.</p>' +
+          '<div class="services__grid" style="margin-top:0">';
+
+        seiten.forEach(function(s) {
+          var label = (s.nav_label || s.slug).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+          var href = BASE_URL + '?s=' + encodeURIComponent(s.slug);
+          html += '<a href="' + href + '" class="service-card" style="text-decoration:none;">' +
+            '<div class="service-card__icon">🐕</div>' +
+            '<h3 class="service-card__title">' + label + '</h3>' +
+          '</a>';
+        });
+
+        html += '</div>';
+        main.innerHTML = html;
+      })
+      .catch(function() {
+        main.innerHTML = '<p style="color:var(--text-muted)">Inhalt konnte nicht geladen werden.</p>';
+      });
+  }
+})();
+</script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
     const ft = document.querySelector('.footer-about p');
     if(ft && d.ueber_text) ft.textContent = d.ueber_text;
     const cp = document.querySelector('.footer-bottom span');
     if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
   }).catch(()=>{});
 </script>
 </body>
