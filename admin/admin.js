@@ -23,7 +23,10 @@
     sha:     null,   // current SHA
     mde:     null,   // EasyMDE instance
     dirty:   false,
-    imgTarget: null, // field id receiving chosen image
+    imgTarget:   null, // field id receiving chosen image
+    _tableMode:  false,
+    _segments:   null, // parsed segments when in table view
+    _tableField: null, // 'inhalt' or 'ns-inhalt'
   };
 
   /* ────────────────────────────────────────────────────────────
@@ -634,7 +637,12 @@
           fText('titel', 'Seitentitel', data.titel) +
           fText('untertitel', 'Untertitel', data.untertitel) +
           fTextarea('intro', 'Einleitungstext', data.intro, 2) +
-          fMarkdown('inhalt', 'Textinhalt (Markdown)', data.inhalt) +
+          '<div class="field-row">' +
+            '<label class="field-label">Textinhalt (Markdown)</label>' +
+            '<div id="te-bar-inhalt" class="te-bar"></div>' +
+            '<textarea class="field-textarea" id="f-inhalt" rows="8">' + escHtml(data.inhalt || '') + '</textarea>' +
+            '<div id="te-content-inhalt" style="display:none"></div>' +
+          '</div>' +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bilder</div>' +
@@ -651,6 +659,7 @@
       saveBar();
     id('admin-main').innerHTML = html;
     initMDE('inhalt');
+    initTableEditor('inhalt', data.inhalt || '');
     bindSaveBtn();
   }
 
@@ -1581,7 +1590,12 @@
         '<div class="form-card">' +
           '<div class="form-card-title">Inhalt</div>' +
           fTextarea('ns-intro', 'Einleitungstext', '', 2) +
-          fMarkdown('ns-inhalt', 'Textinhalt (Markdown)', '') +
+          '<div class="field-row">' +
+            '<label class="field-label">Textinhalt (Markdown)</label>' +
+            '<div id="te-bar-ns-inhalt" class="te-bar"></div>' +
+            '<textarea class="field-textarea" id="f-ns-inhalt" rows="8"></textarea>' +
+            '<div id="te-content-ns-inhalt" style="display:none"></div>' +
+          '</div>' +
           fImage('ns-hero_bild', 'Hero-Hintergrundbild', '') +
           fImage('ns-bild', 'Inhaltsbild', '') +
           fText('ns-kontakt_name', 'Kontaktname (optional)', '') +
@@ -1594,6 +1608,7 @@
       '</div>';
     id('admin-main').innerHTML = html;
     initMDE('ns-inhalt');
+    initTableEditor('ns-inhalt', '');
 
     // Auto-generate slug from title
     var titelEl = id('f-ns-titel');
@@ -1874,13 +1889,300 @@
       try { S.mde.toTextArea(); } catch(e) {}
       S.mde = null;
     }
+    // Reset table editor state
+    S._tableMode  = false;
+    S._segments   = null;
+    S._tableField = null;
   }
 
   function getMDE() {
+    // If table view is active, sync segments → markdown first
+    if (S._tableMode && S._segments && S._tableField) {
+      syncTableSegmentsFromDOM(S._tableField);
+      return segmentsToMd(S._segments);
+    }
     if (S.mde) return S.mde.value();
     var el = document.querySelector('.EasyMDEContainer + textarea');
     return el ? el.value : '';
   }
+
+  /* ────────────────────────────────────────────────────────────
+     TABLE EDITOR
+  ──────────────────────────────────────────────────────────── */
+
+  function mdHasTables(md) {
+    return /^\|.+\|/m.test(md);
+  }
+
+  function parseCells(line) {
+    return line.replace(/^\s*\|/, '').replace(/\|\s*$/, '')
+      .split('|').map(function(c) { return c.trim(); });
+  }
+
+  function parseTableLines(lines) {
+    if (lines.length < 2) return null;
+    if (!/^\s*\|[\s\-:|]+\|/.test(lines[1])) return null;
+    var headers = parseCells(lines[0]);
+    var rows = [];
+    for (var i = 2; i < lines.length; i++) {
+      if (/^\s*\|/.test(lines[i])) rows.push(parseCells(lines[i]));
+    }
+    return { type: 'table', headers: headers, rows: rows };
+  }
+
+  function mdToSegments(md) {
+    var lines = md.split('\n');
+    var segments = [];
+    var i = 0;
+    while (i < lines.length) {
+      if (/^\s*\|/.test(lines[i])) {
+        var tableLines = [];
+        while (i < lines.length && /^\s*\|/.test(lines[i])) {
+          tableLines.push(lines[i]); i++;
+        }
+        var seg = parseTableLines(tableLines);
+        if (seg) {
+          segments.push(seg);
+        } else {
+          var last = segments[segments.length - 1];
+          if (last && last.type === 'text') last.content += '\n' + tableLines.join('\n');
+          else segments.push({ type: 'text', content: tableLines.join('\n') });
+        }
+      } else {
+        var last = segments[segments.length - 1];
+        if (last && last.type === 'text') last.content += '\n' + lines[i];
+        else segments.push({ type: 'text', content: lines[i] });
+        i++;
+      }
+    }
+    segments.forEach(function(s) { if (s.type === 'text') s.content = s.content.trim(); });
+    segments = segments.filter(function(s) { return !(s.type === 'text' && s.content === ''); });
+    if (!segments.length) segments.push({ type: 'text', content: md });
+    return segments;
+  }
+
+  function tableSegToMd(seg) {
+    var cols = seg.headers.length;
+    var header = '| ' + seg.headers.join(' | ') + ' |';
+    var sep    = '| ' + seg.headers.map(function() { return '---'; }).join(' | ') + ' |';
+    var rows = seg.rows.map(function(row) {
+      var cells = [];
+      for (var c = 0; c < cols; c++) cells.push(row[c] !== undefined ? row[c] : '');
+      return '| ' + cells.join(' | ') + ' |';
+    });
+    return [header, sep].concat(rows).join('\n');
+  }
+
+  function segmentsToMd(segments) {
+    return segments.map(function(seg) {
+      return seg.type === 'table' ? tableSegToMd(seg) : (seg.content || '');
+    }).filter(function(s) { return s !== ''; }).join('\n\n');
+  }
+
+  function initTableEditor(fieldId, markdown) {
+    var barEl = id('te-bar-' + fieldId);
+    if (!barEl) return;
+    barEl.innerHTML =
+      '<button type="button" class="te-btn" onclick="switchToTableView(\'' + fieldId + '\')" id="te-btn-table-' + fieldId + '">' +
+        '🗂️ Tabellenansicht' +
+      '</button>' +
+      '<button type="button" class="te-btn te-btn-active" id="te-btn-md-' + fieldId + '" disabled onclick="switchToMarkdownView(\'' + fieldId + '\')">' +
+        '✏️ Markdown' +
+      '</button>' +
+      '<button type="button" class="te-btn te-btn-new" onclick="insertNewTable(\'' + fieldId + '\')" id="te-btn-new-' + fieldId + '">' +
+        '➕ Neue Tabelle' +
+      '</button>';
+  }
+
+  window.switchToTableView = function(fieldId) {
+    var md = S.mde ? S.mde.value() : '';
+    // Hide MDE
+    var mdeWrap = document.querySelector('.EasyMDEContainer');
+    if (mdeWrap) mdeWrap.style.display = 'none';
+    var contentEl = id('te-content-' + fieldId);
+    if (contentEl) contentEl.style.display = '';
+    S._tableMode  = true;
+    S._tableField = fieldId;
+    S._segments   = mdToSegments(md);
+    renderAllTableGrids(fieldId);
+    var btnTable = id('te-btn-table-' + fieldId);
+    var btnMd    = id('te-btn-md-'    + fieldId);
+    if (btnTable) { btnTable.classList.add('te-btn-active');    btnTable.disabled = true;  }
+    if (btnMd)    { btnMd.classList.remove('te-btn-active');    btnMd.disabled    = false; }
+  };
+
+  window.switchToMarkdownView = function(fieldId) {
+    if (S._tableMode && S._segments) {
+      syncTableSegmentsFromDOM(fieldId);
+      var md = segmentsToMd(S._segments);
+      var mdeWrap = document.querySelector('.EasyMDEContainer');
+      if (mdeWrap) mdeWrap.style.display = '';
+      var contentEl = id('te-content-' + fieldId);
+      if (contentEl) contentEl.style.display = 'none';
+      if (S.mde) S.mde.value(md);
+      S._tableMode  = false;
+      S._segments   = null;
+      S._tableField = null;
+    }
+    var btnTable = id('te-btn-table-' + fieldId);
+    var btnMd    = id('te-btn-md-'    + fieldId);
+    if (btnTable) { btnTable.classList.remove('te-btn-active'); btnTable.disabled = false; }
+    if (btnMd)    { btnMd.classList.add('te-btn-active');       btnMd.disabled    = true;  }
+  };
+
+  function syncTableSegmentsFromDOM(fieldId) {
+    if (!S._segments) return;
+    S._segments.forEach(function(seg, si) {
+      if (seg.type !== 'table') return;
+      var cols = seg.headers.length;
+      for (var c = 0; c < cols; c++) {
+        var el = id('te-h-' + fieldId + '-' + si + '-' + c);
+        if (el) seg.headers[c] = el.value;
+      }
+      seg.rows.forEach(function(row, ri) {
+        for (var c = 0; c < cols; c++) {
+          var el = id('te-c-' + fieldId + '-' + si + '-' + ri + '-' + c);
+          if (el) row[c] = el.value;
+        }
+      });
+    });
+  }
+
+  function renderAllTableGrids(fieldId) {
+    var contentEl = id('te-content-' + fieldId);
+    if (!contentEl || !S._segments) return;
+    var html = '';
+    var tIdx = 0;
+    S._segments.forEach(function(seg, si) {
+      if (seg.type === 'text') {
+        if (seg.content) {
+          html += '<div class="te-text-preview">' +
+            '<div class="te-text-label">📝 Textblock</div>' +
+            '<div class="te-text-content">' + escHtml(seg.content.substring(0, 300)) + (seg.content.length > 300 ? '…' : '') + '</div>' +
+          '</div>';
+        }
+      } else if (seg.type === 'table') {
+        html += renderTableGrid(fieldId, tIdx, seg, si);
+        tIdx++;
+      }
+    });
+    if (!html) {
+      html = '<div class="te-empty">Noch kein Inhalt. Klicken Sie auf „➕ Neue Tabelle" um zu beginnen.</div>';
+    }
+    contentEl.innerHTML = html;
+  }
+
+  function renderTableGrid(fieldId, tIdx, seg, si) {
+    var cols = seg.headers.length;
+    var canUp   = si > 0;
+    var canDown = si < S._segments.length - 1;
+    var html = '<div class="te-table-card" id="te-card-' + fieldId + '-' + si + '">' +
+      '<div class="te-table-toolbar">' +
+        '<span class="te-table-title">Tabelle ' + (tIdx + 1) + '</span>' +
+        '<div class="te-table-actions">' +
+          (canUp   ? '<button type="button" class="btn btn-xs btn-ghost" onclick="teMoveUp(\'' + fieldId + '\',' + si + ')" title="Nach oben">↑</button>' : '') +
+          (canDown ? '<button type="button" class="btn btn-xs btn-ghost" onclick="teMoveDown(\'' + fieldId + '\',' + si + ')" title="Nach unten">↓</button>' : '') +
+          '<button type="button" class="btn btn-xs btn-danger-outline" onclick="teDelTable(\'' + fieldId + '\',' + si + ')" title="Tabelle löschen">🗑️ Löschen</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="te-table-wrap"><table class="te-table"><thead><tr>';
+
+    for (var c = 0; c < cols; c++) {
+      html += '<th class="te-th">' +
+        '<input class="te-header-input" type="text" id="te-h-' + fieldId + '-' + si + '-' + c + '" value="' + escAttr(seg.headers[c] || '') + '" placeholder="Spalte ' + (c + 1) + '">' +
+        (cols > 1 ? '<button type="button" class="te-col-del-btn" onclick="teDelCol(\'' + fieldId + '\',' + si + ',' + c + ')" title="Spalte löschen">✕</button>' : '') +
+      '</th>';
+    }
+    html += '<th class="te-col-add-th"><button type="button" class="te-col-add-btn" onclick="teAddCol(\'' + fieldId + '\',' + si + ')" title="Spalte hinzufügen">+</button></th>';
+    html += '</tr></thead><tbody>';
+
+    seg.rows.forEach(function(row, ri) {
+      html += '<tr>';
+      for (var c = 0; c < cols; c++) {
+        html += '<td class="te-cell"><input class="te-cell-input" type="text" id="te-c-' + fieldId + '-' + si + '-' + ri + '-' + c + '" value="' + escAttr(row[c] !== undefined ? row[c] : '') + '"></td>';
+      }
+      html += '<td class="te-row-del-td"><button type="button" class="te-row-del-btn" onclick="teDelRow(\'' + fieldId + '\',' + si + ',' + ri + ')" title="Zeile löschen">✕</button></td></tr>';
+    });
+
+    html += '</tbody></table></div>' +
+      '<button type="button" class="te-add-row-btn" onclick="teAddRow(\'' + fieldId + '\',' + si + ')">+ Zeile hinzufügen</button>' +
+    '</div>';
+    return html;
+  }
+
+  window.teAddRow = function(fieldId, si) {
+    syncTableSegmentsFromDOM(fieldId);
+    var seg = S._segments[si];
+    if (!seg || seg.type !== 'table') return;
+    var row = [];
+    for (var c = 0; c < seg.headers.length; c++) row.push('');
+    seg.rows.push(row);
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teDelRow = function(fieldId, si, ri) {
+    syncTableSegmentsFromDOM(fieldId);
+    var seg = S._segments[si];
+    if (!seg || seg.type !== 'table') return;
+    seg.rows.splice(ri, 1);
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teAddCol = function(fieldId, si) {
+    syncTableSegmentsFromDOM(fieldId);
+    var seg = S._segments[si];
+    if (!seg || seg.type !== 'table') return;
+    seg.headers.push('Spalte ' + (seg.headers.length + 1));
+    seg.rows.forEach(function(row) { row.push(''); });
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teDelCol = function(fieldId, si, ci) {
+    syncTableSegmentsFromDOM(fieldId);
+    var seg = S._segments[si];
+    if (!seg || seg.type !== 'table' || seg.headers.length <= 1) return;
+    seg.headers.splice(ci, 1);
+    seg.rows.forEach(function(row) { row.splice(ci, 1); });
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teDelTable = function(fieldId, si) {
+    syncTableSegmentsFromDOM(fieldId);
+    S._segments.splice(si, 1);
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teMoveUp = function(fieldId, si) {
+    syncTableSegmentsFromDOM(fieldId);
+    if (si <= 0) return;
+    var tmp = S._segments[si - 1]; S._segments[si - 1] = S._segments[si]; S._segments[si] = tmp;
+    renderAllTableGrids(fieldId);
+  };
+
+  window.teMoveDown = function(fieldId, si) {
+    syncTableSegmentsFromDOM(fieldId);
+    if (si >= S._segments.length - 1) return;
+    var tmp = S._segments[si + 1]; S._segments[si + 1] = S._segments[si]; S._segments[si] = tmp;
+    renderAllTableGrids(fieldId);
+  };
+
+  window.insertNewTable = function(fieldId) {
+    var colsStr = prompt('Wie viele Spalten soll die neue Tabelle haben?', '3');
+    if (!colsStr) return;
+    var cols = parseInt(colsStr, 10);
+    if (isNaN(cols) || cols < 1 || cols > 20) return;
+    if (!S._tableMode) {
+      window.switchToTableView(fieldId);
+    } else {
+      syncTableSegmentsFromDOM(fieldId);
+    }
+    var headers = [];
+    for (var c = 0; c < cols; c++) headers.push('Spalte ' + (c + 1));
+    var row = [];
+    for (var c = 0; c < cols; c++) row.push('');
+    S._segments.push({ type: 'table', headers: headers, rows: [row] });
+    renderAllTableGrids(fieldId);
+  };
 
   /* ────────────────────────────────────────────────────────────
      TOGGLE BUTTON

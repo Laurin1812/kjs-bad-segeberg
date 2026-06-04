@@ -449,4 +449,101 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .text-muted { color: var(--text-muted); }
 .mt-1 { margin-top: .5rem; }
 .mt-2 { margin-top: 1rem; }
+
+/* ── TABLE EDITOR ─────────────────────────────────────────────── */
+.te-bar {
+  display: flex; gap: .4rem; margin-bottom: .5rem; flex-wrap: wrap;
+}
+.te-btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .3rem .75rem; border-radius: 6px; font-size: .8rem; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--text-muted);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.te-btn:hover:not(:disabled) { background: var(--green-light); color: var(--green); border-color: var(--green); }
+.te-btn:disabled { opacity: .5; cursor: default; }
+.te-btn.te-btn-active { background: var(--green); color: #fff; border-color: var(--green); }
+.te-btn.te-btn-new { border-color: var(--gold); color: var(--gold); }
+.te-btn.te-btn-new:hover:not(:disabled) { background: #fef9ec; }
+
+.te-text-preview {
+  background: #f8f9fa; border: 1px dashed var(--border); border-radius: 6px;
+  padding: .6rem .9rem; margin-bottom: .5rem;
+}
+.te-text-label { font-size: .75rem; font-weight: 600; color: var(--text-muted); margin-bottom: .3rem; }
+.te-text-content { font-size: .8rem; color: var(--text); white-space: pre-wrap; }
+
+.te-empty {
+  padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: .875rem;
+  background: var(--bg); border-radius: 6px; border: 1px dashed var(--border);
+}
+
+.te-table-card {
+  border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: .75rem;
+  overflow: hidden; background: var(--white);
+}
+.te-table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .5rem .75rem; background: var(--bg); border-bottom: 1px solid var(--border);
+}
+.te-table-title { font-size: .8rem; font-weight: 700; color: var(--text-muted); }
+.te-table-actions { display: flex; gap: .35rem; }
+.btn-xs { padding: .2rem .5rem; font-size: .75rem; }
+
+.te-table-wrap { overflow-x: auto; }
+.te-table { width: 100%; border-collapse: collapse; min-width: 300px; }
+.te-table th, .te-table td { padding: 0; }
+
+.te-th {
+  background: var(--green-light); border-bottom: 2px solid var(--green);
+  border-right: 1px solid var(--border); padding: 4px 6px;
+  position: relative; min-width: 100px;
+}
+.te-col-add-th {
+  background: var(--green-light); border-bottom: 2px solid var(--green);
+  width: 36px; text-align: center;
+}
+.te-header-input {
+  width: 100%; border: none; background: transparent; font-weight: 700;
+  font-size: .8rem; color: var(--green-dark); padding: 2px 4px; outline: none;
+  min-width: 60px;
+}
+.te-header-input:focus { background: rgba(255,255,255,.7); border-radius: 3px; }
+.te-col-del-btn {
+  position: absolute; top: 2px; right: 2px; font-size: .65rem; line-height: 1;
+  background: transparent; border: none; color: var(--danger); cursor: pointer; opacity: 0;
+  padding: 1px 3px; border-radius: 3px;
+}
+.te-th:hover .te-col-del-btn { opacity: 1; }
+.te-col-del-btn:hover { background: var(--danger-bg); }
+.te-col-add-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--green);
+  background: transparent; color: var(--green); font-size: 1rem; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+}
+.te-col-add-btn:hover { background: var(--green); color: #fff; }
+
+.te-table tbody tr:nth-child(odd) td { background: #fafafa; }
+.te-table tbody tr:hover td { background: var(--green-light); }
+.te-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 3px 5px; }
+.te-cell-input {
+  width: 100%; border: none; background: transparent; font-size: .8rem;
+  color: var(--text); padding: 3px 4px; outline: none; min-width: 60px;
+}
+.te-cell-input:focus { background: rgba(255,255,255,.9); border-radius: 3px; outline: 1px solid var(--green); }
+.te-row-del-td { border-bottom: 1px solid var(--border); width: 32px; text-align: center; }
+.te-row-del-btn {
+  font-size: .7rem; border: none; background: transparent; color: var(--danger);
+  cursor: pointer; opacity: 0; padding: 2px 4px; border-radius: 3px;
+}
+.te-table tr:hover .te-row-del-btn { opacity: 1; }
+.te-row-del-btn:hover { background: var(--danger-bg); }
+
+.te-add-row-btn {
+  display: block; width: 100%; padding: .45rem; text-align: center;
+  background: transparent; border: none; border-top: 1px solid var(--border);
+  color: var(--green); font-size: .8rem; font-weight: 600; cursor: pointer;
+}
+.te-add-row-btn:hover { background: var(--green-light); }
 .flex-gap { display: flex; gap: .5rem; flex-wrap: wrap; }
