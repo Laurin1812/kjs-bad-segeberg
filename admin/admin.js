@@ -1700,9 +1700,22 @@
   };
 
   async function doSave(filePath, data, message) {
-    // Always fetch fresh SHA before saving to avoid git-gateway conflicts
-    var current = await apiGet(filePath).catch(function() { return null; });
-    var sha = current ? current.sha : (S.sha || null);
+    // Fetch SHA with cache-busting to avoid git-gateway stale-cache 409s
+    async function fetchFreshSha() {
+      var tok = await getToken();
+      var r = await fetch(GIT + '/' + filePath + '?ref=' + BRANCH + '&_=' + Date.now(), {
+        headers: {
+          'Authorization': 'Bearer ' + tok,
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      if (!r.ok) return null;
+      var d = await r.json();
+      return d.sha || null;
+    }
+
+    var sha = await fetchFreshSha().catch(function() { return S.sha || null; });
     try {
       var result = await apiPut(filePath, data, sha, message);
       if (result && result.content && result.content.sha) {
@@ -1710,10 +1723,10 @@
       }
       return result;
     } catch(e) {
-      // 409 = SHA stale (git-gateway cache); re-fetch SHA and retry once
+      // 409 = SHA still stale; wait briefly, re-fetch, retry once
       if (e.message && e.message.indexOf('409') !== -1) {
-        var retry = await apiGet(filePath).catch(function() { return null; });
-        var retrySha = retry ? retry.sha : null;
+        await new Promise(function(res) { setTimeout(res, 600); });
+        var retrySha = await fetchFreshSha().catch(function() { return null; });
         if (!retrySha) throw e;
         var result2 = await apiPut(filePath, data, retrySha, message);
         if (result2 && result2.content && result2.content.sha) {
