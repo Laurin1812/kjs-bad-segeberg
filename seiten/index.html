@@ -86,11 +86,40 @@
   </div>
 </header>
 
-<nav class="mobile-nav" id="mobileNav">
-  <button class="mobile-nav__close" id="mobileNavClose">✕</button>
+<nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
+  <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
   <ul>
     <li><a href="../index.html">Startseite</a></li>
-    <li><a href="../jaeger/index.html">Jäger</a></li>
+    <li>
+      <details>
+        <summary>Jäger</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="../jaeger/index.html">KJS Bad Segeberg</a></li>
+          <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+          <li><a href="../jaeger/obleute.html">Obleute</a></li>
+          <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
+          <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+          <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+          <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>Verbraucher</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+        </ul>
+      </details>
+    </li>
+    <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
     <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../aktuelles/index.html">Aktuelles</a></li>
     <li><a href="../faq/index.html">FAQ</a></li>
@@ -99,6 +128,7 @@
 </nav>
 
 <div class="page-hero" id="page-hero">
+  <div class="page-hero__bg"></div>
   <div class="container">
     <h1 id="seite-titel">Wird geladen …</h1>
     <nav class="breadcrumb">
@@ -230,8 +260,13 @@
 
     // Hero-Bild setzen falls vorhanden
     if (seite.hero_bild) {
-      var heroEl = document.getElementById('page-hero');
-      if (heroEl) heroEl.style.backgroundImage = "url('" + seite.hero_bild + "')";
+      var heroBg = document.querySelector('.page-hero__bg');
+      if (heroBg) {
+        heroBg.style.backgroundImage = "url('" + seite.hero_bild + "')";
+      } else {
+        var heroEl = document.getElementById('page-hero');
+        if (heroEl) heroEl.style.backgroundImage = "url('" + seite.hero_bild + "')";
+      }
     }
 
     var inhaltEl = document.getElementById('seite-inhalt');
