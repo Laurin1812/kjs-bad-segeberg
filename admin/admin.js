@@ -27,6 +27,7 @@
     _tableMode:  false,
     _segments:   null, // parsed segments when in table view
     _tableField: null, // 'inhalt' or 'ns-inhalt'
+    _mdeWrap:    null, // cached EasyMDEContainer element
   };
 
   /* ────────────────────────────────────────────────────────────
@@ -1893,6 +1894,7 @@
     S._tableMode  = false;
     S._segments   = null;
     S._tableField = null;
+    S._mdeWrap    = null;
   }
 
   function getMDE() {
@@ -1994,15 +1996,29 @@
       '</button>';
   }
 
+  function getMdeWrap(fieldId) {
+    // Find the EasyMDE container that's a sibling of the textarea for this field
+    var ta = id('f-' + fieldId);
+    if (!ta) return document.querySelector('.EasyMDEContainer');
+    // EasyMDE inserts its container right after the textarea
+    var next = ta.nextElementSibling;
+    while (next) {
+      if (next.classList && next.classList.contains('EasyMDEContainer')) return next;
+      next = next.nextElementSibling;
+    }
+    return document.querySelector('.EasyMDEContainer');
+  }
+
   window.switchToTableView = function(fieldId) {
     var md = S.mde ? S.mde.value() : '';
     // Hide MDE
-    var mdeWrap = document.querySelector('.EasyMDEContainer');
+    var mdeWrap = getMdeWrap(fieldId);
     if (mdeWrap) mdeWrap.style.display = 'none';
     var contentEl = id('te-content-' + fieldId);
     if (contentEl) contentEl.style.display = '';
     S._tableMode  = true;
     S._tableField = fieldId;
+    S._mdeWrap    = mdeWrap; // remember for restore
     S._segments   = mdToSegments(md);
     renderAllTableGrids(fieldId);
     var btnTable = id('te-btn-table-' + fieldId);
@@ -2015,7 +2031,7 @@
     if (S._tableMode && S._segments) {
       syncTableSegmentsFromDOM(fieldId);
       var md = segmentsToMd(S._segments);
-      var mdeWrap = document.querySelector('.EasyMDEContainer');
+      var mdeWrap = S._mdeWrap || getMdeWrap(fieldId);
       if (mdeWrap) mdeWrap.style.display = '';
       var contentEl = id('te-content-' + fieldId);
       if (contentEl) contentEl.style.display = 'none';
@@ -2023,6 +2039,7 @@
       S._tableMode  = false;
       S._segments   = null;
       S._tableField = null;
+      S._mdeWrap    = null;
     }
     var btnTable = id('te-btn-table-' + fieldId);
     var btnMd    = id('te-btn-md-'    + fieldId);
@@ -2053,6 +2070,7 @@
     if (!contentEl || !S._segments) return;
     var html = '';
     var tIdx = 0;
+    var hasTable = false;
     S._segments.forEach(function(seg, si) {
       if (seg.type === 'text') {
         if (seg.content) {
@@ -2062,14 +2080,17 @@
           '</div>';
         }
       } else if (seg.type === 'table') {
+        hasTable = true;
         html += renderTableGrid(fieldId, tIdx, seg, si);
         tIdx++;
       }
     });
-    if (!html) {
-      html = '<div class="te-empty">Noch kein Inhalt. Klicken Sie auf „➕ Neue Tabelle" um zu beginnen.</div>';
+    if (!hasTable) {
+      html += '<div class="te-empty">📊 Dieser Inhalt enthält keine Tabellen.<br>Klicken Sie auf <strong>➕ Neue Tabelle</strong> um eine hinzuzufügen.</div>';
     }
     contentEl.innerHTML = html;
+    // Scroll so user sees the result
+    setTimeout(function() { contentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
   }
 
   function renderTableGrid(fieldId, tIdx, seg, si) {
