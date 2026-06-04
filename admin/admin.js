@@ -1700,15 +1700,29 @@
   };
 
   async function doSave(filePath, data, message) {
-    // Always fetch fresh SHA before saving to avoid conflicts
+    // Always fetch fresh SHA before saving to avoid git-gateway conflicts
     var current = await apiGet(filePath).catch(function() { return null; });
     var sha = current ? current.sha : (S.sha || null);
-    var result = await apiPut(filePath, data, sha, message);
-    // Update stored SHA
-    if (result && result.content && result.content.sha) {
-      S.sha = result.content.sha;
+    try {
+      var result = await apiPut(filePath, data, sha, message);
+      if (result && result.content && result.content.sha) {
+        S.sha = result.content.sha;
+      }
+      return result;
+    } catch(e) {
+      // 409 = SHA stale (git-gateway cache); re-fetch SHA and retry once
+      if (e.message && e.message.indexOf('409') !== -1) {
+        var retry = await apiGet(filePath).catch(function() { return null; });
+        var retrySha = retry ? retry.sha : null;
+        if (!retrySha) throw e;
+        var result2 = await apiPut(filePath, data, retrySha, message);
+        if (result2 && result2.content && result2.content.sha) {
+          S.sha = result2.content.sha;
+        }
+        return result2;
+      }
+      throw e;
     }
-    return result;
   }
 
   function setSaving(saving) {
