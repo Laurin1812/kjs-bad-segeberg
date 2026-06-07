@@ -275,6 +275,15 @@
   </div>
 </section>
 
+<!-- ===== ÜBER UNS ===== -->
+<section class="section ueber-uns">
+  <div class="container">
+    <h2 class="section-title" id="ueber-uns-titel">Über uns</h2>
+    <div class="section-divider"></div>
+    <div class="ueber-uns__text" id="ueber-uns-text"></div>
+  </div>
+</section>
+
 <!-- ===== SERVICES / AUFGABEN ===== -->
 <section class="section section--alt services">
   <div class="container">
@@ -717,6 +726,16 @@
     if(qlLabels[1] && d.quicklink_2_label) qlLabels[1].textContent = d.quicklink_2_label;
     if(qlLabels[2] && d.quicklink_3_label) qlLabels[2].textContent = d.quicklink_3_label;
     if(qlLabels[3] && d.quicklink_4_label) qlLabels[3].textContent = d.quicklink_4_label;
+    // Über uns
+    var uuTitel = document.getElementById('ueber-uns-titel');
+    var uuText  = document.getElementById('ueber-uns-text');
+    if(uuTitel && d.ueber_titel) uuTitel.textContent = d.ueber_titel;
+    if(uuText && d.ueber_text){
+      uuText.innerHTML = d.ueber_text.split(/\n\s*\n/).map(function(p){
+        p = p.trim();
+        return p ? '<p>' + p + '</p>' : '';
+      }).join('');
+    }
   }).catch(function(){});
 </script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
