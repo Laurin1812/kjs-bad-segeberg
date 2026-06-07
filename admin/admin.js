@@ -712,6 +712,22 @@
   function renderStartseite(def, data) {
     var html = panelHeader(def.label) +
       '<div class="panel-body">' +
+        '<div class="form-card" style="background:var(--green-light);border-color:var(--green);">' +
+          '<div class="form-card-title" style="color:var(--green-dark);">💡 Schriftgrößen, Schriftarten &amp; Farben ändern</div>' +
+          '<p style="margin:0 0 .85rem;color:var(--text-body);font-size:.9rem;">' +
+            'Diese Einstellungen gelten für die <strong>gesamte Website</strong> (nicht nur die Startseite) ' +
+            'und befinden sich daher in einem eigenen Bereich:' +
+          '</p>' +
+          '<button type="button" class="btn btn-primary btn-sm" onclick="(function(){' +
+            'var wrap=document.getElementById(\'nc-einstellungen\');' +
+            'var grp=document.querySelector(\'[data-navkey=einstellungen]\');' +
+            'if(wrap&&grp&&wrap.style.display===\'none\')grp.click();' +
+            'setTimeout(function(){var d=document.querySelector(\'[data-navkey=design]\');if(d)d.click();},80);' +
+          '})()">' +
+            '🎨 Zu „Design &amp; Farben" wechseln' +
+          '</button>' +
+          '<span style="margin-left:.6rem;color:var(--text-muted);font-size:.82rem;">⚙️ Einstellungen → Design &amp; Farben</span>' +
+        '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Hero-Bereich (Startseiten-Banner)</div>' +
           fText('hero_titel', 'Titel Zeile 1', data.hero_titel) +
@@ -1505,7 +1521,7 @@
       }
       gallery.innerHTML = imgs.map(function(f) {
         var url = '/images/' + f.name;
-        return '<div class="gallery-img-wrap">' +
+        return '<div class="gallery-img-wrap" data-path="' + escAttr(f.path) + '">' +
           '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
           '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
@@ -1534,7 +1550,19 @@
         try {
           await apiDeleteFile(path, sha, '🗑️ Bild gelöscht: ' + name);
           toast('✅ Bild gelöscht.', 'ok');
-          loadMedianGallery();
+          // Direkt aus der Galerie entfernen statt neu zu laden: Die GitHub-API liefert
+          // nach einem DELETE kurzzeitig noch die alte (zwischengespeicherte) Verzeichnis-
+          // liste zurück – ein sofortiges Neuladen würde das gerade gelöschte Bild also
+          // wieder anzeigen ("Geisterbild", das erst beim zweiten Klick verschwindet).
+          var gallery = id('medien-gallery');
+          if (gallery) {
+            var escSel = (window.CSS && CSS.escape) ? CSS.escape(path) : path.replace(/(["\\\]])/g, '\\$1');
+            var wrap = gallery.querySelector('[data-path="' + escSel + '"]');
+            if (wrap) wrap.remove();
+            if (!gallery.querySelector('.gallery-img-wrap')) {
+              gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
+            }
+          }
         } catch(e) {
           toast('❌ Fehler: ' + e.message, 'err');
         }
