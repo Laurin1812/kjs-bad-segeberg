@@ -243,20 +243,20 @@
       <div class="welcome__img-badge">Kreis Bad Segeberg</div>
     </div>
     <div class="welcome__text">
-      <span class="welcome__tag">Willkommen</span>
-      <h2>Heger, Schützer und<br>Botschafter der Natur</h2>
-      <p>
+      <span class="welcome__tag" id="welcome-tag">Willkommen</span>
+      <h2 id="welcome-titel">Heger, Schützer und<br>Botschafter der Natur</h2>
+      <p id="welcome-text">
         Herzlich willkommen bei der Kreisjägerschaft Bad Segeberg e.V.!
         Als Zusammenschluss aller Jägerinnen und Jäger im Kreis Bad Segeberg
         sind wir Motor einer nachhaltigen Jagd und des aktiven Naturschutzes
         in unserer Heimatregion.
       </p>
-      <blockquote class="welcome__quote">
+      <blockquote class="welcome__quote" id="welcome-zitat">
         „Die Jagd ist mehr als das Erlegen von Wild – sie ist eine tiefe Verantwortung
         gegenüber unserer Natur, unserem Wild und den kommenden Generationen.
         Gemeinsam gestalten wir eine lebenswerte Landschaft im Kreis Bad Segeberg."
       </blockquote>
-      <p>
+      <p id="welcome-text2">
         Von der Jungwildrettung im Frühjahr über die Hundeausbildung bis hin
         zu Naturschutzprojekten und dem Jagdhornblasen – unsere Mitglieder
         bringen sich das ganze Jahr über aktiv ein.
@@ -264,8 +264,8 @@
       <div class="welcome__signature">
         <div class="welcome__sig-avatar">🤝</div>
         <div>
-          <span class="welcome__sig-name">Ihr Kreisjägermeister</span>
-          <span class="welcome__sig-role">Kreisjägerschaft Bad Segeberg e.V.</span>
+          <span class="welcome__sig-name" id="welcome-sig-name">Ihr Kreisjägermeister</span>
+          <span class="welcome__sig-role" id="welcome-sig-rolle">Kreisjägerschaft Bad Segeberg e.V.</span>
         </div>
       </div>
       <div style="margin-top:1.75rem">
@@ -726,6 +726,23 @@
     if(qlLabels[1] && d.quicklink_2_label) qlLabels[1].textContent = d.quicklink_2_label;
     if(qlLabels[2] && d.quicklink_3_label) qlLabels[2].textContent = d.quicklink_3_label;
     if(qlLabels[3] && d.quicklink_4_label) qlLabels[3].textContent = d.quicklink_4_label;
+    // Willkommen-Bereich ("Heger, Schützer und Botschafter der Natur")
+    var wkTag   = document.getElementById('welcome-tag');
+    var wkTitel = document.getElementById('welcome-titel');
+    var wkText  = document.getElementById('welcome-text');
+    var wkZitat = document.getElementById('welcome-zitat');
+    var wkText2 = document.getElementById('welcome-text2');
+    var wkSigName = document.getElementById('welcome-sig-name');
+    var wkSigRolle = document.getElementById('welcome-sig-rolle');
+    if(wkTag && d.willkommen_tag) wkTag.textContent = d.willkommen_tag;
+    if(wkTitel && (d.willkommen_titel_zeile1 || d.willkommen_titel_zeile2)){
+      wkTitel.innerHTML = (d.willkommen_titel_zeile1||'') + '<br>' + (d.willkommen_titel_zeile2||'');
+    }
+    if(wkText && d.willkommen_text) wkText.textContent = d.willkommen_text;
+    if(wkZitat && d.willkommen_zitat) wkZitat.textContent = '„' + d.willkommen_zitat + '"';
+    if(wkText2 && d.willkommen_text2) wkText2.textContent = d.willkommen_text2;
+    if(wkSigName && d.willkommen_signatur_name) wkSigName.textContent = d.willkommen_signatur_name;
+    if(wkSigRolle && d.willkommen_signatur_rolle) wkSigRolle.textContent = d.willkommen_signatur_rolle;
     // Über uns
     var uuTitel = document.getElementById('ueber-uns-titel');
     var uuText  = document.getElementById('ueber-uns-text');

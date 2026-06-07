@@ -721,6 +721,21 @@
           fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
         '</div>' +
         '<div class="form-card">' +
+          '<div class="form-card-title">Willkommen-Bereich ("Heger, Schützer und Botschafter der Natur")</div>' +
+          fText('willkommen_tag', 'Badge-Text', data.willkommen_tag) +
+          '<div class="field-row-2">' +
+            fText('willkommen_titel_zeile1', 'Titel Zeile 1', data.willkommen_titel_zeile1) +
+            fText('willkommen_titel_zeile2', 'Titel Zeile 2', data.willkommen_titel_zeile2) +
+          '</div>' +
+          fTextarea('willkommen_text', 'Einleitungstext', data.willkommen_text, 3) +
+          fTextarea('willkommen_zitat', 'Zitat (Anführungszeichen werden automatisch ergänzt)', data.willkommen_zitat, 3) +
+          fTextarea('willkommen_text2', 'Zweiter Absatz', data.willkommen_text2, 3) +
+          '<div class="field-row-2">' +
+            fText('willkommen_signatur_name', 'Unterschrift – Name/Funktion', data.willkommen_signatur_name) +
+            fText('willkommen_signatur_rolle', 'Unterschrift – Zusatz', data.willkommen_signatur_rolle) +
+          '</div>' +
+        '</div>' +
+        '<div class="form-card">' +
           '<div class="form-card-title">Statistiken (3 Zahlen unter dem Hero)</div>' +
           '<div class="field-row-2">' +
             fText('statistik_1_zahl', 'Zahl 1', data.statistik_1_zahl) +
@@ -748,6 +763,9 @@
 
   function collectStartseite(data) {
     ['hero_titel','hero_titel_zeile2','hero_untertitel','hero_button_text',
+     'willkommen_tag','willkommen_titel_zeile1','willkommen_titel_zeile2',
+     'willkommen_text','willkommen_zitat','willkommen_text2',
+     'willkommen_signatur_name','willkommen_signatur_rolle',
      'statistik_1_zahl','statistik_1_label','statistik_2_zahl','statistik_2_label',
      'statistik_3_zahl','statistik_3_label','ueber_titel','ueber_text'].forEach(function(k) {
       data[k] = gv(k);
