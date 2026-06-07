@@ -23,27 +23,37 @@ if (mobileNavClose) mobileNavClose.addEventListener('click', closeMobileNav);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
 
 // Markdown-Bilder mit Größen-/Ausrichtungsklassen: ![alt](pfad){.img-mittel .img-rechts}
-// marked.js kennt diese Attribut-Syntax nicht von Haus aus – wir wandeln sie vor dem
-// Parsen in echte <img class="..."> Tags um, die marked als Roh-HTML durchreicht.
+// marked.js kennt diese Attribut-Syntax nicht von Haus aus. Wir registrieren dafür eine
+// eigene Inline-Extension über die offizielle marked.use()-API (marked.parse selbst ist
+// in dieser Version ein schreibgeschützter Getter und kann nicht überschrieben werden).
 (function() {
-  if (typeof marked === 'undefined' || !marked || typeof marked.parse !== 'function') return;
-  var IMG_CLASS_RE = /!\[([^\]]*)\]\(([^)\s]+)\)\{([^}]+)\}/g;
-  function withImageClasses(md) {
-    if (typeof md !== 'string') return md;
-    return md.replace(IMG_CLASS_RE, function(_, alt, src, classes) {
-      var cls = classes.trim().split(/\s+/)
-        .map(function(c) { return c.replace(/^\./, ''); })
-        .filter(Boolean)
-        .join(' ');
-      var altSafe = String(alt).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-      var srcSafe = String(src).replace(/"/g, '&quot;');
-      return '<img src="' + srcSafe + '" alt="' + altSafe + '" class="' + cls + '" loading="lazy">';
-    });
-  }
-  var _origParse = marked.parse.bind(marked);
-  marked.parse = function(md, opts) {
-    return _origParse(withImageClasses(md), opts);
-  };
+  if (typeof marked === 'undefined' || !marked || typeof marked.use !== 'function') return;
+  var RULE = /^!\[([^\]]*)\]\(([^)\s]+)\)\{([^}]+)\}/;
+
+  marked.use({
+    extensions: [{
+      name: 'imageWithClasses',
+      level: 'inline',
+      start: function(src) {
+        var m = src.match(/!\[/);
+        return m ? m.index : void 0;
+      },
+      tokenizer: function(src) {
+        var match = RULE.exec(src);
+        if (!match) return;
+        var classes = match[3].trim().split(/\s+/)
+          .map(function(c) { return c.replace(/^\./, ''); })
+          .filter(Boolean)
+          .join(' ');
+        return { type: 'imageWithClasses', raw: match[0], alt: match[1], href: match[2], classes: classes };
+      },
+      renderer: function(token) {
+        var altSafe = String(token.alt).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        var srcSafe = String(token.href).replace(/"/g, '&quot;');
+        return '<img src="' + srcSafe + '" alt="' + altSafe + '" class="' + token.classes + '" loading="lazy">';
+      }
+    }]
+  });
 })();
 
 // Active nav link highlighting

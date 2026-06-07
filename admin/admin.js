@@ -150,9 +150,15 @@
     return Array.isArray(data) ? data : [];
   }
 
+  function encodeGitPath(path) {
+    // Pfad-Segmente einzeln kodieren (z.B. Umlaute/Sonderzeichen in Dateinamen wie
+    // "frank-grün-2.png"), dabei die "/"-Trenner erhalten.
+    return String(path).split('/').map(encodeURIComponent).join('/');
+  }
+
   async function apiDeleteFile(path, sha, message) {
     var tok = await getToken();
-    var r = await fetch(GIT + '/' + path, {
+    var r = await fetch(GIT + '/' + encodeGitPath(path), {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: message || '🗑️ Datei gelöscht: ' + path, sha: sha, branch: BRANCH })
