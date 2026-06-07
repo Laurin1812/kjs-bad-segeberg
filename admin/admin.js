@@ -150,6 +150,20 @@
     return Array.isArray(data) ? data : [];
   }
 
+  async function apiDeleteFile(path, sha, message) {
+    var tok = await getToken();
+    var r = await fetch(GIT + '/' + path, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message || '🗑️ Datei gelöscht: ' + path, sha: sha, branch: BRANCH })
+    });
+    if (!r.ok) {
+      var err = await r.json().catch(function() { return {}; });
+      throw new Error((err.message || 'Fehler beim Löschen') + ' (' + r.status + ')');
+    }
+    return true;
+  }
+
   async function apiUploadImage(filename, base64Data) {
     var tok = await getToken();
     var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -656,6 +670,12 @@
           fText('kontakt_name', 'Kontaktname', data.kontakt_name) +
           fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
         '</div>' +
+        (def.key === 'mitglied-werden' ?
+          '<div class="form-card">' +
+            '<div class="form-card-title">Mitgliedsantrag</div>' +
+            fText('antrag_url', 'Mitgliedsantrag-URL', data.antrag_url, 'https://...') +
+          '</div>'
+        : '') +
       '</div>' +
       saveBar();
     id('admin-main').innerHTML = html;
@@ -674,6 +694,9 @@
     data.bild_alt      = gv('bild_alt');
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
+    if (S.section && S.section.key === 'mitglied-werden') {
+      data.antrag_url = gv('antrag_url');
+    }
     return data;
   }
 
@@ -1461,8 +1484,9 @@
         return '<div class="gallery-img-wrap">' +
           '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
-          '<div style="text-align:center;margin-top:.25rem">' +
+          '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
             '<button class="btn btn-sm btn-outline" onclick="medienCopyUrl(\'' + escAttr(url) + '\')">📋 URL kopieren</button>' +
+            '<button class="btn btn-sm btn-outline" style="color:#c0392b;border-color:#c0392b;" onclick="medienDeleteImage(\'' + escAttr(f.path) + '\',\'' + escAttr(f.sha) + '\',\'' + escAttr(f.name) + '\')">🗑️ Löschen</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -1477,6 +1501,21 @@
     }).catch(function() {
       prompt('URL zum Kopieren:', url);
     });
+  };
+
+  window.medienDeleteImage = function(path, sha, name) {
+    showConfirm('Bild löschen',
+      'Bild „' + name + '" wirklich löschen?',
+      async function() {
+        try {
+          await apiDeleteFile(path, sha, '🗑️ Bild gelöscht: ' + name);
+          toast('✅ Bild gelöscht.', 'ok');
+          loadMedianGallery();
+        } catch(e) {
+          toast('❌ Fehler: ' + e.message, 'err');
+        }
+      }
+    );
   };
 
   /* ────────────────────────────────────────────────────────────

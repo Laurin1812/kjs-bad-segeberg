@@ -119,7 +119,7 @@
           ${inhalt ? '<div><p>' + inhalt + '</p></div>' : ''}
           ${kontakt}
           <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
-            <a href="../downloads/index.html" class="btn btn-primary">Aufnahmeantrag herunterladen</a>
+            <a href="${d.antrag_url || '../downloads/index.html'}" class="btn btn-primary">Mitgliedsantrag online ausfüllen</a>
             <a href="../kontakt/index.html" class="btn btn-outline-green">Fragen? Kontakt aufnehmen</a>
           </div>
         `;
@@ -171,7 +171,7 @@
   </div>
   <div class="footer-bottom">
     <span>Copyright 2026 © Kreisjägerschaft Bad Segeberg e.V.</span>
-    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link">Login</a></div>
+    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
   </div>
 </div></footer>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
