@@ -22,6 +22,30 @@ if (mobileNavClose) mobileNavClose.addEventListener('click', closeMobileNav);
 // Close mobile nav on ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
 
+// Markdown-Bilder mit Größen-/Ausrichtungsklassen: ![alt](pfad){.img-mittel .img-rechts}
+// marked.js kennt diese Attribut-Syntax nicht von Haus aus – wir wandeln sie vor dem
+// Parsen in echte <img class="..."> Tags um, die marked als Roh-HTML durchreicht.
+(function() {
+  if (typeof marked === 'undefined' || !marked || typeof marked.parse !== 'function') return;
+  var IMG_CLASS_RE = /!\[([^\]]*)\]\(([^)\s]+)\)\{([^}]+)\}/g;
+  function withImageClasses(md) {
+    if (typeof md !== 'string') return md;
+    return md.replace(IMG_CLASS_RE, function(_, alt, src, classes) {
+      var cls = classes.trim().split(/\s+/)
+        .map(function(c) { return c.replace(/^\./, ''); })
+        .filter(Boolean)
+        .join(' ');
+      var altSafe = String(alt).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      var srcSafe = String(src).replace(/"/g, '&quot;');
+      return '<img src="' + srcSafe + '" alt="' + altSafe + '" class="' + cls + '" loading="lazy">';
+    });
+  }
+  var _origParse = marked.parse.bind(marked);
+  marked.parse = function(md, opts) {
+    return _origParse(withImageClasses(md), opts);
+  };
+})();
+
 // Active nav link highlighting
 (function() {
   const path = window.location.pathname;

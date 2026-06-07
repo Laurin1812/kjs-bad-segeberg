@@ -98,6 +98,53 @@
   </div>
 </div>
 
+<!-- ── MARKDOWN-BILD-EINFÜGEN MODAL ───────────────────────────── -->
+<div id="mdimg-modal" class="modal" style="display:none" role="dialog" aria-modal="true" aria-label="Bild in Text einfügen">
+  <div class="modal-backdrop" id="mdimg-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>📷 Bild einfügen</h3>
+      <button class="modal-close-btn" id="mdimg-close" aria-label="Schließen">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-card-title" style="margin-top:0;">1. Bild auswählen</div>
+      <div class="upload-row">
+        <label class="btn btn-primary" for="mdimg-upload-input">📤 Neu hochladen</label>
+        <input type="file" id="mdimg-upload-input" accept="image/*" style="display:none">
+        <span id="mdimg-upload-status"></span>
+      </div>
+      <div class="img-gallery" id="mdimg-gallery">
+        <div class="gallery-loading">Bilder werden geladen…</div>
+      </div>
+
+      <div id="mdimg-options" style="display:none; margin-top:1.5rem;">
+        <div class="form-card-title">2. Größe</div>
+        <div class="mdimg-option-row" id="mdimg-size-options">
+          <label class="mdimg-option"><input type="radio" name="mdimg-size" value="img-klein"> Klein (25%)</label>
+          <label class="mdimg-option"><input type="radio" name="mdimg-size" value="img-mittel" checked> Mittel (50%)</label>
+          <label class="mdimg-option"><input type="radio" name="mdimg-size" value="img-gross"> Groß (75%)</label>
+          <label class="mdimg-option"><input type="radio" name="mdimg-size" value="img-voll"> Volle Breite (100%)</label>
+        </div>
+
+        <div class="form-card-title">3. Ausrichtung</div>
+        <div class="mdimg-option-row" id="mdimg-align-options">
+          <label class="mdimg-option"><input type="radio" name="mdimg-align" value="img-links"> Links</label>
+          <label class="mdimg-option"><input type="radio" name="mdimg-align" value="img-zentriert" checked> Zentriert</label>
+          <label class="mdimg-option"><input type="radio" name="mdimg-align" value="img-rechts"> Rechts</label>
+        </div>
+
+        <div class="form-card-title">4. Alt-Text (optional)</div>
+        <input type="text" class="field-input" id="mdimg-alt" placeholder="Bildbeschreibung für Barrierefreiheit">
+
+        <div style="margin-top:1.5rem; text-align:right; display:flex; gap:.6rem; justify-content:flex-end;">
+          <button class="btn btn-outline" id="mdimg-cancel" type="button">Abbrechen</button>
+          <button class="btn btn-primary" id="mdimg-insert" type="button" disabled>Einfügen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── BESTÄTIGUNGSDIALOG ─────────────────────────────────────── -->
 <div id="confirm-modal" class="modal" style="display:none">
   <div class="modal-backdrop" id="confirm-backdrop"></div>

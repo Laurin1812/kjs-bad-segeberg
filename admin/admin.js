@@ -1896,6 +1896,116 @@
   }
 
   /* ────────────────────────────────────────────────────────────
+     MARKDOWN-BILD-EINFÜGEN (mit Größe & Ausrichtung)
+  ──────────────────────────────────────────────────────────── */
+  var _mdImgSelected = null; // { url, name }
+
+  function openMdImageModal() {
+    if (!S.mde) { toast('❌ Editor nicht bereit', 'err'); return; }
+    _mdImgSelected = null;
+    var opts = id('mdimg-options');
+    if (opts) opts.style.display = 'none';
+    var insertBtn = id('mdimg-insert');
+    if (insertBtn) insertBtn.disabled = true;
+    var alt = id('mdimg-alt');
+    if (alt) alt.value = '';
+    // Reset radios to defaults
+    var sizeDefault = document.querySelector('#mdimg-size-options input[value="img-mittel"]');
+    if (sizeDefault) sizeDefault.checked = true;
+    var alignDefault = document.querySelector('#mdimg-align-options input[value="img-zentriert"]');
+    if (alignDefault) alignDefault.checked = true;
+
+    id('mdimg-modal').style.display = 'flex';
+    loadMdImgGallery();
+  }
+
+  function closeMdImageModal() {
+    id('mdimg-modal').style.display = 'none';
+  }
+
+  async function loadMdImgGallery() {
+    var gallery = id('mdimg-gallery');
+    if (!gallery) return;
+    gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
+    try {
+      var files = await apiGetDir('images');
+      var imgs = files.filter(function(f) {
+        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+      });
+      if (imgs.length === 0) {
+        gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie eines hoch.</div>';
+        return;
+      }
+      gallery.innerHTML = imgs.map(function(f) {
+        var url = '/images/' + f.name;
+        return '<div class="gallery-img-wrap">' +
+          '<img class="gallery-img" id="mdimg-thumb-' + escAttr(url) + '" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" ' +
+            'onclick="mdImgPick(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" loading="lazy">' +
+          '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      gallery.innerHTML = '<div class="gallery-loading">Fehler: ' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  window.mdImgPick = function(url, name) {
+    _mdImgSelected = { url: url, name: name };
+    // Highlight selection
+    document.querySelectorAll('#mdimg-gallery .gallery-img').forEach(function(img) {
+      img.classList.toggle('gallery-img--selected', img.getAttribute('src') === url);
+    });
+    var opts = id('mdimg-options');
+    if (opts) opts.style.display = '';
+    var insertBtn = id('mdimg-insert');
+    if (insertBtn) insertBtn.disabled = false;
+    // Prefill alt text with filename (without extension) if empty
+    var alt = id('mdimg-alt');
+    if (alt && !alt.value && name) {
+      alt.value = name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+    }
+  };
+
+  function initMdImgUpload() {
+    var input = id('mdimg-upload-input');
+    if (!input) return;
+    input.addEventListener('change', async function() {
+      var file = input.files[0];
+      if (!file) return;
+      var status = id('mdimg-upload-status');
+      if (status) status.textContent = '⏳ Wird hochgeladen…';
+      try {
+        var b64 = await fileToBase64(file);
+        var url = await apiUploadImage(file.name, b64);
+        if (status) status.textContent = '✅ Hochgeladen';
+        await loadMdImgGallery();
+        mdImgPick(url, file.name);
+      } catch(e) {
+        if (status) status.textContent = '❌ ' + e.message;
+      }
+      input.value = '';
+    });
+  }
+
+  function insertMdImage() {
+    if (!_mdImgSelected || !S.mde) return;
+    var sizeEl  = document.querySelector('#mdimg-size-options input[name="mdimg-size"]:checked');
+    var alignEl = document.querySelector('#mdimg-align-options input[name="mdimg-align"]:checked');
+    var sizeCls  = sizeEl  ? sizeEl.value  : 'img-mittel';
+    var alignCls = alignEl ? alignEl.value : 'img-zentriert';
+    var altInput = id('mdimg-alt');
+    var alt = altInput ? altInput.value.trim() : '';
+    if (!alt) alt = _mdImgSelected.name ? _mdImgSelected.name.replace(/\.[^.]+$/, '') : '';
+
+    var markdown = '![' + alt + '](' + _mdImgSelected.url + '){.' + sizeCls + ' .' + alignCls + '}';
+    var cm = S.mde.codemirror;
+    cm.replaceSelection(markdown);
+    cm.focus();
+    closeMdImageModal();
+    toast('✅ Bild eingefügt', 'ok');
+  }
+
+  /* ────────────────────────────────────────────────────────────
      CONFIRM DIALOG
   ──────────────────────────────────────────────────────────── */
   var _confirmCallback = null;
@@ -1918,7 +2028,14 @@
       element: el,
       spellChecker: false,
       autosave: { enabled: false },
-      toolbar: ['bold','italic','heading','|','unordered-list','ordered-list','|','link','image','|','preview','guide'],
+      toolbar: ['bold','italic','heading','|','unordered-list','ordered-list','|','link','image',
+        {
+          name: 'insert-image-sized',
+          action: function() { openMdImageModal(); },
+          className: 'mdimg-toolbar-btn',
+          title: 'Bild einfügen (mit Größe & Ausrichtung)'
+        },
+        '|','preview','guide'],
       status: false,
       minHeight: '180px',
     });
@@ -2561,6 +2678,14 @@
     // Modal close handlers
     id('img-backdrop').addEventListener('click', function() { id('img-modal').style.display = 'none'; });
     id('img-close').addEventListener('click',    function() { id('img-modal').style.display = 'none'; });
+
+    // Markdown-Bild-Einfügen Modal
+    id('mdimg-backdrop').addEventListener('click', closeMdImageModal);
+    id('mdimg-close').addEventListener('click',    closeMdImageModal);
+    id('mdimg-cancel').addEventListener('click',   closeMdImageModal);
+    id('mdimg-insert').addEventListener('click',   insertMdImage);
+    initMdImgUpload();
+
     id('confirm-backdrop').addEventListener('click', function() { id('confirm-modal').style.display = 'none'; });
     id('confirm-cancel').addEventListener('click',   function() { id('confirm-modal').style.display = 'none'; });
     id('confirm-ok').addEventListener('click', function() {

@@ -487,6 +487,31 @@ p  { margin-bottom: 1rem; }
   margin-top: -.75rem;
   margin-bottom: 1rem;
 }
+/* Bild-Größen & Ausrichtung im Markdown-Editor (über "📷 Bild einfügen" gesetzt) */
+.main-content img.img-klein,
+#seite-inhalt img.img-klein,
+#page-inhalt img.img-klein   { max-width: 25%; }
+.main-content img.img-mittel,
+#seite-inhalt img.img-mittel,
+#page-inhalt img.img-mittel  { max-width: 50%; }
+.main-content img.img-gross,
+#seite-inhalt img.img-gross,
+#page-inhalt img.img-gross   { max-width: 75%; }
+.main-content img.img-voll,
+#seite-inhalt img.img-voll,
+#page-inhalt img.img-voll    { max-width: 100%; }
+
+.main-content img.img-links,
+#seite-inhalt img.img-links,
+#page-inhalt img.img-links   { float: left; margin-right: 1rem; margin-bottom: 1rem; }
+.main-content img.img-rechts,
+#seite-inhalt img.img-rechts,
+#page-inhalt img.img-rechts  { float: right; margin-left: 1rem; margin-bottom: 1rem; }
+.main-content img.img-zentriert,
+#seite-inhalt img.img-zentriert,
+#page-inhalt img.img-zentriert {
+  display: block; float: none; margin-left: auto; margin-right: auto;
+}
 /* Tabellen im Markdown */
 .main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
 .main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }

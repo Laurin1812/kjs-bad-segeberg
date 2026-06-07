@@ -426,6 +426,24 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .gallery-img:hover { border-color: var(--green); transform: scale(1.03); }
 .gallery-img-wrap { position: relative; }
 .gallery-img-name { font-size: .68rem; color: var(--text-muted); text-align: center; margin-top: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gallery-img--selected { border-color: var(--green) !important; box-shadow: 0 0 0 2px var(--green-light); }
+
+/* Markdown image-insert modal */
+.mdimg-option-row { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
+.mdimg-option {
+  display: flex; align-items: center; gap: .4rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: .45rem .8rem; font-size: .85rem; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.mdimg-option:hover { border-color: var(--green); }
+.mdimg-option input[type="radio"]:checked + * ,
+.mdimg-option:has(input[type="radio"]:checked) { border-color: var(--green); background: var(--green-light); font-weight: 600; }
+.mdimg-option input[type="radio"] { accent-color: var(--green); margin: 0; }
+
+/* EasyMDE toolbar button "Bild einfügen" */
+.mdimg-toolbar-btn { font-size: 0 !important; line-height: 1; }
+.mdimg-toolbar-btn::before { content: "📷"; font-size: 1rem; }
 
 /* Confirm */
 .confirm-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.25rem; }
