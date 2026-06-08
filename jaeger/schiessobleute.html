@@ -2,10 +2,9 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lernort Natur – Naturerlebnisse für Schulen und Kindergärten im Kreis Bad Segeberg.">
-  <title>Lernort Natur – Kreisjägerschaft Bad Segeberg e.V.</title>
+  <meta name="description" content="Schießobleute der Kreisjägerschaft Bad Segeberg e.V. – Ansprechpartner für das Schießwesen.">
+  <title>Schießobleute – Kreisjägerschaft Bad Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
@@ -39,7 +38,7 @@
     </a>
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
       <li><a href="../index.html">Startseite</a></li>
-      <li><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+      <li class="active"><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
           <li class="has-sub"><a href="../jaeger/index.html">KJS Bad Segeberg <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub">
@@ -67,13 +66,13 @@
               <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
             </ul>
           </li>
-          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
+          <li><a href="infomobil.html">Infomobil</a></li>
           <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
           </li>
         </ul>
       </li>
-      <li class="active"><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+      <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
         <ul class="dropdown">
           <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
           <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
@@ -102,8 +101,8 @@
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
   <div class="container">
-    <h1>🌿 Lernort Natur</h1>
-    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Verbraucher</a><span class="sep">/</span><span>Lernort Natur</span></nav>
+    <h1>Schießobleute</h1>
+    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Jäger</a><span class="sep">/</span><span>Schießobleute</span></nav>
   </div>
 </div>
 <div class="page-content">
@@ -112,82 +111,46 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('/content/verbraucher/lernort-natur.json')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var main = document.getElementById('page-main');
-          if (!main) return;
-          if (d.hero_bild) {
-            var bg = document.querySelector('.page-hero__bg');
-            if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
-          }
-          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">' : '';
-          var kontaktStr = '';
-          if (d.kontakt_name || d.kontakt_email) {
-            kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name||'');
-            if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
-            kontaktStr += '</p>';
-          }
-          main.innerHTML =
-            '<h2>' + (d.untertitel||'') + '</h2>' +
-            '<p>' + (d.intro||'') + '</p>' +
-            bild +
-            '<div id="page-inhalt"></div>' +
-            kontaktStr +
-            '<div style="margin-top:2rem">' +
-              '<a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>' +
-              '<a href="../kontakt/index.html" class="btn btn-outline-green" style="margin-left:.75rem">Kontakt aufnehmen</a>' +
-            '</div>';
-          if (d.inhalt) {
-            var el = document.getElementById('page-inhalt');
-            if (el) {
-              el.innerHTML = typeof marked !== 'undefined'
-                ? marked.parse(d.inhalt)
-                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
-            }
-          }
-        })
-        .catch(function(err) {
-          var main = document.getElementById('page-main');
-          if (main) main.innerHTML = '<p style="color:red">Fehler: ' + (err && err.message ? err.message : String(err)) + '</p>';
-        });
+      fetch('../content/jaeger/schiessobleute.json').then(r=>r.json()).then(d=>{
+        if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">` : '';
+        let inhalt = '';
+        if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
+        const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
+        document.getElementById('page-main').innerHTML = `
+          <h2>${d.untertitel||''}</h2>
+          <p>${d.intro||''}</p>
+          ${bild}
+          ${inhalt ? '<div><p>' + inhalt + '</p></div>' : ''}
+          ${kontakt}
+          <div style="margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap;">
+            <a href="../kontakt/index.html" class="btn btn-primary">Jetzt Kontakt aufnehmen</a>
+            <a href="index.html" class="btn btn-outline-green">Zurück zur Übersicht</a>
+          </div>
+        `;
+      }).catch(()=>{
+        document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+      });
     </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
-        <h4>Verbraucher</h4>
+        <h4>KJS Bad Segeberg</h4>
         <ul class="sidebar-nav">
-          <li><a href="wildfleisch.html">Wildfleisch</a></li>
-          <li class="active"><a href="lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+          <li><a href="vorstand.html">Vorstand</a></li>
+          <li><a href="obleute.html">Obleute</a></li>
+          <li><a href="hegeringe.html">Hegeringe</a></li>
+          <li><a href="mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="jaeger-werden.html">Jäger/in werden</a></li>
+          <li><a href="niederwild.html">Niederwild</a></li>
+          <li><a href="hochwild.html">Hochwild</a></li>
+          <li class="active"><a href="schiessobleute.html">Schießobleute</a></li>
+          <li><a href="satzung.html">Satzung</a></li>
+          <li><a href="landesjagdverband.html">Landesjagdverband</a></li>
         </ul>
-        <script>
-          fetch('/content/seiten-verbraucher.json').then(function(r){return r.json();}).then(function(d){
-            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
-            if (!nav) return;
-            (d.seiten || []).forEach(function(s) {
-              if (s.veroeffentlicht === false || s.in_navigation === false) return;
-              var li = document.createElement('li');
-              li.innerHTML = '<a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
-              nav.appendChild(li);
-            });
-          }).catch(function(){});
-          // Sub-pages for Lernort Natur
-          fetch('/content/seiten-sub-lernort-natur.json').then(function(r){return r.json();}).then(function(d){
-            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
-            if (!nav) return;
-            (d.seiten || []).forEach(function(s) {
-              if (s.veroeffentlicht === false || s.in_navigation === false) return;
-              var li = document.createElement('li');
-              li.style.paddingLeft = '1rem';
-              li.innerHTML = '↳ <a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
-              nav.appendChild(li);
-            });
-          }).catch(function(){});
-        </script>
       </div>
       <div class="contact-box">
-        <h4>Buchungsanfragen</h4>
-        <p>📧 <a href="mailto:lernort@kjs-bad-segeberg.de">lernort@kjs-bad-segeberg.de</a></p>
+        <h4>Geschäftsstelle</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
         <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
       </div>
     </aside>
