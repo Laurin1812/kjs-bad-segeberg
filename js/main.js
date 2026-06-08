@@ -1,4 +1,4 @@
-/* KJS Bad Segeberg – main.js */
+/* KJS Segeberg – main.js */
 
 // Mobile Navigation
 const navToggle = document.getElementById('navToggle');
@@ -56,6 +56,55 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileN
   });
 })();
 
+// Externe Links automatisch in neuem Tab öffnen (target="_blank" + rel="noopener noreferrer")
+// Betrifft alle Links, die auf eine andere Domain zeigen (z.B. Mitgliedsantrag, PDF-Downloads,
+// Landesjagdverband, externe Seiten) – egal ob sie schon im HTML stehen oder erst später aus
+// Markdown-Inhalten / JSON-Daten per fetch() + innerHTML nachgeladen werden.
+(function() {
+  function isExternal(a) {
+    var href = a.getAttribute('href');
+    if (!href) return false;
+    try {
+      var url = new URL(href, window.location.href);
+      return (url.protocol === 'http:' || url.protocol === 'https:') &&
+             url.hostname !== window.location.hostname;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function applyExternal(a) {
+    a.setAttribute('target', '_blank');
+    var rel = (a.getAttribute('rel') || '').split(/\s+/).filter(Boolean);
+    if (rel.indexOf('noopener') === -1) rel.push('noopener');
+    if (rel.indexOf('noreferrer') === -1) rel.push('noreferrer');
+    a.setAttribute('rel', rel.join(' '));
+  }
+
+  function scan(node) {
+    if (!node || node.nodeType !== 1) return;
+    if (node.tagName === 'A' && isExternal(node)) applyExternal(node);
+    if (node.querySelectorAll) {
+      node.querySelectorAll('a[href]').forEach(function(a) {
+        if (isExternal(a)) applyExternal(a);
+      });
+    }
+  }
+
+  // Initialer Durchlauf über die bereits vorhandenen Links
+  scan(document.documentElement);
+
+  // Beobachtet das Dokument dauerhaft auf neu eingefügte Links (z.B. asynchron geladene
+  // Markdown-/JSON-Inhalte) und versieht auch diese automatisch mit target="_blank"
+  if (window.MutationObserver) {
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(scan);
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+})();
+
 // Active nav link highlighting
 (function() {
   const path = window.location.pathname;
@@ -81,21 +130,23 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 // Topbar & Geschäftsstelle dynamisch laden (aus content/einstellungen.json)
 (function() {
+  var topbarLinks = document.querySelectorAll('.topbar__left a');
   var boxes = document.querySelectorAll('.contact-box');
-  if (!boxes.length) return;
+  if (!topbarLinks.length && !boxes.length) return;
   fetch('/content/einstellungen.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      // Topbar aktualisieren
-      var topbarLinks = document.querySelectorAll('.topbar__left a');
+      // Topbar aktualisieren (eigene Telefonnummer für die Kopfzeile, fällt sonst auf die
+      // allgemeine Kontakt-Telefonnummer zurück – so kann Frank beide unabhängig im Admin pflegen)
+      var topbarTel = d.telefon_header || d.telefon;
       topbarLinks.forEach(function(a) {
         if (a.href.indexOf('mailto:') > -1 && d.email) {
           a.href = 'mailto:' + d.email;
           a.textContent = d.email;
         }
-        if (a.href.indexOf('tel:') > -1 && d.telefon) {
-          a.href = 'tel:' + d.telefon.replace(/\s|-/g,'');
-          a.textContent = d.telefon;
+        if (a.href.indexOf('tel:') > -1 && topbarTel) {
+          a.href = 'tel:' + topbarTel.replace(/\s|-/g,'');
+          a.textContent = topbarTel;
         }
       });
       // Geschäftsstelle-Boxen aktualisieren
@@ -165,7 +216,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
   // Alle Sektions-Dateien laden
   var sektionen = [
-    { url: '/content/seiten-kjs.json',        target: function() { return findJaegerSub('KJS Bad Segeberg'); } },
+    { url: '/content/seiten-kjs.json',        target: function() { return findJaegerSub('KJS Segeberg'); } },
     { url: '/content/seiten-aufgaben.json',    target: function() { return findJaegerSub('Aufgaben'); } },
     { url: '/content/seiten-verbraucher.json', target: function() { return findTopDropdown('Verbraucher'); } },
     // Legacy: alte seiten.json mit bereich-Feld
@@ -182,7 +233,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
             return p.veroeffentlicht === true && p.in_navigation === true;
           }).forEach(function(p) {
             var bereich = p.bereich || 'weitere-themen';
-            var t = bereich === 'kjs' ? findJaegerSub('KJS Bad Segeberg')
+            var t = bereich === 'kjs' ? findJaegerSub('KJS Segeberg')
                   : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
                   : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
                   : document.getElementById('weitere-themen-sub');
@@ -290,7 +341,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
   var jaegerDD = document.getElementById('jaeger-dropdown');
 
-  // KJS Bad Segeberg
+  // KJS Segeberg
   fetch('/content/nav-reihenfolge-kjs.json').then(function(r){return r.json();}).then(function(d){
     if (!jaegerDD || !d.reihenfolge) return;
     jaegerDD.querySelectorAll('.has-sub').forEach(function(hs){
@@ -348,7 +399,7 @@ if (contactForm) {
 
     var data = new FormData(contactForm);
     var json = {
-      _subject: 'Neue Kontaktanfrage – KJS Bad Segeberg',
+      _subject: 'Neue Kontaktanfrage – KJS Segeberg',
       _captcha: 'false'
     };
     data.forEach(function(val, key) {

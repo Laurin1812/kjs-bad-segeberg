@@ -36,7 +36,7 @@
   var NAV = [
     { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
     { key:'jaeger', label:'🦌 Jäger', group:true, open:true, children:[
-      { key:'kjs', label:'KJS Bad Segeberg', group:true, open:true, children:[
+      { key:'kjs', label:'KJS Segeberg', group:true, open:true, children:[
         { key:'kjs-uebersicht',   label:'Übersicht',         file:'content/jaeger/uebersicht.json',       form:'standard' },
         { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'] },
         { key:'obleute',          label:'Obleute',            file:'content/obleute.json',                 form:'personen', dataKey:'obleute',   fields:['rolle','name','email','telefon','bild'] },
@@ -1257,7 +1257,11 @@
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Kontaktdaten</div>' +
-          fText('ei-telefon', 'Telefon', data.telefon) +
+          fText('ei-telefon', 'Telefon (Geschäftsstelle / Kontaktbox)', data.telefon) +
+          fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle.' +
+          '</p>' +
           fText('ei-email', 'E-Mail', data.email) +
           fTextarea('ei-adresse', 'Adresse (jede Zeile = eine Zeile)', data.adresse, 3) +
         '</div>' +
@@ -1288,6 +1292,7 @@
 
   function collectEinstellungen(data) {
     data.telefon = gv('ei-telefon');
+    data.telefon_header = gv('ei-telefon-header');
     data.email   = gv('ei-email');
     data.adresse = gv('ei-adresse');
     data.google_kalender_url   = gv('ei-kal-url');
