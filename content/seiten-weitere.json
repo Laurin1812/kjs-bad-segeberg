@@ -1,3 +1,10 @@
 {
-  "seiten": []
+  "seiten": [
+    {
+      "slug": "jagdhornblasen",
+      "nav_label": "Jagdhornblasen",
+      "in_navigation": true,
+      "veroeffentlicht": true
+    }
+  ]
 }
