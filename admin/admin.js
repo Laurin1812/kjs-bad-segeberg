@@ -678,6 +678,14 @@
           fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
           fImage('bild', 'Inhaltsbild', data.bild) +
           fText('bild_alt', 'Bild-Beschreibung', data.bild_alt) +
+          // Vorschaubild + Kurzbeschreibung für Jagdhundeschule-Seiten
+          (def.key && def.key.indexOf('jagdhundeschule') !== -1
+            ? '<div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem;">' +
+              '<p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem;">🐕 <strong>Kachel-Vorschau</strong> — wird in der Jagdhundeschule-Übersicht angezeigt</p>' +
+              fImage('vorschaubild', 'Vorschaubild (für Kachel-Übersicht)', data.vorschaubild) +
+              fText('kurzbeschreibung', 'Kurzbeschreibung (für Kachel-Übersicht)', data.kurzbeschreibung, 'Ein Satz, der die Seite beschreibt …') +
+              '</div>'
+            : '') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Kontakt (optional)</div>' +
@@ -715,6 +723,11 @@
     data.kontakt_email = gv('kontakt_email');
     if (S.section && S.section.key === 'mitglied-werden') {
       data.antrag_url = gv('antrag_url');
+    }
+    // Jagdhundeschule-spezifische Felder (Kachel-Vorschau)
+    if (S.section && S.section.key && S.section.key.indexOf('jagdhundeschule') !== -1) {
+      data.vorschaubild     = gv('vorschaubild');
+      data.kurzbeschreibung = gv('kurzbeschreibung');
     }
     return data;
   }
@@ -808,20 +821,41 @@
   ──────────────────────────────────────────────────────────── */
   function renderAktuelles(def, data) {
     var beitraege = data.beitraege || [];
+    var einst = data.einstellungen || {};
     var html = panelHeader(def.label,
       '<button class="btn btn-primary" onclick="aktuellesNeu()">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
-        '<p class="text-muted" style="margin-bottom:1rem;">' + beitraege.length + ' Beiträge. Klicken zum Bearbeiten.</p>';
+
+      // ── Einstellungen ──────────────────────────────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">⚙️ Anzeigeeinstellungen</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Steuert, welche Beiträge auf der Hauptseite erscheinen. Bei 0 = aktuelles Jahr.</p>' +
+        '<div class="field-row" style="align-items:center;gap:1rem;flex-direction:row;flex-wrap:wrap;">' +
+          '<label class="field-label" style="min-width:180px;margin:0">Anzahl anzeigen (0 = aktuelles Jahr)</label>' +
+          '<input class="field-input" type="number" min="0" max="99" id="akt-anzahl" value="' + (einst.hauptseite_anzahl || 0) + '" style="width:80px">' +
+          '<button class="btn btn-sm btn-outline" onclick="aktuellesEinstSave()">Speichern</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<p class="text-muted" style="margin-bottom:1rem;">' + beitraege.length + ' Beiträge. Klicken zum Bearbeiten.</p>';
 
     beitraege.forEach(function(b, i) {
+      var archivBadge = b.archiviert
+        ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
+        : '';
       html += '<div class="item-card" onclick="aktuellesEdit(' + i + ')">' +
         '<div class="item-body">' +
-          '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
+          '<div class="item-title">' + archivBadge + escHtml(b.titel || '(Kein Titel)') + '</div>' +
           '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
             (b.kategorie ? ' <span class="item-badge">' + escHtml(b.kategorie) + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<div class="item-actions">' +
+          '<button class="btn btn-sm ' + (b.archiviert ? 'btn-outline' : 'btn-ghost') + '" ' +
+            'title="' + (b.archiviert ? 'Aus Archiv zurückholen' : 'Ins Archiv verschieben') + '" ' +
+            'onclick="event.stopPropagation();aktuellesArchivToggle(' + i + ')">' +
+            (b.archiviert ? '↩️ Wiederherstellen' : '📦 Archivieren') +
+          '</button>' +
           '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();aktuellesEdit(' + i + ')">Bearbeiten</button>' +
           '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();aktuellesDelete(' + i + ')">Löschen</button>' +
         '</div>' +
@@ -835,7 +869,7 @@
   window.aktuellesNeu = function() {
     var data = S.data;
     data.beitraege = data.beitraege || [];
-    var newB = { titel:'', datum:'', kategorie:'Allgemein', bild:'', text:'', link:'' };
+    var newB = { titel:'', datum:'', kategorie:'Allgemein', bild:'', text:'', link:'', archiviert: false };
     data.beitraege.unshift(newB);
     aktuellesEdit(0);
   };
@@ -855,6 +889,13 @@
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
           fText('b-link', 'Externer Link (optional)', b.link) +
+          '<div class="field-row" style="align-items:center;gap:.75rem;flex-direction:row;">' +
+            '<label class="field-label" style="min-width:160px;margin:0">Ins Archiv verschieben</label>' +
+            '<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">' +
+              '<input type="checkbox" id="b-archiviert"' + (b.archiviert ? ' checked' : '') + ' style="width:18px;height:18px;cursor:pointer;">' +
+              '<span style="font-size:.85rem;color:var(--text-muted);">Erscheint nicht mehr auf der Hauptseite, bleibt im Archiv sichtbar</span>' +
+            '</label>' +
+          '</div>' +
         '</div>' +
       '</div>';
     id('admin-main').innerHTML = html;
@@ -869,9 +910,28 @@
     b.bild      = gv('b-bild');
     b.text      = getMDE();
     b.link      = gv('b-link');
+    var archCheck = id('b-archiviert');
+    b.archiviert = archCheck ? archCheck.checked : (b.archiviert || false);
     await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
     renderAktuelles(S.section, S.data);
+  };
+
+  window.aktuellesArchivToggle = async function(idx) {
+    var b = (S.data.beitraege || [])[idx];
+    if (!b) return;
+    b.archiviert = !b.archiviert;
+    await doSave(S.section.file, S.data, '📰 Aktuelles: Archivstatus geändert');
+    toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
+    renderAktuelles(S.section, S.data);
+  };
+
+  window.aktuellesEinstSave = async function() {
+    S.data.einstellungen = S.data.einstellungen || {};
+    var anzEl = id('akt-anzahl');
+    S.data.einstellungen.hauptseite_anzahl = anzEl ? (parseInt(anzEl.value, 10) || 0) : 0;
+    await doSave(S.section.file, S.data, '⚙️ Aktuelles: Einstellungen gespeichert');
+    toast('✅ Einstellungen gespeichert!', 'ok');
   };
 
   window.aktuellesDelete = function(idx) {
@@ -1849,6 +1909,16 @@
           fText('ns-kontakt_email', 'Kontakt-E-Mail (optional)', '') +
           fToggle('ns-veroeffentlicht', 'Direkt veröffentlichen?', true) +
         '</div>' +
+        // Jagdhundeschule-spezifisch: Kachel-Vorschau
+        (def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1
+          ? '<div class="form-card">' +
+              '<div class="form-card-title">🐕 Kachel-Vorschau</div>' +
+              '<p class="text-muted" style="margin-bottom:.75rem;font-size:.85rem;">Optional — erscheint in der Jagdhundeschule-Übersicht als Bildkachel.</p>' +
+              fImage('ns-vorschaubild', 'Vorschaubild', '') +
+              fText('ns-kurzbeschreibung', 'Kurzbeschreibung', '', 'Ein Satz, der die Seite beschreibt …') +
+              fText('ns-gruppe', 'Gruppe (optional)', '', 'z.B. Kurse 1–6 oder VGP/VPS') +
+            '</div>'
+          : '') +
         '<div style="padding:0 1.5rem 1.5rem">' +
           '<button class="btn btn-primary btn-lg" onclick="neueSeiteSpeedSave()">💾 Seite erstellen & speichern</button>' +
         '</div>' +
@@ -1904,7 +1974,14 @@
       var manifestResp = await apiGet(def.navFile);
       var manifestData = JSON.parse(fromBase64(manifestResp.content));
       manifestData[def.navKey] = manifestData[def.navKey] || [];
-      manifestData[def.navKey].push({ slug: slug, nav_label: navLabel, in_navigation: true, veroeffentlicht: true });
+      var manifestEntry = { slug: slug, nav_label: navLabel, in_navigation: true, veroeffentlicht: true };
+      // Jagdhundeschule: Kachel-Vorschaufelder in das Manifest schreiben
+      if (def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1) {
+        manifestEntry.vorschaubild     = gv('ns-vorschaubild') || '';
+        manifestEntry.kurzbeschreibung = gv('ns-kurzbeschreibung') || '';
+        manifestEntry.gruppe           = gv('ns-gruppe') || '';
+      }
+      manifestData[def.navKey].push(manifestEntry);
       await apiPut(def.navFile, manifestData, manifestResp.sha, '➕ Navigation aktualisiert: ' + titel);
 
       toast('✅ Seite erstellt! Sie erscheint nach einem Reload im Menü.', 'ok');

@@ -143,85 +143,166 @@
   </div>
 </div>
 
-<div class="page-content full">
+<div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Aktuelles aus unserer Kreisjägerschaft</h2>
-      <p style="color: var(--text-muted); margin-bottom: 2.5rem;">
-        Berichte, Neuigkeiten und Hinweise der Kreisjägerschaft Segeberg e.V.
-      </p>
-
-      <!-- News-Karten – dynamisch aus content/aktuelles.json -->
+    <main class="main-content" id="aktuelles-main">
+      <div id="aktuelles-head" style="margin-bottom:2rem;">
+        <h2 id="aktuelles-headline">Aktuelles aus unserer Kreisjägerschaft</h2>
+        <p style="color:var(--text-muted);margin-top:.4rem;"></p>
+      </div>
       <div class="news__grid" id="news-grid">
         <p style="color:var(--text-muted);">Beiträge werden geladen …</p>
       </div>
-
-      <script>
-        function formatDatum(raw) {
-          if (!raw) return '';
-          var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-          var enMon = {January:'Januar',February:'Februar',March:'März',April:'April',May:'Mai',June:'Juni',July:'Juli',August:'August',September:'September',October:'Oktober',November:'November',December:'Dezember'};
-          // Englische Monatsnamen ersetzen (z.B. "31. May 2026")
-          var fixed = raw.replace(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/g, function(w){return enMon[w]||w;});
-          if (fixed !== raw) return fixed;
-          // DD.MM.YYYY → "31. Mai 2026"
-          var m1 = raw.match(/^(\d{1,2})\.(\d{2})\.(\d{4})$/);
-          if (m1) return parseInt(m1[1],10) + '. ' + mon[parseInt(m1[2],10)-1] + ' ' + m1[3];
-          // ISO YYYY-MM-DD
-          var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-          if (m2) return parseInt(m2[3],10) + '. ' + mon[parseInt(m2[2],10)-1] + ' ' + m2[1];
-          return raw;
-        }
-
-        // Kurz-Zusammenfassung aus Markdown extrahieren (erste ~150 Zeichen ohne Markdown-Syntax)
-        function kurztext(md) {
-          if (!md) return '';
-          var plain = md
-            .replace(/!\[.*?\]\(.*?\)/g, '')   // Bilder entfernen
-            .replace(/\[([^\]]+)\]\(.*?\)/g, '$1') // Links → nur Text
-            .replace(/[#*_>`~]/g, '')           // Markdown-Zeichen entfernen
-            .replace(/\n+/g, ' ').trim();
-          return plain.length > 150 ? plain.substring(0, 150) + ' …' : plain;
-        }
-
-        fetch('../content/aktuelles.json')
-          .then(r => r.json())
-          .then(data => {
-            const grid = document.getElementById('news-grid');
-            if (!data.beitraege || data.beitraege.length === 0) {
-              grid.innerHTML = '<p>Zurzeit keine Beiträge vorhanden.</p>';
-              return;
-            }
-            grid.innerHTML = data.beitraege.map((b, i) => `
-              <article class="news-card" id="news-${i}">
-                <a href="beitrag.html?i=${i}" style="text-decoration:none;color:inherit;display:block;">
-                  <div class="news-card__img-wrap">
-                    ${b.bild
-                      ? `<img class="news-card__img" src="${b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild}" alt="${b.titel}" loading="lazy">`
-                      : `<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">
-                           <img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;">
-                         </div>`}
-                  </div>
-                  <div class="news-card__body">
-                    <div class="news-card__meta">
-                      <span class="news-card__cat">${b.kategorie}</span>
-                      <span class="news-card__date">${formatDatum(b.datum)}</span>
-                    </div>
-                    <h3 class="news-card__title">${b.titel}</h3>
-                    <p class="news-card__excerpt">${kurztext(b.text)}</p>
-                    <span class="read-more" style="font-size:.88rem;font-weight:600;color:var(--green-main);">Weiterlesen →</span>
-                  </div>
-                </a>
-              </article>`).join('');
-          })
-          .catch(() => {
-            document.getElementById('news-grid').innerHTML =
-              '<p>Beiträge konnten nicht geladen werden.</p>';
-          });
-      </script>
     </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Archiv</h4>
+        <ul class="sidebar-nav" id="archiv-jahre"></ul>
+      </div>
+      <div class="contact-box">
+        <h4>Kontakt</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
   </div>
 </div>
+
+<script>
+(function() {
+  function formatDatum(raw) {
+    if (!raw) return '';
+    var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var enMon = {January:'Januar',February:'Februar',March:'März',April:'April',May:'Mai',June:'Juni',July:'Juli',August:'August',September:'September',October:'Oktober',November:'November',December:'Dezember'};
+    var fixed = raw.replace(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/g, function(w){return enMon[w]||w;});
+    if (fixed !== raw) return fixed;
+    var m1 = raw.match(/^(\d{1,2})\.(\d{2})\.(\d{4})$/);
+    if (m1) return parseInt(m1[1],10) + '. ' + mon[parseInt(m1[2],10)-1] + ' ' + m1[3];
+    var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m2) return parseInt(m2[3],10) + '. ' + mon[parseInt(m2[2],10)-1] + ' ' + m2[1];
+    return raw;
+  }
+
+  function getYear(datum) {
+    if (!datum) return 0;
+    var m = datum.match(/(\d{4})/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  function kurztext(md) {
+    if (!md) return '';
+    var plain = md
+      .replace(/!\[.*?\]\(.*?\)/g, '')
+      .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+      .replace(/[#*_>`~]/g, '')
+      .replace(/\n+/g, ' ').trim();
+    return plain.length > 150 ? plain.substring(0, 150) + ' …' : plain;
+  }
+
+  function renderKarte(b, i) {
+    var imgSrc = b.bild ? (b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild) : '';
+    return '<article class="news-card">' +
+      '<a href="beitrag.html?i=' + i + '" style="text-decoration:none;color:inherit;display:block;">' +
+        '<div class="news-card__img-wrap">' +
+          (imgSrc
+            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + b.titel.replace(/"/g,'') + '" loading="lazy">'
+            : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
+        '</div>' +
+        '<div class="news-card__body">' +
+          '<div class="news-card__meta">' +
+            '<span class="news-card__cat">' + (b.kategorie || '') + '</span>' +
+            '<span class="news-card__date">' + formatDatum(b.datum) + '</span>' +
+          '</div>' +
+          '<h3 class="news-card__title">' + b.titel + '</h3>' +
+          '<p class="news-card__excerpt">' + kurztext(b.text) + '</p>' +
+          '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Weiterlesen →</span>' +
+        '</div>' +
+      '</a>' +
+    '</article>';
+  }
+
+  var _allBeitraege = [];
+  var _einst = {};
+  var _activeYear = 0;
+
+  function renderGrid(yearFilter) {
+    var grid = document.getElementById('news-grid');
+    var headline = document.getElementById('aktuelles-headline');
+    var filtered;
+    if (yearFilter === 'alle') {
+      filtered = _allBeitraege;
+      if (headline) headline.textContent = 'Alle Beiträge';
+    } else if (yearFilter > 0) {
+      filtered = _allBeitraege.filter(function(b) { return getYear(b.datum) === yearFilter; });
+      if (headline) headline.textContent = 'Beiträge ' + yearFilter;
+    } else {
+      // Default: current year non-archived, or last N
+      var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
+      var currentYear = new Date().getFullYear();
+      if (anzahl > 0) {
+        filtered = _allBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, anzahl);
+        if (headline) headline.textContent = 'Aktuelles (letzte ' + anzahl + ')';
+      } else {
+        var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && getYear(b.datum) === currentYear; });
+        filtered = thisYear.length > 0 ? thisYear : _allBeitraege.filter(function(b) { return !b.archiviert; });
+        if (headline) headline.textContent = 'Aktuelles aus unserer Kreisjägerschaft';
+      }
+    }
+    if (!filtered.length) {
+      grid.innerHTML = '<p style="color:var(--text-muted)">Keine Beiträge für diesen Zeitraum.</p>';
+      return;
+    }
+    // Map back to original indices for beitrag.html?i=
+    grid.innerHTML = filtered.map(function(b) {
+      var origIdx = _allBeitraege.indexOf(b);
+      return renderKarte(b, origIdx);
+    }).join('');
+  }
+
+  function buildArchivSidebar() {
+    var sidebar = document.getElementById('archiv-jahre');
+    if (!sidebar) return;
+    var years = [];
+    _allBeitraege.forEach(function(b) {
+      var y = getYear(b.datum);
+      if (y && years.indexOf(y) === -1) years.push(y);
+    });
+    years.sort(function(a,b){return b-a;}); // newest first
+
+    if (!years.length) { sidebar.innerHTML = '<li><span style="color:var(--text-muted);font-size:.85rem">Keine Beiträge</span></li>'; return; }
+
+    sidebar.innerHTML = years.map(function(y) {
+      return '<li><a href="#" class="archiv-year-link" data-year="' + y + '">' + y + '</a></li>';
+    }).join('') +
+    '<li style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem;">' +
+      '<a href="#" class="archiv-year-link" data-year="alle" style="font-size:.85rem;color:var(--text-muted)">Alle anzeigen</a>' +
+    '</li>';
+
+    sidebar.querySelectorAll('.archiv-year-link').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        sidebar.querySelectorAll('.archiv-year-link').forEach(function(l){ l.style.fontWeight=''; });
+        a.style.fontWeight = '700';
+        var val = a.dataset.year;
+        renderGrid(val === 'alle' ? 'alle' : parseInt(val, 10));
+      });
+    });
+  }
+
+  fetch('../content/aktuelles.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _allBeitraege = data.beitraege || [];
+      _einst = data.einstellungen || {};
+      buildArchivSidebar();
+      renderGrid(0); // default view
+    })
+    .catch(function() {
+      document.getElementById('news-grid').innerHTML = '<p>Beiträge konnten nicht geladen werden.</p>';
+    });
+})();
+</script>
 
 <footer class="site-footer"><div class="container">
   <div class="footer-grid">
