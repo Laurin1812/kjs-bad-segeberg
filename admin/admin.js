@@ -2236,7 +2236,7 @@
       var result = await doSave(def.file, data, '💾 ' + def.label + ' gespeichert');
       S.data = data;
       setSaving(false);
-      toast('✅ Gespeichert!', 'ok');
+      toast('✅ Gespeichert! Änderungen erscheinen auf der Website in max. 5 Minuten.', 'ok');
       setStatus('✅ Gespeichert');
       S.dirty = false;
     } catch(e) {

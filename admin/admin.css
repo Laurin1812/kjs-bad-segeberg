@@ -461,7 +461,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   border-radius: 4px; padding: 4px 6px; box-sizing: border-box; overflow: hidden;
 }
 .pos-img {
-  flex-shrink: 0; background: var(--green-main); border-radius: 2px;
+  flex-shrink: 0; background: #1e4620; border-radius: 2px; border: 1px solid rgba(0,0,0,.15);
 }
 .pos-left  { width: 22px; height: 28px; }
 .pos-right { width: 22px; height: 28px; }
