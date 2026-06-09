@@ -512,6 +512,31 @@ p  { margin-bottom: 1rem; }
 #page-inhalt img.img-zentriert {
   display: block; float: none; margin-left: auto; margin-right: auto;
 }
+/* Clearfix nach gefloateten Bildern – verhindert, dass nachfolgender Text ins Bild fließt */
+.main-content::after,
+#seite-inhalt::after,
+#page-inhalt::after { content: ''; display: table; clear: both; }
+/* Auch einzelne Absätze hinter Float-Bildern umbrechen */
+.main-content p,
+#seite-inhalt p,
+#page-inhalt p { overflow: visible; }
+
+/* PDF-Links mit 📄-Symbol (für alle Links auf .pdf-Dateien) */
+.main-content a[href$=".pdf"],
+#seite-inhalt a[href$=".pdf"],
+#page-inhalt a[href$=".pdf"] {
+  padding-left: 1.3em;
+  position: relative;
+}
+.main-content a[href$=".pdf"]::before,
+#seite-inhalt a[href$=".pdf"]::before,
+#page-inhalt a[href$=".pdf"]::before {
+  content: "📄";
+  position: absolute;
+  left: 0;
+  font-style: normal;
+}
+
 /* Tabellen im Markdown */
 .main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
 .main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }

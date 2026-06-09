@@ -681,6 +681,11 @@
           fText('kontakt_name', 'Kontaktname', data.kontakt_name) +
           fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
         '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">📄 Dokumente &amp; PDFs</div>' +
+          '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">PDF hochladen und als Link in den Text einfügen. Der Link erscheint auf der Website automatisch mit einem 📄-Symbol.</p>' +
+          '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal()">📄 PDF hochladen &amp; einfügen</button>' +
+        '</div>' +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
             '<div class="form-card-title">Mitgliedsantrag</div>' +
@@ -1958,9 +1963,10 @@
   }
 
   /* ────────────────────────────────────────────────────────────
-     MARKDOWN-BILD-EINFÜGEN (mit Größe & Ausrichtung)
+     MARKDOWN-BILD-EINFÜGEN (mit visueller Positionierung)
   ──────────────────────────────────────────────────────────── */
   var _mdImgSelected = null; // { url, name }
+  var _mdImgPos = { size: 'img-mittel', align: 'img-links' }; // aktuelle Position
 
   function openMdImageModal() {
     if (!S.mde) { toast('❌ Editor nicht bereit', 'err'); return; }
@@ -1971,14 +1977,71 @@
     if (insertBtn) insertBtn.disabled = true;
     var alt = id('mdimg-alt');
     if (alt) alt.value = '';
-    // Reset radios to defaults
-    var sizeDefault = document.querySelector('#mdimg-size-options input[value="img-mittel"]');
-    if (sizeDefault) sizeDefault.checked = true;
-    var alignDefault = document.querySelector('#mdimg-align-options input[value="img-zentriert"]');
-    if (alignDefault) alignDefault.checked = true;
+    // Reset position to first preset (Links)
+    _mdImgPos = { size: 'img-mittel', align: 'img-links' };
+    document.querySelectorAll('.mdimg-pos-btn').forEach(function(btn, i) {
+      btn.classList.toggle('mdimg-pos-btn--active', i === 0);
+    });
+    var preview = id('mdimg-preview-wrap');
+    if (preview) preview.style.display = 'none';
 
     id('mdimg-modal').style.display = 'flex';
     loadMdImgGallery();
+  }
+
+  // Positions-Button geklickt → State aktualisieren + Vorschau neu zeichnen
+  window.mdImgSetPos = function(btn) {
+    _mdImgPos.size  = btn.getAttribute('data-size')  || 'img-mittel';
+    _mdImgPos.align = btn.getAttribute('data-align') || 'img-zentriert';
+    document.querySelectorAll('.mdimg-pos-btn').forEach(function(b) {
+      b.classList.toggle('mdimg-pos-btn--active', b === btn);
+    });
+    updateMdImgPreview();
+  };
+
+  function updateMdImgPreview() {
+    var wrap = id('mdimg-preview-wrap');
+    var prev = id('mdimg-preview');
+    if (!prev) return;
+    if (!_mdImgSelected) { if (wrap) wrap.style.display = 'none'; return; }
+    if (wrap) wrap.style.display = '';
+
+    var size  = _mdImgPos.size  || 'img-mittel';
+    var align = _mdImgPos.align || 'img-links';
+
+    // Vorschau-Stile ableiten
+    var imgStyle = 'max-height:120px;height:auto;border-radius:4px;';
+    var containerStyle = 'overflow:hidden;';
+
+    if (align === 'img-links') {
+      imgStyle += 'float:left;margin-right:12px;margin-bottom:6px;';
+    } else if (align === 'img-rechts') {
+      imgStyle += 'float:right;margin-left:12px;margin-bottom:6px;';
+    } else {
+      imgStyle += 'display:block;margin-left:auto;margin-right:auto;';
+    }
+    if (size === 'img-voll') {
+      imgStyle += 'width:100%;max-height:none;';
+    } else if (size === 'img-gross') {
+      imgStyle += 'max-width:75%;';
+    } else if (size === 'img-klein') {
+      imgStyle += 'max-width:25%;';
+    } else {
+      imgStyle += 'max-width:50%;';
+    }
+
+    prev.innerHTML =
+      '<div style="' + containerStyle + '">' +
+        '<img src="' + _mdImgSelected.url + '" style="' + imgStyle + '" alt="Vorschau">' +
+        (align !== 'img-voll' && size !== 'img-voll'
+          ? '<div style="font-size:.78rem;color:#aaa;line-height:1.5;padding-top:2px;">' +
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+              'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
+              'Ut enim ad minim veniam, quis nostrud exercitation ullamco.' +
+            '</div>'
+          : '') +
+        '<div style="clear:both"></div>' +
+      '</div>';
   }
 
   function closeMdImageModal() {
@@ -2026,6 +2089,8 @@
     if (alt && !alt.value && name) {
       alt.value = name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
     }
+    // Live-Vorschau aktualisieren
+    updateMdImgPreview();
   };
 
   function initMdImgUpload() {
@@ -2051,10 +2116,8 @@
 
   function insertMdImage() {
     if (!_mdImgSelected || !S.mde) return;
-    var sizeEl  = document.querySelector('#mdimg-size-options input[name="mdimg-size"]:checked');
-    var alignEl = document.querySelector('#mdimg-align-options input[name="mdimg-align"]:checked');
-    var sizeCls  = sizeEl  ? sizeEl.value  : 'img-mittel';
-    var alignCls = alignEl ? alignEl.value : 'img-zentriert';
+    var sizeCls  = _mdImgPos.size  || 'img-mittel';
+    var alignCls = _mdImgPos.align || 'img-links';
     var altInput = id('mdimg-alt');
     var alt = altInput ? altInput.value.trim() : '';
     if (!alt) alt = _mdImgSelected.name ? _mdImgSelected.name.replace(/\.[^.]+$/, '') : '';
@@ -2065,6 +2128,95 @@
     cm.focus();
     closeMdImageModal();
     toast('✅ Bild eingefügt', 'ok');
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     PDF-DOKUMENT UPLOAD & EINFÜGEN
+  ──────────────────────────────────────────────────────────── */
+  async function apiUploadPdf(filename, base64Data) {
+    var tok = await getToken();
+    var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
+    var body = { message: '📄 PDF hochgeladen: ' + safeName, content: base64Data, branch: BRANCH };
+    var r = await fetch(GIT + '/downloads/' + safeName, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('PDF-Upload fehlgeschlagen');
+    return '/downloads/' + safeName;
+  }
+
+  function openPdfModal() {
+    if (!S.mde) { toast('❌ Kein Markdown-Editor aktiv – bitte zuerst eine Seite öffnen', 'err'); return; }
+    id('pdf-modal').style.display = 'flex';
+    id('pdf-upload-status').textContent = '';
+    loadPdfGallery();
+  }
+
+  function closePdfModal() {
+    id('pdf-modal').style.display = 'none';
+  }
+
+  async function loadPdfGallery() {
+    var gallery = id('pdf-gallery');
+    if (!gallery) return;
+    gallery.innerHTML = '<div class="gallery-loading">PDFs werden geladen…</div>';
+    try {
+      var files = await apiGetDir('downloads');
+      var pdfs = files.filter(function(f) {
+        return f.type === 'file' && /\.pdf$/i.test(f.name);
+      });
+      if (!pdfs.length) {
+        gallery.innerHTML = '<div class="gallery-loading">Noch keine PDFs vorhanden. Laden Sie eines hoch.</div>';
+        return;
+      }
+      gallery.innerHTML = pdfs.map(function(f) {
+        var url = '/downloads/' + f.name;
+        // Anzeigename: Timestamp-Prefix entfernen für bessere Lesbarkeit
+        var displayName = f.name.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '');
+        return '<div class="pdf-item" onclick="insertPdfLink(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" title="Klicken zum Einfügen">' +
+          '<span class="pdf-icon">📄</span>' +
+          '<span class="pdf-name">' + escHtml(displayName) + '</span>' +
+          '<span class="pdf-filename">' + escHtml(f.name) + '</span>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      gallery.innerHTML = '<div class="gallery-loading">Fehler beim Laden: ' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  window.insertPdfLink = function(url, filename) {
+    if (!S.mde) return;
+    // Anzeigename: Timestamp und Bindestriche entfernen
+    var displayName = filename.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '').trim() || filename;
+    var markdown = '[' + displayName + '](' + url + ')';
+    var cm = S.mde.codemirror;
+    cm.replaceSelection(markdown);
+    cm.focus();
+    closePdfModal();
+    toast('✅ PDF-Link eingefügt: ' + displayName, 'ok');
+  };
+
+  function initPdfUpload() {
+    var input = id('pdf-upload-input');
+    if (!input) return;
+    input.addEventListener('change', async function() {
+      var file = this.files[0];
+      if (!file) return;
+      var status = id('pdf-upload-status');
+      status.textContent = '⏳ Wird hochgeladen…';
+      try {
+        var b64 = await fileToBase64(file);
+        var url = await apiUploadPdf(file.name, b64);
+        status.textContent = '✅ Hochgeladen!';
+        await loadPdfGallery();
+        // Gleich einfügen
+        insertPdfLink(url, file.name);
+      } catch(e) {
+        status.textContent = '❌ ' + e.message;
+      }
+      input.value = '';
+    });
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -2095,7 +2247,13 @@
           name: 'insert-image-sized',
           action: function() { openMdImageModal(); },
           className: 'mdimg-toolbar-btn',
-          title: 'Bild einfügen (mit Größe & Ausrichtung)'
+          title: 'Bild einfügen (mit Position)'
+        },
+        {
+          name: 'insert-pdf',
+          action: function() { openPdfModal(); },
+          className: 'pdf-toolbar-btn',
+          title: 'PDF / Dokument einfügen'
         },
         '|','preview','guide'],
       status: false,
@@ -2754,6 +2912,12 @@
       id('confirm-modal').style.display = 'none';
       if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
     });
+
+    // PDF Modal
+    id('pdf-backdrop').addEventListener('click', closePdfModal);
+    id('pdf-close').addEventListener('click',    closePdfModal);
+    id('pdf-cancel').addEventListener('click',   closePdfModal);
+    initPdfUpload();
 
     initImageUpload();
   });

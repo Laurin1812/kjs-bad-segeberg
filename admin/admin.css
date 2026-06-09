@@ -428,7 +428,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .gallery-img-name { font-size: .68rem; color: var(--text-muted); text-align: center; margin-top: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gallery-img--selected { border-color: var(--green) !important; box-shadow: 0 0 0 2px var(--green-light); }
 
-/* Markdown image-insert modal */
+/* Markdown image-insert modal – legacy options (kept for fallback) */
 .mdimg-option-row { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
 .mdimg-option {
   display: flex; align-items: center; gap: .4rem;
@@ -441,9 +441,56 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .mdimg-option:has(input[type="radio"]:checked) { border-color: var(--green); background: var(--green-light); font-weight: 600; }
 .mdimg-option input[type="radio"] { accent-color: var(--green); margin: 0; }
 
-/* EasyMDE toolbar button "Bild einfügen" */
+/* Visuelle Positions-Buttons (Links / Zentriert / Rechts / Volle Breite) */
+.mdimg-pos-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+.mdimg-pos-btn {
+  display: flex; flex-direction: column; align-items: center; gap: .45rem;
+  border: 2px solid var(--border); border-radius: 10px;
+  padding: .65rem .9rem; cursor: pointer; background: var(--white);
+  font-size: .82rem; color: var(--text-muted); font-weight: 500;
+  transition: border-color .15s, background .15s, color .15s;
+  min-width: 72px;
+}
+.mdimg-pos-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.mdimg-pos-btn--active { border-color: var(--green) !important; background: var(--green-light) !important; color: var(--green-dark) !important; font-weight: 700; }
+
+/* Position-Diagramme im Button */
+.mdimg-pos-icon {
+  display: flex; align-items: center; gap: 4px;
+  height: 36px; width: 64px; background: #f0f4f0;
+  border-radius: 4px; padding: 4px 6px; box-sizing: border-box; overflow: hidden;
+}
+.pos-img {
+  flex-shrink: 0; background: var(--green-main); border-radius: 2px;
+}
+.pos-left  { width: 22px; height: 28px; }
+.pos-right { width: 22px; height: 28px; }
+.pos-center { width: 30px; height: 20px; margin: auto; }
+.pos-full  { width: 100%; height: 16px; }
+.pos-lines { display: flex; flex-direction: column; gap: 3px; flex: 1; padding-top: 2px; }
+.pos-lines span { display: block; height: 4px; background: #ccc; border-radius: 2px; }
+.pos-icon--center { justify-content: center; flex-direction: column; align-items: center; }
+.pos-icon--full   { justify-content: center; align-items: center; }
+.mdimg-pos-label  { font-size: .8rem; }
+
+/* EasyMDE toolbar buttons */
 .mdimg-toolbar-btn { font-size: 0 !important; line-height: 1; }
 .mdimg-toolbar-btn::before { content: "📷"; font-size: 1rem; }
+.pdf-toolbar-btn { font-size: 0 !important; line-height: 1; }
+.pdf-toolbar-btn::before { content: "📄"; font-size: 1rem; }
+
+/* PDF-Galerie im Modal */
+.pdf-gallery { display: flex; flex-direction: column; gap: .4rem; margin-top: .5rem; max-height: 300px; overflow-y: auto; }
+.pdf-item {
+  display: flex; align-items: center; gap: .75rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: .6rem .9rem; cursor: pointer; background: var(--white);
+  transition: border-color .12s, background .12s;
+}
+.pdf-item:hover { border-color: var(--green); background: var(--green-light); }
+.pdf-icon { font-size: 1.3rem; flex-shrink: 0; }
+.pdf-name { font-weight: 600; font-size: .88rem; flex: 1; color: var(--text); }
+.pdf-filename { font-size: .75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
 
 /* Confirm */
 .confirm-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.25rem; }

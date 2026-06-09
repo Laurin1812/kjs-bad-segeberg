@@ -105,6 +105,32 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileN
   }
 })();
 
+// Kaputte Bilder in Inhaltsbereichen still ausblenden (statt Fragezeichen-Platzhalter)
+(function() {
+  var CONTENT_SELECTORS = '#page-inhalt, #seite-inhalt, .main-content, .page-hero__bg';
+  function hideIfBroken(img) {
+    if (!img || img.complete === false) return;  // noch nicht geladen – onerror greift später
+    img.onerror = function() {
+      this.style.display = 'none';
+    };
+  }
+  function scanImages(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.tagName === 'IMG') { hideIfBroken(root); return; }
+    if (root.querySelectorAll) {
+      root.querySelectorAll('img').forEach(hideIfBroken);
+    }
+  }
+  // Initial scan
+  document.querySelectorAll(CONTENT_SELECTORS + ' img').forEach(hideIfBroken);
+  // Dynamisch nachgeladene Inhalte
+  if (window.MutationObserver) {
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) { m.addedNodes.forEach(scanImages); });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+})();
+
 // Active nav link highlighting
 (function() {
   const path = window.location.pathname;
