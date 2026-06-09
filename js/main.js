@@ -1,5 +1,30 @@
 /* KJS Segeberg – main.js */
 
+// ── Content-Fetch-Umleitung: JSON-Dateien direkt von GitHub Raw CDN laden ────
+// Jedes Speichern im Admin erzeugt einen GitHub-Commit. Ohne diese Umleitung
+// löst jeder Commit einen Netlify-Redeploy aus (→ Credit-Verbrauch × 300+/Monat).
+// Mit dieser Umleitung werden content/*.json direkt vom GitHub-CDN geladen –
+// sofort verfügbar, kein Netlify-Deploy nötig, 0 Credits verbraucht.
+(function () {
+  var _fetch = window.fetch.bind(window);
+  var RAW = 'https://raw.githubusercontent.com/Laurin1812/kjs-bad-segeberg/main';
+  window.fetch = function (url, opts) {
+    if (typeof url === 'string') {
+      // Absoluter Pfad: /content/...
+      if (url.indexOf('/content/') === 0) {
+        url = RAW + url;
+      // Relativer Pfad eine Ebene tiefer: ../content/...
+      } else if (url.indexOf('../content/') === 0) {
+        url = RAW + '/content/' + url.slice('../content/'.length);
+      // Relativer Pfad zwei Ebenen tiefer: ../../content/...
+      } else if (url.indexOf('../../content/') === 0) {
+        url = RAW + '/content/' + url.slice('../../content/'.length);
+      }
+    }
+    return _fetch(url, opts);
+  };
+})();
+
 // Mobile Navigation
 const navToggle = document.getElementById('navToggle');
 const mobileNav = document.getElementById('mobileNav');
