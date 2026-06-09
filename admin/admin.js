@@ -107,6 +107,7 @@
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
       { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
       { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
+      { key:'benutzer', label:'👥 Benutzerverwaltung', form:'benutzer' },
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
@@ -221,6 +222,7 @@
 
   function onLogin(user) {
     var name = (user.user_metadata && user.user_metadata.full_name) || user.email || '';
+    S.userName = name;
     id('user-name').textContent = name;
     id('login-screen').style.display = 'none';
     id('admin-app').style.display = '';
@@ -236,6 +238,79 @@
   }
 
   /* ────────────────────────────────────────────────────────────
+     SEKTIONSNAMEN – INLINE DOPPELKLICK
+  ──────────────────────────────────────────────────────────── */
+  function initSektionsnameDblclick() {
+    var keys = ['jaeger', 'kjs', 'aufgaben', 'verbraucher'];
+    keys.forEach(function(k) {
+      var el = document.querySelector('[data-navkey="' + k + '"]');
+      if (!el) return;
+      el.title = 'Doppelklick zum Umbenennen';
+      el.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+        startSektionsEdit(el, k);
+      });
+    });
+  }
+
+  function startSektionsEdit(el, k) {
+    var chevron = el.querySelector('.nav-chevron');
+    // Collect text from text nodes only (skip chevron span)
+    var currentText = '';
+    el.childNodes.forEach(function(n) {
+      if (n.nodeType === 3) currentText += n.textContent;
+    });
+    currentText = currentText.trim();
+
+    // Replace content with editable input
+    el.innerHTML = '';
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = currentText;
+    inp.className = 'sektions-edit-input';
+    el.appendChild(inp);
+    if (chevron) el.appendChild(chevron);
+    inp.focus();
+    inp.select();
+
+    var done = false;
+    async function commitEdit() {
+      if (done) return;
+      done = true;
+      var newName = inp.value.trim() || currentText;
+      el.innerHTML = escHtml(newName);
+      if (chevron) el.appendChild(chevron);
+      if (newName !== currentText) {
+        await saveSektionsname(k, newName);
+      }
+    }
+    function cancelEdit() {
+      if (done) return;
+      done = true;
+      el.innerHTML = escHtml(currentText);
+      if (chevron) el.appendChild(chevron);
+    }
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter')  { e.preventDefault(); commitEdit(); }
+      if (e.key === 'Escape') { cancelEdit(); }
+    });
+    inp.addEventListener('blur', commitEdit);
+  }
+
+  async function saveSektionsname(k, newName) {
+    try {
+      var fresh = await apiGet('content/navigation.json');
+      var data = JSON.parse(fromBase64(fresh.content));
+      data.sektionsnamen = data.sektionsnamen || {};
+      data.sektionsnamen[k] = newName;
+      await apiPut('content/navigation.json', data, fresh.sha, '✏️ Sektionsname: ' + newName);
+      toast('✅ Name gespeichert');
+    } catch(e) {
+      toast('❌ Fehler: ' + e.message, true);
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────
      SIDEBAR
   ──────────────────────────────────────────────────────────── */
   function initApp() {
@@ -244,6 +319,7 @@
     loadAllManifestItems();      // KJS / Aufgaben / Verbraucher custom pages
     initSearch();                // Suchfunktion initialisieren
     id('home-btn').addEventListener('click', showWelcome);
+    initSektionsnameDblclick();  // Inline-Umbenennung via Doppelklick
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -254,10 +330,13 @@
     S.section = null;
     S.dirty = false;
     setActiveNav('');
+    var greeting = S.userName
+      ? 'Hallo ' + escHtml(S.userName) + ', willkommen im Admin-Bereich'
+      : 'Willkommen im Admin-Bereich';
     id('admin-main').innerHTML =
       '<div class="welcome-screen">' +
-        '<div class="welcome-icon">🦌</div>' +
-        '<h2>Willkommen im Admin-Bereich</h2>' +
+        '<div class="welcome-icon"><img src="/images/logo.png" alt="KJS Segeberg e.V." style="height:72px;width:auto;opacity:.85;"></div>' +
+        '<h2>' + greeting + '</h2>' +
         '<p>Wählen Sie links einen Bereich aus, um Inhalte zu bearbeiten.</p>' +
         '<div class="welcome-hints">' +
           '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=aktuelles]\').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>' +
@@ -564,6 +643,7 @@
       case 'downloads':    renderDownloads(def, data);     break;
       case 'navExtra':        renderNavExtra(def, data);         break;
       case 'navReihenfolge':  renderNavReihenfolge(def, data);   break;
+      case 'benutzer':        renderBenutzer();                  break;
       default:                renderStandard(def, data);
     }
   }
@@ -1876,6 +1956,117 @@
 
     return data;
   }
+
+  /* ────────────────────────────────────────────────────────────
+     BENUTZERVERWALTUNG
+  ──────────────────────────────────────────────────────────── */
+  function renderBenutzer() {
+    var main = id('admin-main');
+    main.innerHTML =
+      panelHeader('👥 Benutzerverwaltung') +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Neuen Benutzer einladen</div>' +
+          '<p class="text-muted" style="margin-bottom:1rem;">Der Benutzer erhält eine Einladungs-E-Mail und kann sich dann anmelden.</p>' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="bu-email">E-Mail-Adresse</label>' +
+            '<input class="field-input" type="email" id="bu-email" placeholder="max@example.de">' +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn btn-primary" onclick="benutzerInvite()">✉️ Einladen</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Aktuelle Benutzer</div>' +
+          '<div id="bu-list"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+        '<div class="form-card" style="border-color:#f0ad4e;background:#fffbf0;">' +
+          '<div class="form-card-title" style="color:#856404;">ℹ️ Admin-Berechtigung vergeben</div>' +
+          '<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;">Damit ein Benutzer Inhalte bearbeiten darf, muss er im Netlify-Dashboard die Rolle <strong>admin</strong> erhalten:</p>' +
+          '<ol style="font-size:.85rem;color:var(--text-muted);padding-left:1.4rem;margin:0;">' +
+            '<li>Netlify-Dashboard → <strong>Identity</strong></li>' +
+            '<li>Benutzer auswählen → <strong>Edit</strong></li>' +
+            '<li>Unter <em>Roles</em>: <code>admin</code> eintragen</li>' +
+            '<li>Speichern</li>' +
+          '</ol>' +
+        '</div>' +
+      '</div>';
+    benutzerLoad();
+  }
+
+  async function benutzerLoad() {
+    var list = id('bu-list');
+    if (!list) return;
+    try {
+      var tok = await getToken();
+      var r = await fetch('/.netlify/identity/admin/users?per_page=100', {
+        headers: { 'Authorization': 'Bearer ' + tok }
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' – Ihr Konto benötigt die Rolle "admin" in Netlify Identity.');
+      var d = await r.json();
+      var users = d.users || [];
+      if (!users.length) {
+        list.innerHTML = '<p style="color:var(--text-muted);">Keine Benutzer gefunden.</p>';
+        return;
+      }
+      list.innerHTML = users.map(function(u) {
+        var uname = (u.user_metadata && u.user_metadata.full_name) || '';
+        var roles = (u.app_metadata && u.app_metadata.roles) || [];
+        return '<div class="bu-user-row">' +
+          '<div class="bu-user-info">' +
+            '<strong>' + escHtml(u.email) + '</strong>' +
+            (uname ? ' <span class="bu-user-name">(' + escHtml(uname) + ')</span>' : '') +
+            (roles.length ? ' <span class="bu-badge">' + escHtml(roles.join(', ')) + '</span>' : '') +
+          '</div>' +
+          '<button class="btn btn-sm btn-danger" onclick="benutzerRemove(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🗑️ Entfernen</button>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>';
+    }
+  }
+
+  window.benutzerInvite = async function() {
+    var emailEl = id('bu-email');
+    var email = emailEl ? emailEl.value.trim() : '';
+    if (!email) { toast('❌ Bitte E-Mail-Adresse eingeben', true); return; }
+    try {
+      var tok = await getToken();
+      var r = await fetch('/.netlify/identity/admin/users', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, app_metadata: { roles: [] } })
+      });
+      if (!r.ok) {
+        var err = await r.json().catch(function() { return {}; });
+        throw new Error(err.msg || err.message || 'HTTP ' + r.status);
+      }
+      toast('✅ Einladung gesendet an ' + email);
+      emailEl.value = '';
+      benutzerLoad();
+    } catch(e) {
+      toast('❌ ' + e.message, true);
+    }
+  };
+
+  window.benutzerRemove = async function(uid, email) {
+    if (!confirm('Benutzer ' + email + ' wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
+    try {
+      var tok = await getToken();
+      var r = await fetch('/.netlify/identity/admin/users/' + uid, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + tok }
+      });
+      if (!r.ok) {
+        var err = await r.json().catch(function() { return {}; });
+        throw new Error(err.msg || err.message || 'HTTP ' + r.status);
+      }
+      toast('✅ Benutzer entfernt');
+      benutzerLoad();
+    } catch(e) {
+      toast('❌ ' + e.message, true);
+    }
+  };
 
   /* ────────────────────────────────────────────────────────────
      NEUE SEITE
