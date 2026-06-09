@@ -350,8 +350,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
-// Navigationsreihenfolge aus Admin-JSON anwenden
+// Navigationsreihenfolge, Sektionsnamen und Hauptmenü-Reihenfolge aus navigation.json
 (function() {
+  // Reorder <li> children of `sub` to match `items` array order
   function reorderSub(sub, items) {
     if (!sub || !items || !items.length) return;
     items.forEach(function(item) {
@@ -365,43 +366,115 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     });
   }
 
+  // Rename the text node of a nav link (preserves inner <span> elements)
+  function renameNavLink(el, newText) {
+    if (!el) return;
+    el.childNodes.forEach(function(node) {
+      if (node.nodeType === 3 && node.textContent.trim()) {
+        node.textContent = newText + ' ';
+      }
+    });
+  }
+
+  // Map nav key to main-nav <li> by matching first <a> href pattern
+  var KEY_HREF = {
+    startseite: /^(\.\.\/)*index\.html$/,
+    jaeger:     /jaeger\/index\.html/,
+    verbraucher:/verbraucher\/index\.html/,
+    termine:    /termine\/index\.html/,
+    aktuelles:  /aktuelles\/index\.html/,
+    faq:        /faq\/index\.html/,
+    kontakt:    /kontakt\/index\.html/
+  };
+
   var jaegerDD = document.getElementById('jaeger-dropdown');
+  var mainNav  = document.querySelector('.main-nav');
 
-  // KJS Segeberg
-  fetch('/content/nav-reihenfolge-kjs.json').then(function(r){return r.json();}).then(function(d){
-    if (!jaegerDD || !d.reihenfolge) return;
-    jaegerDD.querySelectorAll('.has-sub').forEach(function(hs){
-      var a = hs.querySelector(':scope > a');
-      if (a && a.textContent.indexOf('KJS') !== -1) reorderSub(hs.querySelector('ul.dropdown--sub'), d.reihenfolge);
-    });
-  }).catch(function(){});
+  fetch('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
 
-  // Aufgaben der Kreisjägerschaft
-  fetch('/content/nav-reihenfolge-aufgaben.json').then(function(r){return r.json();}).then(function(d){
-    if (!jaegerDD || !d.reihenfolge) return;
-    jaegerDD.querySelectorAll('.has-sub').forEach(function(hs){
-      var a = hs.querySelector(':scope > a');
-      if (a && a.textContent.indexOf('Aufgaben') !== -1) reorderSub(hs.querySelector('ul.dropdown--sub'), d.reihenfolge);
-    });
-  }).catch(function(){});
+    // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
+    if (jaegerDD) {
+      // KJS Segeberg sub-menu
+      if (d.kjs && d.kjs.length) {
+        jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
+          var a = hs.querySelector(':scope > a');
+          if (a && a.textContent.indexOf('KJS') !== -1) {
+            reorderSub(hs.querySelector('ul.dropdown--sub'), d.kjs);
+          }
+        });
+      }
+      // Aufgaben sub-menu
+      if (d.aufgaben && d.aufgaben.length) {
+        jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
+          var a = hs.querySelector(':scope > a');
+          if (a && a.textContent.indexOf('Aufgaben') !== -1) {
+            reorderSub(hs.querySelector('ul.dropdown--sub'), d.aufgaben);
+          }
+        });
+      }
+    }
+    // Verbraucher dropdown
+    if (d.verbraucher && d.verbraucher.length && mainNav) {
+      mainNav.querySelectorAll(':scope > li').forEach(function(li) {
+        var a = li.querySelector(':scope > a');
+        if (a && a.textContent.indexOf('Verbraucher') !== -1) {
+          reorderSub(li.querySelector('ul.dropdown'), d.verbraucher);
+        }
+      });
+    }
 
-  // Verbraucher
-  fetch('/content/nav-reihenfolge-verbraucher.json').then(function(r){return r.json();}).then(function(d){
-    if (!d.reihenfolge) return;
-    document.querySelectorAll('.main-nav > li').forEach(function(li){
-      var a = li.querySelector(':scope > a');
-      if (a && a.textContent.indexOf('Verbraucher') !== -1) reorderSub(li.querySelector('ul.dropdown'), d.reihenfolge);
-    });
-  }).catch(function(){});
+    // ── 2. Section name renaming (FEATURE 2) ───────────────────
+    if (d.sektionsnamen) {
+      var sn = d.sektionsnamen;
+      if (jaegerDD) {
+        // KJS Segeberg label
+        if (sn.kjs) {
+          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
+            var a = hs.querySelector(':scope > a');
+            if (a && a.textContent.indexOf('KJS') !== -1) renameNavLink(a, sn.kjs);
+          });
+        }
+        // Aufgaben label
+        if (sn.aufgaben) {
+          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
+            var a = hs.querySelector(':scope > a');
+            if (a && a.textContent.indexOf('Aufgaben') !== -1) renameNavLink(a, sn.aufgaben);
+          });
+        }
+      }
+      // Jäger main nav label
+      if (sn.jaeger && mainNav) {
+        mainNav.querySelectorAll(':scope > li').forEach(function(li) {
+          var a = li.querySelector(':scope > a');
+          if (a && KEY_HREF.jaeger.test(a.getAttribute('href') || '')) renameNavLink(a, sn.jaeger);
+        });
+      }
+      // Verbraucher main nav label
+      if (sn.verbraucher && mainNav) {
+        mainNav.querySelectorAll(':scope > li').forEach(function(li) {
+          var a = li.querySelector(':scope > a');
+          if (a && KEY_HREF.verbraucher.test(a.getAttribute('href') || '')) renameNavLink(a, sn.verbraucher);
+        });
+      }
+    }
 
-  // Weitere Themen (dynamisch eingefügte Seiten aus seiten-weitere.json)
-  fetch('/content/nav-reihenfolge-weitere.json').then(function(r){return r.json();}).then(function(d){
-    if (!jaegerDD || !d.reihenfolge || !d.reihenfolge.length) return;
-    // Kleine Verzögerung damit die dynamisch eingefügten Seiten bereits im DOM sind
-    setTimeout(function() {
-      reorderSub(jaegerDD, d.reihenfolge);
-    }, 300);
-  }).catch(function(){});
+    // ── 3. Main menu reordering (FEATURE 3) ────────────────────
+    if (d.hauptmenu && d.hauptmenu.length && mainNav) {
+      d.hauptmenu.forEach(function(key) {
+        var pattern = KEY_HREF[key];
+        if (!pattern) return;
+        mainNav.querySelectorAll(':scope > li').forEach(function(li) {
+          var a = li.querySelector(':scope > a');
+          if (a && pattern.test(a.getAttribute('href') || '')) {
+            mainNav.appendChild(li); // move to end in specified order
+          }
+        });
+      });
+    }
+
+  }).catch(function() {
+    // navigation.json not yet present – silently keep original order
+  });
 })();
 
 // Contact form handler (Formsubmit.co)

@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Obleute der Kreisjägerschaft Segeberg e.V.">
-  <title>Obleute – Kreisjägerschaft Segeberg e.V.</title>
+  <meta name="description" content="Über uns – Kreisjägerschaft Segeberg e.V.">
+  <title>Über uns – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
@@ -40,7 +40,7 @@
       <li><a href="../index.html">Startseite</a></li>
       <li class="active"><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
-          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
+          <li><a href="ueber-uns.html" class="active">Über uns</a></li>
           <li class="has-sub"><a href="../jaeger/index.html">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub">
               <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
@@ -92,6 +92,7 @@
   <button class="mobile-nav__close" id="mobileNavClose">✕</button>
   <ul>
     <li><a href="../index.html">Startseite</a></li>
+    <li><a href="ueber-uns.html">Über uns</a></li>
     <li><a href="../jaeger/index.html">Jäger</a></li>
     <li><a href="../verbraucher/index.html">Verbraucher</a></li>
     <li><a href="../termine/index.html">Termine</a></li>
@@ -102,53 +103,39 @@
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
   <div class="container">
-    <h1>Obleute</h1>
-    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Jäger</a><span class="sep">/</span><span>Obleute</span></nav>
+    <h1 id="page-title">Über uns</h1>
+    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Jäger</a><span class="sep">/</span><span>Über uns</span></nav>
   </div>
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Die Obleute der KJS Segeberg</h2>
-      <p>Die Obleute sind die Fachbeauftragten des Vorstands für besondere Aufgabenbereiche.
-         Sie koordinieren die Arbeit in ihrem jeweiligen Fachgebiet und sind Ansprechpartner
-         für alle Mitglieder.</p>
-
-      <!-- Obleute – dynamisch aus content/obleute.json -->
-      <div class="persons-grid" id="obleute-grid" style="margin-top:2rem;">
-        <p style="color:var(--text-muted);">Wird geladen …</p>
-      </div>
-      <script>
-        fetch('../content/obleute.json')
-          .then(r => r.json())
-          .then(data => {
-            document.getElementById('obleute-grid').innerHTML = data.obleute.map(m => `
-              <div class="person-card">
-                <div class="person-card__avatar-wrap">
-                  ${m.bild
-                    ? `<img src="${m.bild}" alt="${m.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;">`
-                    : `<div class="person-card__avatar-placeholder">👤</div>`}
-                </div>
-                <div class="person-card__body">
-                  <span class="person-card__role">${m.rolle}</span>
-                  <div class="person-card__name">${m.name}</div>
-                  <div class="person-card__contact">
-                    ${m.email   ? `<a href="mailto:${m.email}">${m.email}</a>` : ''}
-                    ${m.telefon ? `<a href="tel:${m.telefon.replace(/\s|\/|\./g,'')}">${m.telefon}</a>` : ''}
-                  </div>
-                </div>
-              </div>`).join('');
-          });
-      </script>
+    <main class="main-content" id="page-inhalt">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('../content/jaeger/ueber-uns.json').then(r=>r.json()).then(d=>{
+        if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
+        if(d.titel){ document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.'; document.getElementById('page-title').textContent = d.titel; }
+        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" style="width:100%;border-radius:8px;margin-bottom:1.5rem;" onerror="this.style.display='none'">` : '';
+        let inhalt = '';
+        if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
+        document.getElementById('page-inhalt').innerHTML =
+          (d.untertitel ? '<h2>' + d.untertitel + '</h2>' : '') +
+          (d.intro ? '<p>' + d.intro + '</p>' : '') +
+          bild +
+          (inhalt ? '<div>' + inhalt + '</div>' : '') ||
+          '<p>Inhalt wird gerade bearbeitet.</p>';
+      }).catch(()=>{
+        document.getElementById('page-inhalt').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+      });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
-        <h4>KJS Segeberg</h4>
+        <h4>Jäger</h4>
         <ul class="sidebar-nav">
-          <li><a href="vorstand.html">Vorstand</a></li>
-          <li class="active"><a href="obleute.html">Obleute</a></li>
-          <li><a href="hegeringe.html">Hegeringe</a></li>
-          <li><a href="mitglied-werden.html">Mitglied werden</a></li>
+          <li class="active"><a href="ueber-uns.html">Über uns</a></li>
+          <li><a href="index.html">KJS Segeberg</a></li>
+          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
         </ul>
       </div>
       <div class="contact-box">
@@ -187,6 +174,7 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
   </div>
 </div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
@@ -194,10 +182,6 @@
     if(ft && d.ueber_text) ft.textContent = d.ueber_text;
     const cp = document.querySelector('.footer-bottom span');
     if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
   }).catch(()=>{});
 </script>
 </body>

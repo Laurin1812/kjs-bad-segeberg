@@ -612,3 +612,27 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 }
 .te-add-row-btn:hover { background: var(--green-light); }
 .flex-gap { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ── NAV REIHENFOLGE ─────────────────────────────────────────── */
+.navreo-list {
+  display: flex; flex-direction: column; gap: 4px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: .5rem; background: var(--white);
+}
+.navreo-item {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem .75rem; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--bg);
+  cursor: default; user-select: none; transition: box-shadow .15s;
+}
+.navreo-item:hover { background: var(--green-light); border-color: var(--green); }
+.navreo-item.sortable-chosen { box-shadow: var(--shadow-md); border-color: var(--green); background: var(--white); }
+.navreo-item.sortable-ghost  { opacity: .35; }
+.navreo-handle {
+  cursor: grab; font-size: 1.1rem; color: var(--text-muted);
+  padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
+.navreo-handle:active { cursor: grabbing; }
+.navreo-label { flex: 1; font-size: .9rem; color: var(--text); }
+.navreo-names { display: flex; flex-direction: column; gap: .25rem; }
+

@@ -36,6 +36,7 @@
   var NAV = [
     { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
     { key:'jaeger', label:'🦌 Jäger', group:true, open:true, children:[
+      { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard' },
       { key:'kjs', label:'KJS Segeberg', group:true, open:true, children:[
         { key:'kjs-uebersicht',   label:'Übersicht',         file:'content/jaeger/uebersicht.json',       form:'standard' },
         { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'] },
@@ -105,6 +106,7 @@
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
       { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
+      { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
@@ -560,8 +562,9 @@
       case 'design':       renderDesign(def, data);        break;
       case 'impressum':    renderImpressum(def, data);     break;
       case 'downloads':    renderDownloads(def, data);     break;
-      case 'navExtra':     renderNavExtra(def, data);      break;
-      default:             renderStandard(def, data);
+      case 'navExtra':        renderNavExtra(def, data);         break;
+      case 'navReihenfolge':  renderNavReihenfolge(def, data);   break;
+      default:                renderStandard(def, data);
     }
   }
 
@@ -1678,6 +1681,143 @@
   }
 
   /* ────────────────────────────────────────────────────────────
+     NAV REIHENFOLGE & EINSTELLUNGEN
+  ──────────────────────────────────────────────────────────── */
+  function renderNavReihenfolge(def, data) {
+    var sn  = data.sektionsnamen || {};
+    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','termine','aktuelles','faq','kontakt'];
+    var kjs = data.kjs          || [];
+    var auf = data.aufgaben     || [];
+    var vbr = data.verbraucher  || [];
+
+    var HM_LABELS = { startseite:'Startseite', jaeger:'Jäger', verbraucher:'Verbraucher',
+                      termine:'Termine', aktuelles:'Aktuelles', faq:'FAQ', kontakt:'Kontakt' };
+
+    function sortableList(listId, items, labelFn) {
+      var rows = items.map(function(item, i) {
+        return '<div class="navreo-item" data-idx="' + i + '">' +
+          '<span class="navreo-handle" title="Verschieben">⠿</span>' +
+          '<span class="navreo-label">' + escHtml(labelFn ? labelFn(item) : (item.label || item)) + '</span>' +
+          '<input type="hidden" class="navreo-href" value="' + escAttr(item.href || item || '') + '">' +
+          '<input type="hidden" class="navreo-key"  value="' + escAttr(item || '') + '">' +
+        '</div>';
+      }).join('');
+      return '<div class="navreo-list" id="' + listId + '">' + rows + '</div>';
+    }
+
+    var html = panelHeader('🔀 Navigation & Reihenfolge') +
+      '<div class="panel-body">' +
+
+      // ── Sektionsnamen (FEATURE 2) ──────────────────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🏷️ Sektionsnamen</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Hier können Sie die Bezeichnungen der Navigationspunkte anpassen. Die Änderungen erscheinen sofort auf der Website.</p>' +
+        '<div class="navreo-names">' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="sn-jaeger">Hauptpunkt „Jäger"</label>' +
+            '<input class="field-input" id="sn-jaeger" value="' + escAttr(sn.jaeger || 'Jäger') + '">' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="sn-kjs">Untergruppe „KJS Segeberg"</label>' +
+            '<input class="field-input" id="sn-kjs" value="' + escAttr(sn.kjs || 'KJS Segeberg') + '">' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="sn-aufgaben">Untergruppe „Aufgaben"</label>' +
+            '<input class="field-input" id="sn-aufgaben" value="' + escAttr(sn.aufgaben || 'Aufgaben der Kreisjägerschaft') + '">' +
+          '</div>' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="sn-verbraucher">Hauptpunkt „Verbraucher"</label>' +
+            '<input class="field-input" id="sn-verbraucher" value="' + escAttr(sn.verbraucher || 'Verbraucher') + '">' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // ── Hauptmenü-Reihenfolge (FEATURE 3) ─────────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">📋 Hauptmenü-Reihenfolge</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Ziehen Sie die Hauptpunkte in die gewünschte Reihenfolge.</p>' +
+        sortableList('navreo-hauptmenu', hm, function(k) { return HM_LABELS[k] || k; }) +
+      '</div>' +
+
+      // ── KJS-Unterseiten-Reihenfolge (FEATURE 1) ───────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🦌 KJS Segeberg – Unterseiten-Reihenfolge</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Reihenfolge der Seiten im Dropdown „KJS Segeberg".</p>' +
+        sortableList('navreo-kjs', kjs, function(item) { return item.label; }) +
+      '</div>' +
+
+      // ── Aufgaben-Unterseiten-Reihenfolge ──────────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🎯 Aufgaben – Unterseiten-Reihenfolge</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Reihenfolge der Seiten im Dropdown „Aufgaben".</p>' +
+        sortableList('navreo-aufgaben', auf, function(item) { return item.label; }) +
+      '</div>' +
+
+      // ── Verbraucher-Unterseiten-Reihenfolge ───────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🌿 Verbraucher – Unterseiten-Reihenfolge</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Reihenfolge der Seiten im Dropdown „Verbraucher".</p>' +
+        sortableList('navreo-verbraucher', vbr, function(item) { return item.label; }) +
+      '</div>' +
+
+      '</div>' + saveBar();
+
+    id('admin-main').innerHTML = html;
+    bindSaveBtn();
+
+    // Initialize Sortable.js on each list
+    var lists = ['navreo-hauptmenu','navreo-kjs','navreo-aufgaben','navreo-verbraucher'];
+    lists.forEach(function(listId) {
+      var el = id(listId);
+      if (el && window.Sortable) {
+        Sortable.create(el, {
+          handle: '.navreo-handle',
+          animation: 150,
+          onEnd: function() { S.dirty = true; }
+        });
+      }
+    });
+  }
+
+  function collectNavReihenfolge(data) {
+    // Section names
+    data.sektionsnamen = data.sektionsnamen || {};
+    data.sektionsnamen.jaeger      = (id('sn-jaeger')      && id('sn-jaeger').value.trim())     || data.sektionsnamen.jaeger      || 'Jäger';
+    data.sektionsnamen.kjs         = (id('sn-kjs')         && id('sn-kjs').value.trim())        || data.sektionsnamen.kjs         || 'KJS Segeberg';
+    data.sektionsnamen.aufgaben    = (id('sn-aufgaben')    && id('sn-aufgaben').value.trim())   || data.sektionsnamen.aufgaben    || 'Aufgaben der Kreisjägerschaft';
+    data.sektionsnamen.verbraucher = (id('sn-verbraucher') && id('sn-verbraucher').value.trim())|| data.sektionsnamen.verbraucher || 'Verbraucher';
+
+    // Helper: read sorted keys from a navreo list
+    function readOrder(listId, srcArray, keyField) {
+      var el = id(listId);
+      if (!el) return srcArray;
+      var result = [];
+      el.querySelectorAll('.navreo-item').forEach(function(item) {
+        var keyEl  = item.querySelector('.navreo-key');
+        var hrefEl = item.querySelector('.navreo-href');
+        var labelEl = item.querySelector('.navreo-label');
+        if (keyField === 'key') {
+          if (keyEl) result.push(keyEl.value);
+        } else {
+          // object with label + href
+          result.push({
+            label: labelEl ? labelEl.textContent : '',
+            href:  hrefEl  ? hrefEl.value : ''
+          });
+        }
+      });
+      return result.length ? result : srcArray;
+    }
+
+    data.hauptmenu  = readOrder('navreo-hauptmenu',  data.hauptmenu  || [], 'key');
+    data.kjs        = readOrder('navreo-kjs',        data.kjs        || [], 'href');
+    data.aufgaben   = readOrder('navreo-aufgaben',   data.aufgaben   || [], 'href');
+    data.verbraucher= readOrder('navreo-verbraucher',data.verbraucher|| [], 'href');
+
+    return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
      NEUE SEITE
   ──────────────────────────────────────────────────────────── */
   function renderNeueSeite(def) {
@@ -1803,7 +1943,8 @@
       case 'design':        data = collectDesign(data); break;
       case 'impressum':     data = collectImpressum(data); break;
       case 'downloads':     data = collectDownloads(data); break;
-      case 'navExtra':      data = collectNavExtra(data); break;
+      case 'navExtra':        data = collectNavExtra(data); break;
+      case 'navReihenfolge':  data = collectNavReihenfolge(data); break;
     }
 
     setSaving(true);

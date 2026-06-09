@@ -1,0 +1,39 @@
+{
+  "sektionsnamen": {
+    "jaeger": "Jäger",
+    "kjs": "KJS Segeberg",
+    "aufgaben": "Aufgaben der Kreisjägerschaft",
+    "verbraucher": "Verbraucher"
+  },
+  "hauptmenu": [
+    "startseite", "jaeger", "verbraucher", "termine", "aktuelles", "faq", "kontakt"
+  ],
+  "kjs": [
+    {"label": "Über uns",          "href": "/jaeger/ueber-uns.html"},
+    {"label": "Übersicht",         "href": "/jaeger/index.html"},
+    {"label": "Vorstand",          "href": "/jaeger/vorstand.html"},
+    {"label": "Obleute",           "href": "/jaeger/obleute.html"},
+    {"label": "Hegeringe",         "href": "/jaeger/hegeringe.html"},
+    {"label": "Mitglied werden",   "href": "/jaeger/mitglied-werden.html"},
+    {"label": "Jäger/in werden",   "href": "/jaeger/jaeger-werden.html"},
+    {"label": "Niederwild",        "href": "/jaeger/niederwild.html"},
+    {"label": "Hochwild",          "href": "/jaeger/hochwild.html"},
+    {"label": "Schießobleute",     "href": "/jaeger/schiessobleute.html"},
+    {"label": "Satzung",           "href": "/jaeger/satzung.html"},
+    {"label": "Landesjagdverband", "href": "/jaeger/landesjagdverband.html"}
+  ],
+  "aufgaben": [
+    {"label": "Schießwesen",          "href": "/aufgaben/schiessen.html"},
+    {"label": "Hundeausbildung",       "href": "/aufgaben/hundeausbildung.html"},
+    {"label": "Schweißhundeführer",    "href": "/aufgaben/schweisshunde.html"},
+    {"label": "Jugendarbeit",          "href": "/aufgaben/jugend.html"},
+    {"label": "Jagdhornblasen",        "href": "/aufgaben/jagdhorn.html"},
+    {"label": "Naturschutz",           "href": "/aufgaben/naturschutz.html"},
+    {"label": "Jungwildrettung",       "href": "/aufgaben/jungwildrettung.html"}
+  ],
+  "verbraucher": [
+    {"label": "Wildfleisch",              "href": "/verbraucher/wildfleisch.html"},
+    {"label": "Lernort Natur",            "href": "/verbraucher/lernort-natur.html"},
+    {"label": "Grünes Klassenzimmer",     "href": "/verbraucher/gruenes-klassenzimmer.html"}
+  ]
+}
