@@ -1826,12 +1826,20 @@
   function renderNavReihenfolge(def, data) {
     var sn  = data.sektionsnamen || {};
     var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','termine','aktuelles','faq','kontakt'];
+    var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil'];
     var kjs = data.kjs          || [];
     var auf = data.aufgaben     || [];
     var vbr = data.verbraucher  || [];
 
     var HM_LABELS = { startseite:'Startseite', jaeger:'Jäger', verbraucher:'Verbraucher',
                       termine:'Termine', aktuelles:'Aktuelles', faq:'FAQ', kontakt:'Kontakt' };
+    var JD_LABELS = {
+      'ueber-uns':           'Über uns',
+      'kreisjjaegermeister': 'Kreisjägermeister',
+      'kjs-segeberg':        'KJS Segeberg (Untermenü →)',
+      'aufgaben':            'Aufgaben der Kreisjägerschaft (Untermenü →)',
+      'infomobil':           'Infomobil'
+    };
 
     function sortableList(listId, items, labelFn) {
       var rows = items.map(function(item, i) {
@@ -1879,6 +1887,13 @@
         sortableList('navreo-hauptmenu', hm, function(k) { return HM_LABELS[k] || k; }) +
       '</div>' +
 
+      // ── Jäger-Dropdown Hauptpunkte ────────────────────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🦌 Jäger-Dropdown – Reihenfolge der Hauptpunkte</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Reihenfolge der Punkte im Jäger-Dropdown-Menü.</p>' +
+        sortableList('navreo-jaegerdropdown', jd, function(k) { return JD_LABELS[k] || k; }) +
+      '</div>' +
+
       // ── KJS-Unterseiten-Reihenfolge (FEATURE 1) ───────────
       '<div class="form-card">' +
         '<div class="form-card-title">🦌 KJS Segeberg – Unterseiten-Reihenfolge</div>' +
@@ -1906,7 +1921,7 @@
     bindSaveBtn();
 
     // Initialize Sortable.js on each list
-    var lists = ['navreo-hauptmenu','navreo-kjs','navreo-aufgaben','navreo-verbraucher'];
+    var lists = ['navreo-hauptmenu','navreo-jaegerdropdown','navreo-kjs','navreo-aufgaben','navreo-verbraucher'];
     lists.forEach(function(listId) {
       var el = id(listId);
       if (el && window.Sortable) {
@@ -1949,8 +1964,9 @@
       return result.length ? result : srcArray;
     }
 
-    data.hauptmenu  = readOrder('navreo-hauptmenu',  data.hauptmenu  || [], 'key');
-    data.kjs        = readOrder('navreo-kjs',        data.kjs        || [], 'href');
+    data.hauptmenu      = readOrder('navreo-hauptmenu',      data.hauptmenu      || [], 'key');
+    data.jaeger_dropdown= readOrder('navreo-jaegerdropdown', data.jaeger_dropdown|| [], 'key');
+    data.kjs            = readOrder('navreo-kjs',            data.kjs            || [], 'href');
     data.aufgaben   = readOrder('navreo-aufgaben',   data.aufgaben   || [], 'href');
     data.verbraucher= readOrder('navreo-verbraucher',data.verbraucher|| [], 'href');
 

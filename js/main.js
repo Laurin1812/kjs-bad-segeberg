@@ -497,6 +497,24 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       });
     }
 
+    // ── 4. Jäger-Dropdown Direktpunkte umsortieren (FEATURE 4) ───
+    if (d.jaeger_dropdown && d.jaeger_dropdown.length && jaegerDD) {
+      var JAEGER_MATCH = {
+        'ueber-uns':           function(li) { var a = li.querySelector(':scope > a'); return a && /ueber-uns/.test(a.getAttribute('href') || ''); },
+        'kreisjjaegermeister': function(li) { var a = li.querySelector(':scope > a'); return a && /kreisjjaegermeister/.test(a.getAttribute('href') || ''); },
+        'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && /jaeger\/(index|\.\/?)/.test(a.getAttribute('href') || ''); },
+        'aufgaben':            function(li) { var a = li.querySelector(':scope > a'); return a && /Aufgaben/.test(a.textContent || ''); },
+        'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); }
+      };
+      d.jaeger_dropdown.forEach(function(key) {
+        var match = JAEGER_MATCH[key];
+        if (!match) return;
+        jaegerDD.querySelectorAll(':scope > li').forEach(function(li) {
+          if (match(li)) jaegerDD.appendChild(li);
+        });
+      });
+    }
+
   }).catch(function() {
     // navigation.json not yet present – silently keep original order
   });
