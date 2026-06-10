@@ -39,34 +39,34 @@
       { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard' },
       { key:'kjs', label:'KJS Segeberg', group:true, open:true, children:[
         { key:'kjs-uebersicht',   label:'Übersicht',         file:'content/jaeger/uebersicht.json',       form:'standard' },
-        { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'] },
-        { key:'obleute',          label:'Obleute',            file:'content/obleute.json',                 form:'personen', dataKey:'obleute',   fields:['rolle','name','email','telefon','bild'] },
-        { key:'hegeringe',        label:'Hegeringe',          file:'content/hegeringe.json',               form:'hegeringe' },
-        { key:'mitglied-werden',  label:'Mitglied werden',    file:'content/jaeger/mitglied-werden.json',  form:'standard' },
-        { key:'jaeger-werden',    label:'Jäger/in werden',    file:'content/jaeger/jaeger-werden.json',    form:'standard' },
-        { key:'niederwild',       label:'Niederwild',         file:'content/jaeger/niederwild.json',       form:'standard' },
-        { key:'hochwild',         label:'Hochwild',           file:'content/jaeger/hochwild.json',         form:'standard' },
-        { key:'schiessobleute',   label:'Schießobleute',      file:'content/jaeger/schiessobleute.json',   form:'standard' },
-        { key:'satzung',          label:'Satzung',            file:'content/jaeger/satzung.json',          form:'standard' },
-        { key:'landesjagdverband',label:'Landesjagdverband',  file:'content/jaeger/landesjagdverband.json',form:'standard' },
+        { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'], drag:true },
+        { key:'obleute',          label:'Obleute',            file:'content/obleute.json',                 form:'personen', dataKey:'obleute',   fields:['rolle','name','email','telefon','bild'], drag:true },
+        { key:'hegeringe',        label:'Hegeringe',          file:'content/hegeringe.json',               form:'hegeringe', drag:true },
+        { key:'mitglied-werden',  label:'Mitglied werden',    file:'content/jaeger/mitglied-werden.json',  form:'standard', drag:true },
+        { key:'jaeger-werden',    label:'Jäger/in werden',    file:'content/jaeger/jaeger-werden.json',    form:'standard', drag:true },
+        { key:'niederwild',       label:'Niederwild',         file:'content/jaeger/niederwild.json',       form:'standard', drag:true },
+        { key:'hochwild',         label:'Hochwild',           file:'content/jaeger/hochwild.json',         form:'standard', drag:true },
+        { key:'schiessobleute',   label:'Schießobleute',      file:'content/jaeger/schiessobleute.json',   form:'standard', drag:true },
+        { key:'satzung',          label:'Satzung',            file:'content/jaeger/satzung.json',          form:'standard', drag:true },
+        { key:'landesjagdverband',label:'Landesjagdverband',  file:'content/jaeger/landesjagdverband.json',form:'standard', drag:true },
         { key:'new-kjs', label:'➕ Neue KJS-Unterseite',  form:'neueSeite', isAdd:true,
           navFile:'content/seiten-kjs.json', navKey:'seiten', dir:'content/seiten-kjs' },
       ]},
       { key:'kjm', label:'Kreisjägermeister', file:'content/kreisjjaegermeister.json', form:'kjm' },
       { key:'aufgaben', label:'Aufgaben der KJS', group:true, open:false, children:[
-        { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard' },
-        { key:'auf-hunde', label:'Hundeausbildung', group:true, open:false, children:[
+        { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard', drag:true },
+        { key:'auf-hunde', label:'Hundeausbildung', group:true, open:false, drag:true, children:[
           { key:'auf-hunde-uebersicht', label:'Übersichtsseite', file:'content/aufgaben/hundeausbildung.json', form:'standard' },
           { key:'jagdhundeschule-gruppe', label:'🐕 Jagdhundeschule (21 Seiten)', group:true, open:false, children:[
             { key:'new-jagdhundeschule', label:'➕ Neue Seite', form:'neueSeite', isAdd:true,
               navFile:'content/aufgaben/hundeausbildung-seiten.json', navKey:'seiten', dir:'content/aufgaben/hundeausbildung' },
           ]},
         ]},
-        { key:'auf-schweiss',   label:'Schweißhundeführer',    file:'content/aufgaben/schweisshunde.json',  form:'standard' },
-        { key:'auf-jugend',     label:'Jugendarbeit',          file:'content/aufgaben/jugend.json',         form:'standard' },
-        { key:'auf-jagdhorn',   label:'Jagdhornblasen',        file:'content/aufgaben/jagdhorn.json',       form:'standard' },
-        { key:'auf-natur',      label:'Naturschutz',           file:'content/aufgaben/naturschutz.json',    form:'standard' },
-        { key:'auf-jungwild',   label:'Jungwildrettung',       file:'content/aufgaben/jungwildrettung.json',form:'standard' },
+        { key:'auf-schweiss',   label:'Schweißhundeführer',    file:'content/aufgaben/schweisshunde.json',  form:'standard', drag:true },
+        { key:'auf-jugend',     label:'Jugendarbeit',          file:'content/aufgaben/jugend.json',         form:'standard', drag:true },
+        { key:'auf-jagdhorn',   label:'Jagdhornblasen',        file:'content/aufgaben/jagdhorn.json',       form:'standard', drag:true },
+        { key:'auf-natur',      label:'Naturschutz',           file:'content/aufgaben/naturschutz.json',    form:'standard', drag:true },
+        { key:'auf-jungwild',   label:'Jungwildrettung',       file:'content/aufgaben/jungwildrettung.json',form:'standard', drag:true },
         { key:'new-aufgaben', label:'➕ Neue Aufgaben-Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
@@ -112,6 +112,48 @@
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
   ];
+
+  /* ────────────────────────────────────────────────────────────
+     SIDEBAR DRAG & DROP – Mapping NAV-Key → navigation.json-Eintrag
+     (für statische Seiten, deren Reihenfolge in den kjs/aufgaben-
+     Arrays von content/navigation.json gepflegt wird)
+  ──────────────────────────────────────────────────────────── */
+  var STATIC_REORDER_MAPS = {
+    kjs: {
+      arrayKey: 'kjs',
+      // Einträge, deren Position im Array sich nicht über die Sidebar
+      // verschieben lässt (sie tauchen im KJS-Flyout nicht auf)
+      fixed: [
+        { label: 'Über uns',  href: '/jaeger/ueber-uns.html' },
+        { label: 'Übersicht', href: '/jaeger/index.html' }
+      ],
+      map: {
+        'vorstand':          { label: 'Vorstand',           href: '/jaeger/vorstand.html' },
+        'obleute':           { label: 'Obleute',            href: '/jaeger/obleute.html' },
+        'hegeringe':         { label: 'Hegeringe',          href: '/jaeger/hegeringe.html' },
+        'mitglied-werden':   { label: 'Mitglied werden',    href: '/jaeger/mitglied-werden.html' },
+        'jaeger-werden':     { label: 'Jäger/in werden',    href: '/jaeger/jaeger-werden.html' },
+        'niederwild':        { label: 'Niederwild',         href: '/jaeger/niederwild.html' },
+        'hochwild':          { label: 'Hochwild',           href: '/jaeger/hochwild.html' },
+        'schiessobleute':    { label: 'Schießobleute',      href: '/jaeger/schiessobleute.html' },
+        'satzung':           { label: 'Satzung',            href: '/jaeger/satzung.html' },
+        'landesjagdverband': { label: 'Landesjagdverband',  href: '/jaeger/landesjagdverband.html' }
+      }
+    },
+    aufgaben: {
+      arrayKey: 'aufgaben',
+      fixed: [],
+      map: {
+        'auf-schiessen': { label: 'Schießwesen',       href: '/aufgaben/schiessen.html' },
+        'auf-hunde':     { label: 'Hundeausbildung',    href: '/aufgaben/hundeausbildung.html' },
+        'auf-schweiss':  { label: 'Schweißhundeführer', href: '/aufgaben/schweisshunde.html' },
+        'auf-jugend':    { label: 'Jugendarbeit',       href: '/aufgaben/jugend.html' },
+        'auf-jagdhorn':  { label: 'Jagdhornblasen',     href: '/aufgaben/jagdhorn.html' },
+        'auf-natur':     { label: 'Naturschutz',        href: '/aufgaben/naturschutz.html' },
+        'auf-jungwild':  { label: 'Jungwildrettung',    href: '/aufgaben/jungwildrettung.html' }
+      }
+    }
+  };
 
   /* ────────────────────────────────────────────────────────────
      API LAYER (git-gateway)
@@ -315,8 +357,10 @@
   ──────────────────────────────────────────────────────────── */
   function initApp() {
     renderSidebar(NAV);
-    loadDynamicChildren();       // "Weitere Themen" (dynamicChildren:true)
-    loadAllManifestItems();      // KJS / Aufgaben / Verbraucher custom pages
+    Promise.all([
+      loadDynamicChildren(),      // "Weitere Themen" (dynamicChildren:true)
+      loadAllManifestItems()      // KJS / Aufgaben / Verbraucher custom pages
+    ]).then(initSidebarSortables); // Drag & Drop erst aktivieren, wenn alle Items im DOM sind
     initSearch();                // Suchfunktion initialisieren
     id('home-btn').addEventListener('click', showWelcome);
     initSektionsnameDblclick();  // Inline-Umbenennung via Doppelklick
@@ -388,6 +432,7 @@
             navKey:   sec.navKey || 'seiten',
             slug:     s.slug,
             dir:      sec.dir,
+            drag:     true,
           };
           var li = navItemEl(def, sec.level, true);
           li.addEventListener('click', (function(d) {
@@ -423,14 +468,30 @@
         if (!item.open) childWrap.style.display = 'none';
         else if (chevron) chevron.classList.add('open');
 
-        header.addEventListener('click', function() {
+        header.addEventListener('click', function(e) {
+          if (e.target.closest && e.target.closest('.nav-drag-handle')) return;
           var isOpen = childWrap.style.display !== 'none';
           childWrap.style.display = isOpen ? 'none' : '';
           if (chevron) chevron.classList.toggle('open', !isOpen);
         });
-        el.appendChild(header);
-        renderSidebar(item.children, childWrap);
-        el.appendChild(childWrap);
+
+        // Gruppen, die als Ganzes per Drag&Drop verschoben werden können
+        // (z.B. "Hundeausbildung" innerhalb von "Aufgaben der KJS"),
+        // werden zusammen mit ihren Kindern in einen .nav-group-Wrapper
+        // gepackt, damit Sortable.js sie als ein Element behandelt.
+        if (item.drag) {
+          var groupWrap = document.createElement('div');
+          groupWrap.className = 'nav-group';
+          groupWrap.setAttribute('data-navkey', item.key);
+          groupWrap.appendChild(header);
+          renderSidebar(item.children, childWrap);
+          groupWrap.appendChild(childWrap);
+          el.appendChild(groupWrap);
+        } else {
+          el.appendChild(header);
+          renderSidebar(item.children, childWrap);
+          el.appendChild(childWrap);
+        }
       } else {
         var li = navItemEl(item, 2, true);
         li.addEventListener('click', function() { selectSection(item); });
@@ -445,7 +506,16 @@
     if (!clickable) div.classList.add('is-group');
     if (item.isAdd) div.classList.add('is-add');
     div.setAttribute('data-navkey', item.key);
-    div.innerHTML = escHtml(item.label);
+    if (item.isDynamic) {
+      div.setAttribute('data-dynamic', '1');
+      div.setAttribute('data-slug', item.slug);
+    }
+    var html = '';
+    if (item.drag) {
+      html += '<span class="nav-drag-handle" title="Verschieben">⠿</span>';
+    }
+    html += '<span class="nav-item__label">' + escHtml(item.label) + '</span>';
+    div.innerHTML = html;
     if (item.children || item.dynamicChildren) {
       div.innerHTML += '<span class="nav-chevron">&#9658;</span>';
     }
@@ -490,6 +560,12 @@
           label: s.nav_label || s.slug,
           file: weitereNode.dir + '/' + s.slug + '.json',
           form: 'standard',
+          isDynamic: true,
+          navFile: weitereNode.navFile,
+          navKey: weitereNode.navKey,
+          slug: s.slug,
+          dir: weitereNode.dir,
+          drag: true,
         };
         var li = navItemEl(def, 3, true);
         li.addEventListener('click', function() { selectSection(def); });
@@ -506,6 +582,139 @@
       wrap.appendChild(childWrap);
     } catch(e) {
       console.warn('Weitere Themen nicht geladen:', e);
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     SIDEBAR DRAG & DROP – Reihenfolge von Seiten innerhalb einer
+     Sektion per Sortable.js verschieben
+  ──────────────────────────────────────────────────────────── */
+  function initSidebarSortables() {
+    if (!window.Sortable) return;
+
+    function makeSortable(containerId, opts) {
+      var el = id(containerId);
+      if (!el || el._sortableInit) return;
+      el._sortableInit = true;
+      Sortable.create(el, {
+        handle: '.nav-drag-handle',
+        animation: 150,
+        onEnd: function(evt) {
+          if (evt.oldIndex === evt.newIndex) return;
+          onSidebarReorder(el, opts);
+        }
+      });
+    }
+
+    // KJS Segeberg: statische Unterseiten (navigation.json → kjs) +
+    // eigene KJS-Unterseiten (content/seiten-kjs.json)
+    makeSortable('nc-kjs', {
+      arrayKey:       STATIC_REORDER_MAPS.kjs.arrayKey,
+      fixed:          STATIC_REORDER_MAPS.kjs.fixed,
+      staticMap:      STATIC_REORDER_MAPS.kjs.map,
+      dynamicNavFile: 'content/seiten-kjs.json',
+      dynamicNavKey:  'seiten',
+      label:          'KJS Segeberg'
+    });
+
+    // Aufgaben der Kreisjägerschaft: statische Aufgaben (navigation.json → aufgaben,
+    // inkl. der Gruppe "Hundeausbildung" als Ganzes) + eigene Aufgaben-Unterseiten
+    makeSortable('nc-aufgaben', {
+      arrayKey:       STATIC_REORDER_MAPS.aufgaben.arrayKey,
+      fixed:          STATIC_REORDER_MAPS.aufgaben.fixed,
+      staticMap:      STATIC_REORDER_MAPS.aufgaben.map,
+      dynamicNavFile: 'content/seiten-aufgaben.json',
+      dynamicNavKey:  'seiten',
+      label:          'Aufgaben der Kreisjägerschaft'
+    });
+
+    // Jagdhundeschule-Unterseiten (innerhalb von Aufgaben → Hundeausbildung)
+    makeSortable('nc-jagdhundeschule-gruppe', {
+      dynamicNavFile: 'content/aufgaben/hundeausbildung-seiten.json',
+      dynamicNavKey:  'seiten',
+      label:          'Jagdhundeschule'
+    });
+
+    // Weitere Themen (komplett dynamisch)
+    makeSortable('nc-weitere', {
+      dynamicNavFile: 'content/seiten-weitere.json',
+      dynamicNavKey:  'seiten',
+      label:          'Weitere Themen'
+    });
+
+    // Verbraucher-Unterseiten je Themenbereich
+    makeSortable('nc-verbraucher-wild', {
+      dynamicNavFile: 'content/seiten-sub-wildfleisch.json',
+      dynamicNavKey:  'seiten',
+      label:          'Wildfleisch'
+    });
+    makeSortable('nc-verbraucher-lernort', {
+      dynamicNavFile: 'content/seiten-sub-lernort-natur.json',
+      dynamicNavKey:  'seiten',
+      label:          'Lernort Natur'
+    });
+    makeSortable('nc-verbraucher-gruen', {
+      dynamicNavFile: 'content/seiten-sub-gruenes-klassenzimmer.json',
+      dynamicNavKey:  'seiten',
+      label:          'Grünes Klassenzimmer'
+    });
+  }
+
+  // Liest die neue Reihenfolge aus dem DOM und speichert sie sowohl im
+  // navigation.json-Array (statische Seiten) als auch im Reihenfolge-Manifest
+  // (eigene/dynamische Seiten) der jeweiligen Sektion.
+  async function onSidebarReorder(containerEl, opts) {
+    try {
+      var staticOrder = [];
+      var dynamicOrder = [];
+      Array.from(containerEl.children).forEach(function(ch) {
+        var key = ch.getAttribute('data-navkey');
+        if (opts.staticMap && key && opts.staticMap[key]) {
+          staticOrder.push(key);
+        } else if (ch.getAttribute('data-dynamic') === '1') {
+          dynamicOrder.push(ch.getAttribute('data-slug'));
+        }
+      });
+
+      var jobs = [];
+
+      // 1) Statische Seiten → content/navigation.json (z.B. "kjs"/"aufgaben"-Array)
+      if (opts.arrayKey && staticOrder.length) {
+        jobs.push((async function() {
+          var resp = await apiGet('content/navigation.json');
+          var navData = JSON.parse(fromBase64(resp.content));
+          var newArr = (opts.fixed || []).slice();
+          staticOrder.forEach(function(k) { newArr.push(opts.staticMap[k]); });
+          navData[opts.arrayKey] = newArr;
+          await doSave('content/navigation.json', navData, '🔀 Reihenfolge geändert (' + opts.label + ')');
+        })());
+      }
+
+      // 2) Eigene/dynamische Seiten → Reihenfolge-Manifest (z.B. seiten-kjs.json)
+      if (opts.dynamicNavFile && dynamicOrder.length) {
+        jobs.push((async function() {
+          var resp = await apiGet(opts.dynamicNavFile);
+          var data = JSON.parse(fromBase64(resp.content));
+          var navKey = opts.dynamicNavKey || 'seiten';
+          var seiten = data[navKey] || [];
+          var bySlug = {};
+          seiten.forEach(function(s) { bySlug[s.slug] = s; });
+          var newSeiten = [];
+          dynamicOrder.forEach(function(slug) {
+            if (bySlug[slug]) { newSeiten.push(bySlug[slug]); delete bySlug[slug]; }
+          });
+          // Übrige Seiten (z.B. unveröffentlichte) am Ende anhängen
+          seiten.forEach(function(s) { if (bySlug[s.slug]) newSeiten.push(s); });
+          data[navKey] = newSeiten;
+          await doSave(opts.dynamicNavFile, data, '🔀 Reihenfolge geändert (' + opts.label + ')');
+        })());
+      }
+
+      if (!jobs.length) return;
+      await Promise.all(jobs);
+      toast('✅ Reihenfolge gespeichert', 'ok');
+    } catch(e) {
+      toast('❌ Fehler beim Speichern der Reihenfolge: ' + e.message, true);
     }
   }
 
