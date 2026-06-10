@@ -1826,7 +1826,7 @@
   function renderNavReihenfolge(def, data) {
     var sn  = data.sektionsnamen || {};
     var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','termine','aktuelles','faq','kontakt'];
-    var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil'];
+    var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil','weitere-themen'];
     var kjs = data.kjs          || [];
     var auf = data.aufgaben     || [];
     var vbr = data.verbraucher  || [];
@@ -1838,7 +1838,8 @@
       'kreisjjaegermeister': 'Kreisjägermeister',
       'kjs-segeberg':        'KJS Segeberg (Untermenü →)',
       'aufgaben':            'Aufgaben der Kreisjägerschaft (Untermenü →)',
-      'infomobil':           'Infomobil'
+      'infomobil':           'Infomobil',
+      'weitere-themen':      'Weitere Themen (Untermenü →)'
     };
 
     function sortableList(listId, items, labelFn) {

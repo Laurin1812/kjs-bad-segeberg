@@ -504,7 +504,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         'kreisjjaegermeister': function(li) { var a = li.querySelector(':scope > a'); return a && /kreisjjaegermeister/.test(a.getAttribute('href') || ''); },
         'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && /jaeger\/(index(\.html)?)?$/.test(a.getAttribute('href') || ''); },
         'aufgaben':            function(li) { var a = li.querySelector(':scope > a'); return a && /Aufgaben/.test(a.textContent || ''); },
-        'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); }
+        'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); },
+        'weitere-themen':      function(li) { return li.id === 'weitere-themen-item'; }
       };
       d.jaeger_dropdown.forEach(function(key) {
         var match = JAEGER_MATCH[key];

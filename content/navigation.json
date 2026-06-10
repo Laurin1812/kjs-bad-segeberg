@@ -9,7 +9,7 @@
     "startseite", "jaeger", "verbraucher", "termine", "aktuelles", "faq", "kontakt"
   ],
   "jaeger_dropdown": [
-    "ueber-uns", "kreisjjaegermeister", "kjs-segeberg", "aufgaben", "infomobil"
+    "ueber-uns", "kreisjjaegermeister", "kjs-segeberg", "aufgaben", "infomobil", "weitere-themen"
   ],
   "kjs": [
     {"label": "Über uns",          "href": "/jaeger/ueber-uns.html"},
