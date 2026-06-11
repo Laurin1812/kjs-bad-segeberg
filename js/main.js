@@ -588,9 +588,12 @@ if (contactForm) {
 // jeweilige content/*.json ein nicht-leeres "downloads"-Array enthält.
 (function () {
   var path = window.location.pathname;
-  if (!/\.html$/.test(path) || /\/index\.html$/.test(path)) return;
+  // Sonderfall: Kreisjägermeister-Seite ist eine index.html mit eigenem
+  // Content-Pfad und eigener Markup-Struktur (kein #page-inhalt/#page-main).
+  var isKJM = /\/kreisjjaegermeister\/index\.html$/.test(path);
+  if (!isKJM && (!/\.html$/.test(path) || /\/index\.html$/.test(path))) return;
 
-  var contentPath = '/content' + path.replace(/\.html$/, '.json');
+  var contentPath = isKJM ? '/content/kreisjjaegermeister.json' : '/content' + path.replace(/\.html$/, '.json');
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -627,13 +630,15 @@ if (contactForm) {
         attempts++;
         var inhalt = document.getElementById('page-inhalt');
         var main = document.getElementById('page-main');
-        var target = inhalt || main;
-        var ready = inhalt || (main && !main.querySelector('.loading-spinner'));
+        var kjm = isKJM ? document.getElementById('kjm-content') : null;
+        var target = inhalt || main || kjm;
+        var ready = inhalt || (main && !main.querySelector('.loading-spinner')) ||
+          (kjm && kjm.textContent.indexOf('Wird geladen') === -1);
         if (ready && target) {
           clearInterval(iv);
           var box = document.createElement('div');
           box.innerHTML = html;
-          var parent = inhalt ? inhalt.parentNode : main;
+          var parent = inhalt ? inhalt.parentNode : (main || kjm);
           // html besteht aus zwei Top-Level-Elementen (Titel + Liste) – beide anhängen
           while (box.firstChild) parent.appendChild(box.firstChild);
         } else if (attempts > 60) {

@@ -1603,9 +1603,11 @@
           '<div class="form-card-title">Grußwort</div>' +
           fTextarea('kjm-grußwort', 'Grußwort', data.grußwort, 6) +
         '</div>' +
+        renderDownloadsCard(data) +
       '</div>' + saveBar();
     id('admin-main').innerHTML = html;
     initMDE('kjm-aufgaben');
+    initDownloadsSortable();
     bindSaveBtn();
   }
 
@@ -1616,6 +1618,7 @@
     data.telefon  = gv('kjm-telefon');
     data.aufgaben = getMDE();
     data.grußwort = gv('kjm-grußwort');
+    data.downloads = collectDownloadsList();
     return data;
   }
 
