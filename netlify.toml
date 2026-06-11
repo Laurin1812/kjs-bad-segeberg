@@ -11,3 +11,27 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+
+# Browser dazu zwingen, css/js/html immer beim Server zu prüfen (Revalidierung
+# über ETag), statt sie unbegrenzt im Cache zu behalten. Damit greifen
+# Änderungen (z.B. neue Navigations-Reihenfolge, Dropdown-Fixes) für alle
+# Nutzer sofort und nicht erst nach manuellem Cache-Leeren.
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
