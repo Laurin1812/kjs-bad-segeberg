@@ -740,6 +740,11 @@
       return;
     }
 
+    if (def.form === 'benutzer') {
+      renderBenutzer();
+      return;
+    }
+
     if (!def.file) return;
 
     showPanelLoading(def.label);
@@ -3051,6 +3056,10 @@
     id('pdf-upload-status').textContent = '';
     loadPdfGallery();
   }
+  // Wird über inline onclick="openPdfModal()" im "PDF hochladen & einfügen"-Button
+  // aufgerufen (renderStandard etc.) – inline onclick läuft im globalen Scope,
+  // daher muss die Funktion explizit auf window verfügbar gemacht werden.
+  window.openPdfModal = openPdfModal;
 
   function closePdfModal() {
     id('pdf-modal').style.display = 'none';

@@ -10,15 +10,25 @@
   var RAW = 'https://raw.githubusercontent.com/Laurin1812/kjs-bad-segeberg/main';
   window.fetch = function (url, opts) {
     if (typeof url === 'string') {
+      var rewritten = null;
       // Absoluter Pfad: /content/...
       if (url.indexOf('/content/') === 0) {
-        url = RAW + url;
+        rewritten = RAW + url;
       // Relativer Pfad eine Ebene tiefer: ../content/...
       } else if (url.indexOf('../content/') === 0) {
-        url = RAW + '/content/' + url.slice('../content/'.length);
+        rewritten = RAW + '/content/' + url.slice('../content/'.length);
       // Relativer Pfad zwei Ebenen tiefer: ../../content/...
       } else if (url.indexOf('../../content/') === 0) {
-        url = RAW + '/content/' + url.slice('../../content/'.length);
+        rewritten = RAW + '/content/' + url.slice('../../content/'.length);
+      }
+      if (rewritten) {
+        // Cache-Busting: raw.githubusercontent.com cached Antworten über
+        // Fastly ein paar Minuten lang. Ohne Cache-Buster würden frisch im
+        // Admin gespeicherte Änderungen (z.B. Reihenfolge, Texte) auf der
+        // Website erst zeitversetzt ankommen – auch nach Hard-Refresh, da
+        // der Cache auf CDN-Seite (nicht im Browser) liegt.
+        rewritten += (rewritten.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
+        url = rewritten;
       }
     }
     return _fetch(url, opts);
