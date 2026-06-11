@@ -579,3 +579,67 @@ if (contactForm) {
     });
   });
 }
+
+// ── "Dokumente & Downloads" pro Seite ────────────────────────────────────
+// Im Admin können pro Seite Dokumente (z.B. PDFs) mit eigener Beschriftung
+// hinterlegt werden (data.downloads = [{titel, datei}]). Diese werden hier
+// generisch – ohne Änderungen an den einzelnen Seiten-Templates – als
+// eigene "Downloads"-Box am Ende des Seiteninhalts eingefügt, sobald die
+// jeweilige content/*.json ein nicht-leeres "downloads"-Array enthält.
+(function () {
+  var path = window.location.pathname;
+  if (!/\.html$/.test(path) || /\/index\.html$/.test(path)) return;
+
+  var contentPath = '/content' + path.replace(/\.html$/, '.json');
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  fetch(contentPath)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !Array.isArray(d.downloads) || !d.downloads.length) return;
+
+      var items = d.downloads.filter(function (item) { return item && item.datei; });
+      if (!items.length) return;
+
+      var html = '<div class="download-section-title">📄 Downloads</div><div class="downloads-list">' +
+        items.map(function (item) {
+          var datei = item.datei;
+          var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+          return '<div class="download-item">' +
+            '<div class="download-item__icon">📄</div>' +
+            '<div class="download-item__meta"><div class="download-item__name">' + escHtml(name) + '</div></div>' +
+            '<a href="' + escHtml(datei) + '" class="btn btn-sm btn-outline-green" download target="_blank" rel="noopener">⬇ Download</a>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+
+      // Der Seiteninhalt wird von einem eigenen <script> auf der jeweiligen
+      // Seite asynchron nachgeladen (fetch → innerHTML). Wir warten daher,
+      // bis #page-inhalt bzw. #page-main befüllt ist, bevor wir die
+      // Downloads-Box anhängen.
+      var attempts = 0;
+      var iv = setInterval(function () {
+        attempts++;
+        var inhalt = document.getElementById('page-inhalt');
+        var main = document.getElementById('page-main');
+        var target = inhalt || main;
+        var ready = inhalt || (main && !main.querySelector('.loading-spinner'));
+        if (ready && target) {
+          clearInterval(iv);
+          var box = document.createElement('div');
+          box.innerHTML = html;
+          var parent = inhalt ? inhalt.parentNode : main;
+          // html besteht aus zwei Top-Level-Elementen (Titel + Liste) – beide anhängen
+          while (box.firstChild) parent.appendChild(box.firstChild);
+        } else if (attempts > 60) {
+          clearInterval(iv);
+        }
+      }, 150);
+    })
+    .catch(function () {});
+})();

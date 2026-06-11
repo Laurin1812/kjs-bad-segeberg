@@ -998,11 +998,7 @@
           fText('kontakt_name', 'Kontaktname', data.kontakt_name) +
           fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
         '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">📄 Dokumente &amp; PDFs</div>' +
-          '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">PDF hochladen und als Link in den Text einfügen. Der Link erscheint auf der Website automatisch mit einem 📄-Symbol.</p>' +
-          '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal()">📄 PDF hochladen &amp; einfügen</button>' +
-        '</div>' +
+        renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
             '<div class="form-card-title">Mitgliedsantrag</div>' +
@@ -1014,6 +1010,7 @@
     id('admin-main').innerHTML = html;
     initMDE('inhalt');
     initTableEditor('inhalt', data.inhalt || '');
+    initDownloadsSortable();
     bindSaveBtn();
   }
 
@@ -1035,7 +1032,83 @@
       data.vorschaubild     = gv('vorschaubild');
       data.kurzbeschreibung = gv('kurzbeschreibung');
     }
+    data.downloads = collectDownloadsList();
     return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     DOKUMENTE & DOWNLOADS (pro Seite, separat vom Markdown-Text)
+     data.downloads = [{ titel: "...", datei: "/downloads/....pdf" }]
+     Wird auf der Website am Seitenende als eigene Download-Liste
+     gerendert (siehe js/main.js).
+  ──────────────────────────────────────────────────────────── */
+  function renderDownloadRow(d) {
+    var datei = d.datei || '';
+    var fname = datei.split('/').pop();
+    return '<div class="item-card download-row">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Anleitung Mai 2026)" style="margin-bottom:.35rem;">' +
+        '<div class="item-meta">📄 ' + escHtml(fname) +
+          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener">öffnen</a>' : '') +
+        '</div>' +
+      '</div>' +
+      '<input type="hidden" class="dl-datei" value="' + escAttr(datei) + '">' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.download-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderDownloadsCard(data) {
+    var list = data.downloads || [];
+    var rows = list.map(renderDownloadRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">📄 Dokumente &amp; Downloads</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Diese Dateien werden <strong>nicht</strong> in den Text oben eingefügt, sondern erscheinen automatisch ' +
+        'als eigene, beschriftete Download-Liste am Ende dieser Seite. Reihenfolge per Drag &amp; Drop änderbar.' +
+      '</p>' +
+      '<div id="downloads-list">' + rows + '</div>' +
+      '<p class="text-muted" id="downloads-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Dokumente hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\')">📄 PDF hinzufügen</button>' +
+    '</div>';
+  }
+
+  function initDownloadsSortable() {
+    var el = id('downloads-list');
+    if (el && window.Sortable && !el._sortableInit) {
+      el._sortableInit = true;
+      Sortable.create(el, { handle: '.item-drag', animation: 150 });
+    }
+  }
+
+  function collectDownloadsList() {
+    var result = [];
+    document.querySelectorAll('#downloads-list .download-row').forEach(function(row) {
+      var dateiEl = row.querySelector('.dl-datei');
+      var titelEl = row.querySelector('.dl-titel');
+      var datei = dateiEl ? dateiEl.value.trim() : '';
+      var titel = titelEl ? titelEl.value.trim() : '';
+      if (datei) result.push({ titel: titel, datei: datei });
+    });
+    return result;
+  }
+
+  // Fügt ein Dokument (neu hochgeladen oder aus der Galerie ausgewählt) zur
+  // "Dokumente & Downloads"-Liste der aktuell geöffneten Seite hinzu.
+  function addDownloadRow(url, filename) {
+    var list = id('downloads-list');
+    if (!list) return;
+    var displayName = filename.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '').trim() || filename;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderDownloadRow({ titel: displayName, datei: url });
+    list.appendChild(wrap.firstChild);
+    var empty = id('downloads-empty');
+    if (empty) empty.style.display = 'none';
+    initDownloadsSortable();
+    S.dirty = true;
+    toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -3077,13 +3150,30 @@
     return '/downloads/' + safeName;
   }
 
-  function openPdfModal() {
-    if (!S.mde) { toast('❌ Kein Markdown-Editor aktiv – bitte zuerst eine Seite öffnen', 'err'); return; }
+  // Modus des PDF-Modals:
+  //  - 'insert'    : Klick auf eine PDF fügt einen Markdown-Link an der
+  //                   Cursor-Position in den Text ein (Original-Verhalten)
+  //  - 'downloads' : Klick auf eine PDF fügt das Dokument zur "Dokumente &
+  //                   Downloads"-Liste der Seite hinzu (kein Markdown-Link)
+  var _pdfModalMode = 'insert';
+
+  function openPdfModal(mode) {
+    _pdfModalMode = (mode === 'downloads') ? 'downloads' : 'insert';
+    if (_pdfModalMode === 'insert' && !S.mde) {
+      toast('❌ Kein Markdown-Editor aktiv – bitte zuerst eine Seite öffnen', 'err');
+      return;
+    }
+    var titleEl = document.querySelector('#pdf-modal .modal-head h3');
+    if (titleEl) {
+      titleEl.textContent = _pdfModalMode === 'downloads'
+        ? '📄 Dokument zu „Dokumente & Downloads" hinzufügen'
+        : '📄 PDF hochladen & einfügen';
+    }
     id('pdf-modal').style.display = 'flex';
     id('pdf-upload-status').textContent = '';
     loadPdfGallery();
   }
-  // Wird über inline onclick="openPdfModal()" im "PDF hochladen & einfügen"-Button
+  // Wird über inline onclick="openPdfModal()" / onclick="openPdfModal('downloads')"
   // aufgerufen (renderStandard etc.) – inline onclick läuft im globalen Scope,
   // daher muss die Funktion explizit auf window verfügbar gemacht werden.
   window.openPdfModal = openPdfModal;
@@ -3109,7 +3199,7 @@
         var url = '/downloads/' + f.name;
         // Anzeigename: Timestamp-Prefix entfernen für bessere Lesbarkeit
         var displayName = f.name.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '');
-        return '<div class="pdf-item" onclick="insertPdfLink(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" title="Klicken zum Einfügen">' +
+        return '<div class="pdf-item" onclick="pdfItemClick(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" title="Klicken zum Auswählen">' +
           '<span class="pdf-icon">📄</span>' +
           '<span class="pdf-name">' + escHtml(displayName) + '</span>' +
           '<span class="pdf-filename">' + escHtml(f.name) + '</span>' +
@@ -3132,6 +3222,18 @@
     toast('✅ PDF-Link eingefügt: ' + displayName, 'ok');
   };
 
+  // Klick auf eine PDF in der Galerie – Verhalten hängt vom Modal-Modus ab
+  // (siehe openPdfModal): entweder Markdown-Link einfügen, oder das Dokument
+  // zur "Dokumente & Downloads"-Liste der aktuellen Seite hinzufügen.
+  window.pdfItemClick = function(url, filename) {
+    if (_pdfModalMode === 'downloads') {
+      addDownloadRow(url, filename);
+      closePdfModal();
+    } else {
+      insertPdfLink(url, filename);
+    }
+  };
+
   function initPdfUpload() {
     var input = id('pdf-upload-input');
     if (!input) return;
@@ -3145,8 +3247,13 @@
         var url = await apiUploadPdf(file.name, b64);
         status.textContent = '✅ Hochgeladen!';
         await loadPdfGallery();
-        // Gleich einfügen
-        insertPdfLink(url, file.name);
+        // Direkt verwenden: je nach Modus einfügen oder zur Downloads-Liste hinzufügen
+        if (_pdfModalMode === 'downloads') {
+          addDownloadRow(url, file.name);
+          closePdfModal();
+        } else {
+          insertPdfLink(url, file.name);
+        }
       } catch(e) {
         status.textContent = '❌ ' + e.message;
       }
