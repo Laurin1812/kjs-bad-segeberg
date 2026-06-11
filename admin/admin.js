@@ -158,16 +158,24 @@
   /* ────────────────────────────────────────────────────────────
      API LAYER (git-gateway)
   ──────────────────────────────────────────────────────────── */
-  async function getToken() {
+  async function getToken(forceRefresh) {
     var user = netlifyIdentity.currentUser();
     if (!user) throw new Error('Nicht angemeldet');
-    return user.jwt ? await user.jwt() : (user.token && user.token.access_token);
+    return user.jwt ? await user.jwt(!!forceRefresh) : (user.token && user.token.access_token);
   }
 
   async function apiGet(path) {
     var tok = await getToken();
-    var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH, {
-      headers: { 'Authorization': 'Bearer ' + tok }
+    // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
+    // Laden derselben Datei (z.B. nach dem Speichern einer neuen Reihenfolge)
+    // unter Umständen einen gecachten, veralteten Inhalt zurück – die gerade
+    // gespeicherte Änderung scheint dann "zurückgesprungen" zu sein.
+    var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH + '&_=' + Date.now(), {
+      headers: {
+        'Authorization': 'Bearer ' + tok,
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
     if (!r.ok) throw new Error('HTTP ' + r.status + ' beim Laden von ' + path);
     return r.json();
@@ -192,8 +200,12 @@
 
   async function apiGetDir(path) {
     var tok = await getToken();
-    var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH, {
-      headers: { 'Authorization': 'Bearer ' + tok }
+    var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH + '&_=' + Date.now(), {
+      headers: {
+        'Authorization': 'Bearer ' + tok,
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
     if (!r.ok) return [];
     var data = await r.json();
@@ -2225,15 +2237,28 @@
     benutzerLoad();
   }
 
+  window.benutzerLoad = benutzerLoad;
   async function benutzerLoad() {
     var list = id('bu-list');
     if (!list) return;
     try {
-      var tok = await getToken();
+      // forceRefresh=true: ein zuvor ausgestelltes Token kennt eine neu vergebene
+      // "admin"-Rolle in Netlify Identity nicht – erst ein frisches Token (vom
+      // Identity-Server neu ausgestellt) enthält die aktuellen Rollen. Ohne dies
+      // bleibt der Aufruf dauerhaft auf HTTP 401, selbst nachdem die Rolle im
+      // Netlify-Dashboard korrekt gesetzt wurde.
+      var tok = await getToken(true);
       var r = await fetch('/.netlify/identity/admin/users?per_page=100', {
         headers: { 'Authorization': 'Bearer ' + tok }
       });
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' – Ihr Konto benötigt die Rolle "admin" in Netlify Identity.');
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) {
+          throw new Error('HTTP ' + r.status + ' – Ihr Konto hat (noch) nicht die Rolle "admin" in Netlify Identity. ' +
+            'Falls die Rolle gerade erst vergeben wurde: bitte einmal komplett ausloggen und wieder einloggen, ' +
+            'damit ein neues Zugriffstoken mit der Rolle ausgestellt wird.');
+        }
+        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.');
+      }
       var d = await r.json();
       var users = d.users || [];
       if (!users.length) {
@@ -2253,7 +2278,9 @@
         '</div>';
       }).join('');
     } catch(e) {
-      list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>';
+      list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>' +
+        '<p class="mt-1"><button class="btn btn-outline btn-sm" onclick="benutzerLoad()">🔄 Erneut versuchen</button> ' +
+        '<button class="btn btn-outline btn-sm" onclick="netlifyIdentity.logout()">🚪 Aus- &amp; wieder einloggen</button></p>';
     }
   }
 
@@ -2262,7 +2289,7 @@
     var email = emailEl ? emailEl.value.trim() : '';
     if (!email) { toast('❌ Bitte E-Mail-Adresse eingeben', true); return; }
     try {
-      var tok = await getToken();
+      var tok = await getToken(true);
       var r = await fetch('/.netlify/identity/admin/users', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
@@ -2283,7 +2310,7 @@
   window.benutzerRemove = async function(uid, email) {
     if (!confirm('Benutzer ' + email + ' wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
     try {
-      var tok = await getToken();
+      var tok = await getToken(true);
       var r = await fetch('/.netlify/identity/admin/users/' + uid, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + tok }
