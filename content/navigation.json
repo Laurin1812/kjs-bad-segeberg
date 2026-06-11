@@ -40,16 +40,12 @@
       "href": "/jaeger/obleute.html"
     },
     {
+      "label": "Schießobleute",
+      "href": "/jaeger/schiessobleute.html"
+    },
+    {
       "label": "Hegeringe",
       "href": "/jaeger/hegeringe.html"
-    },
-    {
-      "label": "Mitglied werden",
-      "href": "/jaeger/mitglied-werden.html"
-    },
-    {
-      "label": "Jäger/in werden",
-      "href": "/jaeger/jaeger-werden.html"
     },
     {
       "label": "Niederwild",
@@ -60,16 +56,20 @@
       "href": "/jaeger/hochwild.html"
     },
     {
-      "label": "Schießobleute",
-      "href": "/jaeger/schiessobleute.html"
-    },
-    {
       "label": "Satzung",
       "href": "/jaeger/satzung.html"
     },
     {
       "label": "Landesjagdverband",
       "href": "/jaeger/landesjagdverband.html"
+    },
+    {
+      "label": "Jäger/in werden",
+      "href": "/jaeger/jaeger-werden.html"
+    },
+    {
+      "label": "Mitglied werden",
+      "href": "/jaeger/mitglied-werden.html"
     }
   ],
   "aufgaben": [
