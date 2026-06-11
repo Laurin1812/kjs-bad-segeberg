@@ -372,10 +372,45 @@
     Promise.all([
       loadDynamicChildren(),      // "Weitere Themen" (dynamicChildren:true)
       loadAllManifestItems()      // KJS / Aufgaben / Verbraucher custom pages
-    ]).then(initSidebarSortables); // Drag & Drop erst aktivieren, wenn alle Items im DOM sind
+    ]).then(async function() {
+      await applyStaticSidebarOrder(); // gespeicherte Reihenfolge aus navigation.json übernehmen
+      initSidebarSortables();          // Drag & Drop erst aktivieren, wenn alles im DOM ist
+    });
     initSearch();                // Suchfunktion initialisieren
     id('home-btn').addEventListener('click', showWelcome);
     initSektionsnameDblclick();  // Inline-Umbenennung via Doppelklick
+  }
+
+  // Die Reihenfolge der Sidebar (NAV-Konstante) ist statisch/hardcodiert.
+  // Per Drag & Drop gespeicherte Reihenfolgen landen in content/navigation.json
+  // (kjs/aufgaben-Arrays). Damit die Sidebar nach einem Reload nicht auf die
+  // hardcodierte Reihenfolge zurückspringt, werden die betroffenen Container
+  // hier anhand von navigation.json neu sortiert.
+  async function applyStaticSidebarOrder() {
+    try {
+      var resp = await apiGet('content/navigation.json');
+      var data = JSON.parse(fromBase64(resp.content));
+      reorderStaticGroup('nc-kjs', data.kjs, STATIC_REORDER_MAPS.kjs.map);
+      reorderStaticGroup('nc-aufgaben', data.aufgaben, STATIC_REORDER_MAPS.aufgaben.map);
+    } catch(e) {
+      console.warn('Sidebar-Reihenfolge nicht geladen:', e);
+    }
+  }
+
+  function reorderStaticGroup(containerId, order, map) {
+    var el = id(containerId);
+    if (!el || !order || !order.length) return;
+    var hrefToKey = {};
+    Object.keys(map).forEach(function(k) { hrefToKey[map[k].href] = k; });
+    var anchor = el.querySelector(':scope > .is-add');
+    order.forEach(function(item) {
+      var key = hrefToKey[item.href];
+      if (!key) return;
+      var child = el.querySelector(':scope > [data-navkey="' + key + '"]');
+      if (!child) return;
+      if (anchor) el.insertBefore(child, anchor);
+      else el.appendChild(child);
+    });
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -1171,11 +1206,6 @@
             fText('statistik_3_label', 'Bezeichnung 3', data.statistik_3_label) +
           '</div>' +
         '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Über uns</div>' +
-          fText('ueber_titel', 'Überschrift', data.ueber_titel) +
-          fTextarea('ueber_text', 'Text', data.ueber_text, 3) +
-        '</div>' +
       '</div>' +
       saveBar();
     id('admin-main').innerHTML = html;
@@ -1188,7 +1218,7 @@
      'willkommen_text','willkommen_zitat','willkommen_text2',
      'willkommen_signatur_name','willkommen_signatur_rolle',
      'statistik_1_zahl','statistik_1_label','statistik_2_zahl','statistik_2_label',
-     'statistik_3_zahl','statistik_3_label','ueber_titel','ueber_text'].forEach(function(k) {
+     'statistik_3_zahl','statistik_3_label'].forEach(function(k) {
       data[k] = gv(k);
     });
     data.hero_bild = gv('hero_bild');
