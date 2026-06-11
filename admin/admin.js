@@ -2681,6 +2681,8 @@
 
   function closeMdImageModal() {
     id('mdimg-modal').style.display = 'none';
+    id('mdimg-modal').classList.remove('mdimg-swap-mode');
+    _mdLive.swapIndex = -1;
   }
 
   async function loadMdImgGallery() {
@@ -2710,6 +2712,16 @@
   }
 
   window.mdImgPick = function(url, name) {
+    if (_mdLive.swapIndex !== -1) {
+      var swapIdx = _mdLive.swapIndex;
+      _mdLive.swapIndex = -1;
+      applyMdImgChange(swapIdx, { url: url });
+      var modal = id('mdimg-modal');
+      modal.style.display = 'none';
+      modal.classList.remove('mdimg-swap-mode');
+      toast('✅ Bild ausgetauscht', 'ok');
+      return;
+    }
     _mdImgSelected = { url: url, name: name };
     // Highlight selection
     document.querySelectorAll('#mdimg-gallery .gallery-img').forEach(function(img) {
@@ -2763,6 +2775,258 @@
     cm.focus();
     closeMdImageModal();
     toast('✅ Bild eingefügt', 'ok');
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     LIVE-BILDVORSCHAU IM MARKDOWN-EDITOR
+     Ersetzt ![alt](pfad){.klassen} im Editor durch eine echte
+     Bild-Vorschau mit Bearbeitungs-Panel (Größe / Position /
+     Austauschen / Entfernen). Gilt für alle Felder, die initMDE()
+     verwenden.
+  ──────────────────────────────────────────────────────────── */
+  var MDIMG_SIZE_CLASSES  = ['img-klein', 'img-mittel', 'img-gross', 'img-voll'];
+  var MDIMG_ALIGN_CLASSES = ['img-links', 'img-zentriert', 'img-rechts'];
+  var MDIMG_RE = /!\[([^\]]*)\]\(([^()\s]+)\)\{([^}]*)\}/g;
+
+  var _mdLive = {
+    marks: [],        // [{ mark, el, alt, url, size, align }]
+    panel: null,
+    panelIndex: -1,
+    rescanTimer: null,
+    swapIndex: -1
+  };
+
+  function mdImgParseClasses(raw) {
+    var size = 'img-mittel', align = 'img-zentriert';
+    (raw || '').trim().split(/\s+/).forEach(function(tok) {
+      var c = tok.replace(/^\./, '');
+      if (MDIMG_SIZE_CLASSES.indexOf(c)  !== -1) size  = c;
+      if (MDIMG_ALIGN_CLASSES.indexOf(c) !== -1) align = c;
+    });
+    return { size: size, align: align };
+  }
+
+  function mdImgStyleFor(size, align) {
+    var style = 'border-radius:4px;display:block;height:auto;';
+    if (align === 'img-links')       style += 'float:left;margin:0 1rem .6rem 0;';
+    else if (align === 'img-rechts') style += 'float:right;margin:0 0 .6rem 1rem;';
+    else                              style += 'margin:.4rem auto;';
+    if (size === 'img-voll')        style += 'width:100%;max-width:100%;';
+    else if (size === 'img-gross')  style += 'max-width:75%;';
+    else if (size === 'img-klein')  style += 'max-width:25%;';
+    else                              style += 'max-width:50%;';
+    return style;
+  }
+
+  function buildMdImgWidget(entry, index, cm) {
+    var wrap = document.createElement('div');
+    wrap.className = 'mdimg-live';
+
+    var img = document.createElement('img');
+    img.className = 'mdimg-live-img';
+    img.src = entry.url;
+    img.alt = entry.alt || '';
+    img.setAttribute('style', mdImgStyleFor(entry.size, entry.align));
+    img.onload  = function() { cm.refresh(); };
+    img.onerror = function() { wrap.classList.add('mdimg-live--error'); };
+
+    var badge = document.createElement('button');
+    badge.type = 'button';
+    badge.className = 'mdimg-live-edit';
+    badge.title = 'Bild bearbeiten';
+    badge.textContent = '✎';
+
+    wrap.appendChild(img);
+    wrap.appendChild(badge);
+
+    function open(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openMdImgPanel(index, wrap);
+    }
+    img.addEventListener('mousedown', open);
+    badge.addEventListener('mousedown', open);
+
+    return wrap;
+  }
+
+  function rescanMdImages(cm) {
+    closeMdImgPanel();
+    _mdLive.marks.forEach(function(e) { try { e.mark.clear(); } catch(err) {} });
+    _mdLive.marks = [];
+
+    var text = cm.getValue();
+    var entries = [];
+    var m;
+    MDIMG_RE.lastIndex = 0;
+    while ((m = MDIMG_RE.exec(text))) {
+      var cls = mdImgParseClasses(m[3]);
+      entries.push({
+        alt: m[1], url: m[2], size: cls.size, align: cls.align,
+        from: cm.posFromIndex(m.index),
+        to:   cm.posFromIndex(m.index + m[0].length)
+      });
+    }
+    entries.forEach(function(entry, i) {
+      var el = buildMdImgWidget(entry, i, cm);
+      var mark = cm.markText(entry.from, entry.to, {
+        replacedWith: el, atomic: true, inclusiveLeft: false, inclusiveRight: false
+      });
+      _mdLive.marks.push({ mark: mark, el: el, alt: entry.alt, url: entry.url, size: entry.size, align: entry.align });
+    });
+  }
+
+  function scheduleMdImgRescan(cm) {
+    if (_mdLive.rescanTimer) clearTimeout(_mdLive.rescanTimer);
+    _mdLive.rescanTimer = setTimeout(function() { rescanMdImages(cm); }, 300);
+  }
+
+  function setupLiveImagePreview(cm) {
+    rescanMdImages(cm);
+    cm.on('change', function() { scheduleMdImgRescan(cm); });
+    cm.on('scroll', closeMdImgPanel);
+  }
+
+  function destroyLiveImagePreview() {
+    if (_mdLive.rescanTimer) { clearTimeout(_mdLive.rescanTimer); _mdLive.rescanTimer = null; }
+    closeMdImgPanel();
+    _mdLive.marks.forEach(function(e) { try { e.mark.clear(); } catch(err) {} });
+    _mdLive.marks = [];
+    _mdLive.swapIndex = -1;
+  }
+
+  function ensureMdImgPanel() {
+    if (_mdLive.panel) return _mdLive.panel;
+    var p = document.createElement('div');
+    p.className = 'mdimg-live-panel';
+    p.innerHTML =
+      '<div class="mdimg-live-panel__title">🖼️ Bild bearbeiten</div>' +
+      '<div class="mdimg-live-row">' +
+        '<span class="mdimg-live-label">Größe</span>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-klein">Klein</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-mittel">Mittel</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-gross">Groß</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-voll">Volle Breite</button>' +
+      '</div>' +
+      '<div class="mdimg-live-row">' +
+        '<span class="mdimg-live-label">Position</span>' +
+        '<button type="button" class="mdimg-live-btn" data-align="img-links">Links</button>' +
+        '<button type="button" class="mdimg-live-btn" data-align="img-zentriert">Zentriert</button>' +
+        '<button type="button" class="mdimg-live-btn" data-align="img-rechts">Rechts</button>' +
+      '</div>' +
+      '<div class="mdimg-live-row mdimg-live-row--actions">' +
+        '<button type="button" class="btn btn-outline btn-sm" id="mdimg-live-swap">🔄 Bild austauschen</button>' +
+        '<button type="button" class="btn btn-outline btn-sm mdimg-live-danger" id="mdimg-live-remove">🗑️ Entfernen</button>' +
+      '</div>';
+    document.body.appendChild(p);
+
+    p.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+    p.addEventListener('click', function(e) {
+      var sizeBtn  = e.target.closest('[data-size]');
+      var alignBtn = e.target.closest('[data-align]');
+      if (sizeBtn)       applyMdImgChange(_mdLive.panelIndex, { size: sizeBtn.getAttribute('data-size') });
+      else if (alignBtn) applyMdImgChange(_mdLive.panelIndex, { align: alignBtn.getAttribute('data-align') });
+      else if (e.target.id === 'mdimg-live-swap')   openMdImgSwapModal(_mdLive.panelIndex);
+      else if (e.target.id === 'mdimg-live-remove') removeMdImg(_mdLive.panelIndex);
+    });
+
+    _mdLive.panel = p;
+    return p;
+  }
+
+  function openMdImgPanel(index, anchorEl) {
+    var entry = _mdLive.marks[index];
+    if (!entry) return;
+    var p = ensureMdImgPanel();
+    _mdLive.panelIndex = index;
+
+    p.querySelectorAll('[data-size]').forEach(function(b) {
+      b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-size') === entry.size);
+    });
+    p.querySelectorAll('[data-align]').forEach(function(b) {
+      b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-align') === entry.align);
+    });
+
+    p.style.display = 'flex';
+    var rect  = anchorEl.getBoundingClientRect();
+    var pRect = p.getBoundingClientRect();
+    var top  = window.scrollY + rect.bottom + 6;
+    var left = window.scrollX + rect.left;
+    var maxLeft = window.scrollX + document.documentElement.clientWidth - pRect.width - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    p.style.top  = top + 'px';
+    p.style.left = left + 'px';
+
+    setTimeout(function() {
+      document.addEventListener('mousedown', mdImgPanelOutsideClick);
+    }, 0);
+  }
+
+  function mdImgPanelOutsideClick(e) {
+    if (_mdLive.panel && _mdLive.panel.style.display !== 'none' && !_mdLive.panel.contains(e.target)) {
+      closeMdImgPanel();
+    }
+  }
+
+  function closeMdImgPanel() {
+    if (_mdLive.panel) _mdLive.panel.style.display = 'none';
+    _mdLive.panelIndex = -1;
+    document.removeEventListener('mousedown', mdImgPanelOutsideClick);
+  }
+
+  function applyMdImgChange(index, patch) {
+    var entry = _mdLive.marks[index];
+    if (!entry || !S.mde) return;
+    var cm = S.mde.codemirror;
+    var range = entry.mark.find();
+    if (!range) return;
+
+    var alt   = patch.alt   !== undefined ? patch.alt   : entry.alt;
+    var url   = patch.url   !== undefined ? patch.url   : entry.url;
+    var size  = patch.size  || entry.size;
+    var align = patch.align || entry.align;
+    var md = '![' + alt + '](' + url + '){.' + size + ' .' + align + '}';
+
+    cm.replaceRange(md, range.from, range.to);
+    if (_mdLive.rescanTimer) { clearTimeout(_mdLive.rescanTimer); _mdLive.rescanTimer = null; }
+    rescanMdImages(cm);
+
+    if (_mdLive.marks[index]) openMdImgPanel(index, _mdLive.marks[index].el);
+  }
+
+  function openMdImgSwapModal(index) {
+    _mdLive.swapIndex = index;
+    var modal = id('mdimg-modal');
+    modal.classList.add('mdimg-swap-mode');
+    id('mdimg-options').style.display = 'none';
+    modal.style.display = 'flex';
+    loadMdImgGallery();
+    closeMdImgPanel();
+  }
+
+  function removeMdImg(index) {
+    var entry = _mdLive.marks[index];
+    if (!entry || !S.mde) return;
+    var cm = S.mde.codemirror;
+    showConfirm('Bild entfernen', 'Soll dieses Bild aus dem Text entfernt werden?', function() {
+      var range = entry.mark.find();
+      if (!range) return;
+      var lineText = cm.getLine(range.from.line);
+      if (range.from.line === range.to.line && lineText.trim() === lineText.slice(range.from.ch, range.to.ch)) {
+        // Bild steht allein in seiner Zeile → ganze Zeile (+ ggf. folgende Leerzeile) entfernen
+        var startLine = range.from.line;
+        var endLine = startLine + 1;
+        if (endLine < cm.lineCount() && cm.getLine(endLine).trim() === '') endLine++;
+        endLine = Math.min(endLine, cm.lineCount());
+        cm.replaceRange('', { line: startLine, ch: 0 }, { line: endLine, ch: 0 });
+      } else {
+        cm.replaceRange('', range.from, range.to);
+      }
+      if (_mdLive.rescanTimer) { clearTimeout(_mdLive.rescanTimer); _mdLive.rescanTimer = null; }
+      rescanMdImages(cm);
+      closeMdImgPanel();
+      toast('🗑️ Bild entfernt', 'ok');
+    });
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -2914,9 +3178,11 @@
         });
       },
     });
+    setupLiveImagePreview(S.mde.codemirror);
   }
 
   function destroyMDE() {
+    destroyLiveImagePreview();
     if (S.mde) {
       try { S.mde.toTextArea(); } catch(e) {}
       S.mde = null;
@@ -3262,14 +3528,14 @@
       '<h2>' + escHtml(title) + '</h2>' +
       '<div class="panel-header-actions">' +
         (extraBtns || '') +
-        '<button class="btn btn-primary" data-save onclick="saveCurrentSection()">💾 Speichern</button>' +
+        '<button class="btn btn-primary" data-save>💾 Speichern</button>' +
       '</div></div>';
   }
 
   function saveBar() {
     return '<div class="save-bar">' +
       '<span class="save-status" id="save-status"></span>' +
-      '<button class="btn btn-primary" data-save onclick="saveCurrentSection()">💾 Speichern</button>' +
+      '<button class="btn btn-primary" data-save>💾 Speichern</button>' +
     '</div>';
   }
 

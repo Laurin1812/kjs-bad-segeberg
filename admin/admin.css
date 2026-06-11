@@ -496,6 +496,48 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .pdf-toolbar-btn { font-size: 0 !important; line-height: 1; }
 .pdf-toolbar-btn::before { content: "📄"; font-size: 1rem; }
 
+/* Live-Bildvorschau im Markdown-Editor */
+.mdimg-live {
+  display: block; position: relative; overflow: hidden;
+  clear: both; cursor: pointer; min-height: 2rem;
+  border: 1px dashed transparent; border-radius: 6px;
+}
+.mdimg-live:hover { border-color: var(--green); }
+.mdimg-live--error { background: var(--green-light); min-height: 3rem; }
+.mdimg-live-img { max-width: 100%; }
+.mdimg-live-edit {
+  position: absolute; top: 4px; right: 4px;
+  width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--white);
+  color: var(--green); cursor: pointer; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s; padding: 0;
+}
+.mdimg-live:hover .mdimg-live-edit,
+.mdimg-live-edit:focus { opacity: 1; }
+
+/* Bearbeitungs-Panel für Bilder im Editor */
+.mdimg-live-panel {
+  position: absolute; z-index: 200; display: none;
+  flex-direction: column; gap: .5rem;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  padding: .75rem; min-width: 280px; font-size: .8rem;
+}
+.mdimg-live-panel__title { font-weight: 700; color: var(--green-dark); margin-bottom: .1rem; }
+.mdimg-live-row { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.mdimg-live-row--actions { margin-top: .25rem; justify-content: space-between; }
+.mdimg-live-label { color: var(--text-muted); min-width: 4.2rem; font-size: .75rem; }
+.mdimg-live-btn {
+  border: 1px solid var(--border); background: var(--white);
+  border-radius: 5px; padding: .25rem .55rem; font-size: .75rem;
+  cursor: pointer; color: var(--text);
+}
+.mdimg-live-btn:hover { border-color: var(--green); color: var(--green); }
+.mdimg-live-btn--active { border-color: var(--green); background: var(--green-light); color: var(--green-dark); font-weight: 700; }
+.mdimg-live-danger { color: #b3261e; border-color: #b3261e; }
+.mdimg-live-danger:hover { background: #fdecea; }
+
 /* PDF-Galerie im Modal */
 .pdf-gallery { display: flex; flex-direction: column; gap: .4rem; margin-top: .5rem; max-height: 300px; overflow-y: auto; }
 .pdf-item {
