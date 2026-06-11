@@ -2893,6 +2893,26 @@
         '|','preview','guide'],
       status: false,
       minHeight: '180px',
+      previewRender: function(plainText) {
+        // Standard-Rendering von EasyMDE, danach unsere Bild-Größen-/
+        // Ausrichtungs-Syntax ![alt](pfad){.img-mittel .img-rechts} in echte
+        // CSS-Klassen umwandeln – sonst zeigt die Vorschau nur "{.img-mittel
+        // .img-rechts}" als Text hinter dem Bild an (sieht "kaputt" aus,
+        // obwohl die Live-Website das Bild korrekt mit Klassen rendert).
+        var html = this.markdown(plainText);
+        return html.replace(/(<img\b[^>]*>)\s*\{([^}]*)\}/g, function(m, imgTag, cls) {
+          var classes = cls.trim().split(/\s+/)
+            .map(function(c) { return c.replace(/^\./, ''); })
+            .filter(Boolean).join(' ');
+          if (!classes) return imgTag;
+          if (/\sclass="/.test(imgTag)) {
+            return imgTag.replace(/\sclass="([^"]*)"/, function(mm, existing) {
+              return ' class="' + existing + ' ' + classes + '"';
+            });
+          }
+          return imgTag.replace(/\/?>$/, ' class="' + classes + '">');
+        });
+      },
     });
   }
 
