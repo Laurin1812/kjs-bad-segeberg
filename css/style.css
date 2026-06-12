@@ -679,7 +679,11 @@ p  { margin-bottom: 1rem; }
 .download-section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--green-main); border-radius: 2px; }
 
 /* "Dokumente & Downloads" als Sidebar-Karte (neben dem Geschäftsstelle-Block) */
-.sidebar-widget--downloads h4 { color: var(--green-dark); }
+.sidebar-widget--downloads h4 {
+  color: var(--green-dark); display: flex; align-items: center; gap: .45rem;
+}
+.download-heading-icon { display: inline-flex; color: var(--green-main); flex-shrink: 0; }
+.download-heading-icon svg { display: block; }
 .downloads-list--sidebar { display: flex; flex-direction: column; gap: .6rem; }
 .download-item--sidebar {
   display: flex; align-items: center; gap: .65rem;
@@ -688,7 +692,12 @@ p  { margin-bottom: 1rem; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .download-item--sidebar:hover { border-color: var(--green-main); box-shadow: var(--shadow-sm); }
-.download-item--sidebar .download-item__icon { font-size: 1.15rem; flex-shrink: 0; }
+.download-item--sidebar .download-item__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex-shrink: 0; color: var(--green-main);
+  background: var(--green-light); border-radius: var(--radius-sm);
+}
+.download-item--sidebar .download-item__icon svg { display: block; }
 .download-item__thumb {
   display: block; flex-shrink: 0; width: 60px; height: 80px;
   border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);

@@ -610,6 +610,12 @@ if (contactForm) {
       .replace(/"/g, '&quot;');
   }
 
+  // Einheitliche, plattformunabhängige Icons (statt Emojis, die je nach
+  // OS/Browser sehr unterschiedlich – teils unschön – dargestellt werden).
+  var ICON_PDF    = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+  var ICON_OPEN   = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
+  var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+
   fetch(contentPath)
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
@@ -626,20 +632,20 @@ if (contactForm) {
       if (!items.length) return;
 
       var html = '<div class="sidebar-widget sidebar-widget--downloads">' +
-        '<h4>📄 Dokumente &amp; Downloads</h4>' +
+        '<h4><span class="download-heading-icon">' + ICON_PDF + '</span> Dokumente &amp; Downloads</h4>' +
         '<div class="downloads-list downloads-list--sidebar">' +
         items.map(function (item) {
           var datei = item.datei || item.url || item.pfad;
           var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
           var iconHtml = item.vorschau
             ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
-            : '<span class="download-item__icon">📄</span>';
+            : '<span class="download-item__icon">' + ICON_PDF + '</span>';
           return '<div class="download-item--sidebar">' +
             iconHtml +
             '<span class="download-item__name">' + escHtml(name) + '</span>' +
             '<span class="download-item__actions">' +
-              '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">🔗</a>' +
-              '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">⬇</a>' +
+              '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN + '</a>' +
+              '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
             '</span>' +
           '</div>';
         }).join('') +
