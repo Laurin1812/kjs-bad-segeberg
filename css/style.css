@@ -689,6 +689,11 @@ p  { margin-bottom: 1rem; }
 }
 .download-item--sidebar:hover { border-color: var(--green-main); box-shadow: var(--shadow-sm); }
 .download-item--sidebar .download-item__icon { font-size: 1.15rem; flex-shrink: 0; }
+.download-item__thumb {
+  display: block; flex-shrink: 0; width: 60px; height: 80px;
+  border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);
+}
+.download-item__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .download-item--sidebar .download-item__name {
   flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark);
   font-family: var(--font-sans); word-break: break-word;

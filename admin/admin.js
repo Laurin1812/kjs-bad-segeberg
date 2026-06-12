@@ -1112,16 +1112,19 @@
      Wird auf der Website am Seitenende als eigene Download-Liste
      gerendert (siehe js/main.js).
   ──────────────────────────────────────────────────────────── */
+  var dlRowSeq = 0;
   function renderDownloadRow(d) {
     var datei = d.datei || '';
     var fname = datei.split('/').pop();
-    return '<div class="item-card download-row">' +
+    var imgId = 'dl-vorschau-' + (dlRowSeq++);
+    return '<div class="item-card download-row" data-img-id="' + imgId + '">' +
       '<div class="item-drag">⠿</div>' +
       '<div class="item-body">' +
         '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Anleitung Mai 2026)" style="margin-bottom:.35rem;">' +
         '<div class="item-meta">📄 ' + escHtml(fname) +
           (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener">öffnen</a>' : '') +
         '</div>' +
+        '<div style="margin-top:.5rem;">' + fImage(imgId, 'Vorschaubild (optional)', d.vorschau) + '</div>' +
       '</div>' +
       '<input type="hidden" class="dl-datei" value="' + escAttr(datei) + '">' +
       '<div class="item-actions">' +
@@ -1158,9 +1161,12 @@
     document.querySelectorAll('#downloads-list .download-row').forEach(function(row) {
       var dateiEl = row.querySelector('.dl-datei');
       var titelEl = row.querySelector('.dl-titel');
+      var imgId = row.getAttribute('data-img-id');
+      var vorschauEl = imgId ? id('f-' + imgId) : null;
       var datei = dateiEl ? dateiEl.value.trim() : '';
       var titel = titelEl ? titelEl.value.trim() : '';
-      if (datei) result.push({ titel: titel, datei: datei });
+      var vorschau = vorschauEl ? vorschauEl.value.trim() : '';
+      if (datei) result.push({ titel: titel, datei: datei, vorschau: vorschau });
     });
     return result;
   }
