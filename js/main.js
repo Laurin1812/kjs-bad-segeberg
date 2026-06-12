@@ -631,11 +631,14 @@ if (contactForm) {
         items.map(function (item) {
           var datei = item.datei || item.url || item.pfad;
           var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
-          return '<a href="' + escHtml(datei) + '" class="download-item--sidebar" target="_blank" rel="noopener noreferrer">' +
+          return '<div class="download-item--sidebar">' +
             '<span class="download-item__icon">📄</span>' +
             '<span class="download-item__name">' + escHtml(name) + '</span>' +
-            '<span class="download-item__arrow">⬇</span>' +
-          '</a>';
+            '<span class="download-item__actions">' +
+              '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">🔗</a>' +
+              '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">⬇</a>' +
+            '</span>' +
+          '</div>';
         }).join('') +
         '</div></div>';
 

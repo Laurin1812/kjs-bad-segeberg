@@ -685,12 +685,23 @@ p  { margin-bottom: 1rem; }
   display: flex; align-items: center; gap: .65rem;
   background: var(--bg-white); border: 1px solid var(--border);
   border-radius: var(--radius-sm); padding: .6rem .75rem;
-  text-decoration: none; transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 .download-item--sidebar:hover { border-color: var(--green-main); box-shadow: var(--shadow-sm); }
 .download-item--sidebar .download-item__icon { font-size: 1.15rem; flex-shrink: 0; }
-.download-item--sidebar .download-item__name { flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark); font-family: var(--font-sans); }
-.download-item--sidebar .download-item__arrow { color: var(--green-main); font-weight: 700; flex-shrink: 0; }
+.download-item--sidebar .download-item__name {
+  flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark);
+  font-family: var(--font-sans); word-break: break-word;
+}
+.download-item--sidebar .download-item__actions { display: flex; gap: .4rem; flex-shrink: 0; }
+.download-action {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 1px solid var(--green-main); color: var(--green-main);
+  font-size: .95rem; line-height: 1; text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+.download-action:hover { background: var(--green-main); color: #fff; }
 
 /* =========================================================
    FOOTER
