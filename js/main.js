@@ -613,22 +613,31 @@ if (contactForm) {
   fetch(contentPath)
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      if (!d || !Array.isArray(d.downloads) || !d.downloads.length) return;
-
-      var items = d.downloads.filter(function (item) { return item && item.datei; });
+      if (!d) return;
+      // Unterstützt verschiedene Feldnamen: downloads[] (Standard, via Admin
+      // angelegt), documents[]/pdfs[] (alternative Strukturen).
+      var list = Array.isArray(d.downloads) ? d.downloads
+               : Array.isArray(d.documents) ? d.documents
+               : Array.isArray(d.pdfs) ? d.pdfs
+               : [];
+      var items = list.filter(function (item) {
+        return item && (item.datei || item.url || item.pfad);
+      });
       if (!items.length) return;
 
-      var html = '<div class="download-section-title">📄 Downloads</div><div class="downloads-list">' +
+      var html = '<div class="sidebar-widget sidebar-widget--downloads">' +
+        '<h4>📄 Dokumente &amp; Downloads</h4>' +
+        '<div class="downloads-list downloads-list--sidebar">' +
         items.map(function (item) {
-          var datei = item.datei;
+          var datei = item.datei || item.url || item.pfad;
           var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
-          return '<div class="download-item">' +
-            '<div class="download-item__icon">📄</div>' +
-            '<div class="download-item__meta"><div class="download-item__name">' + escHtml(name) + '</div></div>' +
-            '<a href="' + escHtml(datei) + '" class="btn btn-sm btn-outline-green" download target="_blank" rel="noopener">⬇ Download</a>' +
-          '</div>';
+          return '<a href="' + escHtml(datei) + '" class="download-item--sidebar" download target="_blank" rel="noopener">' +
+            '<span class="download-item__icon">📄</span>' +
+            '<span class="download-item__name">' + escHtml(name) + '</span>' +
+            '<span class="download-item__arrow">⬇</span>' +
+          '</a>';
         }).join('') +
-      '</div>';
+        '</div></div>';
 
       // Der Seiteninhalt wird von einem eigenen <script> auf der jeweiligen
       // Seite asynchron nachgeladen (fetch → innerHTML). Wir warten daher,
@@ -640,16 +649,29 @@ if (contactForm) {
         var inhalt = document.getElementById('page-inhalt');
         var main = document.getElementById('page-main');
         var kjm = isKJM ? document.getElementById('kjm-content') : null;
+        var sidebar = document.querySelector('.sidebar');
         var target = inhalt || main || kjm;
         var ready = inhalt || (main && !main.querySelector('.loading-spinner')) ||
           (kjm && kjm.textContent.indexOf('Wird geladen') === -1);
-        if (ready && target) {
+        if (ready && (target || sidebar)) {
           clearInterval(iv);
           var box = document.createElement('div');
           box.innerHTML = html;
-          var parent = inhalt ? inhalt.parentNode : (main || kjm);
-          // html besteht aus zwei Top-Level-Elementen (Titel + Liste) – beide anhängen
-          while (box.firstChild) parent.appendChild(box.firstChild);
+          var widget = box.firstChild;
+          if (sidebar) {
+            // Als eigene Sidebar-Karte einfügen – direkt vor dem grünen
+            // Geschäftsstelle-Kontaktblock, falls vorhanden, sonst am Ende.
+            var contactBox = sidebar.querySelector('.contact-box');
+            if (contactBox) {
+              contactBox.parentNode.insertBefore(widget, contactBox);
+            } else {
+              sidebar.appendChild(widget);
+            }
+          } else if (target) {
+            // Fallback ohne Sidebar-Layout: Karte am Ende des Hauptinhalts anhängen.
+            var parent = inhalt ? inhalt.parentNode : (main || kjm);
+            parent.appendChild(widget);
+          }
         } else if (attempts > 60) {
           clearInterval(iv);
         }

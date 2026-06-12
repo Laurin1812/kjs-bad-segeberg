@@ -922,6 +922,26 @@
       case 'benutzer':        renderBenutzer();                  break;
       default:                renderStandard(def, data);
     }
+    // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
+    // (für Einstellungs-/Verwaltungsseiten ohne öffentliche Entsprechung
+    // nicht sinnvoll und daher ausgenommen).
+    var NO_DOWNLOADS_FORMS = ['einstellungen','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
+    if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
+      injectDownloadsCard(data);
+    }
+  }
+
+  // Hängt die "Dokumente & Downloads"-Karte ans Ende des aktuellen
+  // Formulars an, falls das Formular sie nicht bereits selbst rendert
+  // (z.B. Standard- und Kreisjägermeister-Seiten haben sie schon eingebaut).
+  function injectDownloadsCard(data) {
+    if (id('downloads-list')) { initDownloadsSortable(); return; }
+    var body = document.querySelector('#admin-main .panel-body');
+    if (!body) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderDownloadsCard(data);
+    body.appendChild(wrap.firstChild);
+    initDownloadsSortable();
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -2636,6 +2656,12 @@
       case 'downloads':     data = collectDownloads(data); break;
       case 'navExtra':        data = collectNavExtra(data); break;
       case 'navReihenfolge':  data = collectNavReihenfolge(data); break;
+    }
+
+    // Universeller "Dokumente & Downloads"-Bereich: falls auf dieser Seite
+    // vorhanden, Liste unabhängig vom Formular-Typ mit speichern.
+    if (id('downloads-list')) {
+      data.downloads = collectDownloadsList();
     }
 
     setSaving(true);

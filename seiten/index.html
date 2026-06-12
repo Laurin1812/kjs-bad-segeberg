@@ -311,6 +311,28 @@
       html += '</p>';
     }
 
+    // Dokumente & Downloads (downloads[]/documents[]/pdfs[] aus dem Admin)
+    var dlList = Array.isArray(seite.downloads) ? seite.downloads
+               : Array.isArray(seite.documents) ? seite.documents
+               : Array.isArray(seite.pdfs) ? seite.pdfs
+               : [];
+    var dlItems = dlList.filter(function(item) { return item && (item.datei || item.url || item.pfad); });
+    if (dlItems.length) {
+      html += '<div class="sidebar-widget sidebar-widget--downloads" style="max-width:420px;margin-top:2rem;">' +
+        '<h4>📄 Dokumente &amp; Downloads</h4>' +
+        '<div class="downloads-list downloads-list--sidebar">' +
+        dlItems.map(function(item) {
+          var datei = item.datei || item.url || item.pfad;
+          var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+          return '<a href="' + datei + '" class="download-item--sidebar" download target="_blank" rel="noopener">' +
+            '<span class="download-item__icon">📄</span>' +
+            '<span class="download-item__name">' + name + '</span>' +
+            '<span class="download-item__arrow">⬇</span>' +
+          '</a>';
+        }).join('') +
+        '</div></div>';
+    }
+
     inhaltEl.innerHTML = html;
   }
 })();

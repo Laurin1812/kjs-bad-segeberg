@@ -678,6 +678,20 @@ p  { margin-bottom: 1rem; }
 .download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); }
 .download-section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--green-main); border-radius: 2px; }
 
+/* "Dokumente & Downloads" als Sidebar-Karte (neben dem Geschäftsstelle-Block) */
+.sidebar-widget--downloads h4 { color: var(--green-dark); }
+.downloads-list--sidebar { display: flex; flex-direction: column; gap: .6rem; }
+.download-item--sidebar {
+  display: flex; align-items: center; gap: .65rem;
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: .6rem .75rem;
+  text-decoration: none; transition: border-color var(--transition), box-shadow var(--transition);
+}
+.download-item--sidebar:hover { border-color: var(--green-main); box-shadow: var(--shadow-sm); }
+.download-item--sidebar .download-item__icon { font-size: 1.15rem; flex-shrink: 0; }
+.download-item--sidebar .download-item__name { flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark); font-family: var(--font-sans); }
+.download-item--sidebar .download-item__arrow { color: var(--green-main); font-weight: 700; flex-shrink: 0; }
+
 /* =========================================================
    FOOTER
    ========================================================= */
