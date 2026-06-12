@@ -32,10 +32,6 @@
       "href": "/jaeger/index.html"
     },
     {
-      "label": "Mitglied werden",
-      "href": "/jaeger/mitglied-werden.html"
-    },
-    {
       "label": "Obleute",
       "href": "/jaeger/obleute.html"
     },
@@ -54,6 +50,10 @@
     {
       "label": "Hochwild",
       "href": "/jaeger/hochwild.html"
+    },
+    {
+      "label": "Mitglied werden",
+      "href": "/jaeger/mitglied-werden.html"
     },
     {
       "label": "Schießobleute",
