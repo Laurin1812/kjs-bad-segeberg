@@ -631,25 +631,48 @@ if (contactForm) {
       });
       if (!items.length) return;
 
-      var html = '<div class="sidebar-widget sidebar-widget--downloads">' +
+      // Zwei Varianten: als schmale Sidebar-Karte (neben dem Geschäftsstelle-
+      // Block) oder als volle Breite (Seiten ohne .sidebar-Layout, z.B.
+      // seiten/index.html). Beide nutzen dieselben Icons/Aktionen.
+      function buildActions(datei, name) {
+        return '<span class="download-item__actions">' +
+          '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN + '</a>' +
+          '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
+        '</span>';
+      }
+
+      var itemsSidebar = items.map(function (item) {
+        var datei = item.datei || item.url || item.pfad;
+        var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+        var iconHtml = item.vorschau
+          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+          : '<span class="download-item__icon">' + ICON_PDF + '</span>';
+        return '<div class="download-item--sidebar">' +
+          iconHtml +
+          '<span class="download-item__name">' + escHtml(name) + '</span>' +
+          buildActions(datei, name) +
+        '</div>';
+      }).join('');
+
+      var itemsWide = items.map(function (item) {
+        var datei = item.datei || item.url || item.pfad;
+        var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+        var iconHtml = item.vorschau
+          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+          : '<div class="download-item__icon">' + ICON_PDF + '</div>';
+        return '<div class="download-item">' +
+          iconHtml +
+          '<div class="download-item__meta"><div class="download-item__name">' + escHtml(name) + '</div></div>' +
+          buildActions(datei, name) +
+        '</div>';
+      }).join('');
+
+      var htmlSidebar = '<div class="sidebar-widget sidebar-widget--downloads">' +
         '<h4><span class="download-heading-icon">' + ICON_PDF + '</span> Dokumente &amp; Downloads</h4>' +
-        '<div class="downloads-list downloads-list--sidebar">' +
-        items.map(function (item) {
-          var datei = item.datei || item.url || item.pfad;
-          var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
-          var iconHtml = item.vorschau
-            ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
-            : '<span class="download-item__icon">' + ICON_PDF + '</span>';
-          return '<div class="download-item--sidebar">' +
-            iconHtml +
-            '<span class="download-item__name">' + escHtml(name) + '</span>' +
-            '<span class="download-item__actions">' +
-              '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN + '</a>' +
-              '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
-            '</span>' +
-          '</div>';
-        }).join('') +
-        '</div></div>';
+        '<div class="downloads-list downloads-list--sidebar">' + itemsSidebar + '</div></div>';
+
+      var htmlWide = '<div class="download-section-title"><span class="download-heading-icon">' + ICON_PDF + '</span> Dokumente &amp; Downloads</div>' +
+        '<div class="downloads-list">' + itemsWide + '</div>';
 
       // Der Seiteninhalt wird von einem eigenen <script> auf der jeweiligen
       // Seite asynchron nachgeladen (fetch → innerHTML). Wir warten daher,
@@ -668,11 +691,11 @@ if (contactForm) {
         if (ready && (target || sidebar)) {
           clearInterval(iv);
           var box = document.createElement('div');
-          box.innerHTML = html;
-          var widget = box.firstChild;
           if (sidebar) {
             // Als eigene Sidebar-Karte einfügen – direkt vor dem grünen
             // Geschäftsstelle-Kontaktblock, falls vorhanden, sonst am Ende.
+            box.innerHTML = htmlSidebar;
+            var widget = box.firstChild;
             var contactBox = sidebar.querySelector('.contact-box');
             if (contactBox) {
               contactBox.parentNode.insertBefore(widget, contactBox);
@@ -680,9 +703,11 @@ if (contactForm) {
               sidebar.appendChild(widget);
             }
           } else if (target) {
-            // Fallback ohne Sidebar-Layout: Karte am Ende des Hauptinhalts anhängen.
+            // Seiten ohne .sidebar-Layout (z.B. volle Breite): Karte in der
+            // Breiten-Variante am Ende des Hauptinhalts anhängen.
+            box.innerHTML = htmlWide;
             var parent = inhalt ? inhalt.parentNode : (main || kjm);
-            parent.appendChild(widget);
+            while (box.firstChild) parent.appendChild(box.firstChild);
           }
         } else if (attempts > 60) {
           clearInterval(iv);
