@@ -458,37 +458,47 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .mdimg-option:has(input[type="radio"]:checked) { border-color: var(--green); background: var(--green-light); font-weight: 600; }
 .mdimg-option input[type="radio"] { accent-color: var(--green); margin: 0; }
 
-/* Visuelle Positions-Buttons (Links / Zentriert / Rechts / Volle Breite) */
-.mdimg-pos-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
-.mdimg-pos-btn {
-  display: flex; flex-direction: column; align-items: center; gap: .45rem;
-  border: 2px solid var(--border); border-radius: 10px;
-  padding: .65rem .9rem; cursor: pointer; background: var(--white);
-  font-size: .82rem; color: var(--text-muted); font-weight: 500;
+/* Größen-Buttons (Klein / Mittel / Groß / Volle Breite) */
+.mdimg-size-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+.mdimg-size-btn {
+  border: 2px solid var(--border); border-radius: 8px;
+  padding: .5rem 1rem; cursor: pointer; background: var(--white);
+  font-size: .85rem; color: var(--text-muted); font-weight: 500;
   transition: border-color .15s, background .15s, color .15s;
-  min-width: 72px;
 }
-.mdimg-pos-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
-.mdimg-pos-btn--active { border-color: var(--green) !important; background: var(--green-light) !important; color: var(--green-dark) !important; font-weight: 700; }
+.mdimg-size-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.mdimg-size-btn--active { border-color: var(--green) !important; background: var(--green-light) !important; color: var(--green-dark) !important; font-weight: 700; }
 
-/* Position-Diagramme im Button */
-.mdimg-pos-icon {
-  display: flex; align-items: center; gap: 4px;
-  height: 36px; width: 64px; background: #f0f4f0;
-  border-radius: 4px; padding: 4px 6px; box-sizing: border-box; overflow: hidden;
+/* 3x3 Positions-Raster (visueller Positionswähler wie bei Word) */
+.mdimg-grid-wrap { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.mdimg-grid {
+  display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px);
+  gap: 5px; padding: 6px; background: #f0f4f0; border-radius: 8px;
 }
-.pos-img {
-  flex-shrink: 0; background: #1e4620; border-radius: 2px; border: 1px solid rgba(0,0,0,.15);
+.mdimg-grid-btn {
+  border: 2px solid var(--border); border-radius: 6px; background: var(--white);
+  cursor: pointer; font-size: 1.1rem; line-height: 1; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s, color .15s;
 }
-.pos-left  { width: 22px; height: 28px; }
-.pos-right { width: 22px; height: 28px; }
-.pos-center { width: 30px; height: 20px; margin: auto; }
-.pos-full  { width: 100%; height: 16px; }
-.pos-lines { display: flex; flex-direction: column; gap: 3px; flex: 1; padding-top: 2px; }
-.pos-lines span { display: block; height: 4px; background: #ccc; border-radius: 2px; }
-.pos-icon--center { justify-content: center; flex-direction: column; align-items: center; }
-.pos-icon--full   { justify-content: center; align-items: center; }
-.mdimg-pos-label  { font-size: .8rem; }
+.mdimg-grid-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.mdimg-grid-btn--active { border-color: var(--green) !important; background: var(--green-light) !important; color: var(--green-dark) !important; font-weight: 700; }
+.mdimg-grid-label { font-size: .85rem; color: var(--text-muted); font-weight: 600; }
+
+/* Textumfluss-Auswahl (Block / Float) */
+.mdimg-flow-row { display: flex; flex-wrap: wrap; gap: .75rem; }
+.mdimg-flow-btn {
+  flex: 1; min-width: 180px; text-align: left;
+  display: flex; flex-direction: column; gap: .2rem;
+  border: 2px solid var(--border); border-radius: 8px;
+  padding: .55rem .8rem; cursor: pointer; background: var(--white);
+  font-size: .85rem; color: var(--text); transition: border-color .15s, background .15s;
+}
+.mdimg-flow-btn:hover { border-color: var(--green); background: var(--green-light); }
+.mdimg-flow-btn--active { border-color: var(--green) !important; background: var(--green-light) !important; }
+.mdimg-flow-btn--disabled { opacity: .45; cursor: not-allowed; }
+.mdimg-flow-btn--disabled:hover { border-color: var(--border); background: var(--white); }
+.mdimg-flow-desc { font-size: .75rem; color: var(--text-muted); font-weight: 400; }
 
 /* EasyMDE toolbar buttons */
 .mdimg-toolbar-btn { font-size: 0 !important; line-height: 1; }
@@ -535,6 +545,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 }
 .mdimg-live-btn:hover { border-color: var(--green); color: var(--green); }
 .mdimg-live-btn--active { border-color: var(--green); background: var(--green-light); color: var(--green-dark); font-weight: 700; }
+.mdimg-live-btn--disabled { opacity: .4; cursor: not-allowed; }
 .mdimg-live-danger { color: #b3261e; border-color: #b3261e; }
 .mdimg-live-danger:hover { background: #fdecea; }
 

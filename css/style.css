@@ -513,6 +513,49 @@ p  { margin-bottom: 1rem; }
 #page-inhalt img.img-zentriert {
   display: block; float: none; margin-left: auto; margin-right: auto;
 }
+
+/* Vertikaler Abstand nach oben, gesetzt über das 3x3-Positionsraster im Bild-Tool */
+.main-content img.img-pos-mitte,
+#seite-inhalt img.img-pos-mitte,
+#page-inhalt img.img-pos-mitte { margin-top: 1.5rem; }
+.main-content img.img-pos-unten,
+#seite-inhalt img.img-pos-unten,
+#page-inhalt img.img-pos-unten { margin-top: 3rem; }
+
+/* Textumfluss: Bild floatet, Text läuft daneben (wie Word "Mit Text in Zeile") */
+.main-content img.img-flow.img-links,
+#seite-inhalt img.img-flow.img-links,
+#page-inhalt img.img-flow.img-links {
+  float: left; margin-right: 1.2rem; margin-bottom: .6rem;
+}
+.main-content img.img-flow.img-rechts,
+#seite-inhalt img.img-flow.img-rechts,
+#page-inhalt img.img-flow.img-rechts {
+  float: right; margin-left: 1.2rem; margin-bottom: .6rem;
+}
+/* Zentriert + Umfluss ist physisch nicht möglich -> wie "Kein Umfluss" darstellen */
+.main-content img.img-flow.img-zentriert,
+#seite-inhalt img.img-flow.img-zentriert,
+#page-inhalt img.img-flow.img-zentriert {
+  display: block; float: none; clear: both; margin-left: auto; margin-right: auto;
+}
+
+/* Kein Umfluss: Bild auf eigener Zeile, Text darunter */
+.main-content img.img-block,
+#seite-inhalt img.img-block,
+#page-inhalt img.img-block {
+  display: block; float: none; clear: both; margin-bottom: 1rem;
+}
+.main-content img.img-block.img-links,
+#seite-inhalt img.img-block.img-links,
+#page-inhalt img.img-block.img-links { margin-right: auto; margin-left: 0; }
+.main-content img.img-block.img-rechts,
+#seite-inhalt img.img-block.img-rechts,
+#page-inhalt img.img-block.img-rechts { margin-left: auto; margin-right: 0; }
+.main-content img.img-block.img-zentriert,
+#seite-inhalt img.img-block.img-zentriert,
+#page-inhalt img.img-block.img-zentriert { margin-left: auto; margin-right: auto; }
+
 /* Clearfix nach gefloateten Bildern – verhindert, dass nachfolgender Text ins Bild fließt */
 .main-content::after,
 #seite-inhalt::after,

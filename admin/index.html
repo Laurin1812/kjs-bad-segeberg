@@ -118,43 +118,50 @@
       </div>
 
       <div id="mdimg-options" style="display:none; margin-top:1.5rem;">
-        <div class="form-card-title">2. Position im Text</div>
-        <div class="mdimg-pos-row" id="mdimg-pos-options">
-          <button type="button" class="mdimg-pos-btn mdimg-pos-btn--active" data-size="img-mittel" data-align="img-links" onclick="mdImgSetPos(this)">
-            <span class="mdimg-pos-icon">
-              <span class="pos-img pos-left"></span>
-              <span class="pos-lines"><span></span><span></span><span></span></span>
-            </span>
-            <span class="mdimg-pos-label">Links</span>
-          </button>
-          <button type="button" class="mdimg-pos-btn" data-size="img-mittel" data-align="img-zentriert" onclick="mdImgSetPos(this)">
-            <span class="mdimg-pos-icon pos-icon--center">
-              <span class="pos-img pos-center"></span>
-            </span>
-            <span class="mdimg-pos-label">Zentriert</span>
-          </button>
-          <button type="button" class="mdimg-pos-btn" data-size="img-mittel" data-align="img-rechts" onclick="mdImgSetPos(this)">
-            <span class="mdimg-pos-icon">
-              <span class="pos-lines"><span></span><span></span><span></span></span>
-              <span class="pos-img pos-right"></span>
-            </span>
-            <span class="mdimg-pos-label">Rechts</span>
-          </button>
-          <button type="button" class="mdimg-pos-btn" data-size="img-voll" data-align="img-zentriert" onclick="mdImgSetPos(this)">
-            <span class="mdimg-pos-icon pos-icon--full">
-              <span class="pos-img pos-full"></span>
-            </span>
-            <span class="mdimg-pos-label">Volle Breite</span>
-          </button>
+        <div class="form-card-title">2. Größe</div>
+        <div class="mdimg-size-row" id="mdimg-size-options">
+          <button type="button" class="mdimg-size-btn" data-size="img-klein" onclick="mdImgSetSize(this)">Klein</button>
+          <button type="button" class="mdimg-size-btn mdimg-size-btn--active" data-size="img-mittel" onclick="mdImgSetSize(this)">Mittel</button>
+          <button type="button" class="mdimg-size-btn" data-size="img-gross" onclick="mdImgSetSize(this)">Groß</button>
+          <button type="button" class="mdimg-size-btn" data-size="img-voll" onclick="mdImgSetSize(this)">Volle Breite</button>
         </div>
 
+        <div class="form-card-title" style="margin-top:1.25rem;">3. Position</div>
+        <div class="mdimg-grid-wrap">
+          <div class="mdimg-grid" id="mdimg-grid-options">
+            <button type="button" class="mdimg-grid-btn mdimg-grid-btn--active" data-h="img-links" data-v="img-pos-oben" title="Oben links" onclick="mdImgSetGrid(this)">↖</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-zentriert" data-v="img-pos-oben" title="Oben Mitte" onclick="mdImgSetGrid(this)">↑</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-rechts" data-v="img-pos-oben" title="Oben rechts" onclick="mdImgSetGrid(this)">↗</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-links" data-v="img-pos-mitte" title="Mitte links" onclick="mdImgSetGrid(this)">←</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-zentriert" data-v="img-pos-mitte" title="Zentriert" onclick="mdImgSetGrid(this)">•</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-rechts" data-v="img-pos-mitte" title="Mitte rechts" onclick="mdImgSetGrid(this)">→</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-links" data-v="img-pos-unten" title="Unten links" onclick="mdImgSetGrid(this)">↙</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-zentriert" data-v="img-pos-unten" title="Unten Mitte" onclick="mdImgSetGrid(this)">↓</button>
+            <button type="button" class="mdimg-grid-btn" data-h="img-rechts" data-v="img-pos-unten" title="Unten rechts" onclick="mdImgSetGrid(this)">↘</button>
+          </div>
+          <div class="mdimg-grid-label" id="mdimg-grid-label">Position: Oben links</div>
+        </div>
+
+        <div class="form-card-title" style="margin-top:1.25rem;">4. Textumfluss</div>
+        <div class="mdimg-flow-row" id="mdimg-flow-options">
+          <button type="button" class="mdimg-flow-btn mdimg-flow-btn--active" data-flow="img-flow" onclick="mdImgSetFlow(this)">
+            <strong>Text umfließt Bild</strong>
+            <span class="mdimg-flow-desc">Text läuft neben dem Bild weiter</span>
+          </button>
+          <button type="button" class="mdimg-flow-btn" data-flow="img-block" onclick="mdImgSetFlow(this)">
+            <strong>Kein Umfluss</strong>
+            <span class="mdimg-flow-desc">Bild auf eigener Zeile, Text darunter</span>
+          </button>
+        </div>
+        <div class="field-hint" id="mdimg-flow-hint" style="display:none;">ℹ️ Bei zentrierten Bildern ist kein Textumfluss möglich – das Bild steht auf einer eigenen Zeile.</div>
+
         <!-- Live-Vorschau -->
-        <div id="mdimg-preview-wrap" style="margin-top:1rem;display:none;">
+        <div id="mdimg-preview-wrap" style="margin-top:1.25rem;display:none;">
           <div class="form-card-title">Vorschau</div>
           <div id="mdimg-preview" style="border:1px solid var(--border);border-radius:8px;padding:1rem;min-height:80px;background:#fafafa;overflow:hidden;"></div>
         </div>
 
-        <div class="form-card-title" style="margin-top:1rem;">3. Alt-Text (optional)</div>
+        <div class="form-card-title" style="margin-top:1rem;">5. Alt-Text (optional)</div>
         <input type="text" class="field-input" id="mdimg-alt" placeholder="Bildbeschreibung für Barrierefreiheit">
 
         <div style="margin-top:1.5rem; text-align:right; display:flex; gap:.6rem; justify-content:flex-end;">

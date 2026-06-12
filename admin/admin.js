@@ -2830,7 +2830,8 @@
      MARKDOWN-BILD-EINFÜGEN (mit visueller Positionierung)
   ──────────────────────────────────────────────────────────── */
   var _mdImgSelected = null; // { url, name }
-  var _mdImgPos = { size: 'img-mittel', align: 'img-links' }; // aktuelle Position
+  // aktuelle Position: Größe, horizontale/vertikale Position, Textumfluss
+  var _mdImgPos = { size: 'img-mittel', hpos: 'img-links', vpos: 'img-pos-oben', flow: 'img-flow' };
 
   function openMdImageModal() {
     if (!S.mde) { toast('❌ Editor nicht bereit', 'err'); return; }
@@ -2841,11 +2842,9 @@
     if (insertBtn) insertBtn.disabled = true;
     var alt = id('mdimg-alt');
     if (alt) alt.value = '';
-    // Reset position to first preset (Links)
-    _mdImgPos = { size: 'img-mittel', align: 'img-links' };
-    document.querySelectorAll('.mdimg-pos-btn').forEach(function(btn, i) {
-      btn.classList.toggle('mdimg-pos-btn--active', i === 0);
-    });
+    // Reset auf Standard-Position (oben links, mittel, mit Textumfluss)
+    _mdImgPos = { size: 'img-mittel', hpos: 'img-links', vpos: 'img-pos-oben', flow: 'img-flow' };
+    mdImgSyncButtons();
     var preview = id('mdimg-preview-wrap');
     if (preview) preview.style.display = 'none';
 
@@ -2853,15 +2852,63 @@
     loadMdImgGallery();
   }
 
-  // Positions-Button geklickt → State aktualisieren + Vorschau neu zeichnen
-  window.mdImgSetPos = function(btn) {
-    _mdImgPos.size  = btn.getAttribute('data-size')  || 'img-mittel';
-    _mdImgPos.align = btn.getAttribute('data-align') || 'img-zentriert';
-    document.querySelectorAll('.mdimg-pos-btn').forEach(function(b) {
-      b.classList.toggle('mdimg-pos-btn--active', b === btn);
-    });
+  // Größen-Button geklickt
+  window.mdImgSetSize = function(btn) {
+    _mdImgPos.size = btn.getAttribute('data-size') || 'img-mittel';
+    mdImgSyncButtons();
     updateMdImgPreview();
   };
+
+  // Positions-Raster-Button geklickt (3x3-Raster: horizontale + vertikale Position)
+  window.mdImgSetGrid = function(btn) {
+    _mdImgPos.hpos = btn.getAttribute('data-h') || 'img-links';
+    _mdImgPos.vpos = btn.getAttribute('data-v') || 'img-pos-oben';
+    // Zentrierte Bilder können nicht vom Text umflossen werden
+    if (_mdImgPos.hpos === 'img-zentriert' && _mdImgPos.flow === 'img-flow') {
+      _mdImgPos.flow = 'img-block';
+    }
+    mdImgSyncButtons();
+    updateMdImgPreview();
+  };
+
+  // Textumfluss-Button geklickt
+  window.mdImgSetFlow = function(btn) {
+    var flow = btn.getAttribute('data-flow') || 'img-block';
+    if (flow === 'img-flow' && _mdImgPos.hpos === 'img-zentriert') return; // nicht möglich
+    _mdImgPos.flow = flow;
+    mdImgSyncButtons();
+    updateMdImgPreview();
+  };
+
+  // Sprechende Beschriftung für die aktuelle Raster-Position
+  function mdImgPosLabel(hpos, vpos) {
+    if (hpos === 'img-zentriert' && vpos === 'img-pos-mitte') return 'Zentriert';
+    var h = hpos === 'img-links' ? 'links' : (hpos === 'img-rechts' ? 'rechts' : 'Mitte');
+    var v = vpos === 'img-pos-oben' ? 'Oben' : (vpos === 'img-pos-unten' ? 'Unten' : 'Mitte');
+    return v + ' ' + h;
+  }
+
+  // Alle Buttons/Beschriftungen im Dialog mit dem aktuellen Zustand abgleichen
+  function mdImgSyncButtons() {
+    document.querySelectorAll('#mdimg-size-options [data-size]').forEach(function(b) {
+      b.classList.toggle('mdimg-size-btn--active', b.getAttribute('data-size') === _mdImgPos.size);
+    });
+    document.querySelectorAll('#mdimg-grid-options [data-h]').forEach(function(b) {
+      b.classList.toggle('mdimg-grid-btn--active',
+        b.getAttribute('data-h') === _mdImgPos.hpos && b.getAttribute('data-v') === _mdImgPos.vpos);
+    });
+    var label = id('mdimg-grid-label');
+    if (label) label.textContent = 'Position: ' + mdImgPosLabel(_mdImgPos.hpos, _mdImgPos.vpos);
+
+    var isCenter = _mdImgPos.hpos === 'img-zentriert';
+    document.querySelectorAll('#mdimg-flow-options [data-flow]').forEach(function(b) {
+      var flow = b.getAttribute('data-flow');
+      b.classList.toggle('mdimg-flow-btn--active', flow === _mdImgPos.flow);
+      b.classList.toggle('mdimg-flow-btn--disabled', flow === 'img-flow' && isCenter);
+    });
+    var hint = id('mdimg-flow-hint');
+    if (hint) hint.style.display = isCenter ? '' : 'none';
+  }
 
   function updateMdImgPreview() {
     var wrap = id('mdimg-preview-wrap');
@@ -2870,20 +2917,23 @@
     if (!_mdImgSelected) { if (wrap) wrap.style.display = 'none'; return; }
     if (wrap) wrap.style.display = '';
 
-    var size  = _mdImgPos.size  || 'img-mittel';
-    var align = _mdImgPos.align || 'img-links';
+    var size = _mdImgPos.size, hpos = _mdImgPos.hpos, vpos = _mdImgPos.vpos, flow = _mdImgPos.flow;
 
-    // Vorschau-Stile ableiten
-    var imgStyle = 'max-height:120px;height:auto;border-radius:4px;';
-    var containerStyle = 'overflow:hidden;';
+    // Vorschau-Stile ableiten (kompakter als auf der echten Seite, max. 120px hoch)
+    var imgStyle = 'border-radius:4px;height:auto;max-height:120px;';
+    var marginTop = vpos === 'img-pos-mitte' ? '18px' : (vpos === 'img-pos-unten' ? '36px' : '0');
 
-    if (align === 'img-links') {
-      imgStyle += 'float:left;margin-right:12px;margin-bottom:6px;';
-    } else if (align === 'img-rechts') {
-      imgStyle += 'float:right;margin-left:12px;margin-bottom:6px;';
+    if (flow === 'img-flow' && hpos !== 'img-zentriert') {
+      imgStyle += 'margin-top:' + marginTop + ';';
+      if (hpos === 'img-links') imgStyle += 'float:left;margin-right:12px;margin-bottom:6px;';
+      else                       imgStyle += 'float:right;margin-left:12px;margin-bottom:6px;';
     } else {
-      imgStyle += 'display:block;margin-left:auto;margin-right:auto;';
+      imgStyle += 'display:block;margin-top:' + marginTop + ';margin-bottom:6px;';
+      if (hpos === 'img-links')       imgStyle += 'margin-right:auto;';
+      else if (hpos === 'img-rechts') imgStyle += 'margin-left:auto;';
+      else                              imgStyle += 'margin-left:auto;margin-right:auto;';
     }
+
     if (size === 'img-voll') {
       imgStyle += 'width:100%;max-height:none;';
     } else if (size === 'img-gross') {
@@ -2895,15 +2945,13 @@
     }
 
     prev.innerHTML =
-      '<div style="' + containerStyle + '">' +
+      '<div style="overflow:hidden;">' +
         '<img src="' + _mdImgSelected.url + '" style="' + imgStyle + '" alt="Vorschau">' +
-        (align !== 'img-voll' && size !== 'img-voll'
-          ? '<div style="font-size:.78rem;color:#aaa;line-height:1.5;padding-top:2px;">' +
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
-              'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
-              'Ut enim ad minim veniam, quis nostrud exercitation ullamco.' +
-            '</div>'
-          : '') +
+        '<div style="font-size:.78rem;color:#aaa;line-height:1.5;padding-top:2px;">' +
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' +
+          'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' +
+          'Ut enim ad minim veniam, quis nostrud exercitation ullamco.' +
+        '</div>' +
         '<div style="clear:both"></div>' +
       '</div>';
   }
@@ -2992,13 +3040,19 @@
 
   function insertMdImage() {
     if (!_mdImgSelected || !S.mde) return;
-    var sizeCls  = _mdImgPos.size  || 'img-mittel';
-    var alignCls = _mdImgPos.align || 'img-links';
+    var sizeCls = _mdImgPos.size || 'img-mittel';
+    var hposCls = _mdImgPos.hpos || 'img-links';
+    var vposCls = _mdImgPos.vpos || 'img-pos-oben';
+    var flowCls = _mdImgPos.flow || 'img-flow';
     var altInput = id('mdimg-alt');
     var alt = altInput ? altInput.value.trim() : '';
     if (!alt) alt = _mdImgSelected.name ? _mdImgSelected.name.replace(/\.[^.]+$/, '') : '';
 
-    var markdown = '![' + alt + '](' + _mdImgSelected.url + '){.' + sizeCls + ' .' + alignCls + '}';
+    var classes = [sizeCls, hposCls];
+    if (vposCls !== 'img-pos-oben') classes.push(vposCls);
+    classes.push(flowCls);
+
+    var markdown = '![' + alt + '](' + _mdImgSelected.url + '){.' + classes.join(' .') + '}';
     var cm = S.mde.codemirror;
     cm.replaceSelection(markdown);
     cm.focus();
@@ -3013,12 +3067,14 @@
      Austauschen / Entfernen). Gilt für alle Felder, die initMDE()
      verwenden.
   ──────────────────────────────────────────────────────────── */
-  var MDIMG_SIZE_CLASSES  = ['img-klein', 'img-mittel', 'img-gross', 'img-voll'];
-  var MDIMG_ALIGN_CLASSES = ['img-links', 'img-zentriert', 'img-rechts'];
+  var MDIMG_SIZE_CLASSES   = ['img-klein', 'img-mittel', 'img-gross', 'img-voll'];
+  var MDIMG_HALIGN_CLASSES = ['img-links', 'img-zentriert', 'img-rechts'];
+  var MDIMG_VALIGN_CLASSES = ['img-pos-oben', 'img-pos-mitte', 'img-pos-unten'];
+  var MDIMG_FLOW_CLASSES   = ['img-flow', 'img-block'];
   var MDIMG_RE = /!\[([^\]]*)\]\(([^()\s]+)\)\{([^}]*)\}/g;
 
   var _mdLive = {
-    marks: [],        // [{ mark, el, alt, url, size, align }]
+    marks: [],        // [{ mark, el, alt, url, size, hpos, vpos, flow }]
     panel: null,
     panelIndex: -1,
     rescanTimer: null,
@@ -3026,20 +3082,35 @@
   };
 
   function mdImgParseClasses(raw) {
-    var size = 'img-mittel', align = 'img-zentriert';
+    var size = 'img-mittel', hpos = 'img-links', vpos = null, flow = null;
     (raw || '').trim().split(/\s+/).forEach(function(tok) {
       var c = tok.replace(/^\./, '');
-      if (MDIMG_SIZE_CLASSES.indexOf(c)  !== -1) size  = c;
-      if (MDIMG_ALIGN_CLASSES.indexOf(c) !== -1) align = c;
+      if (MDIMG_SIZE_CLASSES.indexOf(c)   !== -1) size = c;
+      if (MDIMG_HALIGN_CLASSES.indexOf(c) !== -1) hpos = c;
+      if (MDIMG_VALIGN_CLASSES.indexOf(c) !== -1) vpos = c;
+      if (MDIMG_FLOW_CLASSES.indexOf(c)   !== -1) flow = c;
     });
-    return { size: size, align: align };
+    if (!vpos) vpos = 'img-pos-oben';
+    // Alte Bilder ohne Umfluss-Klasse: bisheriges Verhalten nachbilden
+    if (!flow) flow = (hpos === 'img-zentriert') ? 'img-block' : 'img-flow';
+    return { size: size, hpos: hpos, vpos: vpos, flow: flow };
   }
 
-  function mdImgStyleFor(size, align) {
-    var style = 'border-radius:4px;display:block;height:auto;';
-    if (align === 'img-links')       style += 'float:left;margin:0 1rem .6rem 0;';
-    else if (align === 'img-rechts') style += 'float:right;margin:0 0 .6rem 1rem;';
-    else                              style += 'margin:.4rem auto;';
+  function mdImgStyleFor(size, hpos, vpos, flow) {
+    var style = 'border-radius:4px;height:auto;';
+    var marginTop = vpos === 'img-pos-mitte' ? '1.5rem' : (vpos === 'img-pos-unten' ? '3rem' : '0');
+
+    if (flow === 'img-flow' && hpos !== 'img-zentriert') {
+      style += 'display:block;margin-top:' + marginTop + ';';
+      if (hpos === 'img-links') style += 'float:left;margin-right:1rem;margin-bottom:.6rem;';
+      else                       style += 'float:right;margin-left:1rem;margin-bottom:.6rem;';
+    } else {
+      style += 'display:block;clear:both;margin-top:' + marginTop + ';margin-bottom:1rem;';
+      if (hpos === 'img-links')       style += 'margin-right:auto;margin-left:0;';
+      else if (hpos === 'img-rechts') style += 'margin-left:auto;margin-right:0;';
+      else                              style += 'margin-left:auto;margin-right:auto;';
+    }
+
     if (size === 'img-voll')        style += 'width:100%;max-width:100%;';
     else if (size === 'img-gross')  style += 'max-width:75%;';
     else if (size === 'img-klein')  style += 'max-width:25%;';
@@ -3055,7 +3126,7 @@
     img.className = 'mdimg-live-img';
     img.src = entry.url;
     img.alt = entry.alt || '';
-    img.setAttribute('style', mdImgStyleFor(entry.size, entry.align));
+    img.setAttribute('style', mdImgStyleFor(entry.size, entry.hpos, entry.vpos, entry.flow));
     img.onload  = function() { cm.refresh(); };
     img.onerror = function() { wrap.classList.add('mdimg-live--error'); };
 
@@ -3091,7 +3162,7 @@
     while ((m = MDIMG_RE.exec(text))) {
       var cls = mdImgParseClasses(m[3]);
       entries.push({
-        alt: m[1], url: m[2], size: cls.size, align: cls.align,
+        alt: m[1], url: m[2], size: cls.size, hpos: cls.hpos, vpos: cls.vpos, flow: cls.flow,
         from: cm.posFromIndex(m.index),
         to:   cm.posFromIndex(m.index + m[0].length)
       });
@@ -3101,7 +3172,10 @@
       var mark = cm.markText(entry.from, entry.to, {
         replacedWith: el, atomic: true, inclusiveLeft: false, inclusiveRight: false
       });
-      _mdLive.marks.push({ mark: mark, el: el, alt: entry.alt, url: entry.url, size: entry.size, align: entry.align });
+      _mdLive.marks.push({
+        mark: mark, el: el, alt: entry.alt, url: entry.url,
+        size: entry.size, hpos: entry.hpos, vpos: entry.vpos, flow: entry.flow
+      });
     });
   }
 
@@ -3139,9 +3213,20 @@
       '</div>' +
       '<div class="mdimg-live-row">' +
         '<span class="mdimg-live-label">Position</span>' +
-        '<button type="button" class="mdimg-live-btn" data-align="img-links">Links</button>' +
-        '<button type="button" class="mdimg-live-btn" data-align="img-zentriert">Zentriert</button>' +
-        '<button type="button" class="mdimg-live-btn" data-align="img-rechts">Rechts</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-oben">Oben li.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-oben">Oben Mi.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-oben">Oben re.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-mitte">Mitte li.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-mitte">Zentriert</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-mitte">Mitte re.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-unten">Unten li.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-unten">Unten Mi.</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-unten">Unten re.</button>' +
+      '</div>' +
+      '<div class="mdimg-live-row">' +
+        '<span class="mdimg-live-label">Textumfluss</span>' +
+        '<button type="button" class="mdimg-live-btn" data-flow="img-flow">Umfließt</button>' +
+        '<button type="button" class="mdimg-live-btn" data-flow="img-block">Kein Umfluss</button>' +
       '</div>' +
       '<div class="mdimg-live-row mdimg-live-row--actions">' +
         '<button type="button" class="btn btn-outline btn-sm" id="mdimg-live-swap">🔄 Bild austauschen</button>' +
@@ -3151,11 +3236,21 @@
 
     p.addEventListener('mousedown', function(e) { e.stopPropagation(); });
     p.addEventListener('click', function(e) {
-      var sizeBtn  = e.target.closest('[data-size]');
-      var alignBtn = e.target.closest('[data-align]');
-      if (sizeBtn)       applyMdImgChange(_mdLive.panelIndex, { size: sizeBtn.getAttribute('data-size') });
-      else if (alignBtn) applyMdImgChange(_mdLive.panelIndex, { align: alignBtn.getAttribute('data-align') });
-      else if (e.target.id === 'mdimg-live-swap')   openMdImgSwapModal(_mdLive.panelIndex);
+      var sizeBtn = e.target.closest('[data-size]');
+      var gridBtn = e.target.closest('[data-h]');
+      var flowBtn = e.target.closest('[data-flow]');
+      var entry = _mdLive.marks[_mdLive.panelIndex];
+      if (sizeBtn) {
+        applyMdImgChange(_mdLive.panelIndex, { size: sizeBtn.getAttribute('data-size') });
+      } else if (gridBtn) {
+        var patch = { hpos: gridBtn.getAttribute('data-h'), vpos: gridBtn.getAttribute('data-v') };
+        if (patch.hpos === 'img-zentriert' && entry && entry.flow === 'img-flow') patch.flow = 'img-block';
+        applyMdImgChange(_mdLive.panelIndex, patch);
+      } else if (flowBtn) {
+        var flow = flowBtn.getAttribute('data-flow');
+        if (flow === 'img-flow' && entry && entry.hpos === 'img-zentriert') return; // nicht möglich
+        applyMdImgChange(_mdLive.panelIndex, { flow: flow });
+      } else if (e.target.id === 'mdimg-live-swap')   openMdImgSwapModal(_mdLive.panelIndex);
       else if (e.target.id === 'mdimg-live-remove') removeMdImg(_mdLive.panelIndex);
     });
 
@@ -3172,8 +3267,14 @@
     p.querySelectorAll('[data-size]').forEach(function(b) {
       b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-size') === entry.size);
     });
-    p.querySelectorAll('[data-align]').forEach(function(b) {
-      b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-align') === entry.align);
+    p.querySelectorAll('[data-h]').forEach(function(b) {
+      b.classList.toggle('mdimg-live-btn--active',
+        b.getAttribute('data-h') === entry.hpos && b.getAttribute('data-v') === entry.vpos);
+    });
+    p.querySelectorAll('[data-flow]').forEach(function(b) {
+      var flow = b.getAttribute('data-flow');
+      b.classList.toggle('mdimg-live-btn--active', flow === entry.flow);
+      b.classList.toggle('mdimg-live-btn--disabled', flow === 'img-flow' && entry.hpos === 'img-zentriert');
     });
 
     p.style.display = 'flex';
@@ -3210,11 +3311,19 @@
     var range = entry.mark.find();
     if (!range) return;
 
-    var alt   = patch.alt   !== undefined ? patch.alt   : entry.alt;
-    var url   = patch.url   !== undefined ? patch.url   : entry.url;
-    var size  = patch.size  || entry.size;
-    var align = patch.align || entry.align;
-    var md = '![' + alt + '](' + url + '){.' + size + ' .' + align + '}';
+    var alt  = patch.alt  !== undefined ? patch.alt  : entry.alt;
+    var url  = patch.url  !== undefined ? patch.url  : entry.url;
+    var size = patch.size || entry.size;
+    var hpos = patch.hpos || entry.hpos;
+    var vpos = patch.vpos || entry.vpos;
+    var flow = patch.flow || entry.flow;
+    if (hpos === 'img-zentriert' && flow === 'img-flow') flow = 'img-block';
+
+    var classes = [size, hpos];
+    if (vpos !== 'img-pos-oben') classes.push(vpos);
+    classes.push(flow);
+
+    var md = '![' + alt + '](' + url + '){.' + classes.join(' .') + '}';
 
     cm.replaceRange(md, range.from, range.to);
     if (_mdLive.rescanTimer) { clearTimeout(_mdLive.rescanTimer); _mdLive.rescanTimer = null; }
