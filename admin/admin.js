@@ -2358,12 +2358,23 @@
         headers: { 'Authorization': 'Bearer ' + tok }
       });
       if (!r.ok) {
-        if (r.status === 401 || r.status === 403) {
-          throw new Error('HTTP ' + r.status + ' – Ihr Konto hat (noch) nicht die Rolle "admin" in Netlify Identity. ' +
-            'Falls die Rolle gerade erst vergeben wurde: bitte einmal komplett ausloggen und wieder einloggen, ' +
-            'damit ein neues Zugriffstoken mit der Rolle ausgestellt wird.');
+        // Rohen Fehlercode + Antwort in der Konsole protokollieren, damit sich
+        // das Problem im Browser (F12 → Konsole) genau nachvollziehen lässt.
+        var rawBody = await r.text().catch(function() { return ''; });
+        console.error('[Benutzerverwaltung] GET /.netlify/identity/admin/users → HTTP ' + r.status, rawBody);
+        if (r.status === 403) {
+          throw new Error('HTTP 403 – Keine Admin-Berechtigung. Dein Konto hat (noch) nicht die Rolle "admin" ' +
+            'in Netlify Identity. Bitte wende dich an den Netlify-Administrator: Die Rolle "admin" muss im ' +
+            'Netlify-Dashboard unter Identity → Benutzer → Edit → Roles manuell vergeben werden – das ist ' +
+            'per Code nicht möglich.');
         }
-        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.');
+        if (r.status === 401) {
+          throw new Error('HTTP 401 – Anmeldung ungültig oder abgelaufen (Token-Problem). Bitte einmal ' +
+            'komplett ausloggen und wieder einloggen, damit ein neues Zugriffstoken ausgestellt wird. ' +
+            'Falls das nicht hilft: Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige ' +
+            'Minuten dauern, bis sie wirksam wird.');
+        }
+        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + (rawBody ? ' (' + rawBody + ')' : ''));
       }
       var d = await r.json();
       var users = d.users || [];
@@ -2384,6 +2395,7 @@
         '</div>';
       }).join('');
     } catch(e) {
+      console.error('[Benutzerverwaltung] Fehler beim Laden der Benutzerliste:', e);
       list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>' +
         '<p class="mt-1"><button class="btn btn-outline btn-sm" onclick="benutzerLoad()">🔄 Erneut versuchen</button> ' +
         '<button class="btn btn-outline btn-sm" onclick="netlifyIdentity.logout()">🚪 Aus- &amp; wieder einloggen</button></p>';
@@ -2399,16 +2411,24 @@
       var r = await fetch('/.netlify/identity/admin/users', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, app_metadata: { roles: [] } })
+        body: JSON.stringify({ email: email, role: 'admin' })
       });
       if (!r.ok) {
         var err = await r.json().catch(function() { return {}; });
+        console.error('[Benutzerverwaltung] POST /.netlify/identity/admin/users → HTTP ' + r.status, err);
+        if (r.status === 403) {
+          throw new Error('Keine Admin-Berechtigung. Bitte wende dich an den Netlify-Administrator.');
+        }
+        if (r.status === 401) {
+          throw new Error('Anmeldung ungültig oder abgelaufen. Bitte einmal aus- und wieder einloggen.');
+        }
         throw new Error(err.msg || err.message || 'HTTP ' + r.status);
       }
       toast('✅ Einladung gesendet an ' + email);
       emailEl.value = '';
       benutzerLoad();
     } catch(e) {
+      console.error('[Benutzerverwaltung] Fehler beim Einladen:', e);
       toast('❌ ' + e.message, true);
     }
   };
@@ -2423,11 +2443,19 @@
       });
       if (!r.ok) {
         var err = await r.json().catch(function() { return {}; });
+        console.error('[Benutzerverwaltung] DELETE /.netlify/identity/admin/users/' + uid + ' → HTTP ' + r.status, err);
+        if (r.status === 403) {
+          throw new Error('Keine Admin-Berechtigung. Bitte wende dich an den Netlify-Administrator.');
+        }
+        if (r.status === 401) {
+          throw new Error('Anmeldung ungültig oder abgelaufen. Bitte einmal aus- und wieder einloggen.');
+        }
         throw new Error(err.msg || err.message || 'HTTP ' + r.status);
       }
       toast('✅ Benutzer entfernt');
       benutzerLoad();
     } catch(e) {
+      console.error('[Benutzerverwaltung] Fehler beim Entfernen:', e);
       toast('❌ ' + e.message, true);
     }
   };
