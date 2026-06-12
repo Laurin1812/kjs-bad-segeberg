@@ -164,6 +164,21 @@
     return user.jwt ? await user.jwt(!!forceRefresh) : (user.token && user.token.access_token);
   }
 
+  // Dekodiert den Payload eines JWT (reines Base64, keine Signaturprüfung) –
+  // dient nur zur Diagnose, damit man sehen kann, welche Rollen/E-Mail das
+  // Token tatsächlich enthält, das der Server ausgestellt hat.
+  function decodeJwtPayload(tok) {
+    try {
+      var parts = (tok || '').split('.');
+      if (parts.length < 2) return null;
+      var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function apiGet(path) {
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
@@ -2367,18 +2382,30 @@
         var serverMsg = '';
         try { serverMsg = JSON.parse(rawBody).msg || ''; } catch(_e) { serverMsg = rawBody; }
         var detail = serverMsg ? ' Server-Antwort: "' + serverMsg + '"' : '';
+        // Token-Inhalt zur Diagnose dekodieren (nur lokal, ohne Server-Anfrage):
+        // zeigt, welche E-Mail/Rollen das tatsächlich ausgestellte Token enthält.
+        var payload = decodeJwtPayload(tok);
+        var tokenInfo = '';
+        if (payload) {
+          var pRoles = (payload.app_metadata && payload.app_metadata.roles) || [];
+          tokenInfo = ' [Token-Inhalt: email=' + (payload.email || '?') +
+            ', app_metadata.roles=' + JSON.stringify(pRoles) +
+            ', exp=' + (payload.exp ? new Date(payload.exp * 1000).toLocaleString('de-DE') : '?') + ']';
+        } else {
+          tokenInfo = ' [Token konnte nicht dekodiert werden]';
+        }
         if (r.status === 403) {
           throw new Error('HTTP 403 – Keine Admin-Berechtigung. Dein Konto hat (noch) nicht die Rolle "admin" ' +
             'in Netlify Identity. Bitte wende dich an den Netlify-Administrator: Die Rolle "admin" muss im ' +
             'Netlify-Dashboard unter Identity → Benutzer → Edit → Roles manuell vergeben werden – das ist ' +
-            'per Code nicht möglich.' + detail);
+            'per Code nicht möglich.' + detail + tokenInfo);
         }
         if (r.status === 401) {
           throw new Error('HTTP 401 – Anmeldung ungültig/abgelaufen ODER Rolle "admin" fehlt auf dem Zugriffstoken. ' +
             'Bitte einmal komplett ausloggen und wieder einloggen, damit ein neues Zugriffstoken ausgestellt wird. ' +
-            'Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige Minuten dauern, bis sie wirksam wird.' + detail);
+            'Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige Minuten dauern, bis sie wirksam wird.' + detail + tokenInfo);
         }
-        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + detail);
+        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + detail + tokenInfo);
       }
       var d = await r.json();
       var users = d.users || [];
