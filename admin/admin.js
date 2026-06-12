@@ -2362,19 +2362,23 @@
         // das Problem im Browser (F12 → Konsole) genau nachvollziehen lässt.
         var rawBody = await r.text().catch(function() { return ''; });
         console.error('[Benutzerverwaltung] GET /.netlify/identity/admin/users → HTTP ' + r.status, rawBody);
+        // Server-Antwort (z.B. {"code":401,"msg":"..."}) für die Anzeige im UI
+        // extrahieren, damit man den genauen Grund auch ohne Konsole sieht.
+        var serverMsg = '';
+        try { serverMsg = JSON.parse(rawBody).msg || ''; } catch(_e) { serverMsg = rawBody; }
+        var detail = serverMsg ? ' Server-Antwort: "' + serverMsg + '"' : '';
         if (r.status === 403) {
           throw new Error('HTTP 403 – Keine Admin-Berechtigung. Dein Konto hat (noch) nicht die Rolle "admin" ' +
             'in Netlify Identity. Bitte wende dich an den Netlify-Administrator: Die Rolle "admin" muss im ' +
             'Netlify-Dashboard unter Identity → Benutzer → Edit → Roles manuell vergeben werden – das ist ' +
-            'per Code nicht möglich.');
+            'per Code nicht möglich.' + detail);
         }
         if (r.status === 401) {
-          throw new Error('HTTP 401 – Anmeldung ungültig oder abgelaufen (Token-Problem). Bitte einmal ' +
-            'komplett ausloggen und wieder einloggen, damit ein neues Zugriffstoken ausgestellt wird. ' +
-            'Falls das nicht hilft: Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige ' +
-            'Minuten dauern, bis sie wirksam wird.');
+          throw new Error('HTTP 401 – Anmeldung ungültig/abgelaufen ODER Rolle "admin" fehlt auf dem Zugriffstoken. ' +
+            'Bitte einmal komplett ausloggen und wieder einloggen, damit ein neues Zugriffstoken ausgestellt wird. ' +
+            'Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige Minuten dauern, bis sie wirksam wird.' + detail);
         }
-        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + (rawBody ? ' (' + rawBody + ')' : ''));
+        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + detail);
       }
       var d = await r.json();
       var users = d.users || [];
