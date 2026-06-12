@@ -324,7 +324,7 @@
         dlItems.map(function(item) {
           var datei = item.datei || item.url || item.pfad;
           var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
-          return '<a href="' + datei + '" class="download-item--sidebar" download target="_blank" rel="noopener">' +
+          return '<a href="' + datei + '" class="download-item--sidebar" target="_blank" rel="noopener noreferrer">' +
             '<span class="download-item__icon">📄</span>' +
             '<span class="download-item__name">' + name + '</span>' +
             '<span class="download-item__arrow">⬇</span>' +
