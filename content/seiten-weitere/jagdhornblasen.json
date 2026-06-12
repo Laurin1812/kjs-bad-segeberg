@@ -10,5 +10,12 @@
   "kontakt_name": "",
   "kontakt_email": "",
   "in_navigation": true,
-  "veroeffentlicht": true
+  "veroeffentlicht": true,
+  "untertitel": "",
+  "downloads": [
+    {
+      "titel": "Wie o ffne ich das kleine Infomobil richtig_M ai 2026",
+      "datei": "/downloads/1781194530416-Wie-o-ffne-ich-das-kleine-Infomobil-richtig_M-ai-2026.pdf"
+    }
+  ]
 }
