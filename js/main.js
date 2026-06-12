@@ -588,12 +588,21 @@ if (contactForm) {
 // jeweilige content/*.json ein nicht-leeres "downloads"-Array enthält.
 (function () {
   var path = window.location.pathname;
+  // Netlify liefert "pretty URLs" ohne ".html"-Endung aus (z.B. /jaeger/infomobil
+  // statt /jaeger/infomobil.html), ohne Redirect – window.location.pathname
+  // enthält dann kein ".html". Für den Vergleich daher zuerst normalisieren.
+  var basePath = path.replace(/\.html$/, '');
+
   // Sonderfall: Kreisjägermeister-Seite ist eine index.html mit eigenem
   // Content-Pfad und eigener Markup-Struktur (kein #page-inhalt/#page-main).
-  var isKJM = /\/kreisjjaegermeister\/index\.html$/.test(path);
-  if (!isKJM && (!/\.html$/.test(path) || /\/index\.html$/.test(path))) return;
+  var isKJM = /\/kreisjjaegermeister\/index$/.test(basePath) || /\/kreisjjaegermeister\/?$/.test(basePath);
 
-  var contentPath = isKJM ? '/content/kreisjjaegermeister.json' : '/content' + path.replace(/\.html$/, '.json');
+  // Index-/Verzeichnis-Seiten (Startseite, .../index, .../) haben ihren
+  // eigenen Aufbau und werden hier nicht behandelt.
+  var isIndex = basePath === '' || /\/$/.test(basePath) || /\/index$/.test(basePath);
+  if (!isKJM && isIndex) return;
+
+  var contentPath = isKJM ? '/content/kreisjjaegermeister.json' : '/content' + basePath + '.json';
 
   function escHtml(s) {
     return String(s == null ? '' : s)
