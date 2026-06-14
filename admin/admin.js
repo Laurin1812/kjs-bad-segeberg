@@ -405,14 +405,19 @@
     try {
       var resp = await apiGet('content/navigation.json');
       var data = JSON.parse(fromBase64(resp.content));
-      reorderStaticGroup('nc-kjs', data.kjs, STATIC_REORDER_MAPS.kjs.map);
-      reorderStaticGroup('nc-aufgaben', data.aufgaben, STATIC_REORDER_MAPS.aufgaben.map);
+      reorderStaticGroup('nc-kjs', data.kjs, STATIC_REORDER_MAPS.kjs.map, 'kjs-dyn');
+      reorderStaticGroup('nc-aufgaben', data.aufgaben, STATIC_REORDER_MAPS.aufgaben.map, 'aufgaben-dyn');
     } catch(e) {
       console.warn('Sidebar-Reihenfolge nicht geladen:', e);
     }
   }
 
-  function reorderStaticGroup(containerId, order, map) {
+  // order kann sowohl statische Einträge (href aus `map`) als auch eigene
+  // Unterseiten enthalten (href im Format "/seiten/?s=<slug>" → data-navkey
+  // "<dynPrefix>-<slug>"), damit die im Admin per Drag & Drop gespeicherte
+  // Gesamtreihenfolge (statisch + dynamisch gemischt) nach einem Reload
+  // erhalten bleibt.
+  function reorderStaticGroup(containerId, order, map, dynPrefix) {
     var el = id(containerId);
     if (!el || !order || !order.length) return;
     var hrefToKey = {};
@@ -420,6 +425,10 @@
     var anchor = el.querySelector(':scope > .is-add');
     order.forEach(function(item) {
       var key = hrefToKey[item.href];
+      if (!key && dynPrefix) {
+        var m = /^\/seiten\/\?s=(.+)$/.exec(item.href || '');
+        if (m) key = dynPrefix + '-' + m[1];
+      }
       if (!key) return;
       var child = el.querySelector(':scope > [data-navkey="' + key + '"]');
       if (!child) return;
@@ -727,26 +736,42 @@
   // (eigene/dynamische Seiten) der jeweiligen Sektion.
   async function onSidebarReorder(containerEl, opts) {
     try {
-      var staticOrder = [];
+      // domOrder enthält die GESAMTE Reihenfolge des Containers (statische
+      // Seiten UND eigene Unterseiten gemischt, exakt wie im Admin per
+      // Drag & Drop angeordnet) – wichtig, damit die öffentliche Website
+      // dieselbe (ggf. ineinander verschachtelte) Reihenfolge zeigt.
+      var domOrder = [];
       var dynamicOrder = [];
       Array.from(containerEl.children).forEach(function(ch) {
         var key = ch.getAttribute('data-navkey');
         if (opts.staticMap && key && opts.staticMap[key]) {
-          staticOrder.push(key);
+          domOrder.push({ type: 'static', key: key });
         } else if (ch.getAttribute('data-dynamic') === '1') {
-          dynamicOrder.push(ch.getAttribute('data-slug'));
+          var slug = ch.getAttribute('data-slug');
+          var labelEl = ch.querySelector('.nav-item__label');
+          domOrder.push({ type: 'dynamic', slug: slug, label: labelEl ? labelEl.textContent : slug });
+          dynamicOrder.push(slug);
         }
       });
 
       var jobs = [];
 
-      // 1) Statische Seiten → content/navigation.json (z.B. "kjs"/"aufgaben"-Array)
-      if (opts.arrayKey && staticOrder.length) {
+      // 1) Gesamte Reihenfolge (statisch + eigene Seiten) → content/navigation.json
+      //    (z.B. "kjs"/"aufgaben"-Array). Eigene Seiten werden mit ihrem
+      //    /seiten/?s=<slug>-Link gespeichert, damit die Website sie an der
+      //    richtigen Stelle zwischen den statischen Seiten einsortiert.
+      if (opts.arrayKey && domOrder.length) {
         jobs.push((async function() {
           var resp = await apiGet('content/navigation.json');
           var navData = JSON.parse(fromBase64(resp.content));
           var newArr = (opts.fixed || []).slice();
-          staticOrder.forEach(function(k) { newArr.push(opts.staticMap[k]); });
+          domOrder.forEach(function(entry) {
+            if (entry.type === 'static') {
+              newArr.push(opts.staticMap[entry.key]);
+            } else {
+              newArr.push({ label: entry.label, href: '/seiten/?s=' + entry.slug });
+            }
+          });
           navData[opts.arrayKey] = newArr;
           await doSave('content/navigation.json', navData, '🔀 Reihenfolge geändert (' + opts.label + ')');
         })());
