@@ -1,13 +1,20 @@
 /* KJS Segeberg – main.js */
 
-// ── Content-Fetch-Umleitung: JSON-Dateien direkt von GitHub Raw CDN laden ────
+// ── Content-Fetch-Umleitung: JSON-Dateien direkt von jsDelivr-GitHub-CDN laden ──
 // Jedes Speichern im Admin erzeugt einen GitHub-Commit. Ohne diese Umleitung
 // löst jeder Commit einen Netlify-Redeploy aus (→ Credit-Verbrauch × 300+/Monat).
-// Mit dieser Umleitung werden content/*.json direkt vom GitHub-CDN geladen –
-// sofort verfügbar, kein Netlify-Deploy nötig, 0 Credits verbraucht.
+// Mit dieser Umleitung werden content/*.json direkt vom CDN geladen – sofort
+// verfügbar, kein Netlify-Deploy nötig, 0 Credits verbraucht.
+//
+// HINWEIS: Vorher wurde raw.githubusercontent.com verwendet. Dessen Fastly-Cache
+// ignoriert Cache-Busting-Query-Parameter und liefert bis zu 5 Minuten lang
+// veraltete Inhalte aus (auch nach Hard-Refresh, da der Cache auf CDN-Ebene
+// liegt, nicht im Browser). jsDelivr bietet dagegen eine öffentliche Purge-API
+// (purge.jsdelivr.net), die admin.js nach jedem Speichern aufruft – dadurch ist
+// die neue Reihenfolge/der neue Inhalt sofort nach dem Speichern verfügbar.
 (function () {
   var _fetch = window.fetch.bind(window);
-  var RAW = 'https://raw.githubusercontent.com/Laurin1812/kjs-bad-segeberg/main';
+  var RAW = 'https://cdn.jsdelivr.net/gh/Laurin1812/kjs-bad-segeberg@main';
   window.fetch = function (url, opts) {
     if (typeof url === 'string') {
       var rewritten = null;
@@ -22,12 +29,6 @@
         rewritten = RAW + '/content/' + url.slice('../../content/'.length);
       }
       if (rewritten) {
-        // Cache-Busting: raw.githubusercontent.com cached Antworten über
-        // Fastly ein paar Minuten lang. Ohne Cache-Buster würden frisch im
-        // Admin gespeicherte Änderungen (z.B. Reihenfolge, Texte) auf der
-        // Website erst zeitversetzt ankommen – auch nach Hard-Refresh, da
-        // der Cache auf CDN-Seite (nicht im Browser) liegt.
-        rewritten += (rewritten.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
         url = rewritten;
       }
     }
