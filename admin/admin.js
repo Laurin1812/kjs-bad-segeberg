@@ -2732,7 +2732,6 @@
       if (result && result.content && result.content.sha) {
         S.sha = result.content.sha;
       }
-      purgeCdnCache(filePath);
       return result;
     } catch(e) {
       // 409 = SHA still stale; wait briefly, re-fetch, retry once
@@ -2744,25 +2743,10 @@
         if (result2 && result2.content && result2.content.sha) {
           S.sha = result2.content.sha;
         }
-        purgeCdnCache(filePath);
         return result2;
       }
       throw e;
     }
-  }
-
-  // Die öffentliche Website lädt content/*.json nicht von Netlify, sondern
-  // über jsDelivr's GitHub-CDN (siehe js/main.js, Fetch-Umleitung), um
-  // Netlify-Deploy-Credits zu sparen. jsDelivr cached diese Dateien aber bis
-  // zu 12-24h. Damit eine im Admin gespeicherte Änderung (z.B. Drag & Drop
-  // Reihenfolge) SOFORT auf der Website sichtbar wird, leeren wir den
-  // jsDelivr-Cache für die geänderte Datei aktiv per Purge-API. Fire-and-
-  // forget: Fehler hier dürfen den Speichervorgang nicht blockieren/abbrechen.
-  function purgeCdnCache(filePath) {
-    try {
-      var url = 'https://purge.jsdelivr.net/gh/Laurin1812/kjs-bad-segeberg@main/' + filePath;
-      fetch(url, { mode: 'cors' }).catch(function() {});
-    } catch(e) {}
   }
 
   function setSaving(saving) {

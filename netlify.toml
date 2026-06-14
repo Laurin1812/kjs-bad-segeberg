@@ -1,10 +1,10 @@
 [build]
   publish = "."
   command = ""
-  # Netlify-Deploy überspringen wenn sich nur content/*.json geändert hat.
-  # JSON-Inhalte werden direkt vom GitHub-CDN geladen (main.js-Umleitung),
-  # ein Netlify-Deploy ist dafür nicht nötig → kein Credit-Verbrauch beim Speichern im Admin.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)content'"
+  # Jeder Commit (auch reine content/*.json-Änderungen aus dem Admin) löst
+  # einen Netlify-Redeploy aus. content/*.json wird direkt von Netlify
+  # ausgeliefert (relative Pfade, siehe js/main.js), daher muss jede
+  # Admin-Speicherung deployed werden, um sofort live zu sein.
 
 [[headers]]
   for = "/admin/*"
@@ -33,5 +33,10 @@
 
 [[headers]]
   for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/content/*"
   [headers.values]
     Cache-Control = "no-cache, must-revalidate"

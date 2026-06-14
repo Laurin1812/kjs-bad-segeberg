@@ -1,40 +1,14 @@
 /* KJS Segeberg – main.js */
 
-// ── Content-Fetch-Umleitung: JSON-Dateien direkt von jsDelivr-GitHub-CDN laden ──
-// Jedes Speichern im Admin erzeugt einen GitHub-Commit. Ohne diese Umleitung
-// löst jeder Commit einen Netlify-Redeploy aus (→ Credit-Verbrauch × 300+/Monat).
-// Mit dieser Umleitung werden content/*.json direkt vom CDN geladen – sofort
-// verfügbar, kein Netlify-Deploy nötig, 0 Credits verbraucht.
-//
-// HINWEIS: Vorher wurde raw.githubusercontent.com verwendet. Dessen Fastly-Cache
-// ignoriert Cache-Busting-Query-Parameter und liefert bis zu 5 Minuten lang
-// veraltete Inhalte aus (auch nach Hard-Refresh, da der Cache auf CDN-Ebene
-// liegt, nicht im Browser). jsDelivr bietet dagegen eine öffentliche Purge-API
-// (purge.jsdelivr.net), die admin.js nach jedem Speichern aufruft – dadurch ist
-// die neue Reihenfolge/der neue Inhalt sofort nach dem Speichern verfügbar.
-(function () {
-  var _fetch = window.fetch.bind(window);
-  var RAW = 'https://cdn.jsdelivr.net/gh/Laurin1812/kjs-bad-segeberg@main';
-  window.fetch = function (url, opts) {
-    if (typeof url === 'string') {
-      var rewritten = null;
-      // Absoluter Pfad: /content/...
-      if (url.indexOf('/content/') === 0) {
-        rewritten = RAW + url;
-      // Relativer Pfad eine Ebene tiefer: ../content/...
-      } else if (url.indexOf('../content/') === 0) {
-        rewritten = RAW + '/content/' + url.slice('../content/'.length);
-      // Relativer Pfad zwei Ebenen tiefer: ../../content/...
-      } else if (url.indexOf('../../content/') === 0) {
-        rewritten = RAW + '/content/' + url.slice('../../content/'.length);
-      }
-      if (rewritten) {
-        url = rewritten;
-      }
-    }
-    return _fetch(url, opts);
-  };
-})();
+// ── content/*.json laden ─────────────────────────────────────────────────
+// Direkt von der Netlify-Website (relative Pfade), kein GitHub Raw, kein CDN.
+// Jedes Speichern im Admin erzeugt einen GitHub-Commit → Netlify löst
+// automatisch einen Redeploy aus, die neue Version ist danach live.
+// Cache-Buster (?_=Date.now()) verhindert, dass der Browser eine ältere
+// Version aus seinem eigenen HTTP-Cache anzeigt.
+function fetchContent(path) {
+  return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
+}
 
 // Mobile Navigation
 const navToggle = document.getElementById('navToggle');
@@ -195,7 +169,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   var topbarLinks = document.querySelectorAll('.topbar__left a');
   var boxes = document.querySelectorAll('.contact-box');
   if (!topbarLinks.length && !boxes.length) return;
-  fetch('/content/einstellungen.json')
+  fetchContent('/content/einstellungen.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       // Topbar aktualisieren (eigene Telefonnummer für die Kopfzeile, fällt sonst auf die
@@ -293,7 +267,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   // Drag & Drop im Admin gespeicherte Reihenfolge wird auf der Website
   // nicht korrekt angezeigt.
   var insertJobs = sektionen.map(function(s) {
-    return fetch(s.url)
+    return fetchContent(s.url)
       .then(function(r){ return r.json(); })
       .then(function(data) {
         if (s.bereich) {
@@ -323,7 +297,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
   // seiten-weitere.json → "Weitere Themen"-Flyout im Jäger-Menü
   insertJobs.push(
-    fetch('/content/seiten-weitere.json')
+    fetchContent('/content/seiten-weitere.json')
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var publishedSeiten = (data.seiten || []).filter(function(s) {
@@ -380,7 +354,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     var jaegerDD = document.getElementById('jaeger-dropdown');
     var mainNav  = document.querySelector('.main-nav');
 
-    fetch('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
+    fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
 
       // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
       if (jaegerDD) {
@@ -489,7 +463,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 // Eigene Hauptpunkte aus navigation-extra.json in die Hauptnavigation einfügen
 (function() {
-  fetch('/content/navigation-extra.json')
+  fetchContent('/content/navigation-extra.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var nav = document.querySelector('.main-nav');
@@ -627,7 +601,7 @@ if (contactForm) {
   var ICON_OPEN   = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
   var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
 
-  fetch(contentPath)
+  fetchContent(contentPath)
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       if (!d) return;
