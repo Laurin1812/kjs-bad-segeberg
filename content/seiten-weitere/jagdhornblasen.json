@@ -2,8 +2,8 @@
   "titel": "Jagdhornblasen",
   "nav_label": "Jagdhornblasen",
   "slug": "jagdhornblasen",
-  "intro": "test1",
-  "inhalt": "test2",
+  "intro": "",
+  "inhalt": "",
   "hero_bild": "",
   "bild": "",
   "bild_alt": "",
@@ -12,10 +12,5 @@
   "in_navigation": true,
   "veroeffentlicht": true,
   "untertitel": "",
-  "downloads": [
-    {
-      "titel": "Wie o ffne ich das kleine Infomobil richtig_M ai 2026",
-      "datei": "/downloads/1781194530416-Wie-o-ffne-ich-das-kleine-Infomobil-richtig_M-ai-2026.pdf"
-    }
-  ]
+  "downloads": []
 }
