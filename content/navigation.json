@@ -52,10 +52,6 @@
       "href": "/jaeger/hochwild.html"
     },
     {
-      "label": "Mitglied werden",
-      "href": "/jaeger/mitglied-werden.html"
-    },
-    {
       "label": "Schießobleute",
       "href": "/jaeger/schiessobleute.html"
     },
@@ -70,6 +66,10 @@
     {
       "label": "Landesjagdverband",
       "href": "/jaeger/landesjagdverband.html"
+    },
+    {
+      "label": "Mitglied werden",
+      "href": "/jaeger/mitglied-werden.html"
     }
   ],
   "aufgaben": [
