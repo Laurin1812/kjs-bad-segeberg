@@ -780,7 +780,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror h2  { font-size: 1.2rem; font-weight: 700; margin: .9rem 0 .3rem; }
 .tt-mount .ProseMirror h3  { font-size: 1.05rem; font-weight: 700; margin: .7rem 0 .25rem; }
 .tt-mount .ProseMirror ul,
-.tt-mount .ProseMirror ol  { padding-left: 1.6rem; margin: .4rem 0; }
+.tt-mount .ProseMirror ol  { padding-left: 1.6rem; margin: .4rem 0; overflow: hidden; }
 .tt-mount .ProseMirror li  { margin: .15rem 0; }
 .tt-mount .ProseMirror img {
   max-width: 100%;
@@ -805,6 +805,13 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   float: left;
   height: 0;
 }
+
+/* ── TIPTAP TABELLEN ─────────────────────────────────────────── */
+.tt-mount .ProseMirror table { border-collapse: collapse; width: 100%; margin: .6rem 0; }
+.tt-mount .ProseMirror th,
+.tt-mount .ProseMirror td   { border: 1px solid var(--border); padding: .35rem .6rem; min-width: 60px; vertical-align: top; }
+.tt-mount .ProseMirror th   { background: #f3f4f6; font-weight: 600; }
+.tt-mount .ProseMirror .selectedCell { background: #dbeafe; }
 
 /* ── TIPTAP BILD-KONTEXTMENÜ ─────────────────────────────────── */
 #tt-img-menu { pointer-events: auto; }

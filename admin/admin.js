@@ -1159,6 +1159,12 @@
           '<span class="tt-sep"></span>' +
           '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">&bull;&nbsp;Liste</button>' +
           '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1.&nbsp;Liste</button>' +
+          '<span class="tt-sep"></span>' +
+          '<button type="button" class="tt-btn" data-cmd="insertTable"   onclick="ttCmd(\'' + fieldId + '\',\'insertTable\')"   title="Tabelle einfügen">&#9638;&nbsp;Tabelle</button>' +
+          '<button type="button" class="tt-btn" data-cmd="addRowAfter"   onclick="ttCmd(\'' + fieldId + '\',\'addRowAfter\')"   title="Zeile hinzufügen">+Zeile</button>' +
+          '<button type="button" class="tt-btn" data-cmd="addColumnAfter" onclick="ttCmd(\'' + fieldId + '\',\'addColumnAfter\')" title="Spalte hinzufügen">+Spalte</button>' +
+          '<button type="button" class="tt-btn" data-cmd="deleteRow"     onclick="ttCmd(\'' + fieldId + '\',\'deleteRow\')"     title="Zeile löschen">-Zeile</button>' +
+          '<button type="button" class="tt-btn" data-cmd="deleteColumn"  onclick="ttCmd(\'' + fieldId + '\',\'deleteColumn\')"  title="Spalte löschen">-Spalte</button>' +
           imgBtn +
         '</div>' +
         '<div class="tt-mount" id="tt-' + fieldId + '"></div>' +
@@ -1173,13 +1179,18 @@
           '<div class="form-card-title">Seiteninhalt</div>' +
           fText('titel', 'Seitentitel', data.titel) +
           fTipTap('untertitel', 'Untertitel', false) +
-          fTipTap('intro',      'Einleitungstext', false) +
+          fTipTap('intro',      'Einleitungstext', true) +
           fTipTap('inhalt',     'Textinhalt', true) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bilder</div>' +
           fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
           fImage('bild',      'Inhaltsbild',          data.bild) +
+          fSelect('bild_groesse', 'Bildgröße', data.bild_groesse || 'gross', [
+            { value: 'klein',  label: 'Klein (300px)' },
+            { value: 'mittel', label: 'Mittel (500px)' },
+            { value: 'gross',  label: 'Groß (volle Breite)' }
+          ]) +
           fText('bild_alt',   'Bild-Beschreibung',    data.bild_alt) +
         '</div>' +
         '<div class="form-card">' +
@@ -1207,6 +1218,7 @@
     data.inhalt        = getTiptapValue('inhalt');
     data.hero_bild     = gv('hero_bild');
     data.bild          = gv('bild');
+    data.bild_groesse  = gv('bild_groesse');
     data.bild_alt      = gv('bild_alt');
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
@@ -3735,13 +3747,19 @@
       }
     });
 
+    var tableExts = (TT.Table && TT.TableRow && TT.TableCell && TT.TableHeader) ? [
+      TT.Table.configure({ resizable: false }),
+      TT.TableRow,
+      TT.TableHeader,
+      TT.TableCell
+    ] : [];
     var editor = new TT.Editor({
       element: container,
       extensions: [
         TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
         TT.Underline,
         ImageWithClass
-      ],
+      ].concat(tableExts),
       content: html,
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
@@ -3792,14 +3810,19 @@
     menu.querySelectorAll('[data-pos]').forEach(function(b) {
       b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-pos')) !== -1);
     });
-    menu.style.display = 'block';
-    var rect = imgEl.getBoundingClientRect();
+    // Measure first (visibility:hidden), then position, then show
+    menu.style.visibility = 'hidden';
+    menu.style.display    = 'block';
     var mh   = menu.offsetHeight || 46;
+    var mw   = menu.offsetWidth  || 340;
+    var rect = imgEl.getBoundingClientRect();
     var top  = rect.top - mh - 6;
     if (top < 6) top = rect.bottom + 6;
-    var left = Math.max(6, Math.min(rect.left, window.innerWidth - 340));
-    menu.style.top  = top  + 'px';
-    menu.style.left = left + 'px';
+    if (top + mh > window.innerHeight - 6) top = Math.max(6, window.innerHeight - mh - 6);
+    var left = Math.max(6, Math.min(rect.left, window.innerWidth - mw - 6));
+    menu.style.top        = top  + 'px';
+    menu.style.left       = left + 'px';
+    menu.style.visibility = '';
   }
 
   function hideTtImgMenu() {
@@ -3893,8 +3916,13 @@
       case 'underline':   c.toggleUnderline().run();              break;
       case 'h2':          c.toggleHeading({ level: 2 }).run();    break;
       case 'h3':          c.toggleHeading({ level: 3 }).run();    break;
-      case 'bulletList':  c.toggleBulletList().run();             break;
-      case 'orderedList': c.toggleOrderedList().run();            break;
+      case 'bulletList':    c.toggleBulletList().run();                                break;
+      case 'orderedList':   c.toggleOrderedList().run();                               break;
+      case 'insertTable':   c.insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run(); break;
+      case 'addRowAfter':   c.addRowAfter().run();                                    break;
+      case 'addColumnAfter':c.addColumnAfter().run();                                 break;
+      case 'deleteRow':     c.deleteRow().run();                                      break;
+      case 'deleteColumn':  c.deleteColumn().run();                                   break;
     }
     updateTiptapToolbar(fieldId);
   };

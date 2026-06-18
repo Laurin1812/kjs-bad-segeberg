@@ -181,8 +181,9 @@
         var bg = document.querySelector('.page-hero__bg');
         if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
       }
+      var bildBreite = d.bild_groesse === 'klein' ? '300px' : d.bild_groesse === 'mittel' ? '500px' : '100%';
       var bild = d.bild
-        ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">'
+        ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" style="width:' + bildBreite + ';max-width:100%;border-radius:8px;margin-bottom:1.5rem;">'
         : '';
       var kontaktStr = '';
       if (d.kontakt_name || d.kontakt_email) {
