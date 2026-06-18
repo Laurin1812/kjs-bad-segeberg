@@ -772,6 +772,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   font-size: .9rem;
   line-height: 1.65;
   color: var(--text);
+  overflow: auto; /* BFC: enthält float-Bilder, verhindert Überlagerung */
 }
 .tt-mount .ProseMirror > *:first-child { margin-top: 0; }
 .tt-mount .ProseMirror > *:last-child  { margin-bottom: 0; }
@@ -803,4 +804,45 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   pointer-events: none;
   float: left;
   height: 0;
+}
+
+/* ── TIPTAP BILD-KONTEXTMENÜ ─────────────────────────────────── */
+#tt-img-menu { pointer-events: auto; }
+.tt-imgmenu-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .25rem;
+  padding: .4rem .55rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+.tt-imgmenu-label {
+  font-size: .75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.tt-imgmenu-btn {
+  padding: .18rem .45rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: .78rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+.tt-imgmenu-btn:hover           { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.tt-imgmenu-btn--active         { background: var(--green); color: #fff; border-color: var(--green); }
+.tt-imgmenu-btn--danger         { color: var(--danger); border-color: var(--danger); }
+.tt-imgmenu-btn--danger:hover   { background: var(--danger-bg); }
+.tt-imgmenu-sep {
+  display: inline-block;
+  width: 1px;
+  height: 1.3rem;
+  background: var(--border);
+  margin: 0 .15rem;
+  align-self: center;
 }

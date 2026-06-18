@@ -104,7 +104,10 @@
   <div class="modal-box">
     <div class="modal-head">
       <h3>📷 Bild einfügen</h3>
-      <button class="modal-close-btn" id="mdimg-close" aria-label="Schließen">✕</button>
+      <div style="display:flex;gap:.5rem;align-items:center;margin-left:auto;">
+        <button class="btn btn-primary btn-sm" id="mdimg-insert-top" type="button" disabled>Einfügen</button>
+        <button class="modal-close-btn" id="mdimg-close" aria-label="Schließen">✕</button>
+      </div>
     </div>
     <div class="modal-body">
       <div class="form-card-title" style="margin-top:0;">1. Bild auswählen</div>
@@ -213,6 +216,24 @@
         <button class="btn btn-danger" id="confirm-ok">Löschen</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── TIPTAP BILD-KONTEXTMENÜ ────────────────────────────────── -->
+<div id="tt-img-menu" style="display:none;position:fixed;z-index:10000;">
+  <div class="tt-imgmenu-inner">
+    <span class="tt-imgmenu-label">Größe:</span>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-klein"  onclick="ttImgSize('img-klein')">Klein</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-mittel" onclick="ttImgSize('img-mittel')">Mittel</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-gross"  onclick="ttImgSize('img-gross')">Groß</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-voll"   onclick="ttImgSize('img-voll')">Voll</button>
+    <span class="tt-imgmenu-sep"></span>
+    <span class="tt-imgmenu-label">Position:</span>
+    <button type="button" class="tt-imgmenu-btn" data-pos="img-links"     onclick="ttImgPos('img-links')">Links</button>
+    <button type="button" class="tt-imgmenu-btn" data-pos="img-zentriert" onclick="ttImgPos('img-zentriert')">Mitte</button>
+    <button type="button" class="tt-imgmenu-btn" data-pos="img-rechts"    onclick="ttImgPos('img-rechts')">Rechts</button>
+    <span class="tt-imgmenu-sep"></span>
+    <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" onclick="ttImgDelete()" title="Bild löschen">🗑️</button>
   </div>
 </div>
 

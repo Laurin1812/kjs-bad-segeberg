@@ -1157,8 +1157,8 @@
           '<button type="button" class="tt-btn" data-cmd="h2"          onclick="ttCmd(\'' + fieldId + '\',\'h2\')"          title="Überschrift H2">H2</button>' +
           '<button type="button" class="tt-btn" data-cmd="h3"          onclick="ttCmd(\'' + fieldId + '\',\'h3\')"          title="Überschrift H3">H3</button>' +
           '<span class="tt-sep"></span>' +
-          '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">• Liste</button>' +
-          '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1. Liste</button>' +
+          '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">&bull;&nbsp;Liste</button>' +
+          '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1.&nbsp;Liste</button>' +
           imgBtn +
         '</div>' +
         '<div class="tt-mount" id="tt-' + fieldId + '"></div>' +
@@ -2947,8 +2947,8 @@
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
-    var insertBtn = id('mdimg-insert');
-    if (insertBtn) insertBtn.disabled = true;
+    var insertBtn = id('mdimg-insert'); var insertBtnTop = id('mdimg-insert-top');
+    if (insertBtn) insertBtn.disabled = true; if (insertBtnTop) insertBtnTop.disabled = true;
     var alt = id('mdimg-alt');
     if (alt) alt.value = '';
     // Reset auf Standard-Position (oben links, mittel, mit Textumfluss)
@@ -3116,8 +3116,8 @@
     });
     var opts = id('mdimg-options');
     if (opts) opts.style.display = '';
-    var insertBtn = id('mdimg-insert');
-    if (insertBtn) insertBtn.disabled = false;
+    var insertBtn = id('mdimg-insert'); var insertBtnTop = id('mdimg-insert-top');
+    if (insertBtn) insertBtn.disabled = false; if (insertBtnTop) insertBtnTop.disabled = false;
     // Prefill alt text with filename (without extension) if empty
     var alt = id('mdimg-alt');
     if (alt && !alt.value && name) {
@@ -3164,13 +3164,21 @@
 
     // TipTap-Bild einfügen (Infomobil-Editor)
     if (S._tiptapImageField) {
-      var editor = S.tiptapEditors[S._tiptapImageField];
-      if (editor) {
-        editor.chain().focus().setImage({
+      var ttEditor = S.tiptapEditors[S._tiptapImageField];
+      if (ttEditor) {
+        var isFloat = (flowCls === 'img-flow') &&
+                      (hposCls === 'img-links' || hposCls === 'img-rechts');
+        var chain = ttEditor.chain().focus().setImage({
           src: _mdImgSelected.url,
           alt: alt,
           class: classes.join(' ')
-        }).run();
+        });
+        // Nach Float-Bild clearfix-Absatz einfügen damit nachfolgende
+        // Blöcke (Listen, Absätze) das Bild nicht überlagern
+        if (isFloat) {
+          chain = chain.insertContent('<p style="clear:both"></p>');
+        }
+        chain.run();
       }
       closeMdImageModal();
       toast('✅ Bild eingefügt', 'ok');
@@ -3740,6 +3748,17 @@
     });
     S.tiptapEditors[fieldId] = editor;
     updateTiptapToolbar(fieldId);
+
+    // Klick auf Bild → Kontextmenü anzeigen
+    container.addEventListener('click', function(e) {
+      if (e.target.tagName === 'IMG') {
+        _ttClickedImg    = e.target;
+        _ttClickedEditor = editor;
+        showTtImgMenu(e.target);
+      } else {
+        hideTtImgMenu();
+      }
+    });
   }
 
   function getTiptapValue(fieldId) {
@@ -3756,6 +3775,92 @@
     S.tiptapEditors = {};
     S._tiptapImageField = null;
   }
+
+  /* ── TipTap: Bild-Kontextmenü ─────────────────────────────── */
+  var _ttClickedImg    = null;
+  var _ttClickedEditor = null;
+  var SIZE_CLS = ['img-klein','img-mittel','img-gross','img-voll'];
+  var POS_CLS  = ['img-links','img-zentriert','img-rechts'];
+
+  function showTtImgMenu(imgEl) {
+    var menu = id('tt-img-menu');
+    if (!menu) return;
+    var cls = imgEl.className || '';
+    menu.querySelectorAll('[data-size]').forEach(function(b) {
+      b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-size')) !== -1);
+    });
+    menu.querySelectorAll('[data-pos]').forEach(function(b) {
+      b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-pos')) !== -1);
+    });
+    menu.style.display = 'block';
+    var rect = imgEl.getBoundingClientRect();
+    var mh   = menu.offsetHeight || 46;
+    var top  = rect.top - mh - 6;
+    if (top < 6) top = rect.bottom + 6;
+    var left = Math.max(6, Math.min(rect.left, window.innerWidth - 340));
+    menu.style.top  = top  + 'px';
+    menu.style.left = left + 'px';
+  }
+
+  function hideTtImgMenu() {
+    var menu = id('tt-img-menu');
+    if (menu) menu.style.display = 'none';
+    _ttClickedImg    = null;
+    _ttClickedEditor = null;
+  }
+
+  function applyTtImgClass(newClass) {
+    if (!_ttClickedImg || !_ttClickedEditor) return;
+    try {
+      var pos  = _ttClickedEditor.view.posAtDOM(_ttClickedImg, 0);
+      var node = _ttClickedEditor.state.doc.nodeAt(pos);
+      if (node && node.type.name === 'image') {
+        var tr = _ttClickedEditor.state.tr.setNodeMarkup(
+          pos, null, Object.assign({}, node.attrs, { class: newClass })
+        );
+        _ttClickedEditor.view.dispatch(tr);
+        _ttClickedImg.className = newClass;
+      }
+    } catch(e) { console.warn('tt-img update:', e); }
+    showTtImgMenu(_ttClickedImg);
+  }
+
+  window.ttImgSize = function(sizeClass) {
+    if (!_ttClickedImg) return;
+    var cur = (_ttClickedImg.className || '').split(' ').filter(function(c) {
+      return SIZE_CLS.indexOf(c) === -1;
+    });
+    cur.push(sizeClass);
+    applyTtImgClass(cur.join(' '));
+  };
+
+  window.ttImgPos = function(posClass) {
+    if (!_ttClickedImg) return;
+    var cur = (_ttClickedImg.className || '').split(' ').filter(function(c) {
+      return POS_CLS.indexOf(c) === -1;
+    });
+    cur.push(posClass);
+    applyTtImgClass(cur.join(' '));
+  };
+
+  window.ttImgDelete = function() {
+    if (!_ttClickedImg || !_ttClickedEditor) return;
+    try {
+      var pos = _ttClickedEditor.view.posAtDOM(_ttClickedImg, 0);
+      var tr  = _ttClickedEditor.state.tr.delete(pos, pos + 1);
+      _ttClickedEditor.view.dispatch(tr);
+    } catch(e) {}
+    hideTtImgMenu();
+  };
+
+  // Menü ausblenden wenn außerhalb geklickt
+  document.addEventListener('mousedown', function(e) {
+    var menu = id('tt-img-menu');
+    if (!menu || menu.style.display === 'none') return;
+    if (!menu.contains(e.target) && e.target.tagName !== 'IMG') {
+      hideTtImgMenu();
+    }
+  });
 
   // Toolbar-Buttons aktiv/inaktiv setzen je nach Cursor-Position
   function updateTiptapToolbar(fieldId) {
@@ -3800,8 +3905,8 @@
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
-    var insertBtn = id('mdimg-insert');
-    if (insertBtn) insertBtn.disabled = true;
+    var insertBtn = id('mdimg-insert'); var insertBtnTop = id('mdimg-insert-top');
+    if (insertBtn) insertBtn.disabled = true; if (insertBtnTop) insertBtnTop.disabled = true;
     var alt = id('mdimg-alt');
     if (alt) alt.value = '';
     _mdImgPos = { size: 'img-mittel', hpos: 'img-links', vpos: 'img-pos-oben', flow: 'img-flow' };
@@ -4440,9 +4545,10 @@
 
     // Markdown-Bild-Einfügen Modal
     id('mdimg-backdrop').addEventListener('click', closeMdImageModal);
-    id('mdimg-close').addEventListener('click',    closeMdImageModal);
-    id('mdimg-cancel').addEventListener('click',   closeMdImageModal);
-    id('mdimg-insert').addEventListener('click',   insertMdImage);
+    id('mdimg-close').addEventListener('click',      closeMdImageModal);
+    id('mdimg-cancel').addEventListener('click',     closeMdImageModal);
+    id('mdimg-insert').addEventListener('click',     insertMdImage);
+    id('mdimg-insert-top').addEventListener('click', insertMdImage);
     initMdImgUpload();
 
     id('confirm-backdrop').addEventListener('click', function() { id('confirm-modal').style.display = 'none'; });
