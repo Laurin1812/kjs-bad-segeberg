@@ -727,3 +727,80 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   padding: 1px 5px; font: inherit; color: inherit; font-size: inherit;
 }
 
+
+/* ── TIPTAP RICH-TEXT-EDITOR ─────────────────────────────────── */
+.tt-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+}
+.tt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .2rem;
+  padding: .35rem .5rem;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+.tt-btn {
+  padding: .2rem .5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: .8rem;
+  color: var(--text);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.tt-btn:hover  { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.tt-btn--active { background: var(--green); color: #fff; border-color: var(--green); }
+.tt-sep {
+  display: inline-block;
+  width: 1px;
+  height: 1.4rem;
+  background: var(--border);
+  margin: 0 .2rem;
+  align-self: center;
+}
+.tt-mount .ProseMirror {
+  min-height: 150px;
+  padding: .75rem 1rem;
+  outline: none;
+  font-size: .9rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+.tt-mount .ProseMirror > *:first-child { margin-top: 0; }
+.tt-mount .ProseMirror > *:last-child  { margin-bottom: 0; }
+.tt-mount .ProseMirror p   { margin: .4rem 0; }
+.tt-mount .ProseMirror h2  { font-size: 1.2rem; font-weight: 700; margin: .9rem 0 .3rem; }
+.tt-mount .ProseMirror h3  { font-size: 1.05rem; font-weight: 700; margin: .7rem 0 .25rem; }
+.tt-mount .ProseMirror ul,
+.tt-mount .ProseMirror ol  { padding-left: 1.6rem; margin: .4rem 0; }
+.tt-mount .ProseMirror li  { margin: .15rem 0; }
+.tt-mount .ProseMirror img {
+  max-width: 100%;
+  border-radius: 6px;
+  display: block;
+  margin: .5rem 0;
+}
+/* Bild-Ausrichtung (dieselben Klassen wie auf der öffentlichen Website) */
+.tt-mount .ProseMirror img.img-links    { float: left;  margin-right: 1rem; }
+.tt-mount .ProseMirror img.img-rechts   { float: right; margin-left:  1rem; }
+.tt-mount .ProseMirror img.img-zentriert { float: none; margin-left: auto; margin-right: auto; }
+.tt-mount .ProseMirror img.img-block    { clear: both; }
+.tt-mount .ProseMirror img.img-klein    { width: 300px; max-width: 100%; }
+.tt-mount .ProseMirror img.img-mittel   { width: 500px; max-width: 100%; }
+.tt-mount .ProseMirror img.img-gross,
+.tt-mount .ProseMirror img.img-voll     { width: 100%; }
+/* Placeholder-Text wenn Editor leer */
+.tt-mount .ProseMirror.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}

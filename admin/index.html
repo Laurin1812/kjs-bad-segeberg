@@ -223,6 +223,15 @@
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- TipTap via ESM – läuft async, ist fertig bevor der User auf Infomobil klickt -->
+<script type="module">
+  import { Editor } from 'https://esm.sh/@tiptap/core@2';
+  import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2';
+  import Underline  from 'https://esm.sh/@tiptap/extension-underline@2';
+  import Image      from 'https://esm.sh/@tiptap/extension-image@2';
+  window.TipTap = { Editor, StarterKit, Underline, Image };
+</script>
 <script src="admin.js"></script>
 </body>
 </html>

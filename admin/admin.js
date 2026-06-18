@@ -28,6 +28,8 @@
     _segments:   null, // parsed segments when in table view
     _tableField: null, // 'inhalt' or 'ns-inhalt'
     _mdeWrap:    null, // cached EasyMDEContainer element
+    tiptapEditors:     {},   // fieldId → TipTap Editor instance (Infomobil)
+    _tiptapImageField: null, // fieldId des TipTap-Editors, der gerade ein Bild erwartet
   };
 
   /* ────────────────────────────────────────────────────────────
@@ -70,7 +72,7 @@
         { key:'new-aufgaben', label:'➕ Neue Aufgaben-Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
-      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'standard' },
+      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'tiptap' },
       { key:'weitere', label:'Weitere Themen', group:true, open:false, dynamicChildren:true,
         navFile:'content/seiten-weitere.json', navKey:'seiten', dir:'content/seiten-weitere',
         newItemKey:'new-weitere' },
@@ -928,8 +930,10 @@
      FORM DISPATCH
   ──────────────────────────────────────────────────────────── */
   function renderForm(def, data) {
+    destroyAllTiptaps();
     switch(def.form) {
       case 'standard':     renderStandard(def, data);     break;
+      case 'tiptap':       renderInfomobil(def, data);    break;
       case 'startseite':   renderStartseite(def, data);   break;
       case 'aktuelles':    renderAktuelles(def, data);     break;
       case 'termine':      renderTermine(def, data);       break;
@@ -1128,6 +1132,85 @@
       data.kurzbeschreibung = gv('kurzbeschreibung');
     }
     data.downloads = collectDownloadsList();
+    return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     INFOMOBIL – TipTap Rich-Text-Editor
+     Felder: untertitel, intro, inhalt werden als HTML gespeichert
+     und auf infomobil.html direkt via innerHTML gerendert.
+  ──────────────────────────────────────────────────────────── */
+  function fTipTap(fieldId, label, withImageBtn) {
+    var imgBtn = withImageBtn
+      ? '<span class="tt-sep"></span>' +
+        '<button type="button" class="tt-btn" title="Bild einfügen" ' +
+        'onclick="openTiptapImageModal(\'' + fieldId + '\')">📷 Bild</button>'
+      : '';
+    return '<div class="field-row">' +
+      '<label class="field-label">' + escHtml(label) + '</label>' +
+      '<div class="tt-wrap">' +
+        '<div class="tt-toolbar" id="ttbar-' + fieldId + '">' +
+          '<button type="button" class="tt-btn" data-cmd="bold"        onclick="ttCmd(\'' + fieldId + '\',\'bold\')"        title="Fett (Strg+B)"><b>B</b></button>' +
+          '<button type="button" class="tt-btn" data-cmd="italic"      onclick="ttCmd(\'' + fieldId + '\',\'italic\')"      title="Kursiv (Strg+I)"><i>I</i></button>' +
+          '<button type="button" class="tt-btn" data-cmd="underline"   onclick="ttCmd(\'' + fieldId + '\',\'underline\')"   title="Unterstreichen (Strg+U)"><u>U</u></button>' +
+          '<span class="tt-sep"></span>' +
+          '<button type="button" class="tt-btn" data-cmd="h2"          onclick="ttCmd(\'' + fieldId + '\',\'h2\')"          title="Überschrift H2">H2</button>' +
+          '<button type="button" class="tt-btn" data-cmd="h3"          onclick="ttCmd(\'' + fieldId + '\',\'h3\')"          title="Überschrift H3">H3</button>' +
+          '<span class="tt-sep"></span>' +
+          '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">• Liste</button>' +
+          '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1. Liste</button>' +
+          imgBtn +
+        '</div>' +
+        '<div class="tt-mount" id="tt-' + fieldId + '"></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderInfomobil(def, data) {
+    var html = panelHeader(def.label, '') +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Seiteninhalt</div>' +
+          fText('titel', 'Seitentitel', data.titel) +
+          fTipTap('untertitel', 'Untertitel', false) +
+          fTipTap('intro',      'Einleitungstext', false) +
+          fTipTap('inhalt',     'Textinhalt', true) +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Bilder</div>' +
+          fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
+          fImage('bild',      'Inhaltsbild',          data.bild) +
+          fText('bild_alt',   'Bild-Beschreibung',    data.bild_alt) +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Kontakt (optional)</div>' +
+          fText('kontakt_name',  'Kontaktname',   data.kontakt_name) +
+          fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
+        '</div>' +
+        renderDownloadsCard(data) +
+      '</div>' +
+      saveBar();
+    id('admin-main').innerHTML = html;
+    // TipTap-Instanzen initialisieren – vorhandener Inhalt kann noch
+    // Markdown sein (Migration); initTiptap konvertiert das automatisch.
+    initTiptap('untertitel', data.untertitel || '');
+    initTiptap('intro',      data.intro      || '');
+    initTiptap('inhalt',     data.inhalt     || '');
+    initDownloadsSortable();
+    bindSaveBtn();
+  }
+
+  function collectInfomobil(data) {
+    data.titel         = gv('titel');
+    data.untertitel    = getTiptapValue('untertitel');
+    data.intro         = getTiptapValue('intro');
+    data.inhalt        = getTiptapValue('inhalt');
+    data.hero_bild     = gv('hero_bild');
+    data.bild          = gv('bild');
+    data.bild_alt      = gv('bild_alt');
+    data.kontakt_name  = gv('kontakt_name');
+    data.kontakt_email = gv('kontakt_email');
+    data.downloads     = collectDownloadsList();
     return data;
   }
 
@@ -2676,7 +2759,8 @@
     // Collect data
     var data = JSON.parse(JSON.stringify(S.data)); // deep copy
     switch(def.form) {
-      case 'standard':      data = collectStandard(data); break;
+      case 'standard':      data = collectStandard(data);   break;
+      case 'tiptap':        data = collectInfomobil(data);  break;
       case 'startseite':    data = collectStartseite(data); break;
       case 'kjm':           data = collectKJM(data); break;
       case 'faq':           data = collectFAQ(data); break;
@@ -2985,6 +3069,7 @@
     id('mdimg-modal').style.display = 'none';
     id('mdimg-modal').classList.remove('mdimg-swap-mode');
     _mdLive.swapIndex = -1;
+    S._tiptapImageField = null;
   }
 
   async function loadMdImgGallery() {
@@ -3064,7 +3149,7 @@
   }
 
   function insertMdImage() {
-    if (!_mdImgSelected || !S.mde) return;
+    if (!_mdImgSelected) return;
     var sizeCls = _mdImgPos.size || 'img-mittel';
     var hposCls = _mdImgPos.hpos || 'img-links';
     var vposCls = _mdImgPos.vpos || 'img-pos-oben';
@@ -3077,6 +3162,23 @@
     if (vposCls !== 'img-pos-oben') classes.push(vposCls);
     classes.push(flowCls);
 
+    // TipTap-Bild einfügen (Infomobil-Editor)
+    if (S._tiptapImageField) {
+      var editor = S.tiptapEditors[S._tiptapImageField];
+      if (editor) {
+        editor.chain().focus().setImage({
+          src: _mdImgSelected.url,
+          alt: alt,
+          class: classes.join(' ')
+        }).run();
+      }
+      closeMdImageModal();
+      toast('✅ Bild eingefügt', 'ok');
+      return;
+    }
+
+    // EasyMDE-Bild einfügen (alle anderen Editoren)
+    if (!S.mde) return;
     var markdown = '![' + alt + '](' + _mdImgSelected.url + '){.' + classes.join(' .') + '}';
     var cm = S.mde.codemirror;
     cm.replaceSelection(markdown);
@@ -3594,6 +3696,121 @@
     S._tableField = null;
     S._mdeWrap    = null;
   }
+
+  /* ── TipTap: init / get / destroy ─────────────────────────── */
+  function initTiptap(fieldId, rawContent) {
+    var container = id('tt-' + fieldId);
+    if (!container) return;
+    var TT = window.TipTap;
+    if (!TT || !TT.Editor) {
+      container.innerHTML = '<p style="color:var(--text-muted);padding:.75rem;">Editor wird geladen…</p>';
+      return;
+    }
+
+    // Bestehendes Markdown automatisch zu HTML konvertieren (Einmal-Migration)
+    var html = rawContent || '';
+    if (html && !/<[a-z]/i.test(html) && window.marked) {
+      html = window.marked.parse(html);
+    }
+
+    // Image-Extension um CSS-Klassen-Attribut erweitern
+    var ImageWithClass = TT.Image.extend({
+      addAttributes: function() {
+        var parent = this.parent ? this.parent() : {};
+        return Object.assign({}, parent, {
+          class: {
+            default: null,
+            parseHTML:  function(el) { return el.getAttribute('class'); },
+            renderHTML: function(attrs) { return attrs.class ? { class: attrs.class } : {}; }
+          }
+        });
+      }
+    });
+
+    var editor = new TT.Editor({
+      element: container,
+      extensions: [
+        TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
+        TT.Underline,
+        ImageWithClass
+      ],
+      content: html,
+      onUpdate:         function() { updateTiptapToolbar(fieldId); },
+      onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
+    });
+    S.tiptapEditors[fieldId] = editor;
+    updateTiptapToolbar(fieldId);
+  }
+
+  function getTiptapValue(fieldId) {
+    var editor = S.tiptapEditors[fieldId];
+    if (!editor) return '';
+    var html = editor.getHTML();
+    return (html === '<p></p>') ? '' : html;
+  }
+
+  function destroyAllTiptaps() {
+    Object.keys(S.tiptapEditors).forEach(function(k) {
+      try { S.tiptapEditors[k].destroy(); } catch(e) {}
+    });
+    S.tiptapEditors = {};
+    S._tiptapImageField = null;
+  }
+
+  // Toolbar-Buttons aktiv/inaktiv setzen je nach Cursor-Position
+  function updateTiptapToolbar(fieldId) {
+    var editor = S.tiptapEditors[fieldId];
+    var bar    = id('ttbar-' + fieldId);
+    if (!editor || !bar) return;
+    var state = {
+      bold:        editor.isActive('bold'),
+      italic:      editor.isActive('italic'),
+      underline:   editor.isActive('underline'),
+      h2:          editor.isActive('heading', { level: 2 }),
+      h3:          editor.isActive('heading', { level: 3 }),
+      bulletList:  editor.isActive('bulletList'),
+      orderedList: editor.isActive('orderedList')
+    };
+    bar.querySelectorAll('.tt-btn[data-cmd]').forEach(function(btn) {
+      var cmd = btn.getAttribute('data-cmd');
+      btn.classList.toggle('tt-btn--active', !!(cmd && state[cmd]));
+    });
+  }
+
+  // Toolbar-Button-Kommandos (onclick im HTML)
+  window.ttCmd = function(fieldId, cmd) {
+    var editor = S.tiptapEditors[fieldId];
+    if (!editor) return;
+    var c = editor.chain().focus();
+    switch (cmd) {
+      case 'bold':        c.toggleBold().run();                   break;
+      case 'italic':      c.toggleItalic().run();                 break;
+      case 'underline':   c.toggleUnderline().run();              break;
+      case 'h2':          c.toggleHeading({ level: 2 }).run();    break;
+      case 'h3':          c.toggleHeading({ level: 3 }).run();    break;
+      case 'bulletList':  c.toggleBulletList().run();             break;
+      case 'orderedList': c.toggleOrderedList().run();            break;
+    }
+    updateTiptapToolbar(fieldId);
+  };
+
+  // Bild-Modal für TipTap öffnen (analog openMdImageModal, aber ohne S.mde-Check)
+  window.openTiptapImageModal = function(fieldId) {
+    S._tiptapImageField = fieldId;
+    _mdImgSelected = null;
+    var opts = id('mdimg-options');
+    if (opts) opts.style.display = 'none';
+    var insertBtn = id('mdimg-insert');
+    if (insertBtn) insertBtn.disabled = true;
+    var alt = id('mdimg-alt');
+    if (alt) alt.value = '';
+    _mdImgPos = { size: 'img-mittel', hpos: 'img-links', vpos: 'img-pos-oben', flow: 'img-flow' };
+    mdImgSyncButtons();
+    var preview = id('mdimg-preview-wrap');
+    if (preview) preview.style.display = 'none';
+    id('mdimg-modal').style.display = 'flex';
+    loadMdImgGallery();
+  };
 
   function getMDE() {
     // If table view is active, sync segments → markdown first

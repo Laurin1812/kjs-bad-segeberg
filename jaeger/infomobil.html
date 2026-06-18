@@ -190,9 +190,18 @@
         if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
         kontaktStr += '</p>';
       }
+      // untertitel / intro / inhalt werden vom Admin als HTML gespeichert
+      // und hier direkt via innerHTML gerendert (kein marked.parse mehr nötig).
+      // Alte Einträge die noch Markdown enthalten: marked ist auf dieser Seite
+      // geladen – falls kein HTML-Tag erkannt wird, wird Markdown konvertiert.
+      function renderField(raw) {
+        if (!raw) return '';
+        if (/<[a-z]/i.test(raw)) return raw;
+        return typeof marked !== 'undefined' ? marked.parse(raw) : raw;
+      }
       main.innerHTML =
-        (d.untertitel ? '<h2>' + d.untertitel + '</h2>' : '') +
-        (d.intro      ? '<p>' + d.intro + '</p>' : '') +
+        renderField(d.untertitel) +
+        renderField(d.intro) +
         bild +
         '<div id="page-inhalt"></div>' +
         kontaktStr +
@@ -200,11 +209,7 @@
         '<div style="margin-top:2rem;"><a href="../kontakt/index.html" class="btn btn-outline-green">Kontakt aufnehmen</a></div>';
       if (d.inhalt) {
         var el = document.getElementById('page-inhalt');
-        if (el) {
-          el.innerHTML = typeof marked !== 'undefined'
-            ? marked.parse(d.inhalt)
-            : d.inhalt.replace(/&/g, '&amp;').replace(/</g, '&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
-        }
+        if (el) el.innerHTML = renderField(d.inhalt);
       }
       // Google Kalender nach Seiteninhalt einfügen
       return fetch('/content/einstellungen.json');
