@@ -3158,6 +3158,7 @@
   }
 
   function insertMdImage() {
+    alert('insertMdImage aufgerufen');
     if (!_mdImgSelected) return;
     var sizeCls = _mdImgPos.size || 'img-mittel';
     var hposCls = _mdImgPos.hpos || 'img-links';
