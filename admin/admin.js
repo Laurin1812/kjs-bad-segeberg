@@ -3177,14 +3177,22 @@
       if (ttEditor) {
         // Steht der Cursor in einer Tabelle, soll das Bild NACH der
         // Tabelle eingefügt werden statt in die Zelle.
-        var sel = ttEditor.state.selection;
-        for (var d = sel.$from.depth; d > 0; d--) {
-          var ancestorNode = sel.$from.node(d);
-          if (ancestorNode.type.name === 'table') {
-            var afterTablePos = sel.$from.before(d) + ancestorNode.nodeSize;
-            ttEditor.chain().focus().setTextSelection(afterTablePos).run();
+        var state = ttEditor.state;
+        var $pos = state.selection.$anchor;
+        var inTable = false;
+        for (var d = $pos.depth; d > 0; d--) {
+          var node = $pos.node(d);
+          if (node.type.name === 'table' ||
+              node.type.name === 'tableCell' ||
+              node.type.name === 'tableRow') {
+            inTable = true;
             break;
           }
+        }
+        if (inTable) {
+          // Cursor ans Ende des gesamten Dokuments nach der Tabelle setzen
+          var end = state.doc.content.size;
+          ttEditor.chain().focus().setTextSelection(end).run();
         }
 
         var isFloat = (flowCls === 'img-flow') &&
