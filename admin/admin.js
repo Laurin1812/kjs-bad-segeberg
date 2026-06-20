@@ -113,6 +113,7 @@
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
+    { key:'testseite', label:'🧪 Testseite', file:'content/test/testseite.json', form:'tiptap' },
   ];
 
   /* ────────────────────────────────────────────────────────────

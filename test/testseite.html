@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Testseite – nur zu internen Testzwecken.">
+  <title>Testseite – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <div class="topbar__left">
+    <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
+    <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
+  </div>
+</div></div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../index.html" class="site-logo">
+      <img src="../images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
+      <div class="site-logo__text">
+        <span class="site-logo__name">Kreisjägerschaft</span>
+        <span class="site-logo__sub">Segeberg e.V.</span>
+      </div>
+    </a>
+    <nav aria-label="Hauptnavigation"><ul class="main-nav">
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+        <ul class="dropdown" id="jaeger-dropdown">
+          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
+          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+          <li class="has-sub"><a href="../jaeger/index.html">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+              <li><a href="../jaeger/obleute.html">Obleute</a></li>
+              <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+              <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+              <li><a href="../jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
+              <li><a href="../jaeger/niederwild.html">Niederwild</a></li>
+              <li><a href="../jaeger/hochwild.html">Hochwild</a></li>
+              <li><a href="../jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
+              <li><a href="../jaeger/satzung.html">Satzung</a></li>
+              <li><a href="../jaeger/landesjagdverband.html">Landesjagdverband</a></li>
+            </ul>
+          </li>
+          <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../aufgaben/schiessen.html">Schie&#223;wesen</a></li>
+              <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+              <li><a href="../aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
+              <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+              <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+              <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+              <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+            </ul>
+          </li>
+          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
+          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+        </ul>
+      </li>
+      <li><a href="../termine/index.html">Termine</a></li>
+      <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../kontakt/index.html">Kontakt</a></li>
+    </ul></nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav__close" id="mobileNavClose">✕</button>
+  <ul>
+    <li><a href="../index.html">Startseite</a></li>
+    <li><a href="../jaeger/index.html">Jäger</a></li>
+    <li><a href="../termine/index.html">Termine</a></li>
+    <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../kontakt/index.html">Kontakt</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Testseite</h1>
+    <nav class="breadcrumb">
+      <a href="../index.html">Startseite</a><span class="sep">/</span>
+      <span>Testseite</span>
+    </nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Hinweis</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);">Diese Seite dient nur internen Testzwecken und ist nicht im Hauptmenü verlinkt.</p>
+      </div>
+      <div class="contact-box">
+        <h4>Kontakt</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+      <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
+      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
+    </div>
+    <div class="footer-col"><h5>Über die KJS</h5><ul>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
+      <li><a href="../index.html">Startseite</a></li>
+      <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
+      <li><a href="../downloads/index.html">Downloads</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Informationen</h5><ul>
+      <li><a href="../kontakt/index.html">Kontakt</a></li>
+      <li><a href="../termine/index.html">Termine</a></li>
+      <li><a href="../faq/index.html">FAQ</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
+    <div class="footer-bottom__links">
+      <a href="../impressum.html">Impressum</a>
+      <a href="../datenschutz.html">Datenschutz</a>
+      <a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a>
+    </div>
+  </div>
+</div></footer>
+
+<script src="../js/main.js"></script>
+<script>
+  // Testseite-Inhalt laden + rendern + optional Google Kalender
+  fetch('/content/test/testseite.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var main = document.getElementById('page-main');
+      if (!main) return;
+      if (d.hero_bild) {
+        var bg = document.querySelector('.page-hero__bg');
+        if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
+      }
+      var bildBreite = d.bild_groesse === 'klein' ? '300px' : d.bild_groesse === 'mittel' ? '500px' : '100%';
+      var bild = d.bild
+        ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" style="width:' + bildBreite + ';max-width:100%;border-radius:8px;margin-bottom:1.5rem;">'
+        : '';
+      var kontaktStr = '';
+      if (d.kontakt_name || d.kontakt_email) {
+        kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name || '');
+        if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
+        kontaktStr += '</p>';
+      }
+      // untertitel / intro / inhalt werden vom Admin als HTML gespeichert
+      // und hier direkt via innerHTML gerendert (kein marked.parse mehr nötig).
+      // Alte Einträge die noch Markdown enthalten: marked ist auf dieser Seite
+      // geladen – falls kein HTML-Tag erkannt wird, wird Markdown konvertiert.
+      function renderField(raw) {
+        if (!raw) return '';
+        if (/<[a-z]/i.test(raw)) return raw;
+        return typeof marked !== 'undefined' ? marked.parse(raw) : raw;
+      }
+      main.innerHTML =
+        renderField(d.untertitel) +
+        renderField(d.intro) +
+        bild +
+        '<div id="page-inhalt"></div>' +
+        kontaktStr +
+        '<div id="kalender-container"></div>';
+      if (d.inhalt) {
+        var el = document.getElementById('page-inhalt');
+        if (el) el.innerHTML = renderField(d.inhalt);
+      }
+      // Google Kalender nach Seiteninhalt einfügen
+      return fetch('/content/einstellungen.json');
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var container = document.getElementById('kalender-container');
+      if (!container || !d.google_kalender_url) return;
+      var titel = d.google_kalender_titel || 'Terminbuchung';
+      container.innerHTML =
+        '<div style="margin-top:2rem;">' +
+          '<h3 style="margin-bottom:1rem;">' + titel + '</h3>' +
+          '<div style="border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);">' +
+            '<iframe src="' + d.google_kalender_url + '" style="width:100%;height:650px;border:none;display:block;" frameborder="0" scrolling="no" title="Google Kalender – Terminbuchung"></iframe>' +
+          '</div>' +
+          '<p style="font-size:.8rem;color:var(--text-muted);margin-top:.75rem;">Dieser Kalender wird von Google bereitgestellt. ' +
+            '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzhinweise von Google</a></p>' +
+        '</div>';
+    })
+    .catch(function() {});
+
+  // Footer
+  fetch('/content/footer.json').then(r => r.json()).then(d => {
+    const ft = document.querySelector('.footer-about p');
+    if (ft && d.ueber_text) ft.textContent = d.ueber_text;
+    const cp = document.querySelector('.footer-bottom span');
+    if (cp && d.copyright) cp.textContent = d.copyright;
+  }).catch(() => {});
+</script>
+</body>
+</html>
