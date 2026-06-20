@@ -3749,6 +3749,28 @@
             renderHTML: function(attrs) { return attrs.class ? { class: attrs.class } : {}; }
           }
         });
+      },
+      // Float-Bilder (links/rechts) in einen eigenen <div> wrappen, statt
+      // float direkt auf das <img> zu setzen. Dadurch hat der Float-Block
+      // eine garantierte Breite und nachfolgende Listen behalten ihre
+      // Bullets (•), die sonst im padding-Bereich vom Float abgeschnitten
+      // wurden.
+      renderHTML: function(props) {
+        var HTMLAttributes = props.HTMLAttributes || {};
+        var cls = HTMLAttributes.class || '';
+        var isLinks  = cls.indexOf('img-links')  !== -1;
+        var isRechts = cls.indexOf('img-rechts') !== -1;
+        var isFlow   = cls.indexOf('img-flow')   !== -1;
+        if (!isFlow || (!isLinks && !isRechts)) {
+          return ['img', HTMLAttributes];
+        }
+        var width = cls.indexOf('img-klein')  !== -1 ? '300px'
+                  : cls.indexOf('img-mittel') !== -1 ? '500px'
+                  : '100%';
+        var wrapStyle = 'float:' + (isLinks ? 'left' : 'right') + ';' +
+          (isLinks ? 'margin-right:1rem;' : 'margin-left:1rem;') +
+          'margin-bottom:0.5rem;width:' + width + ';';
+        return ['div', { style: wrapStyle }, ['img', HTMLAttributes]];
       }
     });
 

@@ -462,12 +462,11 @@ p  { margin-bottom: 1rem; }
 .main-content h4 { color: var(--green-dark); margin-bottom: .5rem; margin-top: 1.25rem; }
 .main-content p   { color: var(--text-body); line-height: 1.8; }
 .main-content ul, .main-content ol {
-  padding-left: 2rem;
+  padding-left: 1.6rem;
   margin-bottom: 1rem;
-  overflow: visible;
-  list-style-position: outside;
+  overflow: hidden;
 }
-.main-content li { margin-bottom: .4rem; color: var(--text-body); list-style: disc; list-style-position: outside; }
+.main-content li { margin-bottom: .4rem; color: var(--text-body); list-style: disc; }
 .main-content ol li { list-style: decimal; }
 .main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
 .main-content a:not(.btn):hover { color: var(--green-dark); }
