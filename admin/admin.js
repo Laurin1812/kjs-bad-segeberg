@@ -3182,12 +3182,20 @@
           alt: alt,
           class: classes.join(' ')
         });
-        // Nach Float-Bild clearfix-Absatz einfügen damit nachfolgende
-        // Blöcke (Listen, Absätze) das Bild nicht überlagern
+        // Nach Float-Bild clearfix-Absatz einfügen, BEVOR der nächste
+        // Block (z.B. eine Liste) folgt – sonst überlagert das Bild
+        // weiterhin nachfolgende Listenpunkte.
         if (isFloat) {
           chain = chain.insertContent('<div style="clear:both"></div>');
         }
         chain.run();
+        // Cursor explizit nach dem Clearfix positionieren, damit der
+        // nächste eingefügte Block (z.B. eine Liste) garantiert dahinter
+        // landet und nicht mehr neben dem Float-Bild.
+        if (isFloat) {
+          var afterClearfixPos = ttEditor.state.selection.to;
+          ttEditor.chain().focus().setTextSelection(afterClearfixPos).run();
+        }
       }
       closeMdImageModal();
       toast('✅ Bild eingefügt', 'ok');

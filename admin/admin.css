@@ -780,8 +780,16 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror h2  { font-size: 1.2rem; font-weight: 700; margin: .9rem 0 .3rem; }
 .tt-mount .ProseMirror h3  { font-size: 1.05rem; font-weight: 700; margin: .7rem 0 .25rem; }
 .tt-mount .ProseMirror ul,
-.tt-mount .ProseMirror ol  { padding-left: 1.6rem; margin: .4rem 0; overflow: hidden; }
-.tt-mount .ProseMirror li  { margin: .15rem 0; list-style-position: outside; }
+.tt-mount .ProseMirror ol {
+  padding-left: 2rem;
+  margin: .4rem 0;
+  overflow: visible;
+  list-style-position: outside;
+}
+.tt-mount .ProseMirror li {
+  margin: .15rem 0;
+  list-style-position: outside;
+}
 .tt-mount .ProseMirror img {
   max-width: 100%;
   border-radius: 6px;
