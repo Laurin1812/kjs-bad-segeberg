@@ -516,6 +516,30 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     .catch(function() {});
 })();
 
+// ── TEMPORÄR: Testseite ganz unten ins Hauptmenü einfügen ────────────────
+// Nur zum Testen des TipTap-Editors – diesen Block nach dem Test wieder
+// entfernen (siehe content/test/testseite.json + test/testseite.html).
+(function() {
+  var mainNav = document.querySelector('.main-nav');
+  if (mainNav) {
+    var li = document.createElement('li');
+    var a  = document.createElement('a');
+    a.href = '/test/testseite.html';
+    a.textContent = 'Testseite';
+    li.appendChild(a);
+    mainNav.appendChild(li);
+  }
+  var mobileNavList = document.querySelector('#mobileNav ul');
+  if (mobileNavList) {
+    var mli = document.createElement('li');
+    var ma  = document.createElement('a');
+    ma.href = '/test/testseite.html';
+    ma.textContent = 'Testseite';
+    mli.appendChild(ma);
+    mobileNavList.appendChild(mli);
+  }
+})();
+
 // Contact form handler (Formsubmit.co)
 var contactForm = document.getElementById('contactForm');
 if (contactForm) {
