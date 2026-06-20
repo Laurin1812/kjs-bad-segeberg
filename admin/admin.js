@@ -3158,7 +3158,6 @@
   }
 
   function insertMdImage() {
-    alert('insertMdImage aufgerufen');
     if (!_mdImgSelected) return;
     var sizeCls = _mdImgPos.size || 'img-mittel';
     var hposCls = _mdImgPos.hpos || 'img-links';
@@ -3177,28 +3176,28 @@
       var ttEditor = S.tiptapEditors[S._tiptapImageField];
       if (ttEditor) {
         // Steht der Cursor in einer Tabelle, soll das Bild NACH der
-        // Tabelle eingefügt werden statt in die Zelle.
-        var state = ttEditor.state;
-        var $pos = state.selection.$anchor;
-        var names = [];
-        for (var d = $pos.depth; d > 0; d--) {
-          names.push($pos.node(d).type.name);
-        }
-        alert('Nodes: ' + names.join(', '));
-        var inTable = false;
-        for (var d = $pos.depth; d > 0; d--) {
-          var name = $pos.node(d).type.name.toLowerCase();
-          if (name.indexOf('table') !== -1 ||
-              name.indexOf('cell')  !== -1 ||
-              name.indexOf('row')   !== -1) {
-            inTable = true;
-            break;
+        // Tabelle eingefügt werden statt in die Zelle. Die Auswahl wird
+        // beim Öffnen des Modals gespeichert (siehe openTiptapImageModal),
+        // da der Editor beim Klick auf "Einfügen" bereits den Fokus
+        // verloren hat und seine aktuelle Selektion dann nicht mehr stimmt.
+        var savedSel    = window._ttSelectionBeforeModal;
+        var savedEditor = window._ttEditorBeforeModal;
+        if (savedSel && savedEditor) {
+          var $pos = savedSel.$anchor;
+          var inTable = false;
+          for (var d = $pos.depth; d > 0; d--) {
+            var name = $pos.node(d).type.name.toLowerCase();
+            if (name.indexOf('table') !== -1 ||
+                name.indexOf('cell')  !== -1 ||
+                name.indexOf('row')   !== -1) {
+              inTable = true;
+              break;
+            }
           }
-        }
-        if (inTable) {
-          // Cursor ans Ende des gesamten Dokuments nach der Tabelle setzen
-          var end = state.doc.content.size;
-          ttEditor.chain().focus().setTextSelection(end).run();
+          if (inTable) {
+            var end = savedEditor.state.doc.content.size;
+            savedEditor.chain().focus().setTextSelection(end).run();
+          }
         }
 
         var isFloat = (flowCls === 'img-flow') &&
@@ -4046,6 +4045,11 @@
   // Bild-Modal für TipTap öffnen (analog openMdImageModal, aber ohne S.mde-Check)
   window.openTiptapImageModal = function(fieldId) {
     S._tiptapImageField = fieldId;
+    var activeEditor = S.tiptapEditors[fieldId];
+    if (activeEditor) {
+      window._ttSelectionBeforeModal = activeEditor.state.selection;
+      window._ttEditorBeforeModal    = activeEditor;
+    }
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
