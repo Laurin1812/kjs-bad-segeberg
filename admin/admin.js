@@ -3179,9 +3179,11 @@
         // Tabelle eingefügt werden statt in die Zelle.
         var state = ttEditor.state;
         var $pos = state.selection.$anchor;
+        var names = [];
         for (var d = $pos.depth; d > 0; d--) {
-          console.log('Node depth', d, ':', $pos.node(d).type.name);
+          names.push($pos.node(d).type.name);
         }
+        alert('Nodes: ' + names.join(', '));
         var inTable = false;
         for (var d = $pos.depth; d > 0; d--) {
           var name = $pos.node(d).type.name.toLowerCase();
