@@ -3173,16 +3173,16 @@
 
     // TipTap-Bild einfügen (Infomobil-Editor)
     if (S._tiptapImageField) {
-      var ttEditor = S.tiptapEditors[S._tiptapImageField];
-      if (ttEditor) {
-        // Steht der Cursor in einer Tabelle, soll das Bild NACH der
-        // Tabelle eingefügt werden statt in die Zelle. Die Auswahl wird
-        // beim Öffnen des Modals gespeichert (siehe openTiptapImageModal),
-        // da der Editor beim Klick auf "Einfügen" bereits den Fokus
-        // verloren hat und seine aktuelle Selektion dann nicht mehr stimmt.
-        var savedSel    = window._ttSelectionBeforeModal;
-        var savedEditor = window._ttEditorBeforeModal;
-        if (savedSel && savedEditor) {
+      var activeEditor = S.tiptapEditors[S._tiptapImageField];
+      if (activeEditor) {
+        // Tabellen-Check: gespeicherte Selektion verwenden (siehe
+        // openTiptapImageModal), da der Editor beim Klick auf "Einfügen"
+        // bereits den Fokus verloren hat und seine aktuelle Selektion
+        // dann nicht mehr stimmt. Für das tatsächliche Bewegen des
+        // Cursors und Einfügen des Bildes wird aber immer der aktuelle
+        // activeEditor verwendet, nicht der gespeicherte Editor.
+        var savedSel = window._ttSelectionBeforeModal;
+        if (savedSel) {
           var $pos = savedSel.$anchor;
           var inTable = false;
           for (var d = $pos.depth; d > 0; d--) {
@@ -3195,14 +3195,14 @@
             }
           }
           if (inTable) {
-            var end = savedEditor.state.doc.content.size;
-            savedEditor.chain().focus().setTextSelection(end).run();
+            var end = activeEditor.state.doc.content.size;
+            activeEditor.chain().focus().setTextSelection(end).run();
           }
         }
 
         var isFloat = (flowCls === 'img-flow') &&
                       (hposCls === 'img-links' || hposCls === 'img-rechts');
-        var chain = ttEditor.chain().focus().setImage({
+        var chain = activeEditor.chain().focus().setImage({
           src: _mdImgSelected.url,
           alt: alt,
           class: classes.join(' ')
@@ -3220,8 +3220,8 @@
         // nächste eingefügte Block (z.B. eine Liste) garantiert dahinter
         // landet und nicht mehr neben dem Float-Bild.
         if (isFloat) {
-          var afterClearfixPos = ttEditor.state.selection.to;
-          ttEditor.chain().focus().setTextSelection(afterClearfixPos).run();
+          var afterClearfixPos = activeEditor.state.selection.to;
+          activeEditor.chain().focus().setTextSelection(afterClearfixPos).run();
         }
       }
       closeMdImageModal();
