@@ -3179,12 +3179,15 @@
         // Tabelle eingefügt werden statt in die Zelle.
         var state = ttEditor.state;
         var $pos = state.selection.$anchor;
+        for (var d = $pos.depth; d > 0; d--) {
+          console.log('Node depth', d, ':', $pos.node(d).type.name);
+        }
         var inTable = false;
         for (var d = $pos.depth; d > 0; d--) {
-          var node = $pos.node(d);
-          if (node.type.name === 'table' ||
-              node.type.name === 'tableCell' ||
-              node.type.name === 'tableRow') {
+          var name = $pos.node(d).type.name.toLowerCase();
+          if (name.indexOf('table') !== -1 ||
+              name.indexOf('cell')  !== -1 ||
+              name.indexOf('row')   !== -1) {
             inTable = true;
             break;
           }
