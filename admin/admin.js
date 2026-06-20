@@ -3175,6 +3175,18 @@
     if (S._tiptapImageField) {
       var ttEditor = S.tiptapEditors[S._tiptapImageField];
       if (ttEditor) {
+        // Steht der Cursor in einer Tabelle, soll das Bild NACH der
+        // Tabelle eingefügt werden statt in die Zelle.
+        var sel = ttEditor.state.selection;
+        for (var d = sel.$from.depth; d > 0; d--) {
+          var ancestorNode = sel.$from.node(d);
+          if (ancestorNode.type.name === 'table') {
+            var afterTablePos = sel.$from.before(d) + ancestorNode.nodeSize;
+            ttEditor.chain().focus().setTextSelection(afterTablePos).run();
+            break;
+          }
+        }
+
         var isFloat = (flowCls === 'img-flow') &&
                       (hposCls === 'img-links' || hposCls === 'img-rechts');
         var chain = ttEditor.chain().focus().setImage({
@@ -3184,9 +3196,11 @@
         });
         // Nach Float-Bild clearfix-Absatz einfügen, BEVOR der nächste
         // Block (z.B. eine Liste) folgt – sonst überlagert das Bild
-        // weiterhin nachfolgende Listenpunkte.
+        // weiterhin nachfolgende Listenpunkte. Als echter Paragraph-Knoten
+        // eingefügt (nicht als HTML-String), sonst erscheint der Tag als
+        // sichtbarer Text im Editor.
         if (isFloat) {
-          chain = chain.insertContent('<div style="clear:both"></div>');
+          chain = chain.insertContent({ type: 'paragraph', attrs: { style: 'clear:both' } });
         }
         chain.run();
         // Cursor explizit nach dem Clearfix positionieren, damit der
@@ -3774,6 +3788,28 @@
       }
     });
 
+    // Paragraph-Extension um ein "style"-Attribut erweitern, damit der
+    // Clearfix nach Float-Bildern als echter Knoten (nicht als HTML-Text)
+    // eingefügt werden kann.
+    var paragraphExts = [];
+    var starterKitOpts = { heading: { levels: [2, 3] } };
+    if (TT.Paragraph) {
+      var ParagraphWithStyle = TT.Paragraph.extend({
+        addAttributes: function() {
+          var parent = this.parent ? this.parent() : {};
+          return Object.assign({}, parent, {
+            style: {
+              default: null,
+              parseHTML:  function(el) { return el.getAttribute('style'); },
+              renderHTML: function(attrs) { return attrs.style ? { style: attrs.style } : {}; }
+            }
+          });
+        }
+      });
+      starterKitOpts.paragraph = false;
+      paragraphExts = [ParagraphWithStyle];
+    }
+
     var tableExts = (TT.Table && TT.TableRow && TT.TableCell && TT.TableHeader) ? [
       TT.Table.configure({ resizable: false }),
       TT.TableRow,
@@ -3783,10 +3819,10 @@
     var editor = new TT.Editor({
       element: container,
       extensions: [
-        TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
+        TT.StarterKit.configure(starterKitOpts),
         TT.Underline,
         ImageWithClass
-      ].concat(tableExts),
+      ].concat(paragraphExts).concat(tableExts),
       content: html,
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
