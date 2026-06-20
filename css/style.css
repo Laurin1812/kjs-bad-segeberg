@@ -508,10 +508,10 @@ p  { margin-bottom: 1rem; }
 
 .main-content img.img-links,
 #seite-inhalt img.img-links,
-#page-inhalt img.img-links   { float: left; margin-right: 1rem; margin-bottom: 1rem; }
+#page-inhalt img.img-links   { float: left; margin-right: 1rem; margin-bottom: 1rem; max-width: 50%; }
 .main-content img.img-rechts,
 #seite-inhalt img.img-rechts,
-#page-inhalt img.img-rechts  { float: right; margin-left: 1rem; margin-bottom: 1rem; }
+#page-inhalt img.img-rechts  { float: right; margin-left: 1rem; margin-bottom: 1rem; max-width: 50%; }
 .main-content img.img-zentriert,
 #seite-inhalt img.img-zentriert,
 #page-inhalt img.img-zentriert {

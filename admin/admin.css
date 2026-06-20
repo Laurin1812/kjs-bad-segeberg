@@ -795,8 +795,8 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   margin: .5rem 0;
 }
 /* Bild-Ausrichtung (dieselben Klassen wie auf der öffentlichen Website) */
-.tt-mount .ProseMirror img.img-links    { float: left;  margin-right: 1rem; }
-.tt-mount .ProseMirror img.img-rechts   { float: right; margin-left:  1rem; }
+.tt-mount .ProseMirror img.img-links    { float: left;  margin-right: 1rem; max-width: 50%; }
+.tt-mount .ProseMirror img.img-rechts   { float: right; margin-left:  1rem; max-width: 50%; }
 .tt-mount .ProseMirror img.img-zentriert { float: none; margin-left: auto; margin-right: auto; }
 .tt-mount .ProseMirror img.img-block    { clear: both; }
 .tt-mount .ProseMirror img.img-klein    { width: 300px; max-width: 100%; }

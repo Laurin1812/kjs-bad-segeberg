@@ -3175,31 +3175,6 @@
     if (S._tiptapImageField) {
       var activeEditor = S.tiptapEditors[S._tiptapImageField];
       if (activeEditor) {
-        // Tabellen-Check: gespeicherte Selektion verwenden (siehe
-        // openTiptapImageModal), da der Editor beim Klick auf "Einfügen"
-        // bereits den Fokus verloren hat und seine aktuelle Selektion
-        // dann nicht mehr stimmt. Für das tatsächliche Bewegen des
-        // Cursors und Einfügen des Bildes wird aber immer der aktuelle
-        // activeEditor verwendet, nicht der gespeicherte Editor.
-        var savedSel = window._ttSelectionBeforeModal;
-        if (savedSel) {
-          var $pos = savedSel.$anchor;
-          var inTable = false;
-          for (var d = $pos.depth; d > 0; d--) {
-            var name = $pos.node(d).type.name.toLowerCase();
-            if (name.indexOf('table') !== -1 ||
-                name.indexOf('cell')  !== -1 ||
-                name.indexOf('row')   !== -1) {
-              inTable = true;
-              break;
-            }
-          }
-          if (inTable) {
-            var end = activeEditor.state.doc.content.size;
-            activeEditor.chain().focus().setTextSelection(end).run();
-          }
-        }
-
         var isFloat = (flowCls === 'img-flow') &&
                       (hposCls === 'img-links' || hposCls === 'img-rechts');
         var chain = activeEditor.chain().focus().setImage({
@@ -3750,13 +3725,6 @@
   }
 
   /* ── TipTap: init / get / destroy ─────────────────────────── */
-  // Letzte bekannte Selektion pro Feld, live bei jeder Selektionsänderung
-  // mitgeschrieben (onSelectionUpdate). Sobald der Editor durch einen
-  // Klick außerhalb (z.B. Toolbar-Button) den Fokus verliert, liefert
-  // editor.state.selection nicht mehr verlässlich die letzte echte
-  // Cursor-Position – dieser Tracker tut es, da er schon VOR dem
-  // Fokusverlust aktualisiert wurde.
-  var _ttLastSelectionByField = {};
   function initTiptap(fieldId, rawContent) {
     var container = id('tt-' + fieldId);
     if (!container) return;
@@ -3845,10 +3813,7 @@
       ].concat(paragraphExts).concat(tableExts),
       content: html,
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
-      onSelectionUpdate: function() {
-        updateTiptapToolbar(fieldId);
-        _ttLastSelectionByField[fieldId] = editor.state.selection;
-      }
+      onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
     });
     S.tiptapEditors[fieldId] = editor;
     updateTiptapToolbar(fieldId);
@@ -4055,14 +4020,6 @@
   // Bild-Modal für TipTap öffnen (analog openMdImageModal, aber ohne S.mde-Check)
   window.openTiptapImageModal = function(fieldId) {
     S._tiptapImageField = fieldId;
-    var activeEditor = S.tiptapEditors[fieldId];
-    if (activeEditor) {
-      // Live mitgeschriebene Selektion verwenden statt der aktuellen
-      // editor.state.selection, die beim Öffnen des Modals durch den
-      // Fokusverlust schon nicht mehr die echte Cursor-Position ist.
-      window._ttSelectionBeforeModal = _ttLastSelectionByField[fieldId] || activeEditor.state.selection;
-      window._ttEditorBeforeModal    = activeEditor;
-    }
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
