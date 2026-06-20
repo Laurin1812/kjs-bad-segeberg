@@ -220,7 +220,7 @@
 </div>
 
 <!-- ── TIPTAP BILD-KONTEXTMENÜ ────────────────────────────────── -->
-<div id="tt-img-menu" style="display:none;position:fixed;z-index:10000;">
+<div id="tt-img-menu" style="display:none;position:fixed;z-index:9999;">
   <div class="tt-imgmenu-inner">
     <span class="tt-imgmenu-label">Größe:</span>
     <button type="button" class="tt-imgmenu-btn" data-size="img-klein"  onclick="ttImgSize('img-klein')">Klein</button>
@@ -234,6 +234,19 @@
     <button type="button" class="tt-imgmenu-btn" data-pos="img-rechts"    onclick="ttImgPos('img-rechts')">Rechts</button>
     <span class="tt-imgmenu-sep"></span>
     <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" onclick="ttImgDelete()" title="Bild löschen">🗑️</button>
+  </div>
+</div>
+
+<!-- ── TIPTAP TABELLEN-DROPDOWN ──────────────────────────────── -->
+<div id="tt-table-menu" style="display:none;position:fixed;z-index:9999;">
+  <div class="tt-imgmenu-inner tt-imgmenu-inner--col">
+    <button type="button" class="tt-imgmenu-btn" onclick="ttTableCmd('insertTable')">Tabelle einfügen</button>
+    <span class="tt-imgmenu-sep"></span>
+    <button type="button" class="tt-imgmenu-btn" onclick="ttTableCmd('addRowAfter')">Zeile hinzufügen</button>
+    <button type="button" class="tt-imgmenu-btn" onclick="ttTableCmd('deleteRow')">Zeile löschen</button>
+    <span class="tt-imgmenu-sep"></span>
+    <button type="button" class="tt-imgmenu-btn" onclick="ttTableCmd('addColumnAfter')">Spalte hinzufügen</button>
+    <button type="button" class="tt-imgmenu-btn" onclick="ttTableCmd('deleteColumn')">Spalte löschen</button>
   </div>
 </div>
 

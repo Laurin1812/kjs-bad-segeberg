@@ -1160,11 +1160,7 @@
           '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">&bull;&nbsp;Liste</button>' +
           '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1.&nbsp;Liste</button>' +
           '<span class="tt-sep"></span>' +
-          '<button type="button" class="tt-btn" data-cmd="insertTable"   onclick="ttCmd(\'' + fieldId + '\',\'insertTable\')"   title="Tabelle einfügen">&#9638;&nbsp;Tabelle</button>' +
-          '<button type="button" class="tt-btn" data-cmd="addRowAfter"   onclick="ttCmd(\'' + fieldId + '\',\'addRowAfter\')"   title="Zeile hinzufügen">+Zeile</button>' +
-          '<button type="button" class="tt-btn" data-cmd="addColumnAfter" onclick="ttCmd(\'' + fieldId + '\',\'addColumnAfter\')" title="Spalte hinzufügen">+Spalte</button>' +
-          '<button type="button" class="tt-btn" data-cmd="deleteRow"     onclick="ttCmd(\'' + fieldId + '\',\'deleteRow\')"     title="Zeile löschen">-Zeile</button>' +
-          '<button type="button" class="tt-btn" data-cmd="deleteColumn"  onclick="ttCmd(\'' + fieldId + '\',\'deleteColumn\')"  title="Spalte löschen">-Spalte</button>' +
+          '<button type="button" class="tt-btn" onclick="ttToggleTableMenu(event,\'' + fieldId + '\')" title="Tabelle">&#9638;&nbsp;Tabelle</button>' +
           imgBtn +
         '</div>' +
         '<div class="tt-mount" id="tt-' + fieldId + '"></div>' +
@@ -3188,7 +3184,7 @@
         // Nach Float-Bild clearfix-Absatz einfügen damit nachfolgende
         // Blöcke (Listen, Absätze) das Bild nicht überlagern
         if (isFloat) {
-          chain = chain.insertContent('<p style="clear:both"></p>');
+          chain = chain.insertContent('<div style="clear:both"></div>');
         }
         chain.run();
       }
@@ -3810,18 +3806,14 @@
     menu.querySelectorAll('[data-pos]').forEach(function(b) {
       b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-pos')) !== -1);
     });
-    // Measure first (visibility:hidden), then position, then show
+    // Measure first (visibility:hidden), dann mit getBoundingClientRect positionieren
+    menu.style.position   = 'fixed';
+    menu.style.zIndex     = '9999';
     menu.style.visibility = 'hidden';
     menu.style.display    = 'block';
-    var mh   = menu.offsetHeight || 46;
-    var mw   = menu.offsetWidth  || 340;
-    var rect = imgEl.getBoundingClientRect();
-    var top  = rect.top - mh - 6;
-    if (top < 6) top = rect.bottom + 6;
-    if (top + mh > window.innerHeight - 6) top = Math.max(6, window.innerHeight - mh - 6);
-    var left = Math.max(6, Math.min(rect.left, window.innerWidth - mw - 6));
-    menu.style.top        = top  + 'px';
-    menu.style.left       = left + 'px';
+    var r = imgEl.getBoundingClientRect();
+    menu.style.top  = (r.top + window.scrollY - menu.offsetHeight - 8) + 'px';
+    menu.style.left = r.left + 'px';
     menu.style.visibility = '';
   }
 
@@ -3916,16 +3908,59 @@
       case 'underline':   c.toggleUnderline().run();              break;
       case 'h2':          c.toggleHeading({ level: 2 }).run();    break;
       case 'h3':          c.toggleHeading({ level: 3 }).run();    break;
-      case 'bulletList':    c.toggleBulletList().run();                                break;
-      case 'orderedList':   c.toggleOrderedList().run();                               break;
-      case 'insertTable':   c.insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run(); break;
-      case 'addRowAfter':   c.addRowAfter().run();                                    break;
-      case 'addColumnAfter':c.addColumnAfter().run();                                 break;
-      case 'deleteRow':     c.deleteRow().run();                                      break;
-      case 'deleteColumn':  c.deleteColumn().run();                                   break;
+      case 'bulletList':  c.toggleBulletList().run();             break;
+      case 'orderedList': c.toggleOrderedList().run();            break;
     }
     updateTiptapToolbar(fieldId);
   };
+
+  // Tabellen-Dropdown: öffnen/schließen unterhalb des "Tabelle"-Buttons
+  var _ttTableField = null;
+  window.ttToggleTableMenu = function(evt, fieldId) {
+    var menu = id('tt-table-menu');
+    if (!menu) return;
+    if (menu.style.display !== 'none' && _ttTableField === fieldId) {
+      menu.style.display = 'none';
+      _ttTableField = null;
+      return;
+    }
+    _ttTableField = fieldId;
+    var btn = evt.currentTarget;
+    menu.style.visibility = 'hidden';
+    menu.style.display    = 'block';
+    var r = btn.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 6) + 'px';
+    menu.style.left = r.left + 'px';
+    menu.style.visibility = '';
+  };
+
+  window.ttTableCmd = function(cmd) {
+    var fieldId = _ttTableField;
+    var editor  = fieldId && S.tiptapEditors[fieldId];
+    if (editor) {
+      var c = editor.chain().focus();
+      switch (cmd) {
+        case 'insertTable':    c.insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run(); break;
+        case 'addRowAfter':    c.addRowAfter().run();    break;
+        case 'addColumnAfter': c.addColumnAfter().run(); break;
+        case 'deleteRow':      c.deleteRow().run();      break;
+        case 'deleteColumn':   c.deleteColumn().run();   break;
+      }
+    }
+    var menu = id('tt-table-menu');
+    if (menu) menu.style.display = 'none';
+    _ttTableField = null;
+  };
+
+  // Tabellen-Dropdown ausblenden wenn außerhalb geklickt
+  document.addEventListener('mousedown', function(e) {
+    var menu = id('tt-table-menu');
+    if (!menu || menu.style.display === 'none') return;
+    if (!menu.contains(e.target) && !e.target.closest('.tt-btn')) {
+      menu.style.display = 'none';
+      _ttTableField = null;
+    }
+  });
 
   // Bild-Modal für TipTap öffnen (analog openMdImageModal, aber ohne S.mde-Check)
   window.openTiptapImageModal = function(fieldId) {

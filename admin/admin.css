@@ -781,7 +781,7 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror h3  { font-size: 1.05rem; font-weight: 700; margin: .7rem 0 .25rem; }
 .tt-mount .ProseMirror ul,
 .tt-mount .ProseMirror ol  { padding-left: 1.6rem; margin: .4rem 0; overflow: hidden; }
-.tt-mount .ProseMirror li  { margin: .15rem 0; }
+.tt-mount .ProseMirror li  { margin: .15rem 0; list-style-position: outside; }
 .tt-mount .ProseMirror img {
   max-width: 100%;
   border-radius: 6px;
@@ -826,6 +826,12 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
+.tt-imgmenu-inner--col {
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 170px;
+}
+.tt-imgmenu-inner--col .tt-imgmenu-btn { text-align: left; }
 .tt-imgmenu-label {
   font-size: .75rem;
   color: var(--text-muted);
