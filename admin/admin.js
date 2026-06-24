@@ -1169,6 +1169,42 @@
     '</div>';
   }
 
+  // Bildgröße-Auswahl als Button-Gruppe (gleiche Konvention wie Inline-Bilder:
+  // img-25/50/75/100). Gespeichert wird der Klassenname im versteckten Feld
+  // f-bild_groesse, das collectInfomobil über gv('bild_groesse') ausliest.
+  function fBildGroesse(val) {
+    var cur = (val && val.indexOf('img-') === 0) ? val
+            : val === 'klein'  ? 'img-25'
+            : val === 'mittel' ? 'img-50'
+            : val === 'gross'  ? 'img-100'
+            : 'img-100';
+    var opts = [
+      { v: 'img-25',  l: '25%'  },
+      { v: 'img-50',  l: '50%'  },
+      { v: 'img-75',  l: '75%'  },
+      { v: 'img-100', l: '100%' }
+    ];
+    var btns = opts.map(function(o) {
+      return '<button type="button" class="mdimg-size-btn' +
+        (o.v === cur ? ' mdimg-size-btn--active' : '') +
+        '" data-val="' + o.v + '" onclick="bildGroesseSet(\'' + o.v + '\')">' + o.l + '</button>';
+    }).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label">Bildgröße</label>' +
+      '<div class="mdimg-size-row" id="bild-groesse-group">' + btns + '</div>' +
+      '<input type="hidden" id="f-bild_groesse" value="' + cur + '">' +
+    '</div>';
+  }
+
+  window.bildGroesseSet = function(v) {
+    var inp = id('f-bild_groesse');
+    if (inp) inp.value = v;
+    var grp = id('bild-groesse-group');
+    if (grp) grp.querySelectorAll('.mdimg-size-btn').forEach(function(b) {
+      b.classList.toggle('mdimg-size-btn--active', b.getAttribute('data-val') === v);
+    });
+  };
+
   function renderInfomobil(def, data) {
     var html = panelHeader(def.label, '') +
       '<div class="panel-body">' +
@@ -1183,11 +1219,7 @@
           '<div class="form-card-title">Bilder</div>' +
           fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
           fImage('bild',      'Inhaltsbild',          data.bild) +
-          fSelect('bild_groesse', 'Bildgröße', data.bild_groesse || 'gross', [
-            { value: 'klein',  label: 'Klein (300px)' },
-            { value: 'mittel', label: 'Mittel (500px)' },
-            { value: 'gross',  label: 'Groß (volle Breite)' }
-          ]) +
+          fBildGroesse(data.bild_groesse) +
           fText('bild_alt',   'Bild-Beschreibung',    data.bild_alt) +
         '</div>' +
         '<div class="form-card">' +

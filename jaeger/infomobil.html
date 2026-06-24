@@ -181,9 +181,17 @@
         var bg = document.querySelector('.page-hero__bg');
         if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
       }
-      var bildBreite = d.bild_groesse === 'klein' ? '300px' : d.bild_groesse === 'mittel' ? '500px' : '100%';
+      // Inhaltsbild-Größe als CSS-Klasse (img-25/50/75/100, gleiche
+      // Konvention wie Inline-Bilder). Alte Werte klein/mittel/gross werden
+      // auf das neue Schema gemappt.
+      function bildGroesseClass(v) {
+        if (v && v.indexOf('img-') === 0) return v;
+        if (v === 'klein')  return 'img-25';
+        if (v === 'mittel') return 'img-50';
+        return 'img-100';
+      }
       var bild = d.bild
-        ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" style="width:' + bildBreite + ';max-width:100%;border-radius:8px;margin-bottom:1.5rem;">'
+        ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" class="' + bildGroesseClass(d.bild_groesse) + '" style="border-radius:8px;margin-bottom:1.5rem;">'
         : '';
       var kontaktStr = '';
       if (d.kontakt_name || d.kontakt_email) {
