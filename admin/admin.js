@@ -3181,6 +3181,22 @@
         var TT_SIZE_MAP = { 'img-klein':'img-25', 'img-mittel':'img-50', 'img-gross':'img-75', 'img-voll':'img-100' };
         var ttSize = TT_SIZE_MAP[sizeCls] || 'img-50';
         var ttPos  = (hposCls === 'img-rechts' || hposCls === 'img-zentriert') ? hposCls : 'img-links';
+
+        // Ein Float-Bild darf nie INNERHALB einer Liste sitzen, sonst
+        // zerschießt es das Listen-Layout. Steht der Cursor in einer Liste,
+        // den Cursor ans Ende der gesamten (äußersten) Liste verschieben,
+        // damit das Bild als eigener Block NACH der Liste landet und der
+        // nachfolgende Fließtext es sauber umfließt.
+        var $from = activeEditor.state.selection.$from;
+        var listDepth = -1;
+        for (var d = 1; d <= $from.depth; d++) {
+          var nm = $from.node(d).type.name;
+          if (nm === 'bulletList' || nm === 'orderedList') { listDepth = d; break; }
+        }
+        if (listDepth !== -1) {
+          activeEditor.chain().focus().setTextSelection($from.after(listDepth)).run();
+        }
+
         activeEditor.chain().focus().setImage({
           src: _mdImgSelected.url,
           alt: alt,
