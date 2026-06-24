@@ -1,12 +1,12 @@
 {
   "titel": "🧪 Testseite",
-  "untertitel": "<p>Diese Seite dient ausschließlich zum Testen des TipTap-Editors und neuer Funktionen.</p>",
-  "intro": "<p></p><p></p><p style=\"clear: both;\"></p><p>Hier steht ein <strong>Beispiel-Einleitungstext</strong> mit <em>Formatierungen</em> und <u>Unterstreichungen</u>, um die Darstellung im Frontend zu prüfen.</p><div style=\"float: right; margin-left: 1rem; margin-bottom: 0.5rem; width: 300px;\"><img src=\"/images/hundeausbildung.jpg\" alt=\"hundeausbildung\" class=\"img-flow img-klein img-rechts\"></div>",
-  "bild": "/images/hero.jpg",
+  "untertitel": "",
+  "intro": "",
+  "bild": "",
   "bild_groesse": "klein",
   "bild_alt": "Beispielbild für die Testseite",
-  "hero_bild": "/images/hero.jpg",
-  "inhalt": "<h2>Beispiel-Überschrift</h2><p>Dies ist ein Testabsatz mit normalem Fließtext, um die Standard-Typografie zu prüfen.</p><p>Direkt daneben steht eine <strong>Aufzählungsliste</strong>, um zu testen, dass die Listenpunkte nicht vom Float-Bild überdeckt werden:</p><ul><li><p>Erster Listenpunkt</p></li><li><p>Zweiter Listenpunkt</p></li><li><p>Dritter Listenpunkt mit etwas mehr Text, um den Zeilenumbruch zu testen</p></li></ul><h3>Beispiel-Tabelle</h3><table style=\"min-width: 50px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Spalte A</p></th><th colspan=\"1\" rowspan=\"1\"><p>Spalte B</p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Wert 1</p></td><td colspan=\"1\" rowspan=\"1\"><p>Wert 2</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Wert 3</p></td><td colspan=\"1\" rowspan=\"1\"><p>Wert 4</p></td></tr></tbody></table><p>Ende des Testinhalts.</p>",
+  "hero_bild": "",
+  "inhalt": "",
   "kontakt_name": "Max Mustermann",
   "kontakt_email": "test@kjs-bad-segeberg.de",
   "downloads": [
