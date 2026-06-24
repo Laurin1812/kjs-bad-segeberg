@@ -560,6 +560,16 @@ p  { margin-bottom: 1rem; }
 #seite-inhalt img.img-block.img-zentriert,
 #page-inhalt img.img-block.img-zentriert { margin-left: auto; margin-right: auto; }
 
+/* ── TipTap Inline-Bilder: Größe (Prozent der Textbreite) ──────────────
+   Neues, schlankes Schema (img-25/50/75/100). Position kommt von den
+   bestehenden Klassen img-links / img-rechts / img-zentriert oben.
+   width + max-width überschreiben die max-width:50% der Positions-Regeln,
+   da gleiche Spezifität und hier später im Quelltext. */
+.main-content img.img-25,  #seite-inhalt img.img-25,  #page-inhalt img.img-25  { width: 25%;  max-width: 25%; }
+.main-content img.img-50,  #seite-inhalt img.img-50,  #page-inhalt img.img-50  { width: 50%;  max-width: 50%; }
+.main-content img.img-75,  #seite-inhalt img.img-75,  #page-inhalt img.img-75  { width: 75%;  max-width: 75%; }
+.main-content img.img-100, #seite-inhalt img.img-100, #page-inhalt img.img-100 { width: 100%; max-width: 100%; }
+
 /* Clearfix nach gefloateten Bildern – verhindert, dass nachfolgender Text ins Bild fließt */
 .main-content::after,
 #seite-inhalt::after,

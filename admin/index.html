@@ -223,14 +223,14 @@
 <div id="tt-img-menu" style="display:none;position:fixed;z-index:9999;">
   <div class="tt-imgmenu-inner">
     <span class="tt-imgmenu-label">Größe:</span>
-    <button type="button" class="tt-imgmenu-btn" data-size="img-klein"  onclick="ttImgSize('img-klein')">Klein</button>
-    <button type="button" class="tt-imgmenu-btn" data-size="img-mittel" onclick="ttImgSize('img-mittel')">Mittel</button>
-    <button type="button" class="tt-imgmenu-btn" data-size="img-gross"  onclick="ttImgSize('img-gross')">Groß</button>
-    <button type="button" class="tt-imgmenu-btn" data-size="img-voll"   onclick="ttImgSize('img-voll')">Voll</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-25"  onclick="ttImgSize('img-25')">25%</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-50"  onclick="ttImgSize('img-50')">50%</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-75"  onclick="ttImgSize('img-75')">75%</button>
+    <button type="button" class="tt-imgmenu-btn" data-size="img-100" onclick="ttImgSize('img-100')">100%</button>
     <span class="tt-imgmenu-sep"></span>
     <span class="tt-imgmenu-label">Position:</span>
     <button type="button" class="tt-imgmenu-btn" data-pos="img-links"     onclick="ttImgPos('img-links')">Links</button>
-    <button type="button" class="tt-imgmenu-btn" data-pos="img-zentriert" onclick="ttImgPos('img-zentriert')">Mitte</button>
+    <button type="button" class="tt-imgmenu-btn" data-pos="img-zentriert" onclick="ttImgPos('img-zentriert')">Zentriert</button>
     <button type="button" class="tt-imgmenu-btn" data-pos="img-rechts"    onclick="ttImgPos('img-rechts')">Rechts</button>
     <span class="tt-imgmenu-sep"></span>
     <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" onclick="ttImgDelete()" title="Bild löschen">🗑️</button>
@@ -264,12 +264,11 @@
   import StarterKit      from 'https://esm.sh/@tiptap/starter-kit@2';
   import Underline       from 'https://esm.sh/@tiptap/extension-underline@2';
   import Image           from 'https://esm.sh/@tiptap/extension-image@2';
-  import Paragraph       from 'https://esm.sh/@tiptap/extension-paragraph@2';
   import Table           from 'https://esm.sh/@tiptap/extension-table@2';
   import TableRow        from 'https://esm.sh/@tiptap/extension-table-row@2';
   import TableCell       from 'https://esm.sh/@tiptap/extension-table-cell@2';
   import TableHeader     from 'https://esm.sh/@tiptap/extension-table-header@2';
-  window.TipTap = { Editor, StarterKit, Underline, Image, Paragraph, Table, TableRow, TableCell, TableHeader };
+  window.TipTap = { Editor, StarterKit, Underline, Image, Table, TableRow, TableCell, TableHeader };
 </script>
 <script src="admin.js"></script>
 </body>

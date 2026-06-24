@@ -789,20 +789,21 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   margin: .15rem 0;
 }
 .tt-mount .ProseMirror img {
-  max-width: 100%;
-  border-radius: 6px;
   display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
   margin: .5rem 0;
 }
-/* Bild-Ausrichtung (dieselben Klassen wie auf der öffentlichen Website) */
-.tt-mount .ProseMirror img.img-links    { float: left;  margin-right: 1rem; max-width: 50%; }
-.tt-mount .ProseMirror img.img-rechts   { float: right; margin-left:  1rem; max-width: 50%; }
-.tt-mount .ProseMirror img.img-zentriert { float: none; margin-left: auto; margin-right: auto; }
-.tt-mount .ProseMirror img.img-block    { clear: both; }
-.tt-mount .ProseMirror img.img-klein    { width: 300px; max-width: 100%; }
-.tt-mount .ProseMirror img.img-mittel   { width: 500px; max-width: 100%; }
-.tt-mount .ProseMirror img.img-gross,
-.tt-mount .ProseMirror img.img-voll     { width: 100%; }
+/* ── Inline-Bilder: Größe (Prozent der Textbreite) ── */
+.tt-mount .ProseMirror img.img-25  { width: 25%; }
+.tt-mount .ProseMirror img.img-50  { width: 50%; }
+.tt-mount .ProseMirror img.img-75  { width: 75%; }
+.tt-mount .ProseMirror img.img-100 { width: 100%; }
+/* ── Inline-Bilder: Position ── */
+.tt-mount .ProseMirror img.img-links     { float: left;  margin: .25rem 1rem .5rem 0; }
+.tt-mount .ProseMirror img.img-rechts    { float: right; margin: .25rem 0 .5rem 1rem; }
+.tt-mount .ProseMirror img.img-zentriert { float: none; display: block; margin: 1rem auto; }
 /* Placeholder-Text wenn Editor leer */
 .tt-mount .ProseMirror.is-editor-empty::before {
   content: attr(data-placeholder);

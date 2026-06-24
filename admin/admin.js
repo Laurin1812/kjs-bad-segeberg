@@ -3171,33 +3171,21 @@
     if (vposCls !== 'img-pos-oben') classes.push(vposCls);
     classes.push(flowCls);
 
-    // TipTap-Bild einfügen (Infomobil-Editor)
+    // TipTap-Bild einfügen (form:'tiptap', z.B. Testseite/Infomobil).
+    // Größe/Position des Modals werden auf das neue, schlanke Klassenschema
+    // gemappt (img-25/50/75/100 + img-links/img-rechts/img-zentriert).
+    // Feinjustierung danach per Klick-Menü direkt am Bild.
     if (S._tiptapImageField) {
       var activeEditor = S.tiptapEditors[S._tiptapImageField];
       if (activeEditor) {
-        var isFloat = (flowCls === 'img-flow') &&
-                      (hposCls === 'img-links' || hposCls === 'img-rechts');
-        var chain = activeEditor.chain().focus().setImage({
+        var TT_SIZE_MAP = { 'img-klein':'img-25', 'img-mittel':'img-50', 'img-gross':'img-75', 'img-voll':'img-100' };
+        var ttSize = TT_SIZE_MAP[sizeCls] || 'img-50';
+        var ttPos  = (hposCls === 'img-rechts' || hposCls === 'img-zentriert') ? hposCls : 'img-links';
+        activeEditor.chain().focus().setImage({
           src: _mdImgSelected.url,
           alt: alt,
-          class: classes.join(' ')
-        });
-        // Nach Float-Bild clearfix-Absatz einfügen, BEVOR der nächste
-        // Block (z.B. eine Liste) folgt – sonst überlagert das Bild
-        // weiterhin nachfolgende Listenpunkte. Als echter Paragraph-Knoten
-        // eingefügt (nicht als HTML-String), sonst erscheint der Tag als
-        // sichtbarer Text im Editor.
-        if (isFloat) {
-          chain = chain.insertContent({ type: 'paragraph', attrs: { style: 'clear:both' } });
-        }
-        chain.run();
-        // Cursor explizit nach dem Clearfix positionieren, damit der
-        // nächste eingefügte Block (z.B. eine Liste) garantiert dahinter
-        // landet und nicht mehr neben dem Float-Bild.
-        if (isFloat) {
-          var afterClearfixPos = activeEditor.state.selection.to;
-          activeEditor.chain().focus().setTextSelection(afterClearfixPos).run();
-        }
+          class: ttSize + ' ' + ttPos
+        }).run();
       }
       closeMdImageModal();
       toast('✅ Bild eingefügt', 'ok');
@@ -3740,7 +3728,10 @@
       html = window.marked.parse(html);
     }
 
-    // Image-Extension um CSS-Klassen-Attribut erweitern
+    // Image-Extension um ein CSS-Klassen-Attribut erweitern. Das Bild wird
+    // als schlichtes <img class="..."> gerendert; Größe (img-25/50/75/100)
+    // und Position (img-links/img-rechts/img-zentriert) steuert allein das
+    // CSS – kein Wrapper-Div, kein Inline-Style, kein Clearfix nötig.
     var ImageWithClass = TT.Image.extend({
       addAttributes: function() {
         var parent = this.parent ? this.parent() : {};
@@ -3751,52 +3742,8 @@
             renderHTML: function(attrs) { return attrs.class ? { class: attrs.class } : {}; }
           }
         });
-      },
-      // Float-Bilder (links/rechts) in einen eigenen <div> wrappen, statt
-      // float direkt auf das <img> zu setzen. Dadurch hat der Float-Block
-      // eine garantierte Breite und nachfolgende Listen behalten ihre
-      // Bullets (•), die sonst im padding-Bereich vom Float abgeschnitten
-      // wurden.
-      renderHTML: function(props) {
-        var HTMLAttributes = props.HTMLAttributes || {};
-        var cls = HTMLAttributes.class || '';
-        var isLinks  = cls.indexOf('img-links')  !== -1;
-        var isRechts = cls.indexOf('img-rechts') !== -1;
-        var isFlow   = cls.indexOf('img-flow')   !== -1;
-        if (!isFlow || (!isLinks && !isRechts)) {
-          return ['img', HTMLAttributes];
-        }
-        var width = cls.indexOf('img-klein')  !== -1 ? '300px'
-                  : cls.indexOf('img-mittel') !== -1 ? '500px'
-                  : '100%';
-        var wrapStyle = 'float:' + (isLinks ? 'left' : 'right') + ';' +
-          (isLinks ? 'margin-right:1rem;' : 'margin-left:1rem;') +
-          'margin-bottom:0.5rem;width:' + width + ';';
-        return ['div', { style: wrapStyle }, ['img', HTMLAttributes]];
       }
     });
-
-    // Paragraph-Extension um ein "style"-Attribut erweitern, damit der
-    // Clearfix nach Float-Bildern als echter Knoten (nicht als HTML-Text)
-    // eingefügt werden kann.
-    var paragraphExts = [];
-    var starterKitOpts = { heading: { levels: [2, 3] } };
-    if (TT.Paragraph) {
-      var ParagraphWithStyle = TT.Paragraph.extend({
-        addAttributes: function() {
-          var parent = this.parent ? this.parent() : {};
-          return Object.assign({}, parent, {
-            style: {
-              default: null,
-              parseHTML:  function(el) { return el.getAttribute('style'); },
-              renderHTML: function(attrs) { return attrs.style ? { style: attrs.style } : {}; }
-            }
-          });
-        }
-      });
-      starterKitOpts.paragraph = false;
-      paragraphExts = [ParagraphWithStyle];
-    }
 
     var tableExts = (TT.Table && TT.TableRow && TT.TableCell && TT.TableHeader) ? [
       TT.Table.configure({ resizable: false }),
@@ -3807,10 +3754,10 @@
     var editor = new TT.Editor({
       element: container,
       extensions: [
-        TT.StarterKit.configure(starterKitOpts),
+        TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
         TT.Underline,
         ImageWithClass
-      ].concat(paragraphExts).concat(tableExts),
+      ].concat(tableExts),
       content: html,
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
@@ -3848,7 +3795,7 @@
   /* ── TipTap: Bild-Kontextmenü ─────────────────────────────── */
   var _ttClickedImg    = null;
   var _ttClickedEditor = null;
-  var SIZE_CLS = ['img-klein','img-mittel','img-gross','img-voll'];
+  var SIZE_CLS = ['img-25','img-50','img-75','img-100'];
   var POS_CLS  = ['img-links','img-zentriert','img-rechts'];
 
   function showTtImgMenu(imgEl) {
