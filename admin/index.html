@@ -258,17 +258,55 @@
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<!-- TipTap via ESM – läuft async, ist fertig bevor der User auf Infomobil klickt -->
+<!-- TipTap via ESM (CDN). Wird asynchron geladen. Damit der Editor NIE leer
+     initialisiert wird, bevor das Modul vollständig da ist, stellen wir ein
+     Promise bereit (window.__tiptapReady), das erst aufgelöst wird, wenn
+     window.TipTap mit ALLEN Extensions gesetzt ist. admin.js wartet darauf. -->
+<script>
+  window.__tiptapReady = new Promise(function (resolve, reject) {
+    window.__tiptapResolve = resolve;
+    window.__tiptapReject  = reject;
+  });
+  // Promise-Rejections nicht als „unhandled" in der Konsole lärmen lassen –
+  // admin.js hat zusätzlich einen Polling-Fallback.
+  window.__tiptapReady.catch(function () {});
+</script>
 <script type="module">
-  import { Editor }      from 'https://esm.sh/@tiptap/core@2';
-  import StarterKit      from 'https://esm.sh/@tiptap/starter-kit@2';
-  import Underline       from 'https://esm.sh/@tiptap/extension-underline@2';
-  import Image           from 'https://esm.sh/@tiptap/extension-image@2';
-  import Table           from 'https://esm.sh/@tiptap/extension-table@2';
-  import TableRow        from 'https://esm.sh/@tiptap/extension-table-row@2';
-  import TableCell       from 'https://esm.sh/@tiptap/extension-table-cell@2';
-  import TableHeader     from 'https://esm.sh/@tiptap/extension-table-header@2';
-  window.TipTap = { Editor, StarterKit, Underline, Image, Table, TableRow, TableCell, TableHeader };
+  (async function () {
+    try {
+      var mods = await Promise.all([
+        import('https://esm.sh/@tiptap/core@2'),
+        import('https://esm.sh/@tiptap/starter-kit@2'),
+        import('https://esm.sh/@tiptap/extension-underline@2'),
+        import('https://esm.sh/@tiptap/extension-image@2'),
+        import('https://esm.sh/@tiptap/extension-table@2'),
+        import('https://esm.sh/@tiptap/extension-table-row@2'),
+        import('https://esm.sh/@tiptap/extension-table-cell@2'),
+        import('https://esm.sh/@tiptap/extension-table-header@2')
+      ]);
+      var TipTap = {
+        Editor:      mods[0].Editor,
+        StarterKit:  mods[1].default,
+        Underline:   mods[2].default,
+        Image:       mods[3].default,
+        Table:       mods[4].default,
+        TableRow:    mods[5].default,
+        TableCell:   mods[6].default,
+        TableHeader: mods[7].default
+      };
+      // Nur veröffentlichen, wenn wirklich alles da ist (atomar setzen).
+      if (TipTap.Editor && TipTap.StarterKit && TipTap.Underline && TipTap.Image &&
+          TipTap.Table && TipTap.TableRow && TipTap.TableCell && TipTap.TableHeader) {
+        window.TipTap = TipTap;
+        window.__tiptapResolve(window.TipTap);
+      } else {
+        throw new Error('TipTap: nicht alle Extensions geladen');
+      }
+    } catch (e) {
+      console.error('TipTap-Module konnten nicht geladen werden:', e);
+      window.__tiptapReject(e);
+    }
+  })();
 </script>
 <script src="admin.js"></script>
 </body>

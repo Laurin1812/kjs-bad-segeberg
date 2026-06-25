@@ -3820,31 +3820,48 @@
     return out.join('\n');
   }
 
+  /* ── TipTap: Modul-Bereitschaft (Race-Condition wasserdicht) ──
+     window.TipTap gilt nur als bereit, wenn ALLE benötigten Extensions da
+     sind – nicht nur Editor. So wird nie ein halb geladener Editor erzeugt. */
+  function tiptapReady() {
+    var T = window.TipTap;
+    return !!(T && T.Editor && T.StarterKit && T.Underline && T.Image &&
+              T.Table && T.TableRow && T.TableCell && T.TableHeader);
+  }
+  // Ruft cb() auf, sobald TipTap vollständig geladen ist. Bevorzugt das in
+  // index.html bereitgestellte Promise (feuert sofort beim Laden); zusätzlich
+  // ein Polling-Fallback (alle 100ms), falls das Promise mal nicht greift.
+  function whenTiptapReady(cb) {
+    if (tiptapReady()) { cb(); return; }
+    var done = false;
+    function fire() { if (done) return; done = true; cb(); }
+    if (window.__tiptapReady && typeof window.__tiptapReady.then === 'function') {
+      window.__tiptapReady.then(function() { if (tiptapReady()) fire(); });
+    }
+    var tries = 0;
+    var timer = setInterval(function() {
+      if (tiptapReady()) { clearInterval(timer); fire(); }
+      else if (++tries > 600) { clearInterval(timer); } // ~60s Sicherheits-Timeout
+    }, 100);
+  }
+
   /* ── TipTap: init / get / destroy ─────────────────────────── */
   function initTiptap(fieldId, rawContent) {
     var container = id('tt-' + fieldId);
     if (!container) return;
-    var TT = window.TipTap;
-    if (!TT || !TT.Editor) {
-      // RACE-CONDITION: Das TipTap-Modul wird als ESM (CDN) asynchron geladen
-      // und ist beim Öffnen der Seite evtl. noch nicht da. Früher blieb das
-      // Feld dann dauerhaft leer – und ein anschließendes Speichern hätte den
-      // echten Inhalt mit '' überschrieben. Jetzt: warten und erneut versuchen,
-      // sobald window.TipTap verfügbar ist. (getTiptapValue behält bis dahin
-      // ohnehin den alten Wert, falls zwischendurch gespeichert wird.)
+    if (!tiptapReady()) {
+      // RACE-CONDITION: Das TipTap-Modul (ESM/CDN) ist beim ersten Öffnen evtl.
+      // noch nicht (vollständig) geladen. Niemals einen leeren Editor erzeugen –
+      // stattdessen Platzhalter zeigen und erst initialisieren, wenn das Modul
+      // GARANTIERT vollständig da ist (Promise + Polling-Fallback).
       container.innerHTML = '<p style="color:var(--text-muted);padding:.75rem;">Editor wird geladen…</p>';
-      var tries = 0;
-      var timer = setInterval(function() {
-        if (!id('tt-' + fieldId)) { clearInterval(timer); return; } // weiternavigiert
-        if (window.TipTap && window.TipTap.Editor) {
-          clearInterval(timer);
-          initTiptap(fieldId, rawContent);
-        } else if (++tries > 150) {   // ~30s Sicherheits-Timeout
-          clearInterval(timer);
-        }
-      }, 200);
+      whenTiptapReady(function() {
+        // Nur fortsetzen, wenn der Container noch existiert (nicht weiternavigiert).
+        if (id('tt-' + fieldId)) initTiptap(fieldId, rawContent);
+      });
       return;
     }
+    var TT = window.TipTap;
 
     // Bestehendes Markdown automatisch zu HTML konvertieren (Einmal-Migration)
     var html = rawContent || '';
