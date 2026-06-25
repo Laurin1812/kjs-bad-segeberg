@@ -1242,9 +1242,11 @@
 
   function collectInfomobil(data) {
     data.titel         = gv('titel');
-    data.untertitel    = getTiptapValue('untertitel');
-    data.intro         = getTiptapValue('intro');
-    data.inhalt        = getTiptapValue('inhalt');
+    // data ist eine Tiefkopie von S.data → data.X hält hier noch den ALTEN
+    // gespeicherten Wert und dient als Rückfall-Anker (Schutz vor Datenverlust).
+    data.untertitel    = getTiptapValue('untertitel', data.untertitel, 'Untertitel');
+    data.intro         = getTiptapValue('intro',      data.intro,      'Einleitungstext');
+    data.inhalt        = getTiptapValue('inhalt',     data.inhalt,     'Textinhalt');
     data.hero_bild     = gv('hero_bild');
     data.bild          = gv('bild');
     data.bild_groesse  = gv('bild_groesse');
@@ -3766,7 +3768,23 @@
     if (!container) return;
     var TT = window.TipTap;
     if (!TT || !TT.Editor) {
+      // RACE-CONDITION: Das TipTap-Modul wird als ESM (CDN) asynchron geladen
+      // und ist beim Öffnen der Seite evtl. noch nicht da. Früher blieb das
+      // Feld dann dauerhaft leer – und ein anschließendes Speichern hätte den
+      // echten Inhalt mit '' überschrieben. Jetzt: warten und erneut versuchen,
+      // sobald window.TipTap verfügbar ist. (getTiptapValue behält bis dahin
+      // ohnehin den alten Wert, falls zwischendurch gespeichert wird.)
       container.innerHTML = '<p style="color:var(--text-muted);padding:.75rem;">Editor wird geladen…</p>';
+      var tries = 0;
+      var timer = setInterval(function() {
+        if (!id('tt-' + fieldId)) { clearInterval(timer); return; } // weiternavigiert
+        if (window.TipTap && window.TipTap.Editor) {
+          clearInterval(timer);
+          initTiptap(fieldId, rawContent);
+        } else if (++tries > 150) {   // ~30s Sicherheits-Timeout
+          clearInterval(timer);
+        }
+      }, 200);
       return;
     }
 
@@ -3803,6 +3821,11 @@
       TT.TableHeader,
       TT.TableCell
     ] : [];
+    // Falls (z.B. durch einen Retry-Timer) bereits ein Editor für dieses Feld
+    // existiert, vorher sauber entfernen → kein Doppel-Mount. Danach den
+    // „Editor wird geladen…"-Platzhalter entfernen, bevor neu gemountet wird.
+    if (S.tiptapEditors[fieldId]) { try { S.tiptapEditors[fieldId].destroy(); } catch(e) {} }
+    container.innerHTML = '';
     var editor = new TT.Editor({
       element: container,
       extensions: [
@@ -3829,13 +3852,31 @@
     });
   }
 
-  function getTiptapValue(fieldId) {
+  // Liefert den aktuellen Editor-Inhalt – ABER nur, wenn der Editor wirklich
+  // bereit ist. So wird verhindert, dass beim Speichern guter Inhalt durch ''
+  // überschrieben wird (z.B. wenn das TipTap-Modul beim Öffnen noch nicht
+  // geladen war = Race-Condition).
+  //   oldValue: der bisher gespeicherte Wert (Rückfall-Anker)
+  //   label:    Klartext-Feldname für die Rückfrage
+  function getTiptapValue(fieldId, oldValue, label) {
+    oldValue = oldValue || '';
     var editor = S.tiptapEditors[fieldId];
-    if (!editor) return '';
-    // TipTap-interne Selektions-Klasse niemals mitspeichern – sonst klebt sie
-    // dauerhaft am Bild-Knoten. Nur dieses Token wird entfernt.
+    // (1) Editor nicht initialisiert → NICHT leeren, alten Wert behalten.
+    if (!editor) return oldValue;
+    // TipTap-interne Selektions-Klasse niemals mitspeichern.
     var html = editor.getHTML().replace(/\s*ProseMirror-selectednode/g, '');
-    return (html === '<p></p>') ? '' : html;
+    if (html === '<p></p>') html = '';
+    // (2) Inhalt würde von „vorhanden" auf „leer" wechseln → nur löschen, wenn
+    //     der Nutzer es ausdrücklich bestätigt; sonst alten Wert behalten.
+    if (!html && oldValue) {
+      var ok = window.confirm(
+        'Das Feld „' + (label || fieldId) + '" war nicht leer und ist jetzt leer.\n\n' +
+        'Inhalt wirklich löschen?\n\n' +
+        'OK = löschen     ·     Abbrechen = bisherigen Inhalt behalten'
+      );
+      if (!ok) return oldValue;
+    }
+    return html;
   }
 
   function destroyAllTiptaps() {
