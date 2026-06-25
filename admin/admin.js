@@ -3775,6 +3775,10 @@
     if (html && !/<[a-z]/i.test(html) && window.marked) {
       html = window.marked.parse(html);
     }
+    // TipTap-interne Selektions-Klasse entfernen, die früher versehentlich
+    // in gespeicherte Bilder geraten ist. Nur dieses eine Token wird gelöscht
+    // (mit evtl. führendem Leerzeichen) – der restliche Inhalt bleibt intakt.
+    html = html.replace(/\s*ProseMirror-selectednode/g, '');
 
     // Image-Extension um ein CSS-Klassen-Attribut erweitern. Das Bild wird
     // als schlichtes <img class="..."> gerendert; Größe (img-25/50/75/100)
@@ -3828,7 +3832,9 @@
   function getTiptapValue(fieldId) {
     var editor = S.tiptapEditors[fieldId];
     if (!editor) return '';
-    var html = editor.getHTML();
+    // TipTap-interne Selektions-Klasse niemals mitspeichern – sonst klebt sie
+    // dauerhaft am Bild-Knoten. Nur dieses Token wird entfernt.
+    var html = editor.getHTML().replace(/\s*ProseMirror-selectednode/g, '');
     return (html === '<p></p>') ? '' : html;
   }
 
