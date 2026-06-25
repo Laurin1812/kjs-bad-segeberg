@@ -3762,6 +3762,64 @@
     S._mdeWrap    = null;
   }
 
+  /* ── Markdown-Tabellen → echtes <table>-HTML ───────────────────
+     Migrierte Markdown-Seiten enthalten Tabellen als reine Pipe-Syntax
+     (| A | B | + Trennzeile | --- | --- |). TipTap erkennt das nicht und
+     zeigt es als Strich-Text. Diese Funktion findet solche Tabellen-Blöcke
+     im Inhalt und wandelt NUR sie in <table>-HTML um – umliegender Text/HTML
+     bleibt unangetastet. Bevorzugt marked.js, mit manuellem Fallback. */
+  function ttIsMdTableSeparator(line) {
+    // z.B. "| --- | --- |", "|:--|--:|" – nur Pipes/Striche/Doppelpunkte/
+    // Leerzeichen und mindestens ein Strich.
+    return /\|/.test(line) && /-/.test(line) && /^[\s|:\-]+$/.test(line);
+  }
+  function ttMdTableBlockToHtml(md) {
+    if (window.marked && typeof window.marked.parse === 'function') {
+      var h = window.marked.parse(md);
+      if (/<table/i.test(h)) return h;
+    }
+    // Manueller Fallback (falls marked fehlt oder keine Tabelle erzeugt)
+    var rows = md.split('\n').filter(function(l) { return l.trim() !== ''; });
+    if (rows.length < 2) return md;
+    function cells(line) {
+      return line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|')
+        .map(function(c) { return c.trim(); });
+    }
+    var headers = cells(rows[0]);
+    var body = rows.slice(2).map(function(r) { return cells(r); });
+    var out = '<table><thead><tr>' +
+      headers.map(function(x) { return '<th>' + escHtml(x) + '</th>'; }).join('') +
+      '</tr></thead><tbody>';
+    body.forEach(function(r) {
+      out += '<tr>' + headers.map(function(_, c) { return '<td>' + escHtml(r[c] || '') + '</td>'; }).join('') + '</tr>';
+    });
+    return out + '</tbody></table>';
+  }
+  function convertMarkdownTablesToHtml(input) {
+    if (!input || input.indexOf('|') === -1) return input;
+    var lines = input.split('\n');
+    var out = [];
+    var i = 0;
+    while (i < lines.length) {
+      var header = lines[i];
+      var sep = lines[i + 1];
+      if (header && /\|/.test(header) && sep !== undefined && ttIsMdTableSeparator(sep)) {
+        var block = [header, sep];
+        var j = i + 2;
+        while (j < lines.length && /\|/.test(lines[j]) && lines[j].trim() !== '') {
+          block.push(lines[j]);
+          j++;
+        }
+        out.push(ttMdTableBlockToHtml(block.join('\n')));
+        i = j;
+      } else {
+        out.push(header);
+        i++;
+      }
+    }
+    return out.join('\n');
+  }
+
   /* ── TipTap: init / get / destroy ─────────────────────────── */
   function initTiptap(fieldId, rawContent) {
     var container = id('tt-' + fieldId);
@@ -3793,6 +3851,11 @@
     if (html && !/<[a-z]/i.test(html) && window.marked) {
       html = window.marked.parse(html);
     }
+    // Markdown-Tabellen (| --- |), die als reiner Text im Inhalt stecken (z.B.
+    // aus migrierten Markdown-Seiten), in echtes <table>-HTML umwandeln, damit
+    // TipTap sie als bearbeitbare Tabellen erkennt. Bereits in HTML gewandelte
+    // Tabellen haben keine Trennzeile mehr → werden nicht berührt (No-Op).
+    html = convertMarkdownTablesToHtml(html);
     // TipTap-interne Selektions-Klasse entfernen, die früher versehentlich
     // in gespeicherte Bilder geraten ist. Nur dieses eine Token wird gelöscht
     // (mit evtl. führendem Leerzeichen) – der restliche Inhalt bleibt intakt.
@@ -3834,6 +3897,25 @@
         ImageWithClass
       ].concat(tableExts),
       content: html,
+      editorProps: {
+        // Wird Markdown-Tabellen-Text eingefügt, in echtes <table>-HTML wandeln
+        // und einfügen. Sonst (kein Tabellen-Text) normales Einfügen zulassen.
+        handlePaste: function(view, event) {
+          try {
+            var cd = event.clipboardData || window.clipboardData;
+            var text = cd && cd.getData('text/plain');
+            if (text && text.indexOf('|') !== -1) {
+              var converted = convertMarkdownTablesToHtml(text);
+              if (/<table/i.test(converted)) {
+                editor.chain().focus().insertContent(converted).run();
+                event.preventDefault();
+                return true;
+              }
+            }
+          } catch (e) {}
+          return false;
+        }
+      },
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
     });
