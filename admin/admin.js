@@ -3820,6 +3820,63 @@
     return out.join('\n');
   }
 
+  /* ── Markdown-Marker erkennen ──────────────────────────────────
+     Diese Zeichen gibt TipTap als sauberes HTML NIE als rohen Text aus
+     (echte Überschrift = <h2>, echtes Fett = <strong>, echte Liste = <ul>).
+     Tauchen sie im Inhalt auf, ist es (HTML-umhüllter) Markdown. */
+  function hasMarkdownMarkers(s) {
+    if (!s) return false;
+    return /(^|\n)\s{0,3}#{1,6}\s/.test(s)               // ## / ### Überschrift
+        || /\*\*[^*\n]+\*\*/.test(s)                      // **fett**
+        || /(^|\n)\s{0,3}[*\-+]\s+\S/.test(s)             // * / - / + Listenpunkt
+        || /(^|\n)\s{0,3}\d+\.\s+\S/.test(s)              // 1. nummerierte Liste
+        || /(^|\n)\s*\|.*\|\s*\n\s*\|?[\s:|-]*-[\s:|-]*\|/.test(s); // | --- | Tabelle
+  }
+
+  /* ── Markdown → echtes HTML (komplett) ─────────────────────────
+     Wandelt Überschriften/Fett/Kursiv/Listen/Tabellen via marked.js. Erkennt
+     dabei, ob der Inhalt Markdown oder schon sauberes TipTap-HTML ist:
+       (A) keine HTML-Tags        → reiner Markdown → marked.parse(ganz)
+       (B) HTML + Markdown-Marker → HTML-umhüllter Markdown (z.B. <p>## …</p>):
+           pro Top-Level-Knoten – Markdown-Absätze via marked wandeln, echtes
+           HTML (Tabellen/Bilder/Listen) unverändert behalten
+       (C) HTML ohne Marker       → sauberes TipTap-HTML → unverändert lassen
+     So wird nie doppelt gewandelt. */
+  function convertMarkdownToHtml(input) {
+    if (!input) return input;
+    var canMarked = !!(window.marked && typeof window.marked.parse === 'function');
+
+    // (A) Kein einziges HTML-Tag → reiner Markdown → komplett via marked.
+    if (!/<[a-z][\s\S]*?>/i.test(input)) {
+      return canMarked ? window.marked.parse(input) : convertMarkdownTablesToHtml(input);
+    }
+
+    // (B) HTML vorhanden, aber mit rohen Markdown-Markern (naiv eingefügter
+    //     Markdown landet als <p>## …</p>). Top-Level-Knoten einzeln behandeln.
+    if (canMarked && hasMarkdownMarkers(input) && typeof document !== 'undefined') {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = input;
+      var out = '';
+      Array.prototype.forEach.call(tmp.childNodes, function(node) {
+        if (node.nodeType === 3) {                       // Textknoten
+          var t = node.textContent;
+          if (hasMarkdownMarkers(t)) out += window.marked.parse(t);
+          else if (t && t.trim()) out += '<p>' + t + '</p>';
+        } else if (node.nodeType === 1) {                // Element
+          if (node.tagName === 'P' && hasMarkdownMarkers(node.textContent)) {
+            out += window.marked.parse(node.textContent); // Markdown-Absatz wandeln
+          } else {
+            out += node.outerHTML;                        // echtes HTML behalten
+          }
+        }
+      });
+      return out || input;
+    }
+
+    // (C) Sauberes TipTap-HTML → unverändert (nur evtl. eingebettete MD-Tabellen).
+    return convertMarkdownTablesToHtml(input);
+  }
+
   /* ── TipTap: Modul-Bereitschaft (Race-Condition wasserdicht) ──
      window.TipTap gilt nur als bereit, wenn ALLE benötigten Extensions da
      sind – nicht nur Editor. So wird nie ein halb geladener Editor erzeugt. */
@@ -3863,16 +3920,11 @@
     }
     var TT = window.TipTap;
 
-    // Bestehendes Markdown automatisch zu HTML konvertieren (Einmal-Migration)
-    var html = rawContent || '';
-    if (html && !/<[a-z]/i.test(html) && window.marked) {
-      html = window.marked.parse(html);
-    }
-    // Markdown-Tabellen (| --- |), die als reiner Text im Inhalt stecken (z.B.
-    // aus migrierten Markdown-Seiten), in echtes <table>-HTML umwandeln, damit
-    // TipTap sie als bearbeitbare Tabellen erkennt. Bereits in HTML gewandelte
-    // Tabellen haben keine Trennzeile mehr → werden nicht berührt (No-Op).
-    html = convertMarkdownTablesToHtml(html);
+    // Kompletten Markdown-Inhalt (Überschriften, Fett/Kursiv, Listen, Tabellen)
+    // in echtes HTML umwandeln, damit TipTap ihn als Rich-Text statt als rohe
+    // Markdown-Zeichen darstellt. Sauberes TipTap-HTML bleibt unverändert
+    // (siehe convertMarkdownToHtml – erkennt Markdown vs. HTML, kein Doppel-Wandeln).
+    var html = convertMarkdownToHtml(rawContent || '');
     // TipTap-interne Selektions-Klasse entfernen, die früher versehentlich
     // in gespeicherte Bilder geraten ist. Nur dieses eine Token wird gelöscht
     // (mit evtl. führendem Leerzeichen) – der restliche Inhalt bleibt intakt.
@@ -3915,15 +3967,17 @@
       ].concat(tableExts),
       content: html,
       editorProps: {
-        // Wird Markdown-Tabellen-Text eingefügt, in echtes <table>-HTML wandeln
-        // und einfügen. Sonst (kein Tabellen-Text) normales Einfügen zulassen.
+        // Wird Markdown-Text eingefügt (Überschriften/Fett/Listen/Tabellen),
+        // in echtes HTML wandeln und einfügen. Liefert die Zwischenablage echtes
+        // HTML oder ist es kein Markdown → normales Einfügen zulassen.
         handlePaste: function(view, event) {
           try {
             var cd = event.clipboardData || window.clipboardData;
             var text = cd && cd.getData('text/plain');
-            if (text && text.indexOf('|') !== -1) {
-              var converted = convertMarkdownTablesToHtml(text);
-              if (/<table/i.test(converted)) {
+            var htmlClip = cd && cd.getData && cd.getData('text/html');
+            if (text && !htmlClip && hasMarkdownMarkers(text)) {
+              var converted = convertMarkdownToHtml(text);
+              if (converted && converted !== text) {
                 editor.chain().focus().insertContent(converted).run();
                 event.preventDefault();
                 return true;
