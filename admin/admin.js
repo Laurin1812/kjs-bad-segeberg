@@ -3877,44 +3877,96 @@
     return convertMarkdownTablesToHtml(input);
   }
 
-  /* ── TipTap: Modul-Bereitschaft (Race-Condition wasserdicht) ──
+  /* ── TipTap-Modul zuverlässig laden (aktiver Retry + Fallback-CDN) ──
      window.TipTap gilt nur als bereit, wenn ALLE benötigten Extensions da
-     sind – nicht nur Editor. So wird nie ein halb geladener Editor erzeugt. */
+     sind. Das Modul wird via dynamischem import() geladen; schlägt ein Versuch
+     fehl (kalter CDN-Start, Netzwerk-Hänger), wird AKTIV erneut geladen – statt
+     nur auf einen Wert zu pollen, der nie kommt. So bleibt der Editor nicht
+     dauerhaft bei „wird geladen…" hängen. */
   function tiptapReady() {
     var T = window.TipTap;
     return !!(T && T.Editor && T.StarterKit && T.Underline && T.Image &&
               T.Table && T.TableRow && T.TableCell && T.TableHeader);
   }
-  // Ruft cb() auf, sobald TipTap vollständig geladen ist. Bevorzugt das in
-  // index.html bereitgestellte Promise (feuert sofort beim Laden); zusätzlich
-  // ein Polling-Fallback (alle 100ms), falls das Promise mal nicht greift.
-  function whenTiptapReady(cb) {
-    if (tiptapReady()) { cb(); return; }
-    var done = false;
-    function fire() { if (done) return; done = true; cb(); }
-    if (window.__tiptapReady && typeof window.__tiptapReady.then === 'function') {
-      window.__tiptapReady.then(function() { if (tiptapReady()) fire(); });
+  var _tiptapPromise = null;
+  function ensureTiptap() {
+    if (tiptapReady()) return Promise.resolve();
+    if (_tiptapPromise) return _tiptapPromise;
+    var PKGS = ['core', 'starter-kit', 'extension-underline', 'extension-image',
+                'extension-table', 'extension-table-row', 'extension-table-cell', 'extension-table-header'];
+    // Mehrere CDNs – bei Ausfall des einen wird das andere versucht.
+    var CDN = [
+      function(p) { return 'https://esm.sh/@tiptap/' + p + '@2'; },
+      function(p) { return 'https://cdn.jsdelivr.net/npm/@tiptap/' + p + '@2/+esm'; }
+    ];
+    var MAX = 6;
+    function attempt(n) {
+      if (tiptapReady()) return Promise.resolve(); // anderer Lauf war schneller
+      var url = CDN[(n - 1) % CDN.length];
+      return Promise.all(PKGS.map(function(p) { return import(url(p)); }))
+        .then(function(m) {
+          var T = {
+            Editor:      m[0].Editor || m[0].default,
+            StarterKit:  m[1].default,
+            Underline:   m[2].default,
+            Image:       m[3].default,
+            Table:       m[4].default,
+            TableRow:    m[5].default,
+            TableCell:   m[6].default,
+            TableHeader: m[7].default
+          };
+          if (!(T.Editor && T.StarterKit && T.Underline && T.Image &&
+                T.Table && T.TableRow && T.TableCell && T.TableHeader)) {
+            throw new Error('TipTap: Extensions unvollständig geladen');
+          }
+          window.TipTap = T; // atomar, erst wenn alles da ist
+        })
+        .catch(function(err) {
+          if (n < MAX) {
+            var wait = Math.min(400 * n, 2500); // 0.4s,0.8s,1.2s,1.6s,2.0s
+            return new Promise(function(res) { setTimeout(res, wait); })
+              .then(function() { return attempt(n + 1); });
+          }
+          throw err; // alle Versuche erschöpft
+        });
     }
-    var tries = 0;
-    var timer = setInterval(function() {
-      if (tiptapReady()) { clearInterval(timer); fire(); }
-      else if (++tries > 600) { clearInterval(timer); } // ~60s Sicherheits-Timeout
-    }, 100);
+    _tiptapPromise = attempt(1).catch(function(err) {
+      _tiptapPromise = null; // erlaubt manuellen Neuversuch (Button)
+      console.error('TipTap konnte nicht geladen werden:', err);
+      throw err;
+    });
+    return _tiptapPromise;
   }
+
+  // Manueller Neuversuch über den „Erneut versuchen"-Button bei CDN-Ausfall.
+  window.retryTiptapLoad = function() {
+    _tiptapPromise = null;
+    if (S.section && S.section.form === 'tiptap') renderInfomobil(S.section, S.data);
+  };
+
+  // Eager: TipTap-Modul schon beim Laden des Admin starten (nicht erst bei
+  // Bedarf), damit es bereit ist, bevor der Nutzer eine TipTap-Seite öffnet.
+  try { ensureTiptap().catch(function() {}); } catch (e) {}
 
   /* ── TipTap: init / get / destroy ─────────────────────────── */
   function initTiptap(fieldId, rawContent) {
     var container = id('tt-' + fieldId);
     if (!container) return;
     if (!tiptapReady()) {
-      // RACE-CONDITION: Das TipTap-Modul (ESM/CDN) ist beim ersten Öffnen evtl.
-      // noch nicht (vollständig) geladen. Niemals einen leeren Editor erzeugen –
-      // stattdessen Platzhalter zeigen und erst initialisieren, wenn das Modul
-      // GARANTIERT vollständig da ist (Promise + Polling-Fallback).
+      // Modul (ESM/CDN) noch nicht da → Platzhalter zeigen und AKTIV laden
+      // (mit Retry/Fallback). Erst danach den Editor mit Inhalt initialisieren.
+      // Niemals einen leeren Editor erzeugen.
       container.innerHTML = '<p style="color:var(--text-muted);padding:.75rem;">Editor wird geladen…</p>';
-      whenTiptapReady(function() {
-        // Nur fortsetzen, wenn der Container noch existiert (nicht weiternavigiert).
+      ensureTiptap().then(function() {
         if (id('tt-' + fieldId)) initTiptap(fieldId, rawContent);
+      }).catch(function() {
+        var el = id('tt-' + fieldId);
+        if (el) el.innerHTML =
+          '<div style="padding:.75rem;color:var(--danger);font-size:.85rem;line-height:1.5;">' +
+            '⚠️ Editor konnte nicht geladen werden (CDN/Netzwerk nicht erreichbar).' +
+            '<br><button type="button" class="btn btn-sm btn-outline" style="margin-top:.5rem;" ' +
+              'onclick="retryTiptapLoad()">🔄 Erneut versuchen</button>' +
+          '</div>';
       });
       return;
     }
