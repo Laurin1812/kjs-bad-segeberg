@@ -1205,27 +1205,47 @@
     });
   };
 
+  // Kurzer grauer Hilfetext unter einem Feld – exakt dasselbe Markup wie der
+  // bestehende Hinweis im "Dokumente & Downloads"-Bereich (renderDownloadsCard).
+  function ttFieldHint(text) {
+    return '<p style="font-size:.84rem;color:var(--text-muted);margin:.25rem 0 .75rem;">' + escHtml(text) + '</p>';
+  }
+
   function renderInfomobil(def, data) {
+    // Hilfetexte nur auf der Testseite einblenden (renderInfomobil wird auch
+    // von Infomobil genutzt, das soll unverändert bleiben).
+    var isTestseite = def.key === 'testseite';
+    var hint = isTestseite ? ttFieldHint : function() { return ''; };
     var html = panelHeader(def.label, '') +
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Seiteninhalt</div>' +
           fText('titel', 'Seitentitel', data.titel) +
+          hint('Die große Überschrift ganz oben auf der Seite. Kurz und klar halten.') +
           fTipTap('untertitel', 'Untertitel', false) +
+          hint('Kurzer Text direkt unter dem Titel, als Einstieg in die Seite. Optional.') +
           fTipTap('intro',      'Einleitungstext', true) +
+          hint('Der erste Textblock der Seite, oberhalb des Hauptinhalts. Formatierung, Listen und Tabellen sind möglich.') +
           fTipTap('inhalt',     'Textinhalt', true) +
+          hint('Der Haupttext der Seite. Hier kommt der eigentliche Inhalt rein – mit Formatierung, Listen, Tabellen und Bildern.') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bilder</div>' +
           fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
+          hint('Das große Bild im Kopfbereich, hinter dem Titel. Quer-Format wirkt am besten.') +
           fImage('bild',      'Inhaltsbild',          data.bild) +
+          hint('Ein zusätzliches Bild, das im Textbereich erscheint. Optional.') +
           fBildGroesse(data.bild_groesse) +
+          hint('Legt fest, wie groß das Inhaltsbild dargestellt wird (25 % = klein, 100 % = volle Breite).') +
           fText('bild_alt',   'Bild-Beschreibung',    data.bild_alt) +
+          hint('Kurze Beschreibung des Bildes. Hilft Suchmaschinen und wird angezeigt, falls das Bild mal nicht lädt.') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Kontakt (optional)</div>' +
           fText('kontakt_name',  'Kontaktname',   data.kontakt_name) +
+          hint('Name der Ansprechperson, die unten auf der Seite angezeigt wird. Optional.') +
           fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
+          hint('E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
         '</div>' +
         renderDownloadsCard(data) +
       '</div>' +
