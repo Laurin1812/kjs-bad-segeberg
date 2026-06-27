@@ -640,13 +640,47 @@ if (contactForm) {
       });
       if (!items.length) return;
 
+      // Dateisystem-unzulässige Zeichen aus einem Dateinamen-Bestandteil
+      // entfernen (Windows-reservierte Zeichen \ / : * ? " < > |), führende/
+      // abschließende Punkte & Leerzeichen entfernen, Mehrfach-Leerzeichen
+      // zusammenfassen. Umlaute und normale Leerzeichen bleiben erhalten.
+      function sanitizeFilenamePart(s) {
+        return s
+          .replace(/[\\/:*?"<>|]/g, '')
+          .replace(/^[.\s]+|[.\s]+$/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      // Download-Dateiname für den "Herunterladen"-Link: basiert auf dem
+      // eingegebenen Titel (nicht auf dem technischen Dateinamen mit
+      // Zeitstempel-Präfix), mit der Original-Endung. .normalize('NFC')
+      // behebt zerlegte macOS-Umlaute (z.B. "o" + Combining-Diaeresis -> "ö").
+      function buildDownloadFilename(titel, datei) {
+        var baseName = datei.split('/').pop();
+        var extMatch = baseName.match(/\.([a-zA-Z0-9]+)$/);
+        var ext = extMatch ? extMatch[1] : '';
+        var base = (titel && titel.trim()) ? sanitizeFilenamePart(titel.trim().normalize('NFC')) : '';
+        if (!base) {
+          // Titel leer -> bereinigter Original-Dateiname, Zeitstempel-Präfix
+          // (z.B. "1781194530416-") entfernen, falls vorhanden.
+          var withoutTimestamp = baseName.replace(/^\d{10,}-/, '');
+          var stem = withoutTimestamp.replace(/\.[a-zA-Z0-9]+$/, '');
+          base = sanitizeFilenamePart(stem.normalize('NFC')) ||
+                 sanitizeFilenamePart(baseName.replace(/\.[a-zA-Z0-9]+$/, '').normalize('NFC')) || 'datei';
+        }
+        if (ext && !new RegExp('\\.' + ext + '$', 'i').test(base)) base += '.' + ext;
+        return base;
+      }
+
       // Zwei Varianten: als schmale Sidebar-Karte (neben dem Geschäftsstelle-
       // Block) oder als volle Breite (Seiten ohne .sidebar-Layout, z.B.
       // seiten/index.html). Beide nutzen dieselben Icons/Aktionen.
-      function buildActions(datei, name) {
+      function buildActions(datei, name, titel) {
+        var downloadName = buildDownloadFilename(titel, datei);
         return '<span class="download-item__actions">' +
           '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN + '</a>' +
-          '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
+          '<a href="' + escHtml(datei) + '" download="' + escHtml(downloadName) + '" class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
         '</span>';
       }
 
@@ -659,7 +693,7 @@ if (contactForm) {
         return '<div class="download-item--sidebar">' +
           iconHtml +
           '<span class="download-item__name">' + escHtml(name) + '</span>' +
-          buildActions(datei, name) +
+          buildActions(datei, name, item.titel) +
         '</div>';
       }).join('');
 
@@ -672,7 +706,7 @@ if (contactForm) {
         return '<div class="download-item">' +
           iconHtml +
           '<div class="download-item__meta"><div class="download-item__name">' + escHtml(name) + '</div></div>' +
-          buildActions(datei, name) +
+          buildActions(datei, name, item.titel) +
         '</div>';
       }).join('');
 
