@@ -872,6 +872,24 @@ p  { margin-bottom: 1rem; }
   .termine-item { grid-template-columns: 70px 1fr; }
   .termine-item .btn-sm { display: none; }
   .form-grid-2 { grid-template-columns: 1fr; }
+
+  /* TipTap-Inhaltsbilder auf kleinen Screens: kein Float mehr, volle Breite.
+     Sonst quetscht sich der Text bei img-25/50/75 + Float in eine viel zu
+     schmale Spalte (z.B. auf Infomobil/Testseite). */
+  .main-content img.img-25, .main-content img.img-50, .main-content img.img-75,
+  #seite-inhalt img.img-25, #seite-inhalt img.img-50, #seite-inhalt img.img-75,
+  #page-inhalt img.img-25,  #page-inhalt img.img-50,  #page-inhalt img.img-75 {
+    width: 100%; max-width: 100%; float: none; display: block;
+    margin: 1rem auto;
+  }
+
+  /* TipTap-Tabellen (Testseite/Infomobil) auf kleinen Screens scrollbar
+     statt umgebrochen/abgeschnitten – analog zur bestehenden Termine-Tabelle. */
+  .main-content table, #seite-inhalt table, #page-inhalt table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
