@@ -607,6 +607,12 @@ p  { margin-bottom: 1rem; }
    Überlaufen bei Fließtext-Inhalten aus dem Admin. */
 .main-content, #seite-inhalt, #page-inhalt { overflow-wrap: break-word; word-break: break-word; }
 
+/* Breite Tabellen dürfen NUR den Inhaltsbereich selbst seitlich scrollbar
+   machen, nicht die ganze Seite (inkl. Kopf-/Fußzeile) verschieben. Ersetzt
+   den fehleranfälligen JS-Wrapper-Ansatz durch eine robuste, rein
+   CSS-basierte Lösung ohne Abhängigkeit von Skript-Timing. */
+.main-content, #seite-inhalt, #page-inhalt { overflow-x: auto; }
+
 /* Tabellen im Markdown (und TipTap-HTML). min-width:max-content als
    Sicherheitsnetz direkt an der Basis-Regel: verhindert, dass Spalten auf
    schmalen Screens so eng gequetscht werden, dass in Kombination mit dem
