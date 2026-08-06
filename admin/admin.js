@@ -1966,6 +1966,7 @@
           '</p>' +
           fText('ei-email', 'E-Mail', data.email) +
           fTextarea('ei-adresse', 'Adresse (jede Zeile = eine Zeile)', data.adresse, 3) +
+          fTextarea('ei-postadresse', 'Postadresse (nur ausfüllen, falls abweichend von der Adresse oben)', data.postadresse, 3) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Öffnungszeiten</div>' +
@@ -1997,6 +1998,7 @@
     data.telefon_header = gv('ei-telefon-header');
     data.email   = gv('ei-email');
     data.adresse = gv('ei-adresse');
+    data.postadresse = gv('ei-postadresse');
     data.google_kalender_url   = gv('ei-kal-url');
     data.google_kalender_titel = gv('ei-kal-titel');
     var oz = [];
