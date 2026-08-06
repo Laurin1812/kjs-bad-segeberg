@@ -907,7 +907,15 @@ p  { margin-bottom: 1rem; }
   -webkit-overflow-scrolling: touch;
   margin: 1.5rem 0;
 }
-.content-table-wrap table { margin: 0; }
+/* Überschreibt bewusst das width:100% von .main-content table weiter oben:
+   die Tabelle muss ihre natürliche (ggf. breitere) Breite annehmen dürfen,
+   sonst quetschen sich die Spalten und der Browser bricht jedes Wort
+   buchstabenweise um, statt dass die Wrapper-Box seitlich scrollt. */
+.content-table-wrap table {
+  width: auto;
+  min-width: 100%;
+  margin: 0;
+}
 
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
 @media (max-width: 420px) {
