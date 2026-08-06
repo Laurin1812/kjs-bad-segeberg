@@ -10,6 +10,27 @@ function fetchContent(path) {
   return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
 }
 
+// ── Tabellen aus dem Admin/TipTap scrollbar machen ──────────────────────
+// Wichtig: die <table> selbst bleibt display:table (Spaltenberechnung des
+// Browsers funktioniert nur so korrekt) – nur eine umschließende Box
+// bekommt overflow-x:auto. Die Termine-Tabelle hat ihre eigene Lösung und
+// wird hier bewusst ausgeschlossen. Per MutationObserver, weil viele
+// Seiten ihren Inhalt erst nach einem fetch() per innerHTML einfügen.
+function wrapContentTables(root) {
+  root.querySelectorAll('table:not(.termine-table)').forEach(function (table) {
+    if (table.parentElement && table.parentElement.classList.contains('content-table-wrap')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'content-table-wrap';
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  });
+}
+document.querySelectorAll('.main-content, #seite-inhalt, #page-inhalt').forEach(function (container) {
+  wrapContentTables(container);
+  new MutationObserver(function () { wrapContentTables(container); })
+    .observe(container, { childList: true, subtree: true });
+});
+
 // Mobile Navigation
 const navToggle = document.getElementById('navToggle');
 const mobileNav = document.getElementById('mobileNav');
