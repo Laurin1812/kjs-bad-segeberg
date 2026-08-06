@@ -902,6 +902,16 @@ p  { margin-bottom: 1rem; }
    sonst brechen Browser die Spaltenberechnung und jede Zelle rutscht
    einzeln/vertikal untereinander. Die Wrapper-Div wird per JS um jede
    Tabelle in main.js gelegt (siehe wrapContentTables()). */
+/* Button-Gruppen (z.B. "Termine ansehen" + "Kontakt aufnehmen"): gap statt
+   margin-left auf dem zweiten Button – dadurch bleiben beide Buttons auf
+   kleinen Screens sauber links ausgerichtet, egal ob sie nebeneinander
+   passen oder umbrechen. */
+.btn-group { display: flex; flex-wrap: wrap; gap: .75rem; }
+@media (max-width: 480px) {
+  .btn-group { flex-direction: column; }
+  .btn-group .btn { width: 100%; justify-content: center; }
+}
+
 .content-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
