@@ -897,7 +897,9 @@ p  { margin-bottom: 1rem; }
 
   /* TipTap-Tabellen (Testseite/Infomobil) auf kleinen Screens scrollbar
      statt umgebrochen/abgeschnitten – analog zur bestehenden Termine-Tabelle. */
-  .main-content table, #seite-inhalt table, #page-inhalt table {
+  .main-content table:not(.termine-table),
+  #seite-inhalt table:not(.termine-table),
+  #page-inhalt table:not(.termine-table) {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
