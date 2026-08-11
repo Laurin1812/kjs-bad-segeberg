@@ -74,6 +74,10 @@
   ],
   "aufgaben": [
     {
+      "label": "Naturschutz",
+      "href": "/aufgaben/naturschutz.html"
+    },
+    {
       "label": "Jungwildrettung",
       "href": "/aufgaben/jungwildrettung.html"
     },
@@ -92,10 +96,6 @@
     {
       "label": "Jugendarbeit",
       "href": "/aufgaben/jugend.html"
-    },
-    {
-      "label": "Naturschutz",
-      "href": "/aufgaben/naturschutz.html"
     },
     {
       "label": "Jagdhornblasen",
