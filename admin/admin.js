@@ -777,6 +777,22 @@
           });
           navData[opts.arrayKey] = newArr;
           await doSave('content/navigation.json', navData, '🔀 Reihenfolge geändert (' + opts.label + ')');
+          // Wichtig: falls gerade das Panel "Navigation & Reihenfolge" offen ist,
+          // dessen im Speicher gehaltene Kopie (S.data) mit aktualisieren – sonst
+          // überschreibt ein späterer Klick auf den normalen "Speichern"-Button
+          // dieses Panels (der von der alten S.data-Kopie ausgeht) die gerade per
+          // Drag & Drop gespeicherte neue Reihenfolge wieder mit dem alten Stand.
+          if (S.section && S.section.file === 'content/navigation.json' && S.data) {
+            S.data[opts.arrayKey] = newArr;
+            // Ist das Panel "Navigation & Reihenfolge" gerade offen, zeigt es
+            // dieselbe Liste ein zweites Mal (eigene Sortable-Liste, z.B.
+            // "navreo-kjs") – die muss ebenfalls neu aufgebaut werden, sonst
+            // liest ein späterer Klick auf "Speichern" dort die alte,
+            // unveränderte Reihenfolge aus dem noch nicht aktualisierten DOM.
+            if (id('navreo-' + opts.arrayKey)) {
+              renderNavReihenfolge(S.section, S.data);
+            }
+          }
         })());
       }
 
