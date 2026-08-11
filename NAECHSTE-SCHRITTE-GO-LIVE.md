@@ -28,10 +28,10 @@ Ziel laut Frank: **die Seite muss endlich online gehen**, möglichst in kürzest
   - FormSubmit.co verschickt bei der **ersten** Zustellung an eine neue Adresse eine Bestätigungsmail, die erst angeklickt werden muss, bevor Formulare tatsächlich ankommen – unbedingt einmal live testen.
   - FormSubmit.co ist ein kostenloser Drittanbieter-Dienst (kein eigener Mailserver) – kurz mit Frank abstimmen, ob das für den Produktivbetrieb so gewünscht ist oder ob später ein eigener Versand (z.B. über Netlify Functions + Mailanbieter) sinnvoller wäre.
 
-### Domain-Inkonsistenz (gefunden bei der Recherche)
+### Domain-Inkonsistenz (gefunden bei der Recherche) — GEKLÄRT (08.08.2026)
 - Im Code werden **zwei verschiedene Domains** für E-Mail-Adressen verwendet: `@kjs-bad-segeberg.de` (viele ältere Seiten/Topbar/Kontaktfelder) und `@kjs-segeberg.de` (neuere Stellen wie `einstellungen.json`, `impressum.json`, Formular-Zieladresse).
-- `.claude/settings.local.json` deutet außerdem darauf hin, dass mal versucht wurde, unter `https://kjs-bad-segeberg.de/...` zu testen (parallel zur Netlify-Subdomain `kjs-bad-segeberg.netlify.app`).
-- **Vor Go-Live klären:** Welche Domain ist die tatsächliche/aktive (`kjs-bad-segeberg.de` oder `kjs-segeberg.de`)? Alle `mailto:`- und Kontakt-E-Mail-Adressen sollten einheitlich auf die echte, tatsächlich existierende Domain zeigen – sonst kommen Mails ins Leere.
+- **Laurin hat bestätigt: die richtige Domain ist `kjs-segeberg.de`** (nicht `kjs-bad-segeberg.de`). Alle `mailto:`-/Kontakt-Adressen müssen im Code auf `kjs-segeberg.de` vereinheitlicht werden.
+- Kontaktformular-Zieladresse (`frank.huelser@kjs-segeberg.de`) wird demnächst gemeinsam getestet/bestätigt.
 
 ### Sonstiges vor Go-Live (noch zu sammeln/prüfen)
 - [ ] Alle Inhalte final durchgehen (echte Texte statt Platzhalter, besonders neue Seiten wie Testseite/Infomobil)
@@ -41,7 +41,7 @@ Ziel laut Frank: **die Seite muss endlich online gehen**, möglichst in kürzest
 - [ ] Cookie-Banner vor Go-Live aktivieren (aktuell noch nicht aktiv)
 - [ ] **Login-Link im Footer vor dem finalen Go-Live entfernen** – aktuell führt ein Link ganz unten in der Fußzeile direkt in den Adminbereich (praktisch für die Entwicklung, aber ein Sicherheitsrisiko, sobald die Seite live/öffentlich ist)
 - [ ] Impressum/Datenschutz-Texte juristisch prüfen lassen (Frank will das mit Carsten/einem Dienst wie "IT-Recht" klären – Olivers Einwand war, es sei "nicht rechtssicher" wegen Hacking-Risiko)
-- [ ] Top-Menü: "Test"-Menüpunkt vor Go-Live entfernen (bekannt, siehe TEMPORÄR-Kommentar in js/main.js); ein weiterer Menüpunkt-Name gefällt Frank nicht – noch offen, was stattdessen stehen soll
+- [x] Top-Menü: "Test"-Menüpunkt vor Go-Live entfernen — erledigt 11.08.2026, Testseite bleibt im Admin editierbar, ist nur aus Desktop-/Mobile-Navigation raus; ein weiterer Menüpunkt-Name gefällt Frank nicht – noch offen, was stattdessen stehen soll
 
 Ausführlichere Notizen zum gesamten Gespräch (inkl. mittelfristiger CMS-Themen und Feature-Backlog) stehen in `GESPRAECH-FRANK-2026-08-02.md`.
 
