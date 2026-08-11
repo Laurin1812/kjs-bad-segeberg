@@ -370,14 +370,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
 
     // Map nav key to main-nav <li> by matching first <a> href pattern
+    // Netlify liefert interne Links ohne ".html"-Endung aus (Pretty URLs) –
+    // UND kürzt "/ordner/index.html" sogar auf "/ordner/" (kein "index" mehr
+    // im Pfad, nur der Ordner mit Schrägstrich). Alle drei Formen müssen hier
+    // erkannt werden, sonst matcht z.B. "termine" nach dem Deploy gar nichts
+    // mehr (siehe auch reorderSub()/baseName() oben für dieselbe Ursache).
     var KEY_HREF = {
-      startseite: /^(\.\.\/)*index\.html$/,
-      jaeger:     /jaeger\/index\.html/,
-      verbraucher:/verbraucher\/index\.html/,
-      termine:    /termine\/index\.html/,
-      aktuelles:  /aktuelles\/index\.html/,
-      faq:        /faq\/index\.html/,
-      kontakt:    /kontakt\/index\.html/
+      startseite: /^(\.\.\/)*(index(\.html)?)?\/?$/,
+      jaeger:     /jaeger\/(index(\.html)?)?$/,
+      verbraucher:/verbraucher\/(index(\.html)?)?$/,
+      termine:    /termine\/(index(\.html)?)?$/,
+      aktuelles:  /aktuelles\/(index(\.html)?)?$/,
+      faq:        /faq\/(index(\.html)?)?$/,
+      kontakt:    /kontakt\/(index(\.html)?)?$/
     };
 
     var jaegerDD = document.getElementById('jaeger-dropdown');
