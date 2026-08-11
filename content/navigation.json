@@ -78,6 +78,10 @@
       "href": "/aufgaben/hundeausbildung.html"
     },
     {
+      "label": "Jungwildrettung",
+      "href": "/aufgaben/jungwildrettung.html"
+    },
+    {
       "label": "Schweißhundeführer",
       "href": "/aufgaben/schweisshunde.html"
     },
@@ -96,10 +100,6 @@
     {
       "label": "Jagdhornblasen",
       "href": "/aufgaben/jagdhorn.html"
-    },
-    {
-      "label": "Jungwildrettung",
-      "href": "/aufgaben/jungwildrettung.html"
     }
   ],
   "verbraucher": [
