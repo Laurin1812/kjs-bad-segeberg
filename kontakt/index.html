@@ -186,6 +186,23 @@
               <input type="tel" id="telefon" name="telefon" placeholder="04551 / ...">
             </div>
             <div class="form-group">
+              <label>Sind Sie bereits Jäger/in? *</label>
+              <div style="display:flex; gap:1.5rem; margin-top:.4rem;">
+                <label style="font-weight:400; display:flex; align-items:center; gap:.4rem;">
+                  <input type="radio" name="bereits_jaeger" value="Ja" required style="width:auto;" id="bereits-jaeger-ja"> Ja
+                </label>
+                <label style="font-weight:400; display:flex; align-items:center; gap:.4rem;">
+                  <input type="radio" name="bereits_jaeger" value="Nein" required style="width:auto;" id="bereits-jaeger-nein"> Nein
+                </label>
+              </div>
+            </div>
+            <div class="form-group" id="hegering-group" style="display:none;">
+              <label for="hegering">Ihr Hegering</label>
+              <select id="hegering" name="hegering">
+                <option value="">Bitte wählen …</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label for="betreff">Betreff *</label>
               <select id="betreff" name="betreff" required>
                 <option value="">Bitte wählen …</option>
@@ -215,6 +232,36 @@
               Nachricht senden
             </button>
           </form>
+          <script>
+            (function() {
+              var hegeringGroup = document.getElementById('hegering-group');
+              var hegeringSelect = document.getElementById('hegering');
+              var radios = document.querySelectorAll('input[name="bereits_jaeger"]');
+              var loaded = false;
+
+              function toggleHegering() {
+                var ja = document.getElementById('bereits-jaeger-ja').checked;
+                hegeringGroup.style.display = ja ? '' : 'none';
+                if (ja && !loaded) {
+                  loaded = true;
+                  fetch('../content/hegeringe.json')
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                      (d.hegeringe || []).forEach(function(h) {
+                        var opt = document.createElement('option');
+                        opt.value = (h.nummer || '') + (h.name ? ' – ' + h.name : '');
+                        opt.textContent = opt.value;
+                        hegeringSelect.appendChild(opt);
+                      });
+                    })
+                    .catch(function() {});
+                }
+                if (!ja) hegeringSelect.value = '';
+              }
+
+              radios.forEach(function(r) { r.addEventListener('change', toggleHegering); });
+            })();
+          </script>
         </div>
 
         <!-- INFO – dynamisch aus content/einstellungen.json -->
