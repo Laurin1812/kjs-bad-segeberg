@@ -158,7 +158,7 @@
             var bg = document.querySelector('.page-hero__bg');
             if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
           }
-          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">' : '';
+          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" class="' + ((d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')) + '" style="border-radius:8px;margin-bottom:1.5rem;">' : '';
           var kontaktStr = '';
           if (d.kontakt_name || d.kontakt_email) {
             kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name||'');

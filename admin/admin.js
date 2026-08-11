@@ -1081,25 +1081,38 @@
     var extraBtns = def.isDynamic
       ? '<button class="btn btn-sm btn-danger-outline" onclick="dynSeiteDelete()">🗑️ Seite löschen</button>'
       : '';
+    // fH(fieldHtml, hintText): gleicher Hilfetext-Baustein wie bei der
+    // Testseite/Infomobil (siehe insertHintAfterLabel) – jetzt einheitlich
+    // auf allen Standard-Inhaltsseiten, nicht nur auf der Testseite.
+    var fH = function(fieldHtml, hintText) { return insertHintAfterLabel(fieldHtml, ttFieldHint(hintText)); };
     var html = panelHeader(def.label, extraBtns) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Seiteninhalt</div>' +
-          fText('titel', 'Seitentitel', data.titel) +
-          fText('untertitel', 'Untertitel', data.untertitel) +
-          fTextarea('intro', 'Einleitungstext', data.intro, 2) +
-          '<div class="field-row">' +
-            '<label class="field-label">Textinhalt (Markdown)</label>' +
-            '<div id="te-bar-inhalt" class="te-bar"></div>' +
-            '<textarea class="field-textarea" id="f-inhalt" rows="8">' + escHtml(data.inhalt || '') + '</textarea>' +
-            '<div id="te-content-inhalt" style="display:none"></div>' +
-          '</div>' +
+          fH(fText('titel', 'Seitentitel', data.titel),
+            'Die große Überschrift ganz oben auf der Seite. Kurz und klar halten.') +
+          fH(fTipTap('untertitel', 'Untertitel', false),
+            'Kurzer Text direkt unter dem Titel, als Einstieg in die Seite. Optional.') +
+          fH(fTipTap('intro', 'Einleitungstext', true),
+            'Der erste Textblock der Seite, oberhalb des Hauptinhalts. Formatierung, Listen und Bilder sind möglich.') +
+          fH('<div class="field-row">' +
+              '<label class="field-label">Textinhalt (Markdown)</label>' +
+              '<div id="te-bar-inhalt" class="te-bar"></div>' +
+              '<textarea class="field-textarea" id="f-inhalt" rows="8">' + escHtml(data.inhalt || '') + '</textarea>' +
+              '<div id="te-content-inhalt" style="display:none"></div>' +
+            '</div>',
+            'Der Haupttext der Seite. Hier kommt der eigentliche Inhalt rein – mit Formatierung, Listen und Tabellen.') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bilder</div>' +
-          fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
-          fImage('bild', 'Inhaltsbild', data.bild) +
-          fText('bild_alt', 'Bild-Beschreibung', data.bild_alt) +
+          fH(fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild),
+            'Das große Bild im Kopfbereich, hinter dem Titel. Quer-Format wirkt am besten.') +
+          fH(fImage('bild', 'Inhaltsbild', data.bild),
+            'Ein zusätzliches Bild, das im Textbereich erscheint. Optional.') +
+          fH(fBildGroesse(data.bild_groesse),
+            'Legt fest, wie groß das Inhaltsbild dargestellt wird (25 % = klein, 100 % = volle Breite).') +
+          fH(fText('bild_alt', 'Bild-Beschreibung', data.bild_alt),
+            'Kurze Beschreibung des Bildes. Hilft Suchmaschinen und wird angezeigt, falls das Bild mal nicht lädt.') +
           // Vorschaubild + Kurzbeschreibung für Jagdhundeschule-Seiten
           (def.key && def.key.indexOf('jagdhundeschule') !== -1
             ? '<div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem;">' +
@@ -1111,8 +1124,10 @@
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Kontakt (optional)</div>' +
-          fText('kontakt_name', 'Kontaktname', data.kontakt_name) +
-          fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email) +
+          fH(fText('kontakt_name', 'Kontaktname', data.kontakt_name),
+            'Name der Ansprechperson, die unten auf der Seite angezeigt wird. Optional.') +
+          fH(fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email),
+            'E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
         '</div>' +
         renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
@@ -1124,6 +1139,8 @@
       '</div>' +
       saveBar();
     id('admin-main').innerHTML = html;
+    initTiptap('untertitel', data.untertitel || '');
+    initTiptap('intro',      data.intro      || '');
     initMDE('inhalt');
     initTableEditor('inhalt', data.inhalt || '');
     initDownloadsSortable();
@@ -1132,11 +1149,12 @@
 
   function collectStandard(data) {
     data.titel         = gv('titel');
-    data.untertitel    = gv('untertitel');
-    data.intro         = gv('intro');
+    data.untertitel    = getTiptapValue('untertitel', data.untertitel, 'Untertitel');
+    data.intro         = getTiptapValue('intro',      data.intro,      'Einleitungstext');
     data.inhalt        = getMDE();
     data.hero_bild     = gv('hero_bild');
     data.bild          = gv('bild');
+    data.bild_groesse  = gv('bild_groesse');
     data.bild_alt      = gv('bild_alt');
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
@@ -1236,12 +1254,10 @@
   }
 
   function renderInfomobil(def, data) {
-    // Hilfetexte nur auf der Testseite einblenden (renderInfomobil wird auch
-    // von Infomobil genutzt, das soll unverändert bleiben).
-    var isTestseite = def.key === 'testseite';
-    var hint = isTestseite ? ttFieldHint : function() { return ''; };
-    // fH(fieldHtml, hintText): Hilfetext zwischen Label und Feld einfügen.
-    var fH = function(fieldHtml, hintText) { return insertHintAfterLabel(fieldHtml, hint(hintText)); };
+    // Hilfetexte jetzt einheitlich auf allen Seiten mit diesem Formular
+    // (Infomobil + Testseite) sichtbar – nicht mehr auf die Testseite
+    // beschränkt, siehe renderStandard für dieselbe fH()-Konvention.
+    var fH = function(fieldHtml, hintText) { return insertHintAfterLabel(fieldHtml, ttFieldHint(hintText)); };
     var html = panelHeader(def.label, '') +
       '<div class="panel-body">' +
         '<div class="form-card">' +
