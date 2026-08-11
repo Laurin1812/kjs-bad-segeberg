@@ -74,12 +74,12 @@
   ],
   "aufgaben": [
     {
-      "label": "Hundeausbildung",
-      "href": "/aufgaben/hundeausbildung.html"
+      "label": "Schießwesen",
+      "href": "/aufgaben/schiessen.html"
     },
     {
-      "label": "Jungwildrettung",
-      "href": "/aufgaben/jungwildrettung.html"
+      "label": "Hundeausbildung",
+      "href": "/aufgaben/hundeausbildung.html"
     },
     {
       "label": "Schweißhundeführer",
@@ -94,12 +94,12 @@
       "href": "/aufgaben/naturschutz.html"
     },
     {
-      "label": "Schießwesen",
-      "href": "/aufgaben/schiessen.html"
-    },
-    {
       "label": "Jagdhornblasen",
       "href": "/aufgaben/jagdhorn.html"
+    },
+    {
+      "label": "Jungwildrettung",
+      "href": "/aufgaben/jungwildrettung.html"
     }
   ],
   "verbraucher": [
