@@ -74,10 +74,6 @@
   ],
   "aufgaben": [
     {
-      "label": "Schießwesen",
-      "href": "/aufgaben/schiessen.html"
-    },
-    {
       "label": "Hundeausbildung",
       "href": "/aufgaben/hundeausbildung.html"
     },
@@ -92,6 +88,10 @@
     {
       "label": "Naturschutz",
       "href": "/aufgaben/naturschutz.html"
+    },
+    {
+      "label": "Schießwesen",
+      "href": "/aufgaben/schiessen.html"
     },
     {
       "label": "Jagdhornblasen",
