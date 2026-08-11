@@ -3764,7 +3764,7 @@
       element: el,
       spellChecker: false,
       autosave: { enabled: false },
-      toolbar: ['bold','italic','heading','|','unordered-list','ordered-list','|','link','image',
+      toolbar: ['bold','italic','heading','|','unordered-list','ordered-list','|','link',
         {
           name: 'insert-image-sized',
           action: function() { openMdImageModal(); },
