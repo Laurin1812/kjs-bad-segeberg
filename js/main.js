@@ -470,7 +470,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         var JAEGER_MATCH = {
           'ueber-uns':           function(li) { var a = li.querySelector(':scope > a'); return a && /ueber-uns/.test(a.getAttribute('href') || ''); },
           'kreisjjaegermeister': function(li) { var a = li.querySelector(':scope > a'); return a && /kreisjjaegermeister/.test(a.getAttribute('href') || ''); },
-          'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && /jaeger\/(index(\.html)?)?$/.test(a.getAttribute('href') || ''); },
+          'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && li.classList.contains('has-sub') && /KJS/.test(a.textContent || ''); },
           'aufgaben':            function(li) { var a = li.querySelector(':scope > a'); return a && /Aufgaben/.test(a.textContent || ''); },
           'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); },
           'weitere-themen':      function(li) { return li.id === 'weitere-themen-item'; }
@@ -483,6 +483,66 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           });
         });
       }
+
+      // ── 5. Mobile-Nav: gleiche Reihenfolge wie Desktop anwenden ──
+      // Handy-Menü ist eine eigene flache Liste (kein has-sub-Flyout wie
+      // am Desktop) – Gruppen werden über die href-Listen aus
+      // navigation.json (kjs/aufgaben) erkannt und dann als zusammen-
+      // hängender Block in der gespeicherten Reihenfolge einsortiert.
+      (function() {
+        function hrefBase(href) {
+          return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
+        }
+        var jaegerDetails = Array.prototype.filter.call(
+          document.querySelectorAll('#mobileNav details'),
+          function(det) {
+            var sum = det.querySelector('summary');
+            return sum && sum.textContent.trim() === 'Jäger';
+          }
+        )[0];
+        var mobileSub = jaegerDetails && jaegerDetails.querySelector('ul.mobile-nav__sub');
+        if (!mobileSub) return;
+
+        var kjsHrefs = (d.kjs || []).map(function(i) { return hrefBase(i.href); });
+        var aufgabenHrefs = (d.aufgaben || []).map(function(i) { return hrefBase(i.href); });
+
+        var groups = { 'ueber-uns': [], 'kreisjjaegermeister': [], infomobil: [], kjs: [], aufgaben: [], rest: [] };
+        Array.prototype.forEach.call(mobileSub.querySelectorAll(':scope > li'), function(li) {
+          var a = li.querySelector('a');
+          var href = a ? (a.getAttribute('href') || '') : '';
+          var base = hrefBase(href);
+          if (/ueber-uns/.test(href)) groups['ueber-uns'].push(li);
+          else if (/kreisjjaegermeister/.test(href)) groups['kreisjjaegermeister'].push(li);
+          else if (/infomobil/.test(href)) groups.infomobil.push(li);
+          else if (kjsHrefs.indexOf(base) !== -1) groups.kjs.push({ li: li, base: base });
+          else if (aufgabenHrefs.indexOf(base) !== -1) groups.aufgaben.push({ li: li, base: base });
+          else groups.rest.push(li);
+        });
+
+        function sortByOrder(items, order) {
+          var out = [];
+          order.forEach(function(base) {
+            var found = items.filter(function(it) { return it.base === base; })[0];
+            if (found) out.push(found.li);
+          });
+          return out;
+        }
+
+        var KEY_LIS = {
+          'ueber-uns':           groups['ueber-uns'],
+          'kreisjjaegermeister': groups['kreisjjaegermeister'],
+          'kjs-segeberg':        sortByOrder(groups.kjs, kjsHrefs),
+          'aufgaben':            sortByOrder(groups.aufgaben, aufgabenHrefs),
+          'infomobil':           groups.infomobil,
+          'weitere-themen':      []
+        };
+
+        (d.jaeger_dropdown || []).forEach(function(key) {
+          (KEY_LIS[key] || []).forEach(function(li) { mobileSub.appendChild(li); });
+        });
+        // Sicherheitsnetz: alles nicht Zugeordnete (z.B. neue Seiten) hinten anhängen
+        groups.rest.forEach(function(li) { mobileSub.appendChild(li); });
+      })();
 
     }).catch(function() {
       // navigation.json not yet present – silently keep original order
