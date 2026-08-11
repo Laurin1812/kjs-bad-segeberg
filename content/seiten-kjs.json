@@ -1,3 +1,10 @@
 {
-  "seiten": []
+  "seiten": [
+    {
+      "slug": "zz",
+      "nav_label": "zz",
+      "in_navigation": true,
+      "veroeffentlicht": true
+    }
+  ]
 }
