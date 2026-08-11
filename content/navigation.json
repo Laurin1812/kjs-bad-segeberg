@@ -74,6 +74,10 @@
   ],
   "aufgaben": [
     {
+      "label": "Jungwildrettung",
+      "href": "/aufgaben/jungwildrettung.html"
+    },
+    {
       "label": "Schießwesen",
       "href": "/aufgaben/schiessen.html"
     },
@@ -96,10 +100,6 @@
     {
       "label": "Jagdhornblasen",
       "href": "/aufgaben/jagdhorn.html"
-    },
-    {
-      "label": "Jungwildrettung",
-      "href": "/aufgaben/jungwildrettung.html"
     }
   ],
   "verbraucher": [
