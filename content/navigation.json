@@ -9,10 +9,10 @@
     "startseite",
     "jaeger",
     "verbraucher",
-    "termine",
     "aktuelles",
-    "faq",
-    "kontakt"
+    "termine",
+    "kontakt",
+    "faq"
   ],
   "jaeger_dropdown": [
     "kreisjjaegermeister",
