@@ -208,12 +208,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       });
       // Geschäftsstelle-Boxen aktualisieren
       var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
+      var postadresseHtml = d.postadresse ? d.postadresse.trim().split('\n').join('<br>') : '';
       boxes.forEach(function(box) {
         box.innerHTML =
           '<h4>Geschäftsstelle</h4>' +
           (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
           (d.telefon  ? '<p><span class="cb-icon">📞</span><a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
-          (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '');
+          (d.telefon_festnetz ? '<p><span class="cb-icon">☎️</span><a href="tel:' + d.telefon_festnetz.replace(/\s|-/g,'') + '">' + d.telefon_festnetz + '</a></p>' : '') +
+          (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '') +
+          (postadresseHtml ? '<p><span class="cb-icon">✉️</span><span>' + postadresseHtml + '</span></p>' : '');
       });
     })
     .catch(function() {});

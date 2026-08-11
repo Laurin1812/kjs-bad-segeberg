@@ -1965,6 +1965,7 @@
             'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle.' +
           '</p>' +
           fText('ei-email', 'E-Mail', data.email) +
+          fText('ei-telefon-festnetz', 'Telefon Festnetz (Geschäftsstelle)', data.telefon_festnetz) +
           fTextarea('ei-adresse', 'Adresse (jede Zeile = eine Zeile)', data.adresse, 3) +
           fTextarea('ei-postadresse', 'Postadresse (nur ausfüllen, falls abweichend von der Adresse oben)', data.postadresse, 3) +
         '</div>' +
@@ -1997,6 +1998,7 @@
     data.telefon = gv('ei-telefon');
     data.telefon_header = gv('ei-telefon-header');
     data.email   = gv('ei-email');
+    data.telefon_festnetz = gv('ei-telefon-festnetz');
     data.adresse = gv('ei-adresse');
     data.postadresse = gv('ei-postadresse');
     data.google_kalender_url   = gv('ei-kal-url');
