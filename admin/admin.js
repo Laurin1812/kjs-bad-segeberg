@@ -3475,27 +3475,16 @@
       '<div class="mdimg-live-panel__title">🖼️ Bild bearbeiten</div>' +
       '<div class="mdimg-live-row">' +
         '<span class="mdimg-live-label">Größe</span>' +
-        '<button type="button" class="mdimg-live-btn" data-size="img-klein">Klein</button>' +
-        '<button type="button" class="mdimg-live-btn" data-size="img-mittel">Mittel</button>' +
-        '<button type="button" class="mdimg-live-btn" data-size="img-gross">Groß</button>' +
-        '<button type="button" class="mdimg-live-btn" data-size="img-voll">Volle Breite</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-klein">25%</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-mittel">50%</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-gross">75%</button>' +
+        '<button type="button" class="mdimg-live-btn" data-size="img-voll">100%</button>' +
       '</div>' +
       '<div class="mdimg-live-row">' +
         '<span class="mdimg-live-label">Position</span>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-oben">Oben li.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-oben">Oben Mi.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-oben">Oben re.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-mitte">Mitte li.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-mitte">Zentriert</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-mitte">Mitte re.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-links" data-v="img-pos-unten">Unten li.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert" data-v="img-pos-unten">Unten Mi.</button>' +
-        '<button type="button" class="mdimg-live-btn" data-h="img-rechts" data-v="img-pos-unten">Unten re.</button>' +
-      '</div>' +
-      '<div class="mdimg-live-row">' +
-        '<span class="mdimg-live-label">Textumfluss</span>' +
-        '<button type="button" class="mdimg-live-btn" data-flow="img-flow">Umfließt</button>' +
-        '<button type="button" class="mdimg-live-btn" data-flow="img-block">Kein Umfluss</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-links">Links</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-zentriert">Zentriert</button>' +
+        '<button type="button" class="mdimg-live-btn" data-h="img-rechts">Rechts</button>' +
       '</div>' +
       '<div class="mdimg-live-row mdimg-live-row--actions">' +
         '<button type="button" class="btn btn-outline btn-sm" id="mdimg-live-swap">🔄 Bild austauschen</button>' +
@@ -3506,19 +3495,18 @@
     p.addEventListener('mousedown', function(e) { e.stopPropagation(); });
     p.addEventListener('click', function(e) {
       var sizeBtn = e.target.closest('[data-size]');
-      var gridBtn = e.target.closest('[data-h]');
-      var flowBtn = e.target.closest('[data-flow]');
-      var entry = _mdLive.marks[_mdLive.panelIndex];
+      var posBtn  = e.target.closest('[data-h]');
       if (sizeBtn) {
         applyMdImgChange(_mdLive.panelIndex, { size: sizeBtn.getAttribute('data-size') });
-      } else if (gridBtn) {
-        var patch = { hpos: gridBtn.getAttribute('data-h'), vpos: gridBtn.getAttribute('data-v') };
-        if (patch.hpos === 'img-zentriert' && entry && entry.flow === 'img-flow') patch.flow = 'img-block';
-        applyMdImgChange(_mdLive.panelIndex, patch);
-      } else if (flowBtn) {
-        var flow = flowBtn.getAttribute('data-flow');
-        if (flow === 'img-flow' && entry && entry.hpos === 'img-zentriert') return; // nicht möglich
-        applyMdImgChange(_mdLive.panelIndex, { flow: flow });
+      } else if (posBtn) {
+        var hpos = posBtn.getAttribute('data-h');
+        // Vertikale Position & Textumfluss werden nicht mehr separat abgefragt –
+        // wie auf der Testseite automatisch aus der horizontalen Position abgeleitet.
+        applyMdImgChange(_mdLive.panelIndex, {
+          hpos: hpos,
+          vpos: 'img-pos-oben',
+          flow: hpos === 'img-zentriert' ? 'img-block' : 'img-flow'
+        });
       } else if (e.target.id === 'mdimg-live-swap')   openMdImgSwapModal(_mdLive.panelIndex);
       else if (e.target.id === 'mdimg-live-remove') removeMdImg(_mdLive.panelIndex);
     });
@@ -3537,13 +3525,7 @@
       b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-size') === entry.size);
     });
     p.querySelectorAll('[data-h]').forEach(function(b) {
-      b.classList.toggle('mdimg-live-btn--active',
-        b.getAttribute('data-h') === entry.hpos && b.getAttribute('data-v') === entry.vpos);
-    });
-    p.querySelectorAll('[data-flow]').forEach(function(b) {
-      var flow = b.getAttribute('data-flow');
-      b.classList.toggle('mdimg-live-btn--active', flow === entry.flow);
-      b.classList.toggle('mdimg-live-btn--disabled', flow === 'img-flow' && entry.hpos === 'img-zentriert');
+      b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-h') === entry.hpos);
     });
 
     p.style.display = 'flex';
