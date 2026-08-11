@@ -40,7 +40,13 @@
     { key:'jaeger', label:'🦌 Jäger', group:true, open:true, children:[
       { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard' },
       { key:'kjs', label:'KJS Segeberg', group:true, open:true, children:[
-        { key:'kjs-uebersicht',   label:'Übersicht',         file:'content/jaeger/uebersicht.json',       form:'standard' },
+        // 'Übersicht' (content/jaeger/uebersicht.json) bewusst aus dem Admin-Menü
+        // entfernt (11.08.2026) - die Seite jaeger/index.html mit den 6 Kacheln
+        // (Vorstand/Hegeringe/Obleute/Mitglied werden/Jäger werden/Kreisjägermeister)
+        // ist aktuell nirgends verlinkt ("KJS Segeberg" im Menü ist nicht mehr
+        // anklickbar), daher wäre dieser Bearbeitungsbereich tot/verwirrend.
+        // Bei Bedarf einfach die folgende Zeile wieder einkommentieren:
+        // { key:'kjs-uebersicht',   label:'Übersicht',         file:'content/jaeger/uebersicht.json',       form:'standard' },
         { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'], drag:true },
         { key:'obleute',          label:'Obleute',            file:'content/obleute.json',                 form:'personen', dataKey:'obleute',   fields:['rolle','name','email','telefon','bild'], drag:true },
         { key:'hegeringe',        label:'Hegeringe',          file:'content/hegeringe.json',               form:'hegeringe', drag:true },
