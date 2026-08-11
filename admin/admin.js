@@ -1959,6 +1959,9 @@
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Kontaktdaten</div>' +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Diese Angaben erscheinen automatisch in der grünen „Geschäftsstelle"-Kontaktbox auf allen Unterseiten sowie im Impressum und in der Datenschutzerklärung – einmal hier ändern, überall aktuell.' +
+          '</p>' +
           fText('ei-telefon', 'Telefon (Geschäftsstelle / Kontaktbox)', data.telefon) +
           fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
@@ -2085,6 +2088,7 @@
       '<div class="panel-body"><div class="form-card">' +
         fText('imp-verein', 'Vereinsname', data.verein) +
         fTextarea('imp-adresse', 'Adresse', data.adresse, 3) +
+        fTextarea('imp-postadresse', 'Postadresse (nur ausfüllen, falls abweichend von der Adresse oben)', data.postadresse, 3) +
         fText('imp-vertreten', 'Vertreten durch', data.vertreten_durch) +
         fText('imp-telefon', 'Telefon', data.telefon) +
         fText('imp-email', 'E-Mail', data.email) +
@@ -2099,6 +2103,7 @@
   function collectImpressum(data) {
     data.verein           = gv('imp-verein');
     data.adresse          = gv('imp-adresse');
+    data.postadresse      = gv('imp-postadresse');
     data.vertreten_durch  = gv('imp-vertreten');
     data.telefon          = gv('imp-telefon');
     data.email            = gv('imp-email');

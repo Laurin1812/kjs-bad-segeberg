@@ -146,9 +146,20 @@
          Wir verarbeiten Ihre Daten daher ausschließlich auf Grundlage der gesetzlichen
          Bestimmungen (DSGVO, TMG).</p>
       <h3>Verantwortlicher</h3>
-      <p>Kreisjägerschaft Segeberg e.V.<br>
-      Musterstraße 1, 23795 Bad Segeberg<br>
-      E-Mail: <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+      <p id="ds-verantwortlicher">Kreisjägerschaft Segeberg e.V.<br>
+      Wird geladen …</p>
+      <script>
+        fetch('content/einstellungen.json')
+          .then(r => r.json())
+          .then(d => {
+            var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
+            var postadresseHtml = d.postadresse ? '<br>Postadresse: ' + d.postadresse.trim().split('\n').join('<br>') : '';
+            document.getElementById('ds-verantwortlicher').innerHTML =
+              'Kreisjägerschaft Segeberg e.V.<br>' + adresseHtml + postadresseHtml +
+              (d.email ? '<br>E-Mail: <a href="mailto:' + d.email + '">' + d.email + '</a>' : '');
+          })
+          .catch(function() {});
+      </script>
       <h3>Datenerfassung auf dieser Website</h3>
       <p>Diese Website erhebt keine personenbezogenen Daten, soweit Sie uns diese nicht
          freiwillig übermitteln (z. B. über das Kontaktformular). Die von Ihnen eingegebenen

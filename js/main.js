@@ -343,11 +343,16 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     // z.B. href="/jaeger/vorstand.html" oder href="/seiten/?s=mein-slug")
     function reorderSub(sub, items) {
       if (!sub || !items || !items.length) return;
+      // Netlify liefert interne Links ohne ".html" aus (Pretty URLs) – deshalb
+      // Dateiname beidseitig ohne Endung/Query vergleichen, sonst matcht nichts.
+      function baseName(href) {
+        return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
+      }
       items.forEach(function(item) {
-        var filename = item.href.split('/').pop();
+        var filename = baseName(item.href);
         sub.querySelectorAll(':scope > li').forEach(function(li) {
           var a = li.querySelector('a');
-          if (a && a.getAttribute('href') && a.getAttribute('href').indexOf(filename) !== -1) {
+          if (a && a.getAttribute('href') && filename && baseName(a.getAttribute('href')) === filename) {
             sub.appendChild(li);
           }
         });

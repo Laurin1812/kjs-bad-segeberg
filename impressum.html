@@ -150,6 +150,7 @@
           document.getElementById('impressum-content').innerHTML = `
             <h2>Angaben gemäß § 5 TMG</h2>
             <p><strong>${d.verein}</strong><br>${d.adresse.replace(/\n/g,'<br>')}</p>
+            ${d.postadresse ? `<p><strong>Postadresse:</strong><br>${d.postadresse.replace(/\n/g,'<br>')}</p>` : ''}
             <p><strong>Vertreten durch:</strong><br>${d.vertreten_durch}</p>
             <h3>Kontakt</h3>
             <p>Telefon: <a href="tel:${d.telefon.replace(/\s|-|\//g,'')}">${d.telefon}</a><br>
