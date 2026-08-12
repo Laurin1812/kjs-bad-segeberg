@@ -74,12 +74,12 @@
   ],
   "aufgaben": [
     {
-      "label": "Naturschutz",
-      "href": "/aufgaben/naturschutz.html"
-    },
-    {
       "label": "Jungwildrettung",
       "href": "/aufgaben/jungwildrettung.html"
+    },
+    {
+      "label": "Naturschutz",
+      "href": "/aufgaben/naturschutz.html"
     },
     {
       "label": "Schießwesen",
