@@ -385,6 +385,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       kontakt:    /kontakt\/(index(\.html)?)?$/
     };
 
+    // Robusterer Abgleich für Hauptmenü-Punkte: bevorzugt das feste
+    // data-navkey-Attribut (unabhängig vom href, funktioniert auch wenn ein
+    // Punkt wie "Jäger" bewusst auf "#" zeigt, siehe KJS-Segeberg-Fix weiter
+    // unten). Fällt nur zurück auf den href-Regex, falls data-navkey auf
+    // einer Seite mal fehlen sollte.
+    function matchesNavKey(a, key) {
+      if (!a) return false;
+      var dk = a.getAttribute('data-navkey');
+      if (dk) return dk === key;
+      var pattern = KEY_HREF[key];
+      return !!(pattern && pattern.test(a.getAttribute('href') || ''));
+    }
+
     var jaegerDD = document.getElementById('jaeger-dropdown');
     var mainNav  = document.querySelector('.main-nav');
 
@@ -444,14 +457,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         if (sn.jaeger && mainNav) {
           mainNav.querySelectorAll(':scope > li').forEach(function(li) {
             var a = li.querySelector(':scope > a');
-            if (a && KEY_HREF.jaeger.test(a.getAttribute('href') || '')) renameNavLink(a, sn.jaeger);
+            if (matchesNavKey(a, 'jaeger')) renameNavLink(a, sn.jaeger);
           });
         }
         // Verbraucher main nav label
         if (sn.verbraucher && mainNav) {
           mainNav.querySelectorAll(':scope > li').forEach(function(li) {
             var a = li.querySelector(':scope > a');
-            if (a && KEY_HREF.verbraucher.test(a.getAttribute('href') || '')) renameNavLink(a, sn.verbraucher);
+            if (matchesNavKey(a, 'verbraucher')) renameNavLink(a, sn.verbraucher);
           });
         }
       }
@@ -459,11 +472,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       // ── 3. Main menu reordering (FEATURE 3) ────────────────────
       if (d.hauptmenu && d.hauptmenu.length && mainNav) {
         d.hauptmenu.forEach(function(key) {
-          var pattern = KEY_HREF[key];
-          if (!pattern) return;
+          if (!KEY_HREF[key]) return;
           mainNav.querySelectorAll(':scope > li').forEach(function(li) {
             var a = li.querySelector(':scope > a');
-            if (a && pattern.test(a.getAttribute('href') || '')) {
+            if (matchesNavKey(a, key)) {
               mainNav.appendChild(li); // move to end in specified order
             }
           });

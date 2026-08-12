@@ -38,8 +38,8 @@
       </div>
     </a>
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
-      <li><a href="../index.html">Startseite</a></li>
-      <li class="active"><a href="../jaeger/index.html">Jäger <span class="arrow">▾</span></a>
+      <li><a href="../index.html" data-navkey="startseite">Startseite</a></li>
+      <li class="active"><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
           <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
           <li class="has-sub"><a href="#">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
@@ -74,17 +74,17 @@
           </li>
         </ul>
       </li>
-      <li><a href="../verbraucher/index.html">Verbraucher <span class="arrow">▾</span></a>
+      <li><a href="../verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
         <ul class="dropdown">
           <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
           <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
           <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
         </ul>
       </li>
-      <li><a href="../termine/index.html">Termine</a></li>
-      <li><a href="../aktuelles/index.html">Aktuelles</a></li>
-      <li><a href="../faq/index.html">FAQ</a></li>
-      <li><a href="../kontakt/index.html">Kontakt</a></li>
+      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
+      <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
+      <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
@@ -167,14 +167,11 @@
             ? grußwort.split('\n').filter(function(l){ return l.trim(); }).map(function(l){ return `<p>${l}</p>`; }).join('')
             : '';
 
-          // Sidebar-Kontaktbox aktualisieren
-          var sidebar = document.getElementById('kjm-sidebar-contact');
-          if (sidebar) {
-            sidebar.innerHTML =
-              '<h4>Direktkontakt</h4>' +
-              (email   ? `<p>📧 <a href="mailto:${email}">${email}</a></p>` : '') +
-              (telefon ? `<p>📞 <a href="tel:${telefon.replace(/\s|-|\//g,'')}">${telefon}</a></p>` : '');
-          }
+          // Hinweis: die Sidebar-Kontaktbox (#kjm-sidebar-contact) wird NICHT mehr
+          // hier überschrieben – main.js befüllt jede .contact-box automatisch mit
+          // der einheitlichen "Adresse KJS"-Box aus content/einstellungen.json.
+          // Vorher gab es hier ein eigenes "Direktkontakt"-Overlay, das mit main.js
+          // um dasselbe Element konkurrierte (Race Condition je nach Ladezeit).
 
           document.getElementById('kjm-content').innerHTML = `
             <h2>Der Kreisjägermeister</h2>
@@ -218,7 +215,7 @@
         </ul>
       </div>
       <div class="contact-box" id="kjm-sidebar-contact">
-        <h4>Direktkontakt</h4>
+        <h4>Adresse KJS</h4>
         <p style="color:var(--text-muted);font-size:.85rem;">Wird geladen …</p>
       </div>
     </aside>
