@@ -40,10 +40,6 @@
       "href": "/jaeger/vorstand.html"
     },
     {
-      "label": "Satzung",
-      "href": "/jaeger/satzung.html"
-    },
-    {
       "label": "Obleute",
       "href": "/jaeger/obleute.html"
     },
@@ -70,6 +66,10 @@
     {
       "label": "Mitglied werden",
       "href": "/jaeger/mitglied-werden.html"
+    },
+    {
+      "label": "Satzung",
+      "href": "/jaeger/satzung.html"
     }
   ],
   "aufgaben": [
