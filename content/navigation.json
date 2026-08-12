@@ -40,10 +40,6 @@
       "href": "/jaeger/satzung.html"
     },
     {
-      "label": "Mitglied werden",
-      "href": "/jaeger/mitglied-werden.html"
-    },
-    {
       "label": "Obleute",
       "href": "/jaeger/obleute.html"
     },
@@ -70,6 +66,10 @@
     {
       "label": "Jäger/in werden",
       "href": "/jaeger/jaeger-werden.html"
+    },
+    {
+      "label": "Mitglied werden",
+      "href": "/jaeger/mitglied-werden.html"
     }
   ],
   "aufgaben": [
