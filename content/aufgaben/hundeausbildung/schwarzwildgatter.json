@@ -8,5 +8,9 @@
   "bild": "/images/jagdhornblasen.jpg",
   "bild_alt": "",
   "kontakt_name": "",
-  "kontakt_email": ""
+  "kontakt_email": "",
+  "bild_groesse": "img-100",
+  "vorschaubild": "/images/termine.jpg",
+  "kurzbeschreibung": "",
+  "downloads": []
 }
