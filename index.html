@@ -459,12 +459,20 @@
     fetch('/content/aktuelles.json')
       .then(function(r){ return r.json(); })
       .then(function(data){
-        var beitraege = data.beitraege || [];
+        // Archivierte Beiträge auch auf der Startseite ausblenden (vorher wurden
+        // hier einfach die ersten 3 Einträge gezeigt, unabhängig vom Archiv-Status
+        // – dadurch konnte die Startseite andere Beiträge zeigen als die
+        // Aktuelles-Übersichtsseite selbst). "i" im Link muss der Index im
+        // UNGEFILTERTEN Original-Array bleiben, sonst zeigt "Weiterlesen" auf
+        // den falschen Beitrag (gleiches Muster wie in aktuelles/index.html).
+        var alleBeitraege = data.beitraege || [];
+        var beitraege = alleBeitraege.filter(function(b) { return !b.archiviert; });
         if (!beitraege.length) {
           grid.innerHTML = '<p>Zurzeit keine Beiträge vorhanden.</p>';
           return;
         }
-        grid.innerHTML = beitraege.slice(0, 3).map(function(b, i){
+        grid.innerHTML = beitraege.slice(0, 3).map(function(b){
+          var i = alleBeitraege.indexOf(b);
           var imgHtml = b.bild
             ? '<img class="news-card__img" src="' + (b.bild.indexOf('/') === 0 ? '.' + b.bild : b.bild) + '" alt="' + b.titel + '" loading="lazy">'
             : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">' +
