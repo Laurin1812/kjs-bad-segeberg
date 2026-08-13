@@ -406,7 +406,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     var jaegerDD = document.getElementById('jaeger-dropdown');
     var mainNav  = document.querySelector('.main-nav');
 
-    fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
+    // window.__navReady: wird erst erfüllt, wenn ALLE dynamisch eingefügten
+    // Seiten (KJS Segeberg/Aufgaben/Verbraucher/Weitere Themen) UND die
+    // Umsortierung/Umbenennung aus navigation.json fertig im Menü stehen.
+    // Die generische "Verwandte Seiten"-Navigation weiter unten in dieser
+    // Datei wartet darauf, damit sie das Menü nicht zu früh (unvollständig)
+    // ausliest.
+    window.__navReady = fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
 
       // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
       if (jaegerDD) {
@@ -868,8 +874,11 @@ if (contactForm) {
   var targets = document.querySelectorAll('[data-related-nav]');
   if (!targets.length) return;
 
-  var navRoot = document.querySelector('nav[aria-label="Hauptnavigation"] > ul');
-  if (!navRoot) return;
+  // Erst starten, wenn das Hauptmenü vollständig ist (inkl. eigener
+  // Unterseiten aus dem Admin, siehe window.__navReady weiter oben in
+  // dieser Datei) – sonst fehlen z.B. selbst angelegte Verbraucher-Seiten
+  // in der rechten Navigation, weil deren Einfügung ins Menü noch läuft.
+  Promise.resolve(window.__navReady).then(run).catch(run);
 
   function normPath(href) {
     try {
@@ -880,7 +889,7 @@ if (contactForm) {
     }
   }
 
-  function findLink(pathOrHref) {
+  function findLink(navRoot, pathOrHref) {
     var wantPath = normPath(pathOrHref);
     var links = navRoot.querySelectorAll('a[href]');
     var found = null;
@@ -929,16 +938,21 @@ if (contactForm) {
     return html;
   }
 
-  targets.forEach(function (target) {
-    var forHref = target.getAttribute('data-related-for');
-    var matched = findLink(forHref || location.pathname);
-    if (!matched) return;
-    var parentLi = matched.closest('li');
-    var parentUl = parentLi ? parentLi.parentElement : null;
-    if (!parentUl) return;
-    var html = renderSiblings(parentUl, forHref ? null : parentLi);
-    if (html) target.innerHTML = html;
-  });
+  function run() {
+    var navRoot = document.querySelector('nav[aria-label="Hauptnavigation"] > ul');
+    if (!navRoot) return;
+
+    targets.forEach(function (target) {
+      var forHref = target.getAttribute('data-related-for');
+      var matched = findLink(navRoot, forHref || location.pathname);
+      if (!matched) return;
+      var parentLi = matched.closest('li');
+      var parentUl = parentLi ? parentLi.parentElement : null;
+      if (!parentUl) return;
+      var html = renderSiblings(parentUl, forHref ? null : parentLi);
+      if (html) target.innerHTML = html;
+    });
+  }
 })();
 
 // ── Hauptmenü: Dropdowns schließen mit kurzer Verzögerung ────────────────

@@ -203,33 +203,24 @@
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Verbraucher</h4>
-        <ul class="sidebar-nav">
-          <li class="active"><a href="wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-        </ul>
+        <ul class="sidebar-nav" data-related-nav></ul>
+      </div>
+      <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
+        <h4>Weitere Seiten</h4>
+        <ul class="sidebar-nav" id="sub-seiten-nav"></ul>
         <script>
-          fetch('/content/seiten-verbraucher.json').then(function(r){return r.json();}).then(function(d){
-            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
+          fetch('/content/seiten-sub-wildfleisch.json').then(function(r){return r.json();}).then(function(d){
+            var nav = document.getElementById('sub-seiten-nav');
+            var widget = document.getElementById('sub-seiten-widget');
             if (!nav) return;
-            (d.seiten || []).forEach(function(s) {
-              if (s.veroeffentlicht === false || s.in_navigation === false) return;
+            var seiten = (d.seiten || []).filter(function(s) { return s.veroeffentlicht !== false && s.in_navigation !== false; });
+            if (!seiten.length) return;
+            seiten.forEach(function(s) {
               var li = document.createElement('li');
               li.innerHTML = '<a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
               nav.appendChild(li);
             });
-          }).catch(function(){});
-          // Sub-pages for Wildfleisch
-          fetch('/content/seiten-sub-wildfleisch.json').then(function(r){return r.json();}).then(function(d){
-            var nav = document.querySelector('.sidebar-widget .sidebar-nav');
-            if (!nav) return;
-            (d.seiten || []).forEach(function(s) {
-              if (s.veroeffentlicht === false || s.in_navigation === false) return;
-              var li = document.createElement('li');
-              li.style.paddingLeft = '1rem';
-              li.innerHTML = '↳ <a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
-              nav.appendChild(li);
-            });
+            widget.style.display = '';
           }).catch(function(){});
         </script>
       </div>
