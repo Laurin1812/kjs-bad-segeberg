@@ -847,3 +847,96 @@ if (contactForm) {
     })
     .catch(function () {});
 })();
+
+// ── "Verwandte Seiten" – generische rechte Navigation ────────────────────
+// Füllt jede <ul class="sidebar-nav" data-related-nav> automatisch mit den
+// "Geschwister-Seiten" der aktuellen Seite, direkt aus dem echten Hauptmenü
+// oben ausgelesen. Die aktuelle Seite selbst wird dabei weggelassen (man ist
+// ja schon drauf). Menüpunkte, die selbst nur eine Klapp-Überschrift ohne
+// eigene Seite sind (z.B. "KJS Segeberg", href="#"), werden als
+// nicht-klickbare Zwischenüberschrift mit eingerückten Unterpunkten gezeigt –
+// genau wie im Hauptmenü selbst.
+//
+// Dadurch muss diese Liste nirgends mehr von Hand gepflegt werden: ändert
+// sich später ein Menüpunkt, zieht die rechte Navigation automatisch nach.
+//
+// Für Seiten, die selbst nicht direkt im Hauptmenü stehen (z.B. die
+// Jagdhundeschule-Kachelübersicht, die "unter" Hundeausbildung hängt), kann
+// per data-related-for="<href-wie-im-menü>" festgelegt werden, für welchen
+// Menüpunkt die Geschwister-Liste gelten soll.
+(function () {
+  var targets = document.querySelectorAll('[data-related-nav]');
+  if (!targets.length) return;
+
+  var navRoot = document.querySelector('nav[aria-label="Hauptnavigation"] > ul');
+  if (!navRoot) return;
+
+  function normPath(href) {
+    try {
+      var u = new URL(href, location.href);
+      return u.pathname.replace(/index\.html?$/, '').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function findLink(pathOrHref) {
+    var wantPath = normPath(pathOrHref);
+    var links = navRoot.querySelectorAll('a[href]');
+    var found = null;
+    links.forEach(function (a) {
+      if (found) return;
+      var href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      if (normPath(href) === wantPath) found = a;
+    });
+    return found;
+  }
+
+  function groupHeaderHtml(label) {
+    return '<li style="font-size:.75rem;font-weight:700;text-transform:uppercase;' +
+      'letter-spacing:.05em;color:var(--green-dark);padding:.5rem 0 .25rem;' +
+      'margin-top:.5rem;border-top:1px solid var(--border);pointer-events:none;">' +
+      label.replace(/&/g, '&amp;') + '</li>';
+  }
+
+  function itemHtml(label, href, indent) {
+    return '<li><a href="' + href + '"' + (indent ? ' style="padding-left:.75rem;"' : '') + '>' +
+      label.replace(/&/g, '&amp;') + '</a></li>';
+  }
+
+  function renderSiblings(ul, excludeLi) {
+    var html = '';
+    ul.querySelectorAll(':scope > li').forEach(function (li) {
+      if (li === excludeLi) return;
+      var a = li.querySelector(':scope > a');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      var label = a.textContent.trim();
+      var childUl = li.querySelector(':scope > ul');
+      var childItems = childUl ? childUl.querySelectorAll(':scope > li > a') : null;
+      if (childItems && childItems.length && (!href || href === '#')) {
+        // Klapp-Überschrift ohne eigene Seite (z.B. "KJS Segeberg"):
+        // als Zwischenüberschrift + eingerückte Unterpunkte anzeigen.
+        html += groupHeaderHtml(label);
+        childItems.forEach(function (childA) {
+          html += itemHtml(childA.textContent.trim(), childA.getAttribute('href'), true);
+        });
+      } else if (href && href !== '#') {
+        html += itemHtml(label, href, false);
+      }
+    });
+    return html;
+  }
+
+  targets.forEach(function (target) {
+    var forHref = target.getAttribute('data-related-for');
+    var matched = findLink(forHref || location.pathname);
+    if (!matched) return;
+    var parentLi = matched.closest('li');
+    var parentUl = parentLi ? parentLi.parentElement : null;
+    if (!parentUl) return;
+    var html = renderSiblings(parentUl, forHref ? null : parentLi);
+    if (html) target.innerHTML = html;
+  });
+})();
