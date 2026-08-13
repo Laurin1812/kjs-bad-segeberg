@@ -206,17 +206,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           a.textContent = topbarTel;
         }
       });
-      // Geschäftsstelle-Boxen aktualisieren
+      // Kontaktbox aktualisieren: oben "Adresse KJS" (Adresse + allgemeine E-Mail),
+      // darunter als eigener Block "Geschäftsstelle / Postadresse" (freier Text,
+      // z.B. Name/Adresse/Telefon/E-Mail der Geschäftsstelle – von Frank selbst
+      // im Admin unter "Postadresse" gepflegt). Die private Handynummer (d.telefon)
+      // wird hier bewusst NICHT mehr angezeigt.
       var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
       var postadresseHtml = d.postadresse ? d.postadresse.trim().split('\n').join('<br>') : '';
       boxes.forEach(function(box) {
         box.innerHTML =
-          '<h4>Geschäftsstelle</h4>' +
-          (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
-          (d.telefon  ? '<p><span class="cb-icon">📞</span><a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
-          (d.telefon_festnetz ? '<p><span class="cb-icon">☎️</span><a href="tel:' + d.telefon_festnetz.replace(/\s|-/g,'') + '">' + d.telefon_festnetz + '</a></p>' : '') +
+          '<h4>Adresse KJS</h4>' +
           (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '') +
-          (postadresseHtml ? '<p><span class="cb-icon">✉️</span><span>' + postadresseHtml + '</span></p>' : '');
+          (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
+          (postadresseHtml ?
+            '<h4 class="contact-box__sub">Geschäftsstelle / Postadresse</h4>' +
+            '<p><span class="cb-icon">✉️</span><span>' + postadresseHtml + '</span></p>'
+            : '');
       });
     })
     .catch(function() {});

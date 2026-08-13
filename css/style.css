@@ -641,6 +641,7 @@ p  { margin-bottom: 1rem; }
 .contact-box p > span.cb-icon { flex-shrink: 0; line-height: 1.5; }
 .contact-box a   { color: rgba(255,255,255,.88); }
 .contact-box a:hover { color: #fff; }
+.contact-box h4.contact-box__sub { margin-top: 1.1rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; opacity: .85; }
 
 /* =========================================================
    PERSON CARDS
