@@ -9,7 +9,12 @@
      CONSTANTS
   ──────────────────────────────────────────────────────────── */
   var GIT   = '/.netlify/git/github/contents';
-  var BRANCH = 'main';
+  // Admin-Änderungen landen ab jetzt auf dem "staging"-Branch (Vorschau-Adresse
+  // staging--kjs-bad-segeberg.netlify.app), NICHT mehr direkt auf der echten
+  // Live-Seite. Erst nach Prüfung/Freigabe wird staging -> main übertragen
+  // ("veröffentlichen") – das macht aktuell Claude auf Zuruf, kein Automatik-
+  // Knopf hier im Admin (bewusst, um kurz vor Go-Live kein Risiko einzubauen).
+  var BRANCH = 'staging';
 
   var KAT_NEWS    = ['Allgemein','Naturschutz','Jagd','Jungwildrettung','Hundeausbildung','Schießwesen','Jugend','Jagdhornblasen','Veranstaltung','Pressemitteilung'];
   var KAT_TERMINE = ['Vorstand','Schießwesen','Hundeausbildung','Jagdhornblasen','Jugend','Hegering','Naturschutz','Ausbildung','Kreisveranstaltung','Hauptversammlung','Tradition'];
