@@ -2909,6 +2909,28 @@
     try {
       var result = await doSave(def.file, data, '💾 ' + def.label + ' gespeichert');
       S.data = data;
+
+      // Jagdhundeschule-Unterseiten: Kachel-Vorschau (Vorschaubild/Kurzbeschreibung)
+      // wird auf der Übersichtsseite NICHT aus der Unterseite selbst gelesen,
+      // sondern aus dem Manifest (hundeausbildung-seiten.json). Ohne diesen
+      // Sync bleibt die Kachel beim Bearbeiten einer bestehenden Seite auf dem
+      // alten Stand, obwohl das Formular ein neues Bild zeigt.
+      if (def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1 && def.slug) {
+        try {
+          var manifestResp = await apiGet(def.navFile);
+          var manifestData = JSON.parse(fromBase64(manifestResp.content));
+          var liste = manifestData[def.navKey] || [];
+          var eintrag = liste.filter(function(s) { return s.slug === def.slug; })[0];
+          if (eintrag) {
+            eintrag.vorschaubild     = data.vorschaubild     || '';
+            eintrag.kurzbeschreibung = data.kurzbeschreibung || '';
+            await apiPut(def.navFile, manifestData, manifestResp.sha, '🐕 Kachel-Vorschau aktualisiert: ' + (def.label || def.slug));
+          }
+        } catch(syncErr) {
+          console.warn('Kachel-Vorschau-Sync fehlgeschlagen:', syncErr);
+        }
+      }
+
       setSaving(false);
       toast('✅ Gespeichert! Änderungen erscheinen auf der Website in max. 5 Minuten.', 'ok');
       setStatus('✅ Gespeichert');
