@@ -2003,17 +2003,16 @@
         '<div class="form-card">' +
           '<div class="form-card-title">Kontaktdaten</div>' +
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
-            'Diese Angaben erscheinen automatisch in der grünen „Geschäftsstelle"-Kontaktbox auf allen Unterseiten sowie im Impressum und in der Datenschutzerklärung – einmal hier ändern, überall aktuell.' +
+            'Diese Angaben erscheinen automatisch in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten sowie im Impressum und in der Datenschutzerklärung – einmal hier ändern, überall aktuell.' +
           '</p>' +
-          fText('ei-telefon', 'Telefon (Geschäftsstelle / Kontaktbox)', data.telefon) +
+          fText('ei-telefon', 'Telefon (für Impressum & Kontaktseite, NICHT in der grünen Box)', data.telefon) +
           fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
             'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle.' +
           '</p>' +
-          fText('ei-email', 'E-Mail', data.email) +
-          fText('ei-telefon-festnetz', 'Telefon Festnetz (Geschäftsstelle)', data.telefon_festnetz) +
-          fTextarea('ei-adresse', 'Adresse (jede Zeile = eine Zeile)', data.adresse, 3) +
-          fTextarea('ei-postadresse', 'Postadresse (nur ausfüllen, falls abweichend von der Adresse oben)', data.postadresse, 3) +
+          fText('ei-email', 'E-Mail (erscheint oben in der Box, unter „Adresse KJS")', data.email) +
+          fTextarea('ei-adresse', 'Adresse KJS (jede Zeile = eine Zeile, erscheint oben in der Box)', data.adresse, 3) +
+          fTextarea('ei-postadresse', 'Geschäftsstelle / Postadresse (eigener Block unten in der Box – z.B. Name, Adresse, Telefon, E-Mail, jede Zeile einzeln)', data.postadresse, 5) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Öffnungszeiten</div>' +
@@ -2044,7 +2043,9 @@
     data.telefon = gv('ei-telefon');
     data.telefon_header = gv('ei-telefon-header');
     data.email   = gv('ei-email');
-    data.telefon_festnetz = gv('ei-telefon-festnetz');
+    // telefon_festnetz wird nicht mehr in der Box angezeigt (Feld aus dem Formular
+    // entfernt) – alter Wert bleibt unangetastet erhalten, falls er je gebraucht wird.
+    data.telefon_festnetz = data.telefon_festnetz || '';
     data.adresse = gv('ei-adresse');
     data.postadresse = gv('ei-postadresse');
     data.google_kalender_url   = gv('ei-kal-url');
