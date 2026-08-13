@@ -940,3 +940,43 @@ if (contactForm) {
     if (html) target.innerHTML = html;
   });
 })();
+
+// ── Hauptmenü: Dropdowns schließen mit kurzer Verzögerung ────────────────
+// Frank hatte gemeldet, dass sich die Menüs (z.B. "KJS Segeberg" → Flyout
+// mit Landesjagdverband, Vorstand, ...) beim Rüberfahren mit der Maus sofort
+// schließen, sobald man nur minimal von der geraden Linie abweicht. Das
+// liegt daran, dass die Anzeige bisher rein per CSS ":hover" gesteuert war –
+// verlässt der Mauszeiger auch nur für einen Sekundenbruchteil den Menüpunkt
+// (z.B. beim diagonalen Rüberfahren zum Untermenü), klappt alles sofort zu.
+// Diese Funktion ergänzt eine kurze "Toleranzzeit": Beim Verlassen wird das
+// Menü nicht sofort geschlossen, sondern erst nach einer kurzen Verzögerung –
+// fährt man in der Zwischenzeit zurück oder ins Untermenü, bleibt es offen.
+(function () {
+  var CLOSE_DELAY = 350; // ms
+  var timers = new WeakMap();
+
+  function openNow(el) {
+    var t = timers.get(el);
+    if (t) { clearTimeout(t); timers.delete(el); }
+    el.classList.add('nav-open');
+  }
+  function closeDelayed(el) {
+    var t = timers.get(el);
+    if (t) clearTimeout(t);
+    t = setTimeout(function () {
+      el.classList.remove('nav-open');
+      timers.delete(el);
+    }, CLOSE_DELAY);
+    timers.set(el, t);
+  }
+
+  function wire(selector) {
+    document.querySelectorAll(selector).forEach(function (el) {
+      el.addEventListener('mouseenter', function () { openNow(el); });
+      el.addEventListener('mouseleave', function () { closeDelayed(el); });
+    });
+  }
+
+  wire('.main-nav > li');   // Hauptmenü-Dropdowns (Jäger, Verbraucher, ...)
+  wire('.has-sub');         // Verschachtelte Flyout-Untermenüs (KJS Segeberg, Aufgaben ...)
+})();
