@@ -12,7 +12,7 @@
       "slug": "kurs-1-junghunde",
       "nav_label": "Kurs 1: Junghunde",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/naturschutz.webp",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -20,7 +20,7 @@
       "slug": "kurs-2-anlagenpruefung",
       "nav_label": "Kurs 2: Anlagenprüfung",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/hundeausbildung.jpg",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -28,7 +28,7 @@
       "slug": "kurs-3-gesellenpruefung",
       "nav_label": "Kurs 3: Gesellenprüfung",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/termine.jpg",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -36,7 +36,7 @@
       "slug": "kurs-4-meisterpruefung",
       "nav_label": "Kurs 4: Meisterprüfung",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/jagdhornblasen.jpg",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -44,7 +44,7 @@
       "slug": "kurs-5-schweisspruefungen",
       "nav_label": "Kurs 5: Schweißprüfungen",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/jungwildrettung.jpg",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -52,7 +52,7 @@
       "slug": "kurs-6-bringtreue-bauarbeit",
       "nav_label": "Kurs 6: Bringtreue und Bauarbeit",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/download-1-.jpg",
       "kurzbeschreibung": "",
       "gruppe": "Kurse 1–6"
     },
@@ -60,7 +60,7 @@
       "slug": "hegeringhundetage",
       "nav_label": "Hegeringhundetage",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1786536130480-Copilot_20260812_135859.png",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -68,7 +68,7 @@
       "slug": "nachsuchen",
       "nav_label": "Nachsuchenführer",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/hundeausbildung.jpg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -76,7 +76,7 @@
       "slug": "anerkennung-faehrtenhund",
       "nav_label": "Anerkennung Fährtenhund",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/hero.jpg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -84,7 +84,7 @@
       "slug": "stoeberhunde",
       "nav_label": "Stöberhunde",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/naturschutz.webp",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -92,7 +92,7 @@
       "slug": "bauhunde",
       "nav_label": "Bauhunde",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/schiessen.jpg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -100,7 +100,7 @@
       "slug": "asp-kadaversuchhunde",
       "nav_label": "ASP-Kadaversuchhunde",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/schweisshunde.jpg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -108,7 +108,7 @@
       "slug": "schwarzwildgatter",
       "nav_label": "Schwarzwildgatter",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/termine.jpg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -124,7 +124,7 @@
       "slug": "brauchbarkeit",
       "nav_label": "Brauchbarkeit",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1781424007487-info2_.jpeg",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -132,7 +132,7 @@
       "slug": "vgp-vps-wanderpokal",
       "nav_label": "VGP/VPS-Wanderpokal",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/hero.jpg",
       "kurzbeschreibung": "",
       "gruppe": "VGP/VPS"
     },
@@ -140,7 +140,7 @@
       "slug": "vgp-preistraeger",
       "nav_label": "Bisherige VGP-Preisträger",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1781435792677-drohen.jpg",
       "kurzbeschreibung": "",
       "gruppe": "VGP/VPS"
     },
@@ -148,7 +148,7 @@
       "slug": "vps-preistraeger",
       "nav_label": "Bisherige VPS-Preisträger",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1780899261226-pixabay-felberwolf-dog-user-ID-3210831_1920-1.png",
       "kurzbeschreibung": "",
       "gruppe": "VGP/VPS"
     },
@@ -156,7 +156,7 @@
       "slug": "veranstaltungen-hundewesen",
       "nav_label": "Veranstaltungen Hundewesen",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1780821513512-BCO.99697243-771f-49d7-b7a4-f017b4d7b9b5.png",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
@@ -164,7 +164,7 @@
       "slug": "hunde-welpen-abzugeben",
       "nav_label": "Hunde/Welpen abzugeben",
       "veroeffentlicht": true,
-      "vorschaubild": "",
+      "vorschaubild": "/images/1780899261226-pixabay-felberwolf-dog-user-ID-3210831_1920-1.png",
       "kurzbeschreibung": "",
       "gruppe": ""
     }
