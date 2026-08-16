@@ -8,6 +8,12 @@
   "kontakt_name": "",
   "kontakt_email": "jungwild@kjs-bad-segeberg.de",
   "hero_bild": "/images/1786866016612-111.jpg",
-  "downloads": [],
+  "downloads": [
+    {
+      "titel": "Jungwildrettung Kisdorf 2023 2026",
+      "datei": "/downloads/1786891941427-Jungwildrettung-2023-2026.pdf",
+      "vorschau": ""
+    }
+  ],
   "bild_groesse": "img-50"
 }
