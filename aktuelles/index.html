@@ -197,6 +197,19 @@
     return m ? parseInt(m[1], 10) : 0;
   }
 
+  // Erscheinungsjahr eines Beitrags (Frank-Wunsch Punkt 4): das Admin-Feld
+  // "Erscheinungsjahr" (b.jahr) hat Vorrang und bestimmt, in welchem Archiv-
+  // Jahr der Beitrag einsortiert wird – unabhängig vom eigentlichen Datum.
+  // Ist es leer (ältere Beiträge ohne dieses Feld), fällt es automatisch
+  // auf das Jahr aus dem Datum zurück (bisheriges Verhalten).
+  function postYear(b) {
+    if (b && b.jahr) {
+      var j = parseInt(b.jahr, 10);
+      if (j) return j;
+    }
+    return getYear(b && b.datum);
+  }
+
   function kurztext(md) {
     if (!md) return '';
     var plain = md
@@ -241,7 +254,7 @@
       filtered = _allBeitraege;
       if (headline) headline.textContent = 'Alle Beiträge';
     } else if (yearFilter > 0) {
-      filtered = _allBeitraege.filter(function(b) { return getYear(b.datum) === yearFilter; });
+      filtered = _allBeitraege.filter(function(b) { return postYear(b) === yearFilter; });
       if (headline) headline.textContent = 'Beiträge ' + yearFilter;
     } else {
       // Default: current year non-archived, or last N
@@ -251,7 +264,7 @@
         filtered = _allBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, anzahl);
         if (headline) headline.textContent = 'Aktuelles (letzte ' + anzahl + ')';
       } else {
-        var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && getYear(b.datum) === currentYear; });
+        var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === currentYear; });
         filtered = thisYear.length > 0 ? thisYear : _allBeitraege.filter(function(b) { return !b.archiviert; });
         if (headline) headline.textContent = 'Aktuelles aus unserer Kreisjägerschaft';
       }
@@ -272,7 +285,7 @@
     if (!sidebar) return;
     var years = [];
     _allBeitraege.forEach(function(b) {
-      var y = getYear(b.datum);
+      var y = postYear(b);
       if (y && years.indexOf(y) === -1) years.push(y);
     });
     years.sort(function(a,b){return b-a;}); // newest first

@@ -1657,7 +1657,7 @@
   window.aktuellesNeu = function() {
     var data = S.data;
     data.beitraege = data.beitraege || [];
-    var newB = { titel:'', datum:'', kategorie:'Allgemein', bild:'', text:'', link:'', archiviert: false };
+    var newB = { titel:'', datum:'', jahr: String(new Date().getFullYear()), kategorie:'Allgemein', bild:'', text:'', link:'', archiviert: false };
     data.beitraege.unshift(newB);
     aktuellesEdit(0);
   };
@@ -1673,6 +1673,11 @@
         '<div class="form-card">' +
           fText('b-titel', 'Titel', b.titel) +
           fDate('b-datum', 'Datum', b.datum) +
+          '<div class="field-row">' +
+            '<label class="field-label" for="f-b-jahr">Erscheinungsjahr</label>' +
+            '<input class="field-input" type="number" id="f-b-jahr" value="' + escAttr(b.jahr || jahrAusDatum(b.datum)) + '" placeholder="' + escAttr(jahrAusDatum(b.datum) || String(new Date().getFullYear())) + '" style="max-width:140px">' +
+            '<p class="field-hint">Bestimmt, in welchem Archiv-Jahr der Beitrag einsortiert wird (unabhängig vom Datum oben). Normalerweise gleich dem Jahr des Datums.</p>' +
+          '</div>' +
           fCombobox('b-kategorie', 'Kategorie', b.kategorie, alleAktuellesKategorien()) +
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
@@ -1700,6 +1705,7 @@
     var b = S.data.beitraege[idx];
     b.titel     = gv('b-titel');
     b.datum     = isoToDatum(gv('b-datum'));
+    b.jahr      = gv('b-jahr') || jahrAusDatum(b.datum);
     b.kategorie = gv('b-kategorie');
     b.bild      = gv('b-bild');
     b.text      = getMDE();
@@ -4884,6 +4890,13 @@
     var m = iso && iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (m) return parseInt(m[3],10) + '.' + m[2] + '.' + m[1];
     return iso || '';
+  }
+
+  // Jahr aus einem DD.MM.YYYY-Datum extrahieren – gleiche Regex-Logik wie
+  // getYear() auf der öffentlichen Aktuelles-Seite (aktuelles/index.html).
+  function jahrAusDatum(datum) {
+    var m = datum && String(datum).match(/(\d{4})/);
+    return m ? m[1] : '';
   }
 
   function findByKey(arr, key) {
