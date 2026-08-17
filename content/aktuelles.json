@@ -5,6 +5,26 @@
   },
   "beitraege": [
     {
+      "titel": "Test",
+      "datum": "10.06.2027",
+      "jahr": "2027",
+      "kategorie": "Jugend",
+      "bild": "/images/hundeausbildung.jpg",
+      "text": "Test",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/jagdhornblasen.jpg",
+          "titel": "Test"
+        },
+        {
+          "bild": "/images/mike_albrecht_jugendobmann.jpg",
+          "titel": ""
+        }
+      ]
+    },
+    {
       "titel": "Jungwildrettung 2026 – Saison startet!",
       "datum": "1.04.2026",
       "kategorie": "Jagdhornblasen",
