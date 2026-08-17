@@ -19,6 +19,27 @@
   var KAT_NEWS    = ['Allgemein','Naturschutz','Jagd','Jungwildrettung','Hundeausbildung','Schießwesen','Jugend','Jagdhornblasen','Veranstaltung','Pressemitteilung'];
   var KAT_TERMINE = ['Vorstand','Schießwesen','Hundeausbildung','Jagdhornblasen','Jugend','Hegering','Naturschutz','Ausbildung','Kreisveranstaltung','Hauptversammlung','Tradition'];
 
+  // Aktuelles-Kategorien erweiterbar (Frank-Wunsch Punkt 3): KAT_NEWS ist nur
+  // die feste Basis-Liste. Zusätzlich fließen alle Kategorien mit ein, die
+  // irgendein bestehender Beitrag bereits trägt – tippt Frank im Kategorie-
+  // Feld (fCombobox, freies Textfeld + Vorschlagsliste) einen neuen Namen ein
+  // und speichert, taucht dieser ab sofort automatisch als Vorschlag für
+  // künftige Beiträge auf. Kein separates "Kategorien verwalten"-UI nötig –
+  // dieselbe Funktion liefert später auch die Liste für den Kategorie-Filter
+  // auf der öffentlichen Seite (Punkt 6), sodass neue Kategorien dort ohne
+  // Code-Änderung automatisch erscheinen.
+  function alleAktuellesKategorien() {
+    var used = ((S.data && S.data.beitraege) || []).map(function(b) {
+      return (b.kategorie || '').trim();
+    }).filter(Boolean);
+    var seen = {};
+    var out = [];
+    KAT_NEWS.concat(used).forEach(function(k) {
+      if (!seen[k]) { seen[k] = true; out.push(k); }
+    });
+    return out;
+  }
+
   /* ────────────────────────────────────────────────────────────
      STATE
   ──────────────────────────────────────────────────────────── */
@@ -1652,7 +1673,7 @@
         '<div class="form-card">' +
           fText('b-titel', 'Titel', b.titel) +
           fDate('b-datum', 'Datum', b.datum) +
-          fCombobox('b-kategorie', 'Kategorie', b.kategorie, KAT_NEWS) +
+          fCombobox('b-kategorie', 'Kategorie', b.kategorie, alleAktuellesKategorien()) +
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
           fText('b-link', 'Externer Link (optional)', b.link) +
