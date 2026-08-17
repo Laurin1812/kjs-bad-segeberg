@@ -297,6 +297,39 @@
       } else {
         sidebar.closest('.sidebar-widget').style.display = 'none';
       }
+
+      // Dokumente & Downloads (Frank-Wunsch Punkt 5) – gleiche Sidebar-Karte
+      // wie auf normalen Inhaltsseiten (siehe js/main.js), hier aber pro
+      // Beitrag statt seitenweit, da "Aktuelles" ein eigenständiges
+      // Datenmodell (content/aktuelles.json → beitraege[]) hat.
+      var downloads = (b.downloads || []).filter(function(d) { return d && (d.datei || d.url || d.pfad); });
+      if (downloads.length) {
+        var ICON_PDF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+        var ICON_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
+        var ICON_DL   = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+        var items = downloads.map(function(item) {
+          var datei = item.datei || item.url || item.pfad;
+          var src = datei.indexOf('/') === 0 ? '..' + datei : '../' + datei;
+          var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+          var iconHtml = item.vorschau
+            ? '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + (item.vorschau.indexOf('/') === 0 ? '..' + item.vorschau : '../' + item.vorschau) + '" alt="' + name + '" loading="lazy"></a>'
+            : '<span class="download-item__icon">' + ICON_PDF + '</span>';
+          return '<div class="download-item--sidebar">' +
+            iconHtml +
+            '<span class="download-item__name">' + name + '</span>' +
+            '<span class="download-item__actions">' +
+              '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + name + ' öffnen">' + ICON_OPEN + '</a>' +
+              '<a href="' + src + '" download class="download-action" title="Herunterladen" aria-label="' + name + ' herunterladen">' + ICON_DL + '</a>' +
+            '</span>' +
+          '</div>';
+        }).join('');
+        var box = document.createElement('div');
+        box.className = 'sidebar-widget sidebar-widget--downloads';
+        box.innerHTML = '<h4><span class="download-heading-icon">' + ICON_PDF + '</span> Dokumente &amp; Downloads</h4>' +
+          '<div class="downloads-list downloads-list--sidebar">' + items + '</div>';
+        var contactBox = document.querySelector('.sidebar .contact-box');
+        if (contactBox) contactBox.parentNode.insertBefore(box, contactBox);
+      }
     })
     .catch(zeigeFehlermeldung);
 })();

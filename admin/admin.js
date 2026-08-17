@@ -1691,14 +1691,17 @@
           '</div>' +
         '</div>' +
         // "Aktuelles" ist ein eigenständiges Mini-Formular (läuft nicht über
-        // renderForm()), deshalb Bildergalerie hier direkt eingebunden statt
-        // über injectGalerieCard() – siehe Frank-Wunsch Punkt 2 (Fotos zu
-        // Veranstaltungen/Beiträgen).
+        // renderForm()), deshalb Bildergalerie UND Downloads hier direkt
+        // eingebunden statt über injectGalerieCard()/injectDownloadsCard() –
+        // siehe Frank-Wunsch Punkt 2 (Fotos) und Punkt 5 (Dokumente, pro
+        // Beitrag statt seitenweit).
         renderGalerieCard(b) +
+        renderDownloadsCard(b) +
       '</div>';
     id('admin-main').innerHTML = html;
     initMDE('b-text');
     initGalerieSortable();
+    initDownloadsSortable();
   };
 
   window.aktuelleSave = async function(idx) {
@@ -1713,6 +1716,7 @@
     var archCheck = id('b-archiviert');
     b.archiviert = archCheck ? archCheck.checked : (b.archiviert || false);
     b.galerie = collectGalerieList();
+    b.downloads = collectDownloadsList();
     await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
     renderAktuelles(S.section, S.data);
