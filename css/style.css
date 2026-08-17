@@ -790,6 +790,17 @@ p  { margin-bottom: 1rem; }
 }
 .galerie-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .galerie-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+/* Überschreibt .main-content/#seite-inhalt/#page-inhalt img (gleiche Spezifität,
+   aber dort weiter oben in der Datei) – ohne das hier bleiben deren margin/
+   border-radius/box-shadow am Galerie-Bild hängen (derselbe Bug wie bei den
+   Jagdhundeschule-Kacheln, siehe .news-card__img weiter unten). */
+.main-content .galerie-item img,
+#seite-inhalt .galerie-item img,
+#page-inhalt .galerie-item img {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 .galerie-item__caption { padding: .55rem .75rem; font-size: .82rem; color: var(--text-dark); }
 @media (max-width: 640px) {
   .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
