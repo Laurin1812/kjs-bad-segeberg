@@ -1671,13 +1671,13 @@
         '<button class="btn btn-primary" onclick="aktuelleSave(' + idx + ')">💾 Speichern</button>') +
       '<div class="panel-body">' +
         '<div class="form-card">' +
-          fText('b-titel', 'Titel', b.titel) +
-          fDate('b-datum', 'Datum', b.datum) +
           '<div class="field-row">' +
             '<label class="field-label" for="f-b-jahr">Erscheinungsjahr</label>' +
             '<input class="field-input" type="number" id="f-b-jahr" value="' + escAttr(b.jahr || jahrAusDatum(b.datum)) + '" placeholder="' + escAttr(jahrAusDatum(b.datum) || String(new Date().getFullYear())) + '" style="max-width:140px">' +
-            '<p class="field-hint">Bestimmt, in welchem Archiv-Jahr der Beitrag einsortiert wird (unabhängig vom Datum oben). Normalerweise gleich dem Jahr des Datums.</p>' +
+            '<p class="field-hint">Bestimmt, in welchem Archiv-Jahr der Beitrag einsortiert wird (unabhängig vom Datum unten). Normalerweise gleich dem Jahr des Datums.</p>' +
           '</div>' +
+          fDate('b-datum', 'Datum', b.datum) +
+          fText('b-titel', 'Titel', b.titel) +
           fCombobox('b-kategorie', 'Kategorie', b.kategorie, alleAktuellesKategorien()) +
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
