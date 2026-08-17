@@ -19,14 +19,43 @@
   },
   "beitraege": [
     {
-      "titel": "",
+      "titel": "test",
       "datum": "",
-      "jahr": "2026",
-      "kategorie": "Allgemein",
-      "bild": "",
-      "text": "",
+      "jahr": "2025",
+      "kategorie": "test22",
+      "bild": "/images/1786866016612-111.jpg",
+      "text": "ssdsdswdds",
       "link": "",
-      "archiviert": false
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1780821513512-BCO.99697243-771f-49d7-b7a4-f017b4d7b9b5.png",
+          "titel": "test1"
+        },
+        {
+          "bild": "/images/1786536130480-Copilot_20260812_135859.png",
+          "titel": "test2"
+        },
+        {
+          "bild": "/images/dsc00448.jpg",
+          "titel": "test3"
+        },
+        {
+          "bild": "/images/frank-grün-2.png",
+          "titel": "test4"
+        },
+        {
+          "bild": "/images/hero.jpg",
+          "titel": "test3"
+        }
+      ],
+      "downloads": [
+        {
+          "titel": "Jungwildrettung 2023 2026",
+          "datei": "/downloads/1786988504989-Jungwildrettung-2023-2026.pdf",
+          "vorschau": ""
+        }
+      ]
     },
     {
       "titel": "Test",
