@@ -220,6 +220,20 @@
     return raw;
   }
 
+  // Erscheinungsjahr eines Beitrags – gleiche Logik wie postYear() auf der
+  // Aktuelles-Übersichtsseite (aktuelles/index.html): das Admin-Feld
+  // "Erscheinungsjahr" (b.jahr, siehe Punkt 4) hat Vorrang, sonst Jahr aus
+  // dem Datum. Wird hier für die Jahres-Trennung bei "Weitere Beiträge"
+  // gebraucht (Punkt 7).
+  function postYear(b) {
+    if (b && b.jahr) {
+      var j = parseInt(b.jahr, 10);
+      if (j) return j;
+    }
+    var m = b && b.datum && String(b.datum).match(/(\d{4})/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
   function zeigeFehlermeldung() {
     document.getElementById('beitrag-titel').textContent = 'Beitrag nicht gefunden';
     document.getElementById('beitrag-inhalt').innerHTML =
@@ -288,7 +302,12 @@
 
       // Sidebar: weitere Beiträge (außer dem aktuellen)
       var sidebar = document.getElementById('weitere-beitraege');
-      var andere = beitraege.slice(0, 5).filter(function(_, i) { return i !== idx; }).slice(0, 4);
+      // Nur Beiträge aus demselben Erscheinungsjahr wie der aktuelle Beitrag
+      // (Frank-Wunsch Punkt 7) – vorher wurden Jahre wild gemischt.
+      var eigenesJahr = postYear(b);
+      var andere = beitraege
+        .filter(function(a, i) { return i !== idx && postYear(a) === eigenesJahr; })
+        .slice(0, 4);
       if (andere.length) {
         sidebar.innerHTML = andere.map(function(a, j) {
           var realIdx = beitraege.indexOf(a);
