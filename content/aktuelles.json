@@ -13,10 +13,21 @@
       "Jagdhornblasen",
       "Veranstaltung",
       "Pressemitteilung",
-      "Testkategorie"
+      "Testkategorie",
+      "test22"
     ]
   },
   "beitraege": [
+    {
+      "titel": "",
+      "datum": "",
+      "jahr": "2026",
+      "kategorie": "Allgemein",
+      "bild": "",
+      "text": "",
+      "link": "",
+      "archiviert": false
+    },
     {
       "titel": "Test",
       "datum": "10.06.2027",
