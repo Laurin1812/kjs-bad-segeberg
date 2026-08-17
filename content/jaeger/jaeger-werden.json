@@ -9,5 +9,19 @@
   "kontakt_name": "",
   "kontakt_email": "",
   "downloads": [],
-  "bild_groesse": "img-50"
+  "bild_groesse": "img-50",
+  "galerie": [
+    {
+      "bild": "/images/1780821513512-BCO.99697243-771f-49d7-b7a4-f017b4d7b9b5.png",
+      "titel": "Test"
+    },
+    {
+      "bild": "/images/1780899261226-pixabay-felberwolf-dog-user-ID-3210831_1920-1.png",
+      "titel": "test"
+    },
+    {
+      "bild": "/images/1781424007487-info2_.jpeg",
+      "titel": "Test1"
+    }
+  ]
 }
