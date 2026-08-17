@@ -986,6 +986,13 @@
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
+    // Bildergalerie: gleiche Seiten wie Downloads, zusätzlich ohne reine
+    // Personen-Listen (Vorstand, Obleute, Hegeringe) – dort macht eine
+    // Bildergalerie inhaltlich keinen Sinn (Frank-Wunsch, siehe Punkt 2).
+    var NO_GALERIE_FORMS = NO_DOWNLOADS_FORMS.concat(['personen','hegeringe']);
+    if (NO_GALERIE_FORMS.indexOf(def.form) === -1) {
+      injectGalerieCard(data);
+    }
   }
 
   // Hängt die "Dokumente & Downloads"-Karte ans Ende des aktuellen
@@ -1178,6 +1185,7 @@
       data.kurzbeschreibung = gv('kurzbeschreibung');
     }
     data.downloads = collectDownloadsList();
+    data.galerie    = collectGalerieList();
     return data;
   }
 
@@ -1327,6 +1335,7 @@
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
     data.downloads     = collectDownloadsList();
+    data.galerie       = collectGalerieList();
     return data;
   }
 
@@ -1409,6 +1418,90 @@
     initDownloadsSortable();
     S.dirty = true;
     toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     BILDERGALERIE (Punkt 2, Frank-Wunsch) – gleiches Baukasten-Prinzip
+     wie "Dokumente & Downloads": data.galerie = [{ bild, titel }].
+     Wird generisch (ohne Änderungen an einzelnen Seiten) über
+     renderForm()/injectGalerieCard() an jede Inhaltsseite angehängt.
+  ──────────────────────────────────────────────────────────── */
+  var galRowSeq = 0;
+
+  function renderGalerieRow(g) {
+    var imgId = 'gal-bild-' + (galRowSeq++);
+    return '<div class="item-card galerie-row" data-img-id="' + imgId + '">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        fImage(imgId, 'Bild', g.bild) +
+        '<input class="field-input gal-titel" type="text" value="' + escAttr(g.titel || '') + '" placeholder="Beschriftung (z.B. Hegeringtag Mai 2026)" style="margin-top:.5rem;">' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.galerie-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderGalerieCard(data) {
+    var list = data.galerie || [];
+    var rows = list.map(renderGalerieRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">🖼️ Bildergalerie</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Mehrere Bilder mit eigener Beschriftung (z.B. Fotos von einer Veranstaltung). ' +
+        'Werden am Ende dieser Seite als Galerie angezeigt. Reihenfolge per Drag &amp; Drop änderbar.' +
+      '</p>' +
+      '<div id="galerie-list">' + rows + '</div>' +
+      '<p class="text-muted" id="galerie-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Bilder hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="addGalerieRow()">🖼️ Bild hinzufügen</button>' +
+    '</div>';
+  }
+
+  function initGalerieSortable() {
+    var el = id('galerie-list');
+    if (el && window.Sortable && !el._sortableInit) {
+      el._sortableInit = true;
+      Sortable.create(el, { handle: '.item-drag', animation: 150 });
+    }
+  }
+
+  function collectGalerieList() {
+    var result = [];
+    document.querySelectorAll('#galerie-list .galerie-row').forEach(function(row) {
+      var imgId = row.getAttribute('data-img-id');
+      var bildEl = imgId ? id('f-' + imgId) : null;
+      var titelEl = row.querySelector('.gal-titel');
+      var bild = bildEl ? bildEl.value.trim() : '';
+      var titel = titelEl ? titelEl.value.trim() : '';
+      if (bild) result.push({ bild: bild, titel: titel });
+    });
+    return result;
+  }
+
+  // Fügt eine leere Bildzeile hinzu; der Admin wählt das Bild dann direkt
+  // über den "Bild wählen"-Button in der neuen Zeile aus.
+  window.addGalerieRow = function() {
+    var list = id('galerie-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderGalerieRow({});
+    list.appendChild(wrap.firstChild);
+    var empty = id('galerie-empty');
+    if (empty) empty.style.display = 'none';
+    initGalerieSortable();
+    S.dirty = true;
+  };
+
+  // Hängt die Bildergalerie-Karte ans Ende des aktuellen Formulars an,
+  // analog zu injectDownloadsCard().
+  function injectGalerieCard(data) {
+    if (id('galerie-list')) { initGalerieSortable(); return; }
+    var body = document.querySelector('#admin-main .panel-body');
+    if (!body) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderGalerieCard(data);
+    body.appendChild(wrap.firstChild);
+    initGalerieSortable();
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -1571,9 +1664,15 @@
             '</label>' +
           '</div>' +
         '</div>' +
+        // "Aktuelles" ist ein eigenständiges Mini-Formular (läuft nicht über
+        // renderForm()), deshalb Bildergalerie hier direkt eingebunden statt
+        // über injectGalerieCard() – siehe Frank-Wunsch Punkt 2 (Fotos zu
+        // Veranstaltungen/Beiträgen).
+        renderGalerieCard(b) +
       '</div>';
     id('admin-main').innerHTML = html;
     initMDE('b-text');
+    initGalerieSortable();
   };
 
   window.aktuelleSave = async function(idx) {
@@ -1586,6 +1685,7 @@
     b.link      = gv('b-link');
     var archCheck = id('b-archiviert');
     b.archiviert = archCheck ? archCheck.checked : (b.archiviert || false);
+    b.galerie = collectGalerieList();
     await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
     renderAktuelles(S.section, S.data);
@@ -1914,6 +2014,7 @@
     data.aufgaben = getMDE();
     data.grußwort = gv('kjm-grußwort');
     data.downloads = collectDownloadsList();
+    data.galerie    = collectGalerieList();
     return data;
   }
 
@@ -2903,6 +3004,10 @@
     // vorhanden, Liste unabhängig vom Formular-Typ mit speichern.
     if (id('downloads-list')) {
       data.downloads = collectDownloadsList();
+    }
+    // Universelle Bildergalerie: gleiches Prinzip wie Downloads oben.
+    if (id('galerie-list')) {
+      data.galerie = collectGalerieList();
     }
 
     setSaving(true);

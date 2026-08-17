@@ -882,6 +882,70 @@ if (contactForm) {
     .catch(function () {});
 })();
 
+// ── Bildergalerie pro Seite ────────────────────────────────────────────
+// Gleiches Prinzip wie "Dokumente & Downloads" oben: Im Admin können pro
+// Seite mehrere Bilder mit eigener Beschriftung hinterlegt werden
+// (data.galerie = [{bild, titel}]). Wird hier generisch als Bilder-Raster
+// am Ende des Seiteninhalts eingefügt, sobald die jeweilige content/*.json
+// ein nicht-leeres "galerie"-Array enthält. Erscheint NICHT auf reinen
+// Personen-Seiten (Vorstand/Obleute/Hegeringe) – dort gibt es im Admin gar
+// kein Galerie-Feld, die content-Datei enthält also nie ein galerie-Array.
+(function () {
+  var path = window.location.pathname;
+  var basePath = path.replace(/\.html$/, '');
+  var isKJM = /\/kreisjjaegermeister\/index$/.test(basePath) || /\/kreisjjaegermeister\/?$/.test(basePath);
+  var isIndex = basePath === '' || /\/$/.test(basePath) || /\/index$/.test(basePath);
+  if (!isKJM && isIndex) return;
+  var contentPath = isKJM ? '/content/kreisjjaegermeister.json' : '/content' + basePath + '.json';
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  fetchContent(contentPath)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d) return;
+      var items = (Array.isArray(d.galerie) ? d.galerie : []).filter(function (g) { return g && g.bild; });
+      if (!items.length) return;
+
+      var cards = items.map(function (g) {
+        var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
+        return '<a href="' + escHtml(g.bild) + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
+          '<img src="' + escHtml(g.bild) + '" alt="' + escHtml(g.titel || '') + '" loading="lazy">' +
+          caption +
+        '</a>';
+      }).join('');
+
+      var html = '<div class="galerie-section">' +
+        '<div class="galerie-section__title">Bildergalerie</div>' +
+        '<div class="galerie-grid">' + cards + '</div>' +
+      '</div>';
+
+      var attempts = 0;
+      var iv = setInterval(function () {
+        attempts++;
+        var inhalt = document.getElementById('page-inhalt');
+        var main = document.getElementById('page-main');
+        var kjm = isKJM ? document.getElementById('kjm-content') : null;
+        var target = inhalt || main || kjm;
+        var ready = inhalt || (main && !main.querySelector('.loading-spinner')) ||
+          (kjm && kjm.textContent.indexOf('Wird geladen') === -1);
+        if (ready && target) {
+          clearInterval(iv);
+          var box = document.createElement('div');
+          box.innerHTML = html;
+          var parent = inhalt ? inhalt.parentNode : (main || kjm);
+          while (box.firstChild) parent.appendChild(box.firstChild);
+        } else if (attempts > 60) {
+          clearInterval(iv);
+        }
+      }, 150);
+    })
+    .catch(function () {});
+})();
+
 // ── "Verwandte Seiten" – generische rechte Navigation ────────────────────
 // Füllt jede <ul class="sidebar-nav" data-related-nav> automatisch mit den
 // "Geschwister-Seiten" der aktuellen Seite, direkt aus dem echten Hauptmenü

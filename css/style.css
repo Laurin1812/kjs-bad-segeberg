@@ -778,6 +778,23 @@ p  { margin-bottom: 1rem; }
 .download-item__actions { display: flex; gap: .4rem; flex-shrink: 0; }
 .download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); }
 
+/* "Bildergalerie" pro Seite (gleiches Baukasten-Prinzip wie Downloads) */
+.galerie-section { margin-top: 2rem; }
+.galerie-section__title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 0 0 .75rem; font-family: var(--font-sans); }
+.galerie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+.galerie-item {
+  display: block; border-radius: var(--radius-md); overflow: hidden;
+  background: var(--bg-white); border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.galerie-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.galerie-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.galerie-item__caption { padding: .55rem .75rem; font-size: .82rem; color: var(--text-dark); }
+@media (max-width: 640px) {
+  .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+
 /* "Dokumente & Downloads" als Sidebar-Karte (neben dem Geschäftsstelle-Block) */
 .sidebar-widget--downloads h4 {
   color: var(--green-dark); display: flex; align-items: center; gap: .45rem;

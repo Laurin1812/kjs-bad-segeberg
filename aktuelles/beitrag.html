@@ -269,6 +269,19 @@
         html += '<p style="margin-top:2rem;"><a href="' + b.link + '" class="btn btn-primary" target="_blank" rel="noopener">Mehr erfahren →</a></p>';
       }
 
+      // Bildergalerie (falls im Admin Bilder zu diesem Beitrag hinterlegt wurden)
+      var galerie = (b.galerie || []).filter(function(g) { return g && g.bild; });
+      if (galerie.length) {
+        html += '<div class="galerie-section"><div class="galerie-section__title">Bildergalerie</div><div class="galerie-grid">';
+        galerie.forEach(function(g) {
+          var src = g.bild.indexOf('/') === 0 ? '..' + g.bild : '../' + g.bild;
+          var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + g.titel.trim() + '</div>' : '';
+          html += '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
+            '<img src="' + src + '" alt="' + (g.titel || '') + '" loading="lazy">' + caption + '</a>';
+        });
+        html += '</div></div>';
+      }
+
       html += '<p style="margin-top:2.5rem;"><a href="index.html" class="btn btn-outline-green">← Zurück zu Aktuelles</a></p>';
 
       document.getElementById('beitrag-inhalt').innerHTML = html;
