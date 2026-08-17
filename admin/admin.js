@@ -19,26 +19,61 @@
   var KAT_NEWS    = ['Allgemein','Naturschutz','Jagd','Jungwildrettung','Hundeausbildung','Schießwesen','Jugend','Jagdhornblasen','Veranstaltung','Pressemitteilung'];
   var KAT_TERMINE = ['Vorstand','Schießwesen','Hundeausbildung','Jagdhornblasen','Jugend','Hegering','Naturschutz','Ausbildung','Kreisveranstaltung','Hauptversammlung','Tradition'];
 
-  // Aktuelles-Kategorien erweiterbar (Frank-Wunsch Punkt 3): KAT_NEWS ist nur
-  // die feste Basis-Liste. Zusätzlich fließen alle Kategorien mit ein, die
-  // irgendein bestehender Beitrag bereits trägt – tippt Frank im Kategorie-
-  // Feld (fCombobox, freies Textfeld + Vorschlagsliste) einen neuen Namen ein
-  // und speichert, taucht dieser ab sofort automatisch als Vorschlag für
-  // künftige Beiträge auf. Kein separates "Kategorien verwalten"-UI nötig –
-  // dieselbe Funktion liefert später auch die Liste für den Kategorie-Filter
-  // auf der öffentlichen Seite (Punkt 6), sodass neue Kategorien dort ohne
-  // Code-Änderung automatisch erscheinen.
+  // Aktuelles-Kategorien erweiterbar (Frank-Wunsch Punkt 3): die Kategorie-
+  // Liste ist jetzt eine echte, dauerhaft in content/aktuelles.json unter
+  // einstellungen.kategorien gespeicherte Liste (nicht mehr nur aus
+  // vorhandenen Beiträgen abgeleitet) – Frank legt neue Kategorien über den
+  // "+ Neu"-Button neben dem Kategorie-Dropdown an (siehe
+  // window.aktuellesKategorieAdd), die dann dauerhaft zur Auswahl stehen,
+  // auch bevor ein Beitrag sie benutzt. KAT_NEWS ist nur der Startwert, falls
+  // noch keine eigene Liste gespeichert ist. Alte Beiträge mit einer
+  // Kategorie, die (noch) nicht in der Liste steht, werden zur Sicherheit
+  // ergänzt. Dieselbe Funktion liefert auch die Basis für den Kategorie-
+  // Filter auf der öffentlichen Seite (Punkt 6).
   function alleAktuellesKategorien() {
+    var kats = (S.data && S.data.einstellungen && S.data.einstellungen.kategorien) || KAT_NEWS;
     var used = ((S.data && S.data.beitraege) || []).map(function(b) {
       return (b.kategorie || '').trim();
     }).filter(Boolean);
     var seen = {};
     var out = [];
-    KAT_NEWS.concat(used).forEach(function(k) {
+    kats.concat(used).forEach(function(k) {
       if (!seen[k]) { seen[k] = true; out.push(k); }
     });
     return out;
   }
+
+  // "+ Neu"-Button neben dem Kategorie-Dropdown bei Aktuelles-Beiträgen:
+  // fragt einen Namen ab, speichert ihn dauerhaft in
+  // S.data.einstellungen.kategorien (sofortiges Speichern, unabhängig vom
+  // aktuellen Beitrag) und wählt ihn direkt im offenen Formular aus.
+  window.aktuellesKategorieAdd = async function() {
+    var neu = prompt('Name der neuen Kategorie:');
+    if (!neu) return;
+    neu = neu.trim();
+    if (!neu) return;
+    S.data.einstellungen = S.data.einstellungen || {};
+    var kats = (S.data.einstellungen.kategorien || KAT_NEWS).slice();
+    if (kats.indexOf(neu) === -1) kats.push(neu);
+    S.data.einstellungen.kategorien = kats;
+    try {
+      await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + neu + '" hinzugefügt');
+      toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
+    } catch (e) {
+      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      return;
+    }
+    var sel = id('f-b-kategorie');
+    if (sel) {
+      if (!sel.querySelector('option[value="' + neu.replace(/"/g, '\\"') + '"]')) {
+        var opt = document.createElement('option');
+        opt.value = neu;
+        opt.textContent = neu;
+        sel.appendChild(opt);
+      }
+      sel.value = neu;
+    }
+  };
 
   /* ────────────────────────────────────────────────────────────
      STATE
@@ -1091,6 +1126,26 @@
       '</div>';
   }
   // Dropdown mit freier Texteingabe (datalist)
+  // Kategorie-Dropdown bei Aktuelles-Beiträgen (Frank-Wunsch Punkt 3, nach
+  // Rückmeldung von Laurin überarbeitet): echtes <select> statt freiem
+  // Textfeld, daneben ein "+ Neu"-Button (window.aktuellesKategorieAdd), der
+  // eine neue Kategorie dauerhaft in content/aktuelles.json speichert.
+  function fKategorieDropdown(val) {
+    var options = alleAktuellesKategorien();
+    if (val && options.indexOf(val) === -1) options = options.concat([val]);
+    var opts = options.map(function(o) {
+      return '<option value="' + escAttr(o) + '"' + (o === val ? ' selected' : '') + '>' + escHtml(o) + '</option>';
+    }).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label" for="f-b-kategorie">Kategorie</label>' +
+      '<div style="display:flex;gap:.5rem;align-items:center;">' +
+        '<select class="field-input" id="f-b-kategorie" style="flex:1;">' + opts + '</select>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="aktuellesKategorieAdd()" style="white-space:nowrap;">+ Neu</button>' +
+      '</div>' +
+      '<p class="field-hint">Neue Kategorie über „+ Neu" anlegen – steht danach dauerhaft zur Auswahl.</p>' +
+    '</div>';
+  }
+
   function fCombobox(id, label, val, options) {
     var listId = 'dl-' + id;
     var opts = options.map(function(o) {
@@ -1679,7 +1734,7 @@
           '</div>' +
           fDate('b-datum', 'Datum', b.datum) +
           fText('b-titel', 'Titel', b.titel) +
-          fCombobox('b-kategorie', 'Kategorie', b.kategorie, alleAktuellesKategorien()) +
+          fKategorieDropdown(b.kategorie) +
           fImage('b-bild', 'Bild', b.bild) +
           fMarkdown('b-text', 'Text (Markdown)', b.text) +
           fText('b-link', 'Externer Link (optional)', b.link) +
