@@ -14,11 +14,11 @@
   "galerie": [
     {
       "bild": "/images/download-1-.jpg",
-      "titel": ""
+      "titel": "test"
     },
     {
       "bild": "/images/hundeausbildung.jpg",
-      "titel": ""
+      "titel": "test"
     }
   ]
 }
