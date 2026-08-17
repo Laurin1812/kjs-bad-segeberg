@@ -167,6 +167,10 @@
         <h4>Archiv</h4>
         <ul class="sidebar-nav" id="archiv-jahre"></ul>
       </div>
+      <div class="sidebar-widget" id="kategorie-widget">
+        <h4>Kategorie</h4>
+        <ul class="sidebar-nav" id="kategorie-filter"></ul>
+      </div>
       <div class="contact-box">
         <h4>Kontakt</h4>
         <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
@@ -244,33 +248,48 @@
 
   var _allBeitraege = [];
   var _einst = {};
-  var _activeYear = 0;
+  var _activeYear = 0;        // 0 = Standardansicht, 'alle' = alle Jahre, Zahl = bestimmtes Jahr
+  var _activeKategorie = 'alle'; // 'alle' = kein Kategorie-Filter
 
-  function renderGrid(yearFilter) {
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function jahresFilter(yearFilter) {
+    if (yearFilter === 'alle') return _allBeitraege;
+    if (yearFilter > 0) return _allBeitraege.filter(function(b) { return postYear(b) === yearFilter; });
+    // Default: aktuelles Jahr, nicht archiviert, oder letzte N
+    var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
+    var currentYear = new Date().getFullYear();
+    if (anzahl > 0) return _allBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, anzahl);
+    var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === currentYear; });
+    return thisYear.length > 0 ? thisYear : _allBeitraege.filter(function(b) { return !b.archiviert; });
+  }
+
+  function jahresHeadline(yearFilter) {
+    if (yearFilter === 'alle') return 'Alle Beiträge';
+    if (yearFilter > 0) return 'Beiträge ' + yearFilter;
+    var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
+    return anzahl > 0 ? 'Aktuelles (letzte ' + anzahl + ')' : 'Aktuelles aus unserer Kreisjägerschaft';
+  }
+
+  // Kombiniert Jahres-Archiv-Filter (bestehend) und Kategorie-Filter (Frank-
+  // Wunsch Punkt 6, zusätzlich zum Archiv-Filter) – beide gleichzeitig aktiv.
+  function applyFilters() {
     var grid = document.getElementById('news-grid');
     var headline = document.getElementById('aktuelles-headline');
-    var filtered;
-    if (yearFilter === 'alle') {
-      filtered = _allBeitraege;
-      if (headline) headline.textContent = 'Alle Beiträge';
-    } else if (yearFilter > 0) {
-      filtered = _allBeitraege.filter(function(b) { return postYear(b) === yearFilter; });
-      if (headline) headline.textContent = 'Beiträge ' + yearFilter;
-    } else {
-      // Default: current year non-archived, or last N
-      var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
-      var currentYear = new Date().getFullYear();
-      if (anzahl > 0) {
-        filtered = _allBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, anzahl);
-        if (headline) headline.textContent = 'Aktuelles (letzte ' + anzahl + ')';
-      } else {
-        var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === currentYear; });
-        filtered = thisYear.length > 0 ? thisYear : _allBeitraege.filter(function(b) { return !b.archiviert; });
-        if (headline) headline.textContent = 'Aktuelles aus unserer Kreisjägerschaft';
-      }
+    var filtered = jahresFilter(_activeYear);
+    if (_activeKategorie !== 'alle') {
+      filtered = filtered.filter(function(b) { return (b.kategorie || '').trim() === _activeKategorie; });
+    }
+    if (headline) {
+      var text = jahresHeadline(_activeYear);
+      if (_activeKategorie !== 'alle') text += ' – ' + _activeKategorie;
+      headline.textContent = text;
     }
     if (!filtered.length) {
-      grid.innerHTML = '<p style="color:var(--text-muted)">Keine Beiträge für diesen Zeitraum.</p>';
+      grid.innerHTML = '<p style="color:var(--text-muted)">Keine Beiträge für diese Auswahl.</p>';
       return;
     }
     // Map back to original indices for beitrag.html?i=
@@ -305,7 +324,42 @@
         sidebar.querySelectorAll('.archiv-year-link').forEach(function(l){ l.style.fontWeight=''; });
         a.style.fontWeight = '700';
         var val = a.dataset.year;
-        renderGrid(val === 'alle' ? 'alle' : parseInt(val, 10));
+        _activeYear = val === 'alle' ? 'alle' : parseInt(val, 10);
+        applyFilters();
+      });
+    });
+  }
+
+  // Kategorie-Filter (Frank-Wunsch Punkt 6): Liste wird nicht fest verdrahtet,
+  // sondern aus den tatsächlich vorkommenden Kategorien aller Beiträge
+  // gebaut – neue, im Admin frei eingetippte Kategorien (Punkt 3) tauchen
+  // hier automatisch auf, ohne Code-Änderung.
+  function buildKategorieSidebar() {
+    var widget = document.getElementById('kategorie-widget');
+    var sidebar = document.getElementById('kategorie-filter');
+    if (!sidebar || !widget) return;
+    var kats = [];
+    _allBeitraege.forEach(function(b) {
+      var k = (b.kategorie || '').trim();
+      if (k && kats.indexOf(k) === -1) kats.push(k);
+    });
+    if (!kats.length) { widget.style.display = 'none'; return; }
+    kats.sort(function(a, b) { return a.localeCompare(b, 'de'); });
+
+    sidebar.innerHTML = kats.map(function(k) {
+      return '<li><a href="#" class="kategorie-filter-link" data-kat="' + escHtml(k) + '">' + escHtml(k) + '</a></li>';
+    }).join('') +
+    '<li style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem;">' +
+      '<a href="#" class="kategorie-filter-link" data-kat="alle" style="font-size:.85rem;color:var(--text-muted)">Alle anzeigen</a>' +
+    '</li>';
+
+    sidebar.querySelectorAll('.kategorie-filter-link').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        sidebar.querySelectorAll('.kategorie-filter-link').forEach(function(l){ l.style.fontWeight=''; });
+        a.style.fontWeight = '700';
+        _activeKategorie = a.dataset.kat;
+        applyFilters();
       });
     });
   }
@@ -316,7 +370,8 @@
       _allBeitraege = data.beitraege || [];
       _einst = data.einstellungen || {};
       buildArchivSidebar();
-      renderGrid(0); // default view
+      buildKategorieSidebar();
+      applyFilters(); // default view
     })
     .catch(function() {
       document.getElementById('news-grid').innerHTML = '<p>Beiträge konnten nicht geladen werden.</p>';
