@@ -186,10 +186,38 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // Topbar & Geschäftsstelle dynamisch laden (aus content/einstellungen.json)
+//
+// Einheitliche Icons: Frank wollte, dass überall dieselben Icons verwendet
+// werden wie auf der Kontakt-Seite (dort als KONTAKT_ICONS definiert) –
+// statt der bisherigen Emojis (📧 📞 🏠 ✉️) in Kopfzeile und Kontaktbox.
+// Da diese beiden Bereiche auf JEDER Seite vorkommen, werden die Icons hier
+// zentral an einer Stelle eingesetzt statt in jeder HTML-Datei einzeln.
+var ICONS = {
+  mail:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M5 10v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10"/></svg>',
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>'
+};
+
 (function() {
   var topbarLinks = document.querySelectorAll('.topbar__left a');
   var boxes = document.querySelectorAll('.contact-box');
   if (!topbarLinks.length && !boxes.length) return;
+
+  // Kopfzeile: Emoji vor dem Link durch das einheitliche SVG-Icon ersetzen
+  topbarLinks.forEach(function(a) {
+    var span = a.parentElement;
+    if (!span || span.querySelector('svg')) return;
+    var icon = a.href.indexOf('mailto:') > -1 ? ICONS.mail
+             : a.href.indexOf('tel:') > -1 ? ICONS.phone
+             : null;
+    if (!icon) return;
+    Array.prototype.slice.call(span.childNodes).forEach(function(node) {
+      if (node.nodeType === 3) span.removeChild(node); // altes Emoji (Textknoten)
+    });
+    span.insertAdjacentHTML('afterbegin', '<span class="topbar__icon">' + icon + '</span>');
+  });
+
   fetchContent('/content/einstellungen.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
@@ -216,11 +244,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       boxes.forEach(function(box) {
         box.innerHTML =
           '<h4>Adresse KJS</h4>' +
-          (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '') +
-          (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
+          (adresseHtml ? '<p><span class="cb-icon">' + ICONS.home + '</span><span>' + adresseHtml + '</span></p>' : '') +
+          (d.email    ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
           (postadresseHtml ?
             '<h4 class="contact-box__sub">Geschäftsstelle / Postadresse</h4>' +
-            '<p><span class="cb-icon">✉️</span><span>' + postadresseHtml + '</span></p>'
+            '<p><span class="cb-icon">' + ICONS.pin + '</span><span>' + postadresseHtml + '</span></p>'
             : '');
       });
     })
