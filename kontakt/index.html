@@ -153,8 +153,8 @@
 <div class="page-content full">
   <div class="container">
     <main class="main-content">
-      <h2>So erreichen Sie uns</h2>
-      <p style="color:var(--text-muted); margin-bottom:2.5rem;">
+      <h2 id="kontakt-ueberschrift">So erreichen Sie uns</h2>
+      <p id="kontakt-text" style="color:var(--text-muted); margin-bottom:2.5rem;">
         Haben Sie Fragen, Anregungen oder möchten Sie Mitglied werden?
         Nehmen Sie gerne Kontakt mit uns auf – wir freuen uns auf Ihre Nachricht.
       </p>
@@ -283,6 +283,9 @@
           fetch('../content/einstellungen.json')
             .then(r => r.json())
             .then(d => {
+              if (d.kontakt_ueberschrift) document.getElementById('kontakt-ueberschrift').textContent = d.kontakt_ueberschrift;
+              if (d.kontakt_text) document.getElementById('kontakt-text').textContent = d.kontakt_text;
+
               const adresseHtml = d.adresse
                 ? d.adresse.replace(/\n/g, '<br>')
                 : '';

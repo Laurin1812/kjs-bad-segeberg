@@ -169,8 +169,9 @@
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
+    { key:'kontaktseite', label:'📞 Kontaktseite', file:'content/einstellungen.json', form:'kontaktseite' },
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
-      { key:'kontakt',   label:'Kontakt & Öffnungszeiten', file:'content/einstellungen.json',    form:'einstellungen' },
+      { key:'kontakt',   label:'Telefonzentrale & Kalender', file:'content/einstellungen.json',    form:'einstellungen' },
       { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
@@ -1025,6 +1026,7 @@
       case 'hegeringe':    renderHegeringe(def, data);     break;
       case 'kjm':          renderKJM(def, data);           break;
       case 'faq':          renderFAQ(def, data);           break;
+      case 'kontaktseite': renderKontaktseite(def, data);  break;
       case 'einstellungen':renderEinstellungen(def, data); break;
       case 'footer':       renderFooter(def, data);        break;
       case 'design':       renderDesign(def, data);        break;
@@ -1038,7 +1040,7 @@
     // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
     // (für Einstellungs-/Verwaltungsseiten ohne öffentliche Entsprechung
     // nicht sinnvoll und daher ausgenommen).
-    var NO_DOWNLOADS_FORMS = ['einstellungen','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
+    var NO_DOWNLOADS_FORMS = ['einstellungen','kontaktseite','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
@@ -2174,38 +2176,26 @@
   }
 
   /* ────────────────────────────────────────────────────────────
-     EINSTELLUNGEN (Kontakt & Öffnungszeiten)
+     EINSTELLUNGEN (Telefonzentrale & Kalender)
+     Hinweis: Kontaktdaten (Adresse/Postadresse/Telefon/E-Mail/Sprechzeiten)
+     sowie Überschrift & Text der Kontaktseite wurden in einen eigenen,
+     sauberen Bereich "📞 Kontaktseite" verschoben (renderKontaktseite unten)
+     - auf Wunsch von Laurin, damit die Kontaktseite an einem Ort komplett
+     bearbeitbar ist statt vermischt mit seitenfremden Einstellungen wie dem
+     Google-Kalender (der zur Termine-Seite gehört). Beide Formulare teilen
+     sich weiterhin dieselbe Datei (content/einstellungen.json) als einzige
+     Quelle der Wahrheit – jedes Formular rührt dabei nur seine eigenen
+     Felder an und lässt die Felder des jeweils anderen unangetastet.
   ──────────────────────────────────────────────────────────── */
   function renderEinstellungen(def, data) {
-    var oz = data.oeffnungszeiten || [];
-    var ozHtml = oz.map(function(o, i) {
-      return '<div style="display:flex;gap:.5rem;margin-bottom:.5rem;" data-oz="' + i + '">' +
-        '<input class="field-input" style="flex:1" value="' + escAttr(o.tage) + '" placeholder="Tag(e), z.B. Montag – Freitag" id="oz-tage-' + i + '">' +
-        '<input class="field-input" style="flex:1" value="' + escAttr(o.zeiten) + '" placeholder="Uhrzeit, z.B. 10:00 – 12:00 Uhr" id="oz-zeiten-' + i + '">' +
-        '<button class="btn btn-sm btn-ghost" onclick="ozDelete(' + i + ')">✕</button>' +
-      '</div>';
-    }).join('');
-
     var html = panelHeader(def.label) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
-          '<div class="form-card-title">Kontaktdaten</div>' +
-          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
-            'Diese Angaben erscheinen automatisch in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten sowie im Impressum und in der Datenschutzerklärung – einmal hier ändern, überall aktuell.' +
-          '</p>' +
-          fText('ei-telefon', 'Telefon (für Impressum & Kontaktseite, NICHT in der grünen Box)', data.telefon) +
+          '<div class="form-card-title">Telefonzentrale</div>' +
           fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
-            'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle.' +
+            'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle (siehe „📞 Kontaktseite").' +
           '</p>' +
-          fText('ei-email', 'E-Mail (erscheint oben in der Box, unter „Adresse KJS")', data.email) +
-          fTextarea('ei-adresse', 'Adresse KJS (jede Zeile = eine Zeile, erscheint oben in der Box)', data.adresse, 3) +
-          fTextarea('ei-postadresse', 'Geschäftsstelle / Postadresse (eigener Block unten in der Box – z.B. Name, Adresse, Telefon, E-Mail, jede Zeile einzeln)', data.postadresse, 5) +
-        '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Öffnungszeiten</div>' +
-          '<div id="oz-list">' + ozHtml + '</div>' +
-          '<button class="list-add-btn" onclick="ozAdd()" style="margin-top:.5rem">+ Zeile hinzufügen</button>' +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Google Kalender (optional)</div>' +
@@ -2217,31 +2207,75 @@
     bindSaveBtn();
   }
 
-  window.ozDelete = function(i) {
-    S.data.oeffnungszeiten.splice(i, 1);
-    renderEinstellungen(S.section, S.data);
-  };
-  window.ozAdd = function() {
-    S.data.oeffnungszeiten = S.data.oeffnungszeiten || [];
-    S.data.oeffnungszeiten.push({ tage:'', zeiten:'' });
-    renderEinstellungen(S.section, S.data);
-  };
-
   function collectEinstellungen(data) {
-    data.telefon = gv('ei-telefon');
     data.telefon_header = gv('ei-telefon-header');
-    data.email   = gv('ei-email');
-    // telefon_festnetz wird nicht mehr in der Box angezeigt (Feld aus dem Formular
-    // entfernt) – alter Wert bleibt unangetastet erhalten, falls er je gebraucht wird.
-    data.telefon_festnetz = data.telefon_festnetz || '';
-    data.adresse = gv('ei-adresse');
-    data.postadresse = gv('ei-postadresse');
     data.google_kalender_url   = gv('ei-kal-url');
     data.google_kalender_titel = gv('ei-kal-titel');
+    return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     KONTAKTSEITE (eigener Bereich, komplette Seite kontakt/index.html:
+     Überschrift, Einleitungstext und der komplette Geschäftsstelle-Block)
+  ──────────────────────────────────────────────────────────── */
+  function renderKontaktseite(def, data) {
+    var oz = data.oeffnungszeiten || [];
+    var ozHtml = oz.map(function(o, i) {
+      return '<div style="display:flex;gap:.5rem;margin-bottom:.5rem;" data-koz="' + i + '">' +
+        '<input class="field-input" style="flex:1" value="' + escAttr(o.tage) + '" placeholder="Tag(e), z.B. Montag – Freitag" id="koz-tage-' + i + '">' +
+        '<input class="field-input" style="flex:1" value="' + escAttr(o.zeiten) + '" placeholder="Uhrzeit, z.B. 10:00 – 12:00 Uhr" id="koz-zeiten-' + i + '">' +
+        '<button class="btn btn-sm btn-ghost" onclick="kontaktOzDelete(' + i + ')">✕</button>' +
+      '</div>';
+    }).join('');
+
+    var html = panelHeader(def.label) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Überschrift & Text</div>' +
+          fText('ko-ueberschrift', 'Überschrift', data.kontakt_ueberschrift, 'So erreichen Sie uns') +
+          fTextarea('ko-text', 'Einleitungstext (unter der Überschrift, über dem Formular)', data.kontakt_text, 3) +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Geschäftsstelle</div>' +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Diese Angaben erscheinen auf der Kontaktseite sowie automatisch in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten und im Impressum – einmal hier ändern, überall aktuell.' +
+          '</p>' +
+          fText('ko-telefon', 'Telefon', data.telefon) +
+          fText('ko-email', 'E-Mail', data.email) +
+          fTextarea('ko-adresse', 'Adresse KJS (jede Zeile einzeln)', data.adresse, 3) +
+          fTextarea('ko-postadresse', 'Postadresse / Geschäftsstelle (jede Zeile einzeln, z.B. Name, Adresse, Telefon, E-Mail)', data.postadresse, 5) +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Sprechzeiten</div>' +
+          '<div id="koz-list">' + ozHtml + '</div>' +
+          '<button class="list-add-btn" onclick="kontaktOzAdd()" style="margin-top:.5rem">+ Zeile hinzufügen</button>' +
+        '</div>' +
+      '</div>' + saveBar();
+    id('admin-main').innerHTML = html;
+    bindSaveBtn();
+  }
+
+  window.kontaktOzDelete = function(i) {
+    S.data.oeffnungszeiten.splice(i, 1);
+    renderKontaktseite(S.section, S.data);
+  };
+  window.kontaktOzAdd = function() {
+    S.data.oeffnungszeiten = S.data.oeffnungszeiten || [];
+    S.data.oeffnungszeiten.push({ tage:'', zeiten:'' });
+    renderKontaktseite(S.section, S.data);
+  };
+
+  function collectKontaktseite(data) {
+    data.kontakt_ueberschrift = gv('ko-ueberschrift');
+    data.kontakt_text  = gv('ko-text');
+    data.telefon = gv('ko-telefon');
+    data.email   = gv('ko-email');
+    data.adresse = gv('ko-adresse');
+    data.postadresse = gv('ko-postadresse');
     var oz = [];
-    document.querySelectorAll('[data-oz]').forEach(function(row) {
-      var i = row.getAttribute('data-oz');
-      oz.push({ tage: val('oz-tage-' + i), zeiten: val('oz-zeiten-' + i) });
+    document.querySelectorAll('[data-koz]').forEach(function(row) {
+      var i = row.getAttribute('data-koz');
+      oz.push({ tage: val('koz-tage-' + i), zeiten: val('koz-zeiten-' + i) });
     });
     data.oeffnungszeiten = oz;
     return data;
@@ -3077,6 +3111,7 @@
       case 'startseite':    data = collectStartseite(data); break;
       case 'kjm':           data = collectKJM(data); break;
       case 'faq':           data = collectFAQ(data); break;
+      case 'kontaktseite':  data = collectKontaktseite(data); break;
       case 'einstellungen': data = collectEinstellungen(data); break;
       case 'footer':        data = collectFooter(data); break;
       case 'design':        data = collectDesign(data); break;
