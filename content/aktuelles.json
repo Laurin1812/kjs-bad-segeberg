@@ -1,7 +1,20 @@
 {
   "einstellungen": {
     "hauptseite_anzahl": 0,
-    "hauptseite_modus": "aktuelles_jahr"
+    "hauptseite_modus": "aktuelles_jahr",
+    "kategorien": [
+      "Allgemein",
+      "Naturschutz",
+      "Jagd",
+      "Jungwildrettung",
+      "Hundeausbildung",
+      "Schießwesen",
+      "Jugend",
+      "Jagdhornblasen",
+      "Veranstaltung",
+      "Pressemitteilung",
+      "Testkategorie"
+    ]
   },
   "beitraege": [
     {
