@@ -280,6 +280,22 @@
             user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
           };
 
+          // Zieht aus dem freien Postadresse-Text eine "Tel: ..."- und
+          // "E-Mail: ..."-Zeile heraus (case-insensitive, auch "Telefon:"),
+          // damit sie separat als klickbare Icon-Zeile angezeigt werden können,
+          // statt als reiner Fließtext in der Postadresse selbst zu stehen.
+          function splitPostadresse(raw) {
+            var telefon = '', email = '';
+            var lines = (raw || '').split('\n').filter(function(line) {
+              var telMatch = line.match(/^\s*tel(?:efon)?\s*[:.]?\s*(.+)$/i);
+              if (telMatch) { telefon = telMatch[1].trim(); return false; }
+              var mailMatch = line.match(/^\s*e-?mail\s*[:.]?\s*(.+)$/i);
+              if (mailMatch) { email = mailMatch[1].trim(); return false; }
+              return true;
+            });
+            return { text: lines.join('\n'), telefon: telefon, email: email };
+          }
+
           fetch('../content/einstellungen.json')
             .then(r => r.json())
             .then(d => {
@@ -289,9 +305,19 @@
               const adresseHtml = d.adresse
                 ? d.adresse.replace(/\n/g, '<br>')
                 : '';
-              const postadresseHtml = d.postadresse
-                ? d.postadresse.replace(/\n/g, '<br>')
-                : '';
+
+              // Postadresse (Frank persönlich): Telefon/E-Mail sollen als eigene,
+              // klickbare Icon-Zeilen erscheinen – genau wie bei der Geschäftsstelle
+              // oben. Bevorzugt werden die dedizierten Admin-Felder postadresse_telefon/
+              // postadresse_email; ist das Feld leer, wird automatisch aus dem
+              // Postadresse-Fließtext eine Zeile "Tel: ..." bzw. "E-Mail: ..."
+              // herausgelöst (self-migrierend, kein manuelles Nacharbeiten im Admin
+              // nötig, bis Frank die neuen Felder separat pflegt).
+              const postadresseSplit = splitPostadresse(d.postadresse || '');
+              const postadresseHtml = postadresseSplit.text.replace(/\n/g, '<br>');
+              const postadresseTelefon = d.postadresse_telefon || postadresseSplit.telefon;
+              const postadresseEmail   = d.postadresse_email   || postadresseSplit.email;
+
               const ozeiten = (d.oeffnungszeiten || [])
                 .map(o => `${o.tage}${o.zeiten ? ': ' + o.zeiten : ''}`)
                 .join('<br>');
@@ -338,24 +364,24 @@
                   </div>
                 </div>` : ''}
 
-                ${d.postadresse_telefon ? `
+                ${postadresseTelefon ? `
                 <div class="kontakt-detail">
                   <div class="kontakt-detail__icon">${KONTAKT_ICONS.phone}</div>
                   <div>
                     <span class="kontakt-detail__label">Telefon</span>
                     <div class="kontakt-detail__value">
-                      <a href="tel:${d.postadresse_telefon.replace(/\s|\/|\./g,'')}">${d.postadresse_telefon}</a>
+                      <a href="tel:${postadresseTelefon.replace(/\s|\/|\./g,'')}">${postadresseTelefon}</a>
                     </div>
                   </div>
                 </div>` : ''}
 
-                ${d.postadresse_email ? `
+                ${postadresseEmail ? `
                 <div class="kontakt-detail">
                   <div class="kontakt-detail__icon">${KONTAKT_ICONS.mail}</div>
                   <div>
                     <span class="kontakt-detail__label">E-Mail</span>
                     <div class="kontakt-detail__value">
-                      <a href="mailto:${d.postadresse_email}">${d.postadresse_email}</a>
+                      <a href="mailto:${postadresseEmail}">${postadresseEmail}</a>
                     </div>
                   </div>
                 </div>` : ''}

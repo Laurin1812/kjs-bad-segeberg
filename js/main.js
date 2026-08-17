@@ -199,6 +199,22 @@ var ICONS = {
   pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>'
 };
 
+// Zieht aus dem freien Postadresse-Text eine "Tel: ..."- und "E-Mail: ..."-Zeile
+// heraus (case-insensitive, auch "Telefon:"), damit sie separat als klickbare
+// Icon-Zeile angezeigt werden können statt als reiner Fließtext in der
+// Postadresse selbst zu stehen. Identische Logik wie in kontakt/index.html.
+function splitPostadresse(raw) {
+  var telefon = '', email = '';
+  var lines = (raw || '').split('\n').filter(function(line) {
+    var telMatch = line.match(/^\s*tel(?:efon)?\s*[:.]?\s*(.+)$/i);
+    if (telMatch) { telefon = telMatch[1].trim(); return false; }
+    var mailMatch = line.match(/^\s*e-?mail\s*[:.]?\s*(.+)$/i);
+    if (mailMatch) { email = mailMatch[1].trim(); return false; }
+    return true;
+  });
+  return { text: lines.join('\n'), telefon: telefon, email: email };
+}
+
 (function() {
   var topbarLinks = document.querySelectorAll('.topbar__left a');
   var boxes = document.querySelectorAll('.contact-box');
@@ -242,7 +258,19 @@ var ICONS = {
       // E-Mail → Postadresse (Frank persönlich) → deren eigene Telefon-/
       // E-Mail-Zeilen als separate klickbare Icon-Zeilen.
       var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
-      var postadresseHtml = d.postadresse ? d.postadresse.trim().split('\n').join('<br>') : '';
+
+      // Postadresse (Frank persönlich): Telefon/E-Mail sollen als eigene,
+      // klickbare Icon-Zeilen erscheinen – genau wie beim Geschäftsstelle-Block
+      // oben. Bevorzugt werden die dedizierten Felder postadresse_telefon/
+      // postadresse_email; ist eins leer, wird automatisch aus dem
+      // Postadresse-Fließtext eine Zeile "Tel: ..." bzw. "E-Mail: ..."
+      // herausgelöst (self-migrierend, kein manuelles Nacharbeiten im Admin
+      // nötig, bis Frank die neuen Felder separat pflegt).
+      var postadresseSplit = splitPostadresse(d.postadresse || '');
+      var postadresseHtml = postadresseSplit.text.split('\n').join('<br>');
+      var postadresseTelefon = d.postadresse_telefon || postadresseSplit.telefon;
+      var postadresseEmail   = d.postadresse_email   || postadresseSplit.email;
+
       boxes.forEach(function(box) {
         box.innerHTML =
           '<h4>Geschäftsstelle</h4>' +
@@ -253,8 +281,8 @@ var ICONS = {
             '<h4 class="contact-box__sub">Postadresse</h4>' +
             '<p><span class="cb-icon">' + ICONS.pin + '</span><span>' + postadresseHtml + '</span></p>'
             : '') +
-          (d.postadresse_telefon ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + d.postadresse_telefon.replace(/\s|\/|\./g,'') + '">' + d.postadresse_telefon + '</a></p>' : '') +
-          (d.postadresse_email   ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + d.postadresse_email + '">' + d.postadresse_email + '</a></p>' : '');
+          (postadresseTelefon ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + postadresseTelefon.replace(/\s|\/|\./g,'') + '">' + postadresseTelefon + '</a></p>' : '') +
+          (postadresseEmail   ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + postadresseEmail + '">' + postadresseEmail + '</a></p>' : '');
       });
     })
     .catch(function() {});
