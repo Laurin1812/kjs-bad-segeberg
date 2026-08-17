@@ -156,6 +156,7 @@
       <div id="aktuelles-head" style="margin-bottom:2rem;">
         <h2 id="aktuelles-headline">Aktuelles aus unserer Kreisjägerschaft</h2>
         <p style="color:var(--text-muted);margin-top:.4rem;"></p>
+        <div id="kategorie-filter-inline" style="display:none;margin-top:1rem;"></div>
       </div>
       <div class="news__grid" id="news-grid">
         <p style="color:var(--text-muted);">Beiträge werden geladen …</p>
@@ -166,10 +167,6 @@
       <div class="sidebar-widget">
         <h4>Archiv</h4>
         <ul class="sidebar-nav" id="archiv-jahre"></ul>
-      </div>
-      <div class="sidebar-widget" id="kategorie-widget">
-        <h4>Kategorie</h4>
-        <ul class="sidebar-nav" id="kategorie-filter"></ul>
       </div>
       <div class="contact-box">
         <h4>Kontakt</h4>
@@ -249,7 +246,7 @@
   var _allBeitraege = [];
   var _einst = {};
   var _activeYear = 0;        // 0 = Standardansicht, 'alle' = alle Jahre, Zahl = bestimmtes Jahr
-  var _activeKategorie = 'alle'; // 'alle' = kein Kategorie-Filter
+  var _activeKategorien = []; // leer = kein Kategorie-Filter (alle), sonst Mehrfachauswahl
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -274,20 +271,18 @@
     return anzahl > 0 ? 'Aktuelles (letzte ' + anzahl + ')' : 'Aktuelles aus unserer Kreisjägerschaft';
   }
 
-  // Kombiniert Jahres-Archiv-Filter (bestehend) und Kategorie-Filter (Frank-
-  // Wunsch Punkt 6, zusätzlich zum Archiv-Filter) – beide gleichzeitig aktiv.
+  // Kombiniert Jahres-Archiv-Filter (bestehend) und Kategorie-Mehrfachauswahl
+  // (Frank-Wunsch, überarbeitet: nicht mehr rechts in der Sidebar, sondern als
+  // Checkbox-Auswahl direkt unter der Überschrift, kombinierbar mit dem
+  // Jahres-Filter) – beide gleichzeitig aktiv.
   function applyFilters() {
     var grid = document.getElementById('news-grid');
     var headline = document.getElementById('aktuelles-headline');
     var filtered = jahresFilter(_activeYear);
-    if (_activeKategorie !== 'alle') {
-      filtered = filtered.filter(function(b) { return (b.kategorie || '').trim() === _activeKategorie; });
+    if (_activeKategorien.length) {
+      filtered = filtered.filter(function(b) { return _activeKategorien.indexOf((b.kategorie || '').trim()) !== -1; });
     }
-    if (headline) {
-      var text = jahresHeadline(_activeYear);
-      if (_activeKategorie !== 'alle') text += ' – ' + _activeKategorie;
-      headline.textContent = text;
-    }
+    if (headline) headline.textContent = jahresHeadline(_activeYear);
     if (!filtered.length) {
       grid.innerHTML = '<p style="color:var(--text-muted)">Keine Beiträge für diese Auswahl.</p>';
       return;
@@ -325,40 +320,72 @@
         a.style.fontWeight = '700';
         var val = a.dataset.year;
         _activeYear = val === 'alle' ? 'alle' : parseInt(val, 10);
+        _activeKategorien = []; // Kategorie-Auswahl bei Jahreswechsel zurücksetzen
+        buildKategorieInline();
         applyFilters();
       });
     });
   }
 
-  // Kategorie-Filter (Frank-Wunsch Punkt 6): Liste wird nicht fest verdrahtet,
-  // sondern aus den tatsächlich vorkommenden Kategorien aller Beiträge
-  // gebaut – neue, im Admin frei eingetippte Kategorien (Punkt 3) tauchen
-  // hier automatisch auf, ohne Code-Änderung.
-  function buildKategorieSidebar() {
-    var widget = document.getElementById('kategorie-widget');
-    var sidebar = document.getElementById('kategorie-filter');
-    if (!sidebar || !widget) return;
+  // Kategorie-Mehrfachauswahl (Frank-Wunsch, überarbeitet): nicht mehr rechts
+  // in der Sidebar (verwirrend im Zusammenspiel mit dem Jahres-Archiv-Filter),
+  // sondern als Checkbox-Auswahl direkt unter der Überschrift ("Beiträge
+  // 2028" o.ä.). Die Liste wird aus den Beiträgen des GERADE aktiven
+  // Jahres-Filters gebaut (nicht aus allen Beiträgen) und bei jedem
+  // Jahreswechsel neu aufgebaut – zeigt also immer nur Kategorien, die im
+  // gewählten Jahr auch tatsächlich vorkommen. Neue, im Admin frei
+  // eingetippte Kategorien (Punkt 3) tauchen hier automatisch auf.
+  function buildKategorieInline() {
+    var wrap = document.getElementById('kategorie-filter-inline');
+    if (!wrap) return;
+    var basis = jahresFilter(_activeYear);
     var kats = [];
-    _allBeitraege.forEach(function(b) {
+    basis.forEach(function(b) {
       var k = (b.kategorie || '').trim();
       if (k && kats.indexOf(k) === -1) kats.push(k);
     });
-    if (!kats.length) { widget.style.display = 'none'; return; }
+    if (!kats.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
     kats.sort(function(a, b) { return a.localeCompare(b, 'de'); });
 
-    sidebar.innerHTML = kats.map(function(k) {
-      return '<li><a href="#" class="kategorie-filter-link" data-kat="' + escHtml(k) + '">' + escHtml(k) + '</a></li>';
-    }).join('') +
-    '<li style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem;">' +
-      '<a href="#" class="kategorie-filter-link" data-kat="alle" style="font-size:.85rem;color:var(--text-muted)">Alle anzeigen</a>' +
-    '</li>';
+    var alleChecked = _activeKategorien.length === 0;
+    var html = '<div style="font-size:.82rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;">' +
+      'Kategorien filtern (mehrere möglich)</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.88rem;">' +
+      '<label style="display:flex;align-items:center;gap:.35rem;cursor:pointer;">' +
+        '<input type="checkbox" class="kat-inline-alle"' + (alleChecked ? ' checked' : '') + '> Alle anzeigen' +
+      '</label>' +
+      kats.map(function(k) {
+        var checked = _activeKategorien.indexOf(k) !== -1;
+        return '<label style="display:flex;align-items:center;gap:.35rem;cursor:pointer;">' +
+          '<input type="checkbox" class="kat-inline-item" value="' + escHtml(k) + '"' + (checked ? ' checked' : '') + '> ' + escHtml(k) +
+        '</label>';
+      }).join('') +
+      '</div>';
+    wrap.innerHTML = html;
+    wrap.style.display = '';
 
-    sidebar.querySelectorAll('.kategorie-filter-link').forEach(function(a) {
-      a.addEventListener('click', function(e) {
-        e.preventDefault();
-        sidebar.querySelectorAll('.kategorie-filter-link').forEach(function(l){ l.style.fontWeight=''; });
-        a.style.fontWeight = '700';
-        _activeKategorie = a.dataset.kat;
+    var alleBox = wrap.querySelector('.kat-inline-alle');
+    var itemBoxes = wrap.querySelectorAll('.kat-inline-item');
+
+    alleBox.addEventListener('change', function() {
+      if (alleBox.checked) {
+        _activeKategorien = [];
+        itemBoxes.forEach(function(b) { b.checked = false; });
+        applyFilters();
+      } else {
+        alleBox.checked = true; // "Alle" lässt sich nicht direkt abwählen, nur über Einzelauswahl verlassen
+      }
+    });
+
+    itemBoxes.forEach(function(box) {
+      box.addEventListener('change', function() {
+        if (box.checked) {
+          alleBox.checked = false;
+          if (_activeKategorien.indexOf(box.value) === -1) _activeKategorien.push(box.value);
+        } else {
+          _activeKategorien = _activeKategorien.filter(function(k) { return k !== box.value; });
+          if (!_activeKategorien.length) alleBox.checked = true;
+        }
         applyFilters();
       });
     });
@@ -370,7 +397,7 @@
       _allBeitraege = data.beitraege || [];
       _einst = data.einstellungen || {};
       buildArchivSidebar();
-      buildKategorieSidebar();
+      buildKategorieInline();
       applyFilters(); // default view
     })
     .catch(function() {

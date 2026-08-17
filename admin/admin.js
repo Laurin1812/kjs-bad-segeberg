@@ -1257,7 +1257,8 @@
       data.kurzbeschreibung = gv('kurzbeschreibung');
     }
     data.downloads = collectDownloadsList();
-    data.galerie    = collectGalerieList();
+    data.galerie = collectGalerieList();
+    data.galerie_titel = collectGalerieTitel();
     return data;
   }
 
@@ -1407,7 +1408,8 @@
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
     data.downloads     = collectDownloadsList();
-    data.galerie       = collectGalerieList();
+    data.galerie = collectGalerieList();
+    data.galerie_titel = collectGalerieTitel();
     return data;
   }
 
@@ -1523,6 +1525,10 @@
         'Mehrere Bilder mit eigener Beschriftung (z.B. Fotos von einer Veranstaltung). ' +
         'Werden am Ende dieser Seite als Galerie angezeigt. Reihenfolge per Drag &amp; Drop änderbar.' +
       '</p>' +
+      '<div class="field-row">' +
+        '<label class="field-label" for="f-galerie-titel">Überschrift der Galerie</label>' +
+        '<input class="field-input" type="text" id="f-galerie-titel" value="' + escAttr(data.galerie_titel || '') + '" placeholder="Bildergalerie">' +
+      '</div>' +
       '<div id="galerie-list">' + rows + '</div>' +
       '<p class="text-muted" id="galerie-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Bilder hinzugefügt.</p>' +
       '<button type="button" class="btn btn-outline btn-sm" onclick="addGalerieRow()">🖼️ Bild hinzufügen</button>' +
@@ -1548,6 +1554,13 @@
       if (bild) result.push({ bild: bild, titel: titel });
     });
     return result;
+  }
+
+  // Überschrift der Bildergalerie (Frank-Wunsch: frei umbenennbar statt
+  // fest "Bildergalerie"). Leer -> Standardwert.
+  function collectGalerieTitel() {
+    var t = gv('galerie-titel');
+    return (t && t.trim()) || 'Bildergalerie';
   }
 
   // Fügt eine leere Bildzeile hinzu; der Admin wählt das Bild dann direkt
@@ -1768,6 +1781,7 @@
     var archCheck = id('b-archiviert');
     b.archiviert = archCheck ? archCheck.checked : (b.archiviert || false);
     b.galerie = collectGalerieList();
+    b.galerie_titel = collectGalerieTitel();
     b.downloads = collectDownloadsList();
     await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
@@ -2097,7 +2111,8 @@
     data.aufgaben = getTiptapValue('kjm-aufgaben', data.aufgaben, 'Aufgaben');
     data.grußwort = gv('kjm-grußwort');
     data.downloads = collectDownloadsList();
-    data.galerie    = collectGalerieList();
+    data.galerie = collectGalerieList();
+    data.galerie_titel = collectGalerieTitel();
     return data;
   }
 
@@ -2237,7 +2252,9 @@
           fText('ko-telefon', 'Telefon', data.telefon) +
           fText('ko-email', 'E-Mail', data.email) +
           fTextarea('ko-adresse', 'Adresse KJS (jede Zeile einzeln)', data.adresse, 3) +
-          fTextarea('ko-postadresse', 'Postadresse / Geschäftsstelle (jede Zeile einzeln, z.B. Name, Adresse, Telefon, E-Mail)', data.postadresse, 5) +
+          fTextarea('ko-postadresse', 'Postadresse (nur Name + Anschrift, jede Zeile einzeln – Telefon/E-Mail bitte in die beiden Felder darunter, damit sie als eigene klickbare Zeilen angezeigt werden)', data.postadresse, 4) +
+          fText('ko-postadresse-telefon', 'Telefon (zur Postadresse)', data.postadresse_telefon) +
+          fText('ko-postadresse-email', 'E-Mail (zur Postadresse)', data.postadresse_email) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Sprechzeiten</div>' +
@@ -2266,6 +2283,8 @@
     data.email   = gv('ko-email');
     data.adresse = gv('ko-adresse');
     data.postadresse = gv('ko-postadresse');
+    data.postadresse_telefon = gv('ko-postadresse-telefon');
+    data.postadresse_email   = gv('ko-postadresse-email');
     var oz = [];
     document.querySelectorAll('[data-koz]').forEach(function(row) {
       var i = row.getAttribute('data-koz');
@@ -3117,6 +3136,7 @@
     // Universelle Bildergalerie: gleiches Prinzip wie Downloads oben.
     if (id('galerie-list')) {
       data.galerie = collectGalerieList();
+      data.galerie_titel = collectGalerieTitel();
     }
 
     setSaving(true);

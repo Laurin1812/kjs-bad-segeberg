@@ -659,7 +659,10 @@ p  { margin-bottom: 1rem; }
 .topbar__icon svg { width: 14px; height: 14px; display: block; }
 .contact-box a   { color: rgba(255,255,255,.88); }
 .contact-box a:hover { color: #fff; }
-.contact-box h4.contact-box__sub { margin-top: 1.1rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; opacity: .85; }
+/* Keine eigene Groß-/Kleinschreibung mehr für die Unterüberschrift – Frank hatte
+   bemängelt, dass "Adresse KJS" und "GESCHÄFTLICHE POSTADRESSE" uneinheitlich
+   wirkten. Beide Überschriften nutzen jetzt denselben Stil wie .contact-box h4. */
+.contact-box h4.contact-box__sub { margin-top: 1.1rem; font-size: .95rem; opacity: .9; }
 
 /* =========================================================
    PERSON CARDS
@@ -804,6 +807,50 @@ p  { margin-bottom: 1rem; }
 .galerie-item__caption { padding: .55rem .75rem; font-size: .82rem; color: var(--text-dark); }
 @media (max-width: 640px) {
   .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+
+/* Bildergalerie-Lightbox: Overlay statt eigener Bild-Seite, mit Vor/Zurück-
+   Navigation. Siehe js/main.js (Event-Delegation auf .galerie-item). */
+body.kjs-lightbox-lock { overflow: hidden; }
+.kjs-lightbox {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(20, 20, 15, .92);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity var(--transition);
+}
+.kjs-lightbox--open { opacity: 1; visibility: visible; }
+.kjs-lightbox__stage {
+  max-width: min(90vw, 1100px); max-height: 88vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.kjs-lightbox__img {
+  max-width: 90vw; max-height: 78vh; object-fit: contain;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  background: #000;
+}
+.kjs-lightbox__caption { color: #fff; font-size: .9rem; margin-top: .75rem; text-align: center; }
+.kjs-lightbox__counter { color: rgba(255,255,255,.6); font-size: .8rem; margin-top: .25rem; }
+.kjs-lightbox__close,
+.kjs-lightbox__prev,
+.kjs-lightbox__next {
+  position: absolute; background: rgba(255,255,255,.12); color: #fff;
+  border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+}
+.kjs-lightbox__close:hover,
+.kjs-lightbox__prev:hover,
+.kjs-lightbox__next:hover { background: rgba(255,255,255,.25); }
+.kjs-lightbox__close { top: 1.25rem; right: 1.25rem; width: 2.5rem; height: 2.5rem; font-size: 1.6rem; line-height: 1; }
+.kjs-lightbox__prev,
+.kjs-lightbox__next { top: 50%; transform: translateY(-50%); width: 3rem; height: 3rem; font-size: 1.2rem; }
+.kjs-lightbox__prev { left: 1rem; }
+.kjs-lightbox__next { right: 1rem; }
+@media (max-width: 640px) {
+  .kjs-lightbox__prev, .kjs-lightbox__next { width: 2.4rem; height: 2.4rem; font-size: 1rem; }
+  .kjs-lightbox__close { top: .75rem; right: .75rem; }
+  .kjs-lightbox__prev { left: .4rem; }
+  .kjs-lightbox__next { right: .4rem; }
 }
 
 /* "Dokumente & Downloads" als Sidebar-Karte (neben dem Geschäftsstelle-Block) */

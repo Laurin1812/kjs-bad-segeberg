@@ -307,15 +307,6 @@
                   </div>
                 </div>
 
-                ${postadresseHtml ? `
-                <div class="kontakt-detail">
-                  <div class="kontakt-detail__icon">${KONTAKT_ICONS.pin}</div>
-                  <div>
-                    <span class="kontakt-detail__label">Postadresse</span>
-                    <div class="kontakt-detail__value">${postadresseHtml}</div>
-                  </div>
-                </div>` : ''}
-
                 ${d.telefon ? `
                 <div class="kontakt-detail">
                   <div class="kontakt-detail__icon">${KONTAKT_ICONS.phone}</div>
@@ -334,6 +325,37 @@
                     <span class="kontakt-detail__label">E-Mail</span>
                     <div class="kontakt-detail__value">
                       <a href="mailto:${d.email}">${d.email}</a>
+                    </div>
+                  </div>
+                </div>` : ''}
+
+                ${postadresseHtml ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">${KONTAKT_ICONS.pin}</div>
+                  <div>
+                    <span class="kontakt-detail__label">Postadresse</span>
+                    <div class="kontakt-detail__value">${postadresseHtml}</div>
+                  </div>
+                </div>` : ''}
+
+                ${d.postadresse_telefon ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">${KONTAKT_ICONS.phone}</div>
+                  <div>
+                    <span class="kontakt-detail__label">Telefon</span>
+                    <div class="kontakt-detail__value">
+                      <a href="tel:${d.postadresse_telefon.replace(/\s|\/|\./g,'')}">${d.postadresse_telefon}</a>
+                    </div>
+                  </div>
+                </div>` : ''}
+
+                ${d.postadresse_email ? `
+                <div class="kontakt-detail">
+                  <div class="kontakt-detail__icon">${KONTAKT_ICONS.mail}</div>
+                  <div>
+                    <span class="kontakt-detail__label">E-Mail</span>
+                    <div class="kontakt-detail__value">
+                      <a href="mailto:${d.postadresse_email}">${d.postadresse_email}</a>
                     </div>
                   </div>
                 </div>` : ''}

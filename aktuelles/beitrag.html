@@ -286,7 +286,8 @@
       // Bildergalerie (falls im Admin Bilder zu diesem Beitrag hinterlegt wurden)
       var galerie = (b.galerie || []).filter(function(g) { return g && g.bild; });
       if (galerie.length) {
-        html += '<div class="galerie-section"><div class="galerie-section__title">Bildergalerie</div><div class="galerie-grid">';
+        var galerieTitel = (b.galerie_titel && b.galerie_titel.trim()) || 'Bildergalerie';
+        html += '<div class="galerie-section"><div class="galerie-section__title">' + galerieTitel + '</div><div class="galerie-grid">';
         galerie.forEach(function(g) {
           var src = g.bild.indexOf('/') === 0 ? '..' + g.bild : '../' + g.bild;
           var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + g.titel.trim() + '</div>' : '';

@@ -234,22 +234,27 @@ var ICONS = {
           a.textContent = topbarTel;
         }
       });
-      // Kontaktbox aktualisieren: oben "Adresse KJS" (Adresse + allgemeine E-Mail),
-      // darunter als eigener Block "Geschäftsstelle / Postadresse" (freier Text,
-      // z.B. Name/Adresse/Telefon/E-Mail der Geschäftsstelle – von Frank selbst
-      // im Admin unter "Postadresse" gepflegt). Die private Handynummer (d.telefon)
-      // wird hier bewusst NICHT mehr angezeigt.
+      // Kontaktbox aktualisieren: gleiche Struktur wie der Geschäftsstelle-Block
+      // auf der Kontaktseite (kontakt/index.html) – Überschrift, Reihenfolge und
+      // Feld-Aufteilung müssen exakt übereinstimmen (Frank hatte die abweichende
+      // Groß-/Kleinschreibung "Adresse KJS" vs. "GESCHÄFTLICHE POSTADRESSE"
+      // bemängelt). Ablauf: Geschäftsstelle-Überschrift → Adresse → Telefon →
+      // E-Mail → Postadresse (Frank persönlich) → deren eigene Telefon-/
+      // E-Mail-Zeilen als separate klickbare Icon-Zeilen.
       var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
       var postadresseHtml = d.postadresse ? d.postadresse.trim().split('\n').join('<br>') : '';
       boxes.forEach(function(box) {
         box.innerHTML =
-          '<h4>Adresse KJS</h4>' +
+          '<h4>Geschäftsstelle</h4>' +
           (adresseHtml ? '<p><span class="cb-icon">' + ICONS.home + '</span><span>' + adresseHtml + '</span></p>' : '') +
+          (d.telefon  ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + d.telefon.replace(/\s|\/|\./g,'') + '">' + d.telefon + '</a></p>' : '') +
           (d.email    ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
           (postadresseHtml ?
-            '<h4 class="contact-box__sub">Geschäftsstelle / Postadresse</h4>' +
+            '<h4 class="contact-box__sub">Postadresse</h4>' +
             '<p><span class="cb-icon">' + ICONS.pin + '</span><span>' + postadresseHtml + '</span></p>'
-            : '');
+            : '') +
+          (d.postadresse_telefon ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + d.postadresse_telefon.replace(/\s|\/|\./g,'') + '">' + d.postadresse_telefon + '</a></p>' : '') +
+          (d.postadresse_email   ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + d.postadresse_email + '">' + d.postadresse_email + '</a></p>' : '');
       });
     })
     .catch(function() {});
@@ -918,8 +923,9 @@ if (contactForm) {
         '</a>';
       }).join('');
 
+      var galerieTitel = (d.galerie_titel && d.galerie_titel.trim()) || 'Bildergalerie';
       var html = '<div class="galerie-section">' +
-        '<div class="galerie-section__title">Bildergalerie</div>' +
+        '<div class="galerie-section__title">' + escHtml(galerieTitel) + '</div>' +
         '<div class="galerie-grid">' + cards + '</div>' +
       '</div>';
 
@@ -1085,4 +1091,99 @@ if (contactForm) {
 
   wire('.main-nav > li');   // Hauptmenü-Dropdowns (Jäger, Verbraucher, ...)
   wire('.has-sub');         // Verschachtelte Flyout-Untermenüs (KJS Segeberg, Aufgaben ...)
+})();
+
+// ── Bildergalerie-Lightbox (site-weit) ────────────────────────────────────
+// Frank-Wunsch: Klick auf ein Galerie-Bild soll es NICHT mehr als eigene
+// Bilddatei-Seite öffnen (target="_blank"), sondern als Overlay direkt auf
+// der aktuellen Seite, mit Vor/Zurück-Navigation (Pfeile, Tastatur, Swipe)
+// durch alle Bilder derselben Galerie. Per Event-Delegation auf document
+// registriert – funktioniert dadurch automatisch für JEDE Bildergalerie
+// (Standard-Seiten via main.js-Renderer und aktuelles/beitrag.html), ohne
+// dass jede Stelle einzeln verdrahtet werden muss.
+(function () {
+  var overlay = null, imgEl = null, captionEl = null, counterEl = null;
+  var items = []; // aktuelle Galerie-Bilder (Array von {href, alt, caption})
+  var idx = 0;
+
+  function build() {
+    if (overlay) return;
+    overlay = document.createElement('div');
+    overlay.className = 'kjs-lightbox';
+    overlay.innerHTML =
+      '<button type="button" class="kjs-lightbox__close" aria-label="Schließen">&times;</button>' +
+      '<button type="button" class="kjs-lightbox__prev" aria-label="Vorheriges Bild">&#10094;</button>' +
+      '<button type="button" class="kjs-lightbox__next" aria-label="Nächstes Bild">&#10095;</button>' +
+      '<div class="kjs-lightbox__stage">' +
+        '<img class="kjs-lightbox__img" alt="">' +
+        '<div class="kjs-lightbox__caption"></div>' +
+        '<div class="kjs-lightbox__counter"></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    imgEl = overlay.querySelector('.kjs-lightbox__img');
+    captionEl = overlay.querySelector('.kjs-lightbox__caption');
+    counterEl = overlay.querySelector('.kjs-lightbox__counter');
+
+    overlay.querySelector('.kjs-lightbox__close').addEventListener('click', close);
+    overlay.querySelector('.kjs-lightbox__prev').addEventListener('click', function (e) { e.stopPropagation(); show(idx - 1); });
+    overlay.querySelector('.kjs-lightbox__next').addEventListener('click', function (e) { e.stopPropagation(); show(idx + 1); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    // Touch-Swipe
+    var touchX = null;
+    overlay.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    overlay.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40) show(idx + (dx < 0 ? 1 : -1));
+      touchX = null;
+    }, { passive: true });
+  }
+
+  function show(i) {
+    if (!items.length) return;
+    idx = (i + items.length) % items.length;
+    var it = items[idx];
+    imgEl.src = it.href;
+    imgEl.alt = it.alt || '';
+    captionEl.textContent = it.caption || '';
+    captionEl.style.display = it.caption ? '' : 'none';
+    counterEl.textContent = items.length > 1 ? (idx + 1) + ' / ' + items.length : '';
+  }
+
+  function open(galleryItems, startIdx) {
+    build();
+    items = galleryItems;
+    overlay.classList.add('kjs-lightbox--open');
+    document.body.classList.add('kjs-lightbox-lock');
+    show(startIdx);
+  }
+
+  function close() {
+    if (!overlay) return;
+    overlay.classList.remove('kjs-lightbox--open');
+    document.body.classList.remove('kjs-lightbox-lock');
+    items = [];
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest ? e.target.closest('.galerie-item') : null;
+    if (!link) return;
+    e.preventDefault();
+    var grid = link.closest('.galerie-grid') || document;
+    var links = Array.prototype.slice.call(grid.querySelectorAll('.galerie-item'));
+    var galleryItems = links.map(function (a) {
+      var img = a.querySelector('img');
+      var capEl = a.querySelector('.galerie-item__caption');
+      return { href: a.getAttribute('href'), alt: img ? img.getAttribute('alt') : '', caption: capEl ? capEl.textContent : '' };
+    });
+    open(galleryItems, links.indexOf(link));
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!overlay || !overlay.classList.contains('kjs-lightbox--open')) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') show(idx - 1);
+    else if (e.key === 'ArrowRight') show(idx + 1);
+  });
 })();
