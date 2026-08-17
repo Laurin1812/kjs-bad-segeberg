@@ -257,6 +257,10 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 
 /* Panel body */
 .panel-body { padding: 1.5rem; max-width: 800px; }
+/* Medien & Bilder (Punkt 10): normale Formulare bleiben bewusst bei 800px
+   (bessere Lesbarkeit für Textfelder), aber das Bilder-Grid soll die volle
+   Seitenbreite nutzen statt rechts leeren Platz zu lassen. */
+.panel-body--wide { max-width: none; }
 
 /* Loading */
 .panel-loading {

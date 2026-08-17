@@ -2373,7 +2373,7 @@
   ──────────────────────────────────────────────────────────── */
   function renderMedian() {
     var html = '<div class="panel-header"><h2>🖼️ Medien & Bilder</h2></div>' +
-      '<div class="panel-body">' +
+      '<div class="panel-body panel-body--wide">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bild hochladen</div>' +
           '<div class="upload-row" style="margin-bottom:1.25rem;">' +
