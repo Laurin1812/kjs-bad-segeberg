@@ -292,7 +292,7 @@
             var inhaltHtml = '';
             if (d.inhalt) {
               inhaltHtml = typeof marked !== 'undefined'
-                ? marked.parse(d.inhalt)
+                ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt))
                 : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
             }
             main.innerHTML =

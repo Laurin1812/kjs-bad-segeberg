@@ -187,7 +187,7 @@
                 </div>
               </div>
               <div id="kjm-aufgaben-wrap">
-                ${aufgaben ? (typeof marked !== 'undefined' ? marked.parse(aufgaben) : '<p>'+aufgaben.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>') : ''}
+                ${aufgaben ? (/<[a-z][\s\S]*>/i.test(aufgaben) ? aufgaben : (typeof marked !== 'undefined' ? marked.parse(aufgaben) : '<p>'+aufgaben.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>')) : ''}
                 ${email || telefon ? `
                 <h3>Kontakt</h3>
                 <p>

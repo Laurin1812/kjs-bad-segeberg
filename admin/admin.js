@@ -1191,13 +1191,8 @@
             'Kurzer Text direkt unter dem Titel, als Einstieg in die Seite. Optional.') +
           fH(fTipTap('intro', 'Einleitungstext', true),
             'Der erste Textblock der Seite, oberhalb des Hauptinhalts. Formatierung, Listen und Bilder sind möglich.') +
-          fH('<div class="field-row">' +
-              '<label class="field-label">Textinhalt (Markdown)</label>' +
-              '<div id="te-bar-inhalt" class="te-bar"></div>' +
-              '<textarea class="field-textarea" id="f-inhalt" rows="8">' + escHtml(data.inhalt || '') + '</textarea>' +
-              '<div id="te-content-inhalt" style="display:none"></div>' +
-            '</div>',
-            'Der Haupttext der Seite. Hier kommt der eigentliche Inhalt rein – mit Formatierung, Listen und Tabellen.') +
+          fH(fTipTap('inhalt', 'Textinhalt', true),
+            'Der Haupttext der Seite. Hier kommt der eigentliche Inhalt rein – mit Formatierung, Listen, Tabellen und Bildern (frei verschiebbar, wie bei Untertitel/Einleitungstext).') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bilder</div>' +
@@ -1237,8 +1232,7 @@
     id('admin-main').innerHTML = html;
     initTiptap('untertitel', data.untertitel || '');
     initTiptap('intro',      data.intro      || '');
-    initMDE('inhalt');
-    initTableEditor('inhalt', data.inhalt || '');
+    initTiptap('inhalt',     data.inhalt     || '');
     initDownloadsSortable();
     bindSaveBtn();
   }
@@ -1247,7 +1241,7 @@
     data.titel         = gv('titel');
     data.untertitel    = getTiptapValue('untertitel', data.untertitel, 'Untertitel');
     data.intro         = getTiptapValue('intro',      data.intro,      'Einleitungstext');
-    data.inhalt        = getMDE();
+    data.inhalt        = getTiptapValue('inhalt',     data.inhalt,     'Textinhalt');
     data.hero_bild     = gv('hero_bild');
     data.bild          = gv('bild');
     data.bild_groesse  = gv('bild_groesse');
@@ -2080,8 +2074,8 @@
           fText('kjm-telefon', 'Telefon', data.telefon) +
         '</div>' +
         '<div class="form-card">' +
-          '<div class="form-card-title">Aufgaben & Zuständigkeiten (Markdown)</div>' +
-          fMarkdown('kjm-aufgaben', 'Aufgaben', data.aufgaben) +
+          '<div class="form-card-title">Aufgaben & Zuständigkeiten</div>' +
+          fTipTap('kjm-aufgaben', 'Aufgaben', true) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Grußwort</div>' +
@@ -2090,7 +2084,7 @@
         renderDownloadsCard(data) +
       '</div>' + saveBar();
     id('admin-main').innerHTML = html;
-    initMDE('kjm-aufgaben');
+    initTiptap('kjm-aufgaben', data.aufgaben || '');
     initDownloadsSortable();
     bindSaveBtn();
   }
@@ -2100,7 +2094,7 @@
     data.bild     = gv('kjm-bild');
     data.email    = gv('kjm-email');
     data.telefon  = gv('kjm-telefon');
-    data.aufgaben = getMDE();
+    data.aufgaben = getTiptapValue('kjm-aufgaben', data.aufgaben, 'Aufgaben');
     data.grußwort = gv('kjm-grußwort');
     data.downloads = collectDownloadsList();
     data.galerie    = collectGalerieList();
@@ -2992,12 +2986,7 @@
         '<div class="form-card">' +
           '<div class="form-card-title">Inhalt</div>' +
           fTextarea('ns-intro', 'Einleitungstext', '', 2) +
-          '<div class="field-row">' +
-            '<label class="field-label">Textinhalt (Markdown)</label>' +
-            '<div id="te-bar-ns-inhalt" class="te-bar"></div>' +
-            '<textarea class="field-textarea" id="f-ns-inhalt" rows="8"></textarea>' +
-            '<div id="te-content-ns-inhalt" style="display:none"></div>' +
-          '</div>' +
+          fTipTap('ns-inhalt', 'Textinhalt', true) +
           fImage('ns-hero_bild', 'Hero-Hintergrundbild', '') +
           fImage('ns-bild', 'Inhaltsbild', '') +
           fText('ns-kontakt_name', 'Kontaktname (optional)', '') +
@@ -3019,8 +3008,7 @@
         '</div>' +
       '</div>';
     id('admin-main').innerHTML = html;
-    initMDE('ns-inhalt');
-    initTableEditor('ns-inhalt', '');
+    initTiptap('ns-inhalt', '');
 
     // Auto-generate slug from title
     var titelEl = id('f-ns-titel');
@@ -3048,7 +3036,7 @@
       nav_label:      navLabel,
       slug:           slug,
       intro:          gv('ns-intro'),
-      inhalt:         getMDE(),
+      inhalt:         getTiptapValue('ns-inhalt', '', 'Textinhalt'),
       hero_bild:      gv('ns-hero_bild'),
       bild:           gv('ns-bild'),
       bild_alt:       '',
@@ -4145,6 +4133,54 @@
         || /(^|\n)\s{0,3}\d+\.\s+\S/.test(s)              // 1. nummerierte Liste
         || /(^|\n)\s*\|.*\|\s*\n\s*\|?[\s:|-]*-[\s:|-]*\|/.test(s); // | --- | Tabelle
   }
+
+  /* ── Alte Markdown-Bilder mit Größen-/Positionsklassen erkennen ─────
+     ![alt](pfad){.img-mittel .img-links .img-flow} – Syntax des alten
+     EasyMDE-Editors (siehe insertMdImage). marked.js kennt diese Attribut-
+     Liste nicht von Haus aus (gleiches Problem wie in js/main.js gelöst),
+     UND die alten Klassennamen (img-klein/mittel/gross/voll) passen nicht
+     zum neuen, schlankeren TipTap-Schema (img-25/50/75/100). Diese Extension
+     wandelt beim Umstieg auf TipTap (convertMarkdownToHtml) alte Bilder in
+     <img class="img-25/50/75/100 img-links/rechts/zentriert"> um – exakt das
+     Schema, das TipTap/initTiptap für neu eingefügte Bilder ohnehin nutzt
+     (siehe TT_SIZE_MAP in insertMdImage). img-flow/img-pos-oben/-unten gibt
+     es im neuen Schema nicht und werden bewusst weggelassen. */
+  (function() {
+    if (typeof marked === 'undefined' || !marked || typeof marked.use !== 'function') return;
+    var RULE = /^!\[([^\]]*)\]\(([^)\s]+)\)\{([^}]+)\}/;
+    var OLD_SIZE_MAP = { 'img-klein':'img-25', 'img-mittel':'img-50', 'img-gross':'img-75', 'img-voll':'img-100' };
+    var OLD_HPOS = { 'img-links':1, 'img-rechts':1, 'img-zentriert':1 };
+
+    marked.use({
+      extensions: [{
+        name: 'imageWithClassesLegacyMigration',
+        level: 'inline',
+        start: function(src) {
+          var m = src.match(/!\[/);
+          return m ? m.index : void 0;
+        },
+        tokenizer: function(src) {
+          var match = RULE.exec(src);
+          if (!match) return;
+          var rawClasses = match[3].trim().split(/\s+/).map(function(c) { return c.replace(/^\./, ''); }).filter(Boolean);
+          var newClasses = [];
+          var hpos = 'img-links';
+          rawClasses.forEach(function(c) {
+            if (OLD_SIZE_MAP[c]) newClasses.push(OLD_SIZE_MAP[c]);
+            else if (OLD_HPOS[c]) hpos = c;
+          });
+          if (!newClasses.length) newClasses.push('img-50');
+          newClasses.push(hpos);
+          return { type: 'imageWithClassesLegacyMigration', raw: match[0], alt: match[1], href: match[2], classes: newClasses.join(' ') };
+        },
+        renderer: function(token) {
+          var altSafe = String(token.alt).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+          var srcSafe = String(token.href).replace(/"/g, '&quot;');
+          return '<img src="' + srcSafe + '" alt="' + altSafe + '" class="' + token.classes + '">';
+        }
+      }]
+    });
+  })();
 
   /* ── Markdown → echtes HTML (komplett) ─────────────────────────
      Wandelt Überschriften/Fett/Kursiv/Listen/Tabellen via marked.js. Erkennt
