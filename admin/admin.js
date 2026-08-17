@@ -1668,7 +1668,8 @@
     if (!b) return;
     var html = panelHeader('📰 Beitrag bearbeiten',
         '<button class="btn btn-outline" onclick="renderAktuelles(S.section,S.data)">← Zurück</button>' +
-        '<button class="btn btn-primary" onclick="aktuelleSave(' + idx + ')">💾 Speichern</button>') +
+        '<button class="btn btn-primary" onclick="aktuelleSave(' + idx + ')">💾 Speichern</button>',
+        true) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="field-row">' +
@@ -4834,12 +4835,18 @@
   /* ────────────────────────────────────────────────────────────
      UI HELPERS
   ──────────────────────────────────────────────────────────── */
-  function panelHeader(title, extraBtns) {
+  // hideDefaultSave: für Bildschirme wie aktuellesEdit(), die bereits einen
+  // eigenen, funktionierenden Speichern-Button in extraBtns mitgeben (mit
+  // eigenem onclick statt dem generischen [data-save] → saveCurrentSection()-
+  // Mechanismus). Ohne dieses Flag gab es Punkt-9-Bug: zwei "Speichern"-
+  // Buttons, wobei der Standard-Button (data-save) dort nie mit
+  // bindSaveBtn() verkabelt und damit toter Klick war.
+  function panelHeader(title, extraBtns, hideDefaultSave) {
     return '<div class="panel-header">' +
       '<h2>' + escHtml(title) + '</h2>' +
       '<div class="panel-header-actions">' +
         (extraBtns || '') +
-        '<button class="btn btn-primary" data-save>💾 Speichern</button>' +
+        (hideDefaultSave ? '' : '<button class="btn btn-primary" data-save>💾 Speichern</button>') +
       '</div></div>';
   }
 
