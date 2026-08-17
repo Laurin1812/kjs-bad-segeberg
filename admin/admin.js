@@ -2423,7 +2423,6 @@
           '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
           '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
-            '<button class="btn btn-sm btn-outline" onclick="medienCopyUrl(\'' + escAttr(url) + '\')">📋 URL kopieren</button>' +
             '<button class="btn btn-sm btn-outline" style="color:#c0392b;border-color:#c0392b;" onclick="medienDeleteImage(\'' + escAttr(f.path) + '\',\'' + escAttr(f.sha) + '\',\'' + escAttr(f.name) + '\')">🗑️ Löschen</button>' +
           '</div>' +
         '</div>';
