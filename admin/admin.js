@@ -75,6 +75,47 @@
     }
   };
 
+  // "🗑"-Button neben dem Kategorie-Dropdown: löscht die aktuell ausgewählte
+  // Kategorie dauerhaft aus S.data.einstellungen.kategorien (Frank-Wunsch:
+  // versehentlich angelegte Kategorien wie "test22" sollen wieder entfernbar
+  // sein). Ist die Kategorie noch bei mindestens einem Beitrag eingetragen,
+  // wird die Löschung verweigert (sonst taucht sie über alleAktuellesKategorien()
+  // sofort wieder in der Liste auf, da "verwendete" Kategorien immer ergänzt
+  // werden) – stattdessen Hinweis, erst die betroffenen Beiträge umzustellen.
+  window.aktuellesKategorieDelete = async function() {
+    var sel = id('f-b-kategorie');
+    var val = sel ? sel.value : '';
+    if (!val) return;
+    var usedBy = ((S.data && S.data.beitraege) || []).filter(function(b) {
+      return (b.kategorie || '').trim() === val;
+    });
+    if (usedBy.length) {
+      alert('„' + val + '" kann nicht gelöscht werden – wird noch von ' + usedBy.length +
+        ' Beitrag' + (usedBy.length === 1 ? '' : 'en') + ' verwendet:\n\n' +
+        usedBy.map(function(b) { return '• ' + (b.titel || '(ohne Titel)'); }).join('\n') +
+        '\n\nBitte dort erst eine andere Kategorie wählen.');
+      return;
+    }
+    if (!confirm('Kategorie „' + val + '" wirklich löschen?')) return;
+    S.data.einstellungen = S.data.einstellungen || {};
+    var kats = (S.data.einstellungen.kategorien || KAT_NEWS).slice();
+    var idx = kats.indexOf(val);
+    if (idx !== -1) kats.splice(idx, 1);
+    S.data.einstellungen.kategorien = kats;
+    try {
+      await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + val + '" gelöscht');
+      toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
+    } catch (e) {
+      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      return;
+    }
+    if (sel) {
+      var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
+      if (opt) opt.remove();
+      if (sel.options.length) sel.value = sel.options[0].value;
+    }
+  };
+
   /* ────────────────────────────────────────────────────────────
      STATE
   ──────────────────────────────────────────────────────────── */
@@ -327,8 +368,24 @@
       headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error('Upload fehlgeschlagen');
+    if (!r.ok) throw new Error(await apiUploadErrorMessage(r));
     return '/images/' + safeName;
+  }
+
+  // Liest die eigentliche Fehlermeldung aus der GitHub-API-Antwort aus (statt
+  // nur "Upload fehlgeschlagen" anzuzeigen) – z.B. "Content is too large" bei
+  // Dateien über dem ~1MB-Limit der Contents-API, oder ein 409/422 bei
+  // Namenskollisionen. Ohne dieses Detail war ein fehlgeschlagener Upload
+  // bisher nicht ohne DevTools-Netzwerktab diagnostizierbar.
+  async function apiUploadErrorMessage(r) {
+    var detail = '';
+    try {
+      var err = await r.json();
+      detail = err && err.message ? err.message : '';
+    } catch (e) { /* Antwort war kein JSON */ }
+    if (!detail && r.status === 413) detail = 'Datei zu groß';
+    if (!detail && r.status === 422) detail = 'Ungültige Anfrage (evtl. Datei zu groß oder Namenskonflikt)';
+    return 'Upload fehlgeschlagen (' + r.status + (detail ? ': ' + detail : '') + ')';
   }
 
   function toBase64(str) {
@@ -1143,8 +1200,9 @@
       '<div style="display:flex;gap:.5rem;align-items:center;">' +
         '<select class="field-input" id="f-b-kategorie" style="flex:1;">' + opts + '</select>' +
         '<button type="button" class="btn btn-outline btn-sm" onclick="aktuellesKategorieAdd()" style="white-space:nowrap;">+ Neu</button>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="aktuellesKategorieDelete()" title="Ausgewählte Kategorie löschen" style="white-space:nowrap;">🗑</button>' +
       '</div>' +
-      '<p class="field-hint">Neue Kategorie über „+ Neu" anlegen – steht danach dauerhaft zur Auswahl.</p>' +
+      '<p class="field-hint">Neue Kategorie über „+ Neu" anlegen, ausgewählte über 🗑 löschen (nur möglich, wenn kein Beitrag sie mehr verwendet).</p>' +
     '</div>';
   }
 
@@ -3883,6 +3941,13 @@
   /* ────────────────────────────────────────────────────────────
      PDF-DOKUMENT UPLOAD & EINFÜGEN
   ──────────────────────────────────────────────────────────── */
+  // Contents-API von GitHub (über die Netlify git-gateway) akzeptiert nur
+  // Dateien bis ca. 1 MB in einem einzelnen PUT-Request mit Base64-Inhalt –
+  // größere Scans/PDFs schlagen dort mit einem harten Fehler fehl. Deshalb
+  // vorab prüfen und eine klare, verständliche Meldung zeigen statt erst
+  // nach dem Hochladen mit einer kryptischen API-Fehlermeldung zu scheitern.
+  var PDF_MAX_BYTES = 1000000; // ~1 MB, entspricht dem Contents-API-Limit
+
   async function apiUploadPdf(filename, base64Data) {
     var tok = await getToken();
     var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -3892,7 +3957,7 @@
       headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error('PDF-Upload fehlgeschlagen');
+    if (!r.ok) throw new Error(await apiUploadErrorMessage(r));
     return '/downloads/' + safeName;
   }
 
@@ -3987,6 +4052,11 @@
       var file = this.files[0];
       if (!file) return;
       var status = id('pdf-upload-status');
+      if (file.size > PDF_MAX_BYTES) {
+        status.textContent = '❌ Datei zu groß (' + (file.size / 1000000).toFixed(1) + ' MB) – maximal 1 MB möglich. Bitte das PDF vorher verkleinern/komprimieren.';
+        input.value = '';
+        return;
+      }
       status.textContent = '⏳ Wird hochgeladen…';
       try {
         var b64 = await fileToBase64(file);

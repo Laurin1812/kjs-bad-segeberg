@@ -245,8 +245,27 @@
 
   var _allBeitraege = [];
   var _einst = {};
-  var _activeYear = 0;        // 0 = Standardansicht, 'alle' = alle Jahre, Zahl = bestimmtes Jahr
+  // Frank-Wunsch: Klickt man oben im Hauptmenü auf "Aktuelles", sollen sofort
+  // ALLE Beiträge (alle Jahre) angezeigt werden, nicht nur das aktuelle Jahr –
+  // daher startet der Jahres-Filter direkt auf 'alle' statt auf 0.
+  var _activeYear = 'alle';   // 'alle' = alle Jahre, Zahl = bestimmtes Jahr
   var _activeKategorien = []; // leer = kein Kategorie-Filter (alle), sonst Mehrfachauswahl
+
+  // Sortier-Schlüssel für einen Beitrag: Jahr (mit Erscheinungsjahr-Override
+  // über postYear) kombiniert mit Monat/Tag aus b.datum, egal ob im Format
+  // "TT.MM.JJJJ" oder "JJJJ-MM-TT" gespeichert. Damit landen neuere Beiträge
+  // zuverlässig oben und ältere unten – unabhängig von der Reihenfolge, in
+  // der sie ursprünglich in content/aktuelles.json angelegt wurden.
+  function beitragSortKey(b) {
+    var year = postYear(b) || 0;
+    var monat = 0, tag = 0;
+    var raw = (b && b.datum) || '';
+    var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    var m2 = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m1) { tag = parseInt(m1[1], 10); monat = parseInt(m1[2], 10); }
+    else if (m2) { monat = parseInt(m2[2], 10); tag = parseInt(m2[3], 10); }
+    return year * 10000 + monat * 100 + tag;
+  }
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -394,11 +413,15 @@
   fetch('../content/aktuelles.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      _allBeitraege = data.beitraege || [];
+      _allBeitraege = (data.beitraege || []).slice().sort(function(a, b) {
+        return beitragSortKey(b) - beitragSortKey(a); // neueste zuerst, älteste zuletzt
+      });
       _einst = data.einstellungen || {};
       buildArchivSidebar();
       buildKategorieInline();
-      applyFilters(); // default view
+      applyFilters(); // default view: alle Jahre, neueste zuerst
+      var alleLink = document.querySelector('.archiv-year-link[data-year="alle"]');
+      if (alleLink) alleLink.style.fontWeight = '700';
     })
     .catch(function() {
       document.getElementById('news-grid').innerHTML = '<p>Beiträge konnten nicht geladen werden.</p>';
