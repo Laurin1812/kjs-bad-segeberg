@@ -219,6 +219,41 @@
   </div>
 </div>
 
+<!-- ── EINGABE-DIALOG (Ersatz für window.prompt, das oben im Browser-Fenster
+     statt im Programm selbst erscheint und Frank verwirrt hat) ─────────── -->
+<div id="prompt-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="prompt-backdrop"></div>
+  <div class="modal-box modal-box--sm">
+    <div class="modal-head">
+      <h3 id="prompt-title">Eingabe</h3>
+    </div>
+    <div class="modal-body">
+      <p id="prompt-msg" style="margin-bottom:.6rem;"></p>
+      <input type="text" id="prompt-input" class="field-input" style="width:100%;">
+      <div class="confirm-actions">
+        <button class="btn btn-outline" id="prompt-cancel">Abbrechen</button>
+        <button class="btn btn-primary" id="prompt-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HINWEIS-DIALOG (Ersatz für window.alert) ──────────────────────── -->
+<div id="alert-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="alert-backdrop"></div>
+  <div class="modal-box modal-box--sm">
+    <div class="modal-head">
+      <h3 id="alert-title">Hinweis</h3>
+    </div>
+    <div class="modal-body">
+      <p id="alert-msg" style="white-space:pre-line;"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-primary" id="alert-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── TIPTAP BILD-KONTEXTMENÜ ────────────────────────────────── -->
 <div id="tt-img-menu" style="display:none;position:fixed;z-index:9999;">
   <div class="tt-imgmenu-inner">

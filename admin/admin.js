@@ -48,7 +48,7 @@
   // S.data.einstellungen.kategorien (sofortiges Speichern, unabhängig vom
   // aktuellen Beitrag) und wählt ihn direkt im offenen Formular aus.
   window.aktuellesKategorieAdd = async function() {
-    var neu = prompt('Name der neuen Kategorie:');
+    var neu = await showPrompt('Neue Kategorie', 'Name der neuen Kategorie:');
     if (!neu) return;
     neu = neu.trim();
     if (!neu) return;
@@ -90,30 +90,32 @@
       return (b.kategorie || '').trim() === val;
     });
     if (usedBy.length) {
-      alert('„' + val + '" kann nicht gelöscht werden – wird noch von ' + usedBy.length +
+      await showAlert('Kann nicht gelöscht werden',
+        '„' + val + '" wird noch von ' + usedBy.length +
         ' Beitrag' + (usedBy.length === 1 ? '' : 'en') + ' verwendet:\n\n' +
         usedBy.map(function(b) { return '• ' + (b.titel || '(ohne Titel)'); }).join('\n') +
         '\n\nBitte dort erst eine andere Kategorie wählen.');
       return;
     }
-    if (!confirm('Kategorie „' + val + '" wirklich löschen?')) return;
-    S.data.einstellungen = S.data.einstellungen || {};
-    var kats = (S.data.einstellungen.kategorien || KAT_NEWS).slice();
-    var idx = kats.indexOf(val);
-    if (idx !== -1) kats.splice(idx, 1);
-    S.data.einstellungen.kategorien = kats;
-    try {
-      await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + val + '" gelöscht');
-      toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
-    } catch (e) {
-      toast('❌ Fehler beim Speichern: ' + e.message, true);
-      return;
-    }
-    if (sel) {
-      var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
-      if (opt) opt.remove();
-      if (sel.options.length) sel.value = sel.options[0].value;
-    }
+    showConfirm('Kategorie löschen', 'Kategorie „' + val + '" wirklich löschen?', async function() {
+      S.data.einstellungen = S.data.einstellungen || {};
+      var kats = (S.data.einstellungen.kategorien || KAT_NEWS).slice();
+      var idx = kats.indexOf(val);
+      if (idx !== -1) kats.splice(idx, 1);
+      S.data.einstellungen.kategorien = kats;
+      try {
+        await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + val + '" gelöscht');
+        toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
+      } catch (e) {
+        toast('❌ Fehler beim Speichern: ' + e.message, true);
+        return;
+      }
+      if (sel) {
+        var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
+        if (opt) opt.remove();
+        if (sel.options.length) sel.value = sel.options[0].value;
+      }
+    });
   };
 
   /* ────────────────────────────────────────────────────────────
@@ -4087,6 +4089,60 @@
     id('confirm-title').textContent = title;
     id('confirm-msg').textContent   = msg;
     id('confirm-modal').style.display = 'flex';
+  }
+
+  // Ersatz für window.prompt()/window.alert(): die nativen Browser-Dialoge
+  // erscheinen oben im Browserfenster (losgelöst vom Admin-Inhalt darunter),
+  // was Frank bei der Kategorien-Verwaltung verwirrt hat ("erscheint da oben,
+  // nicht direkt daneben"). showPrompt/showAlert nutzen stattdessen dasselbe
+  // zentrierte Modal-System wie showConfirm (siehe #prompt-modal/#alert-modal
+  // in index.html) – erscheinen also mittig im Programmfenster, in der
+  // gleichen Optik wie alle anderen Dialoge im Admin.
+  function showPrompt(title, label, defaultValue) {
+    return new Promise(function(resolve) {
+      id('prompt-title').textContent = title;
+      id('prompt-msg').textContent = label || '';
+      var input = id('prompt-input');
+      input.value = defaultValue || '';
+      id('prompt-modal').style.display = 'flex';
+      setTimeout(function() { input.focus(); input.select(); }, 0);
+
+      function cleanup(result) {
+        id('prompt-modal').style.display = 'none';
+        id('prompt-ok').removeEventListener('click', onOk);
+        id('prompt-cancel').removeEventListener('click', onCancel);
+        id('prompt-backdrop').removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKeydown);
+        resolve(result);
+      }
+      function onOk() { cleanup(input.value.trim() || null); }
+      function onCancel() { cleanup(null); }
+      function onKeydown(e) {
+        if (e.key === 'Enter') { e.preventDefault(); onOk(); }
+        else if (e.key === 'Escape') { onCancel(); }
+      }
+      id('prompt-ok').addEventListener('click', onOk);
+      id('prompt-cancel').addEventListener('click', onCancel);
+      id('prompt-backdrop').addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKeydown);
+    });
+  }
+
+  function showAlert(title, msg) {
+    return new Promise(function(resolve) {
+      id('alert-title').textContent = title;
+      id('alert-msg').textContent = msg;
+      id('alert-modal').style.display = 'flex';
+      function cleanup() {
+        id('alert-modal').style.display = 'none';
+        id('alert-ok').removeEventListener('click', onOk);
+        id('alert-backdrop').removeEventListener('click', onOk);
+        resolve();
+      }
+      function onOk() { cleanup(); }
+      id('alert-ok').addEventListener('click', onOk);
+      id('alert-backdrop').addEventListener('click', onOk);
+    });
   }
 
   /* ────────────────────────────────────────────────────────────
