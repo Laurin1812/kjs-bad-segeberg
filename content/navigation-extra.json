@@ -1,15 +1,3 @@
 {
-  "hauptpunkte": [
-    {
-      "label": "Service",
-      "seiten": [
-        {
-          "slug": "downloads",
-          "nav_label": "Downloads",
-          "veroeffentlicht": true,
-          "in_navigation": true
-        }
-      ]
-    }
-  ]
+  "hauptpunkte": []
 }
