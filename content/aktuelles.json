@@ -23,12 +23,41 @@
       "datum": "1.04.2023",
       "jahr": "2023",
       "kategorie": "Veranstaltung",
-      "bild": "",
-      "text": "",
+      "bild": "/images/1787035342710-2023_1.jpg",
+      "text": "Vereinsbericht 2023 ist hier hochgeladen",
       "link": "",
       "archiviert": false,
-      "galerie": [],
-      "galerie_titel": "Bildergalerie",
+      "galerie": [
+        {
+          "bild": "/images/1787035342710-2023_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035357133-2023_2.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035364884-2023_03.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035376172-2023_4.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035388061-2023_5.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035400882-2023_6.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035414249-2023_7.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impessionen aus dem Kreisjägertag 2023",
       "downloads": [
         {
           "titel": "Vereinsbericht 2023",
