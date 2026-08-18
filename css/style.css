@@ -665,7 +665,16 @@ p  { margin-bottom: 1rem; }
    scrollen zu lassen. */
 .main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
 .main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }
-.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); overflow-wrap: break-word; word-break: break-word; }
+/* WICHTIG: kein word-break:break-word hier (nur overflow-wrap:break-word als
+   Notbremse für einzelne extrem lange Wörter/URLs) – word-break:break-word
+   lässt den Browser bei der Tabellen-Spaltenberechnung Zellen praktisch bis
+   auf 0px zusammenschrumpfen (bricht auch kurze Wörter mitten durch), was
+   dazu führte, dass Tabellen NIE als "zu breit" erkannt wurden, dafür aber
+   bis zur Unlesbarkeit gequetscht waren. Mit nur overflow-wrap bleibt die
+   Mindestbreite einer Spalte an ihrem längsten normalen Wort orientiert –
+   genau das, was main.js (applyTableLayout) zur echten Breitenmessung
+   braucht. */
+.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); overflow-wrap: break-word; }
 .main-content tr:nth-child(even) td { background: var(--bg-light); }
 /* Blockquote */
 .main-content blockquote { border-left: 4px solid var(--green-main); margin: 1.5rem 0; padding: .75rem 1.25rem; background: var(--bg-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); font-style: italic; }

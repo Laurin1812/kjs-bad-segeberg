@@ -77,25 +77,21 @@ function labelTableCells(root) {
 // die eigentliche Karten-Darstellung). Läuft initial, bei jeder DOM-
 // Änderung (MutationObserver, z.B. Termine-Filter) und bei jedem Resize.
 //
-// Wichtig: die "natürliche" Breite kann NICHT einfach über scrollWidth im
-// normalen Zustand gemessen werden, weil .main-content td ein
-// word-break:break-word gesetzt hat (verhindert Buchstaben-für-Buchstaben-
-// Umbruch auf sehr engen Screens, siehe weiter oben) – dieses word-break
-// lässt den Browser Zellen praktisch beliebig schmal quetschen, wodurch
-// scrollWidth NIE über die Wrapper-Breite hinausgeht, selbst wenn die
-// Tabelle dadurch unlesbar eng wird. Deshalb wird kurzzeitig white-space:
-// nowrap auf alle Zellen gesetzt, um die wirkliche (ungequetschte)
-// Wunschbreite zu ermitteln, und danach sofort wieder zurückgesetzt.
+// Wichtig: hier bewusst OHNE white-space:nowrap gemessen – normales
+// Umbrechen von Zellinhalt (mehrzeilige Zellen) ist völlig in Ordnung und
+// soll NICHT zum Stapeln führen, nur weil eine Zeile "nicht auf eine Zeile
+// passt". Gestapelt werden soll nur, wenn selbst mit normalem Umbruch noch
+// echtes horizontales Überlaufen entsteht (z.B. ein einzelnes sehr langes
+// Wort/URL, die auch nach Umbruch die Spalte sprengt). Voraussetzung dafür:
+// .main-content td hat KEIN word-break:break-word mehr (siehe style.css) –
+// das ließ Spalten sonst bis zur Unlesbarkeit schrumpfen, ohne je als "zu
+// breit" erkannt zu werden.
 function applyTableLayout(root) {
   root.querySelectorAll('table').forEach(function (table) {
     var wrap = table.closest('.content-table-wrap') || table.closest('.termine-table-wrap');
     if (!wrap) return;
     wrap.classList.remove('is-stacked');
-    var cells = table.querySelectorAll('th, td');
-    var prevWhiteSpace = [];
-    cells.forEach(function (c, i) { prevWhiteSpace[i] = c.style.whiteSpace; c.style.whiteSpace = 'nowrap'; });
     var needsStack = table.scrollWidth > wrap.clientWidth + 1;
-    cells.forEach(function (c, i) { c.style.whiteSpace = prevWhiteSpace[i]; });
     wrap.classList.toggle('is-stacked', needsStack);
   });
 }
