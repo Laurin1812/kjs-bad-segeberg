@@ -72,18 +72,30 @@ function labelTableCells(root) {
 // reicht nicht, weil manche Tabellen schon bei mittleren Breiten (z.B.
 // Tablet/schmales Desktop-Fenster) nicht mehr reinpassen, andere auch auf
 // dem Handy noch locker passen. Deshalb wird pro Tabelle live gemessen, ob
-// ihre natürliche Breite (scrollWidth) den verfügbaren Platz im Wrapper
-// überschreitet, und danach die .is-stacked-Klasse gesetzt/entfernt (siehe
-// style.css für die eigentliche Karten-Darstellung). Läuft initial, bei
-// jeder DOM-Änderung (MutationObserver, z.B. Termine-Filter) und bei jedem
-// Resize erneut.
+// ihre natürliche Breite den verfügbaren Platz im Wrapper überschreitet,
+// und danach die .is-stacked-Klasse gesetzt/entfernt (siehe style.css für
+// die eigentliche Karten-Darstellung). Läuft initial, bei jeder DOM-
+// Änderung (MutationObserver, z.B. Termine-Filter) und bei jedem Resize.
+//
+// Wichtig: die "natürliche" Breite kann NICHT einfach über scrollWidth im
+// normalen Zustand gemessen werden, weil .main-content td ein
+// word-break:break-word gesetzt hat (verhindert Buchstaben-für-Buchstaben-
+// Umbruch auf sehr engen Screens, siehe weiter oben) – dieses word-break
+// lässt den Browser Zellen praktisch beliebig schmal quetschen, wodurch
+// scrollWidth NIE über die Wrapper-Breite hinausgeht, selbst wenn die
+// Tabelle dadurch unlesbar eng wird. Deshalb wird kurzzeitig white-space:
+// nowrap auf alle Zellen gesetzt, um die wirkliche (ungequetschte)
+// Wunschbreite zu ermitteln, und danach sofort wieder zurückgesetzt.
 function applyTableLayout(root) {
   root.querySelectorAll('table').forEach(function (table) {
     var wrap = table.closest('.content-table-wrap') || table.closest('.termine-table-wrap');
     if (!wrap) return;
-    // Erst entstapeln, damit scrollWidth die echte (unGESTAPELTE) Breite misst.
     wrap.classList.remove('is-stacked');
+    var cells = table.querySelectorAll('th, td');
+    var prevWhiteSpace = [];
+    cells.forEach(function (c, i) { prevWhiteSpace[i] = c.style.whiteSpace; c.style.whiteSpace = 'nowrap'; });
     var needsStack = table.scrollWidth > wrap.clientWidth + 1;
+    cells.forEach(function (c, i) { c.style.whiteSpace = prevWhiteSpace[i]; });
     wrap.classList.toggle('is-stacked', needsStack);
   });
 }
