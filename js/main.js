@@ -10,11 +10,11 @@ function fetchContent(path) {
   return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
 }
 
-// ── Tabellen aus dem Admin/TipTap scrollbar machen ──────────────────────
+// ── Tabellen aus dem Admin/TipTap scrollbar machen (Desktop-Fallback) ────
 // Wichtig: die <table> selbst bleibt display:table (Spaltenberechnung des
 // Browsers funktioniert nur so korrekt) – nur eine umschließende Box
-// bekommt overflow-x:auto. Die Termine-Tabelle hat ihre eigene Lösung und
-// wird hier bewusst ausgeschlossen. Per MutationObserver, weil viele
+// bekommt overflow-x:auto. Die Termine-Tabelle hat ihre eigene Wrapper-Box
+// und wird hier bewusst ausgeschlossen. Per MutationObserver, weil viele
 // Seiten ihren Inhalt erst nach einem fetch() per innerHTML einfügen.
 function wrapContentTables(root) {
   root.querySelectorAll('table:not(.termine-table)').forEach(function (table) {
@@ -25,10 +25,54 @@ function wrapContentTables(root) {
     wrap.appendChild(table);
   });
 }
+
+// ── Tabellen auf dem Handy: Karten-Ansicht statt seitlichem Wischen ──────
+// Frank-Wunsch: das horizontale Scrollen/Swipen in Tabellen (bisher über
+// .content-table-wrap/.termine-table-wrap mit overflow-x:auto gelöst) soll
+// komplett entfallen – auf schmalen Screens muss man alles ohne Wischen
+// sehen können. Lösung: jede <td> bekommt per data-label die zugehörige
+// Spaltenüberschrift zugewiesen; eine CSS-Regel (siehe style.css) stapelt
+// die Zeilen dann unterhalb einer bestimmten Bildschirmbreite zu Karten und
+// zeigt data-label per ::before als Feldbezeichnung vor dem Wert – ganz
+// ohne die Tabellen im Admin manuell anpassen zu müssen. Funktioniert für
+// JEDE Tabelle (Admin/TipTap-Inhalte UND die Termine-Tabelle), da hier rein
+// aus den vorhandenen <th>-Texten gelesen wird. Läuft bewusst bei jedem
+// Observer-Durchlauf erneut (kein "nur einmal"-Schutz), weil z.B. die
+// Termine-Tabelle ihren <tbody>-Inhalt beim Filtern komplett neu aufbaut.
+function labelTableCells(root) {
+  root.querySelectorAll('table').forEach(function (table) {
+    var headRow = table.querySelector('thead tr');
+    var bodyRows;
+    if (headRow) {
+      bodyRows = table.querySelectorAll('tbody tr');
+    } else {
+      // Keine <thead> vorhanden (z.B. einfache Markdown-Tabelle ohne
+      // explizite Kopfzeile) – erste Zeile der Tabelle dient als Kopfzeile
+      // und wird bei den Datenzeilen ausgeklammert.
+      var allRows = table.querySelectorAll('tr');
+      headRow = allRows[0];
+      bodyRows = Array.prototype.slice.call(allRows, 1);
+    }
+    if (!headRow) return;
+    var labels = Array.prototype.map.call(headRow.querySelectorAll('th,td'), function (c) {
+      return c.textContent.trim();
+    });
+    if (!labels.length) return;
+    Array.prototype.forEach.call(bodyRows, function (row) {
+      Array.prototype.forEach.call(row.querySelectorAll('td'), function (cell, i) {
+        if (labels[i]) cell.setAttribute('data-label', labels[i]);
+      });
+    });
+  });
+}
+
 document.querySelectorAll('.main-content, #seite-inhalt, #page-inhalt').forEach(function (container) {
   wrapContentTables(container);
-  new MutationObserver(function () { wrapContentTables(container); })
-    .observe(container, { childList: true, subtree: true });
+  labelTableCells(container);
+  new MutationObserver(function () {
+    wrapContentTables(container);
+    labelTableCells(container);
+  }).observe(container, { childList: true, subtree: true });
 });
 
 // Mobile Navigation

@@ -1086,6 +1086,77 @@ body.kjs-lightbox-lock { overflow: hidden; }
   margin: 0 !important;
 }
 
+/* ── Tabellen auf dem Handy: Karten statt seitlichem Wischen ─────────────
+   Frank-Wunsch: kein horizontales Scrollen/Swipen mehr in Tabellen, egal ob
+   Admin/TipTap-Inhaltstabelle oder die Termine-Tabelle – alles muss ohne
+   Wischen sichtbar sein. Ab dieser Breite wird jede Tabellenzeile zu einer
+   eigenen Karte gestapelt; die Spaltenüberschrift erscheint (über das per
+   JS gesetzte data-label-Attribut, siehe main.js labelTableCells()) als
+   Feldbezeichnung vor dem jeweiligen Wert. !important nötig, um die
+   Desktop-Breiten-Erzwingung von .content-table-wrap table (oben) zu
+   überschreiben. */
+@media (max-width: 768px) {
+  .content-table-wrap { overflow-x: visible !important; margin: 1.5rem 0; }
+  .termine-table-wrap { overflow-x: visible; box-shadow: none; }
+
+  .content-table-wrap table,
+  .termine-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .content-table-wrap table thead,
+  .termine-table thead {
+    display: none;
+  }
+
+  .content-table-wrap table tbody tr,
+  .termine-table tbody tr {
+    display: block;
+    margin-bottom: .9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .content-table-wrap table tbody tr:nth-child(even),
+  .termine-table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
+
+  .content-table-wrap table tbody td,
+  .termine-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    text-align: right;
+    padding: .55rem .85rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-white);
+  }
+  .content-table-wrap table tbody td:last-child,
+  .termine-table tbody td:last-child {
+    border-bottom: none;
+  }
+  .content-table-wrap table tbody td::before,
+  .termine-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    text-align: left;
+    color: var(--green-dark);
+    margin-right: .75rem;
+    flex-shrink: 0;
+  }
+  /* Zellen ohne Label (z.B. eine reine Trennzeile) normal anzeigen */
+  .content-table-wrap table tbody td:not([data-label])::before,
+  .termine-table tbody td:not([data-label])::before {
+    content: '';
+    margin: 0;
+  }
+}
+
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
 @media (max-width: 420px) {
   :root { --fs-h1: 1.65rem; --fs-h2: 1.3rem; --fs-h3: 1.1rem; }
