@@ -408,7 +408,15 @@ p  { margin-bottom: 1rem; }
    stehen). flex:1 allein reicht nicht, weil das Grid nur INNERHALB einer
    Zeile gleich hoch stretcht, nicht über die ganze Seite hinweg – line-clamp
    erzwingt stattdessen für jede Karte exakt denselben Platz für den Text. */
-.news-card__excerpt {
+/* Klasse doppelt notiert (erhöht nur die Spezifität, ändert sonst nichts):
+   die generische Regel ".main-content p, #seite-inhalt p, #page-inhalt p"
+   (line-height 1.8 / overflow: visible, weiter unten in dieser Datei) hat
+   durch den zusätzlichen Element-Selektor "p" höhere Spezifität als ein
+   einzelner Klassenname und hat line-height/overflow bisher überschrieben –
+   der Text lief dadurch trotz gesetzter Höhe unten aus der Karte heraus und
+   überlappte "Weiterlesen". Container-unabhängig (Startseite hat kein
+   .main-content), daher hier bewusst nicht mit .main-content-Präfix gelöst. */
+.news-card__excerpt.news-card__excerpt {
   font-size: .86rem; color: var(--text-muted); margin-bottom: 1rem;
   line-height: 1.5em; height: calc(3 * 1.5em); overflow: hidden;
 }
