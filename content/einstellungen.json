@@ -2,7 +2,7 @@
   "telefon": "01556-0020001",
   "telefon_header": "+49 (0)152-21591669",
   "telefon_festnetz": "",
-  "email": "info@kjs-segeberg.detest",
+  "email": "info@kjs-segeberg.de",
   "adresse": "Kreisjägerschaft Segeberg e.V.\nAm Schießstand 1\n24640 Hasenmoor\n",
   "postadresse": "Kreisjägerschaft Segeberg e.V.\nFrank Hülser\nSchniedertwiete 1\n24629 Kisdorf\nTel: 0152-21591669\nE-Mail: frank.huelser@kjs-segeberg.de",
   "oeffnungszeiten": [
@@ -14,5 +14,7 @@
   "google_kalender_url": "",
   "google_kalender_titel": "Terminbuchung",
   "kontakt_ueberschrift": "",
-  "kontakt_text": "Haben Sie Fragen, Anregungen oder möchten Sie Mitglied werden? Nehmen Sie gerne Kontakt mit uns auf – wir freuen uns auf Ihre Nachricht"
+  "kontakt_text": "Haben Sie Fragen, Anregungen oder möchten Sie Mitglied werden? Nehmen Sie gerne Kontakt mit uns auf – wir freuen uns auf Ihre Nachricht",
+  "postadresse_telefon": "",
+  "postadresse_email": ""
 }
