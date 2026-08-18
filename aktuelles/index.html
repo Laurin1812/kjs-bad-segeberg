@@ -306,8 +306,15 @@
       grid.innerHTML = '<p style="color:var(--text-muted)">Keine Beiträge für diese Auswahl.</p>';
       return;
     }
+    // Anzeige-Reihenfolge: neueste zuerst, älteste zuletzt. Wichtig: erst hier
+    // auf einer KOPIE sortieren (nicht _allBeitraege selbst), damit origIdx
+    // unten weiterhin die korrekte, unveränderte Position aus content/
+    // aktuelles.json liefert (siehe Kommentar beim Laden weiter unten).
+    var sorted = filtered.slice().sort(function(a, b) {
+      return beitragSortKey(b) - beitragSortKey(a);
+    });
     // Map back to original indices for beitrag.html?i=
-    grid.innerHTML = filtered.map(function(b) {
+    grid.innerHTML = sorted.map(function(b) {
       var origIdx = _allBeitraege.indexOf(b);
       return renderKarte(b, origIdx);
     }).join('');
@@ -413,9 +420,16 @@
   fetch('../content/aktuelles.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      _allBeitraege = (data.beitraege || []).slice().sort(function(a, b) {
-        return beitragSortKey(b) - beitragSortKey(a); // neueste zuerst, älteste zuletzt
-      });
+      // WICHTIG: _allBeitraege NICHT umsortieren – beitrag.html liest denselben
+      // content/aktuelles.json direkt und greift per URL-Parameter (?i=N) auf
+      // beitraege[N] in der UNVERÄNDERTEN JSON-Reihenfolge zu. Würde hier
+      // sortiert, würde origIdx (siehe applyFilters, _allBeitraege.indexOf)
+      // zwar noch zur eigenen Anzeige passen, aber der Link ?i=N würde auf
+      // der Detailseite auf einen völlig anderen Beitrag zeigen (genau der
+      // Bug, den Frank gemeldet hat: Kachel "Jagdhornblasen" öffnete einen
+      // Pressemitteilung-Artikel). Sortiert wird stattdessen erst die
+      // gefilterte Kopie in applyFilters(), origIdx bleibt dabei korrekt.
+      _allBeitraege = data.beitraege || [];
       _einst = data.einstellungen || {};
       buildArchivSidebar();
       buildKategorieInline();
