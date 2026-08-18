@@ -23,11 +23,28 @@
       "datum": "18.05.2022",
       "jahr": "2022",
       "kategorie": "Allgemein",
-      "bild": "",
+      "bild": "/images/1787037368126-2022_2.jpg",
       "text": "Vereinsbericht 2022",
       "link": "",
       "archiviert": false,
-      "galerie": [],
+      "galerie": [
+        {
+          "bild": "/images/1787037361774-2022_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037377992-2022_3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037386315-2022_4.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037393861-2022_5.jpg",
+          "titel": ""
+        }
+      ],
       "galerie_titel": "Bildergalerie",
       "downloads": []
     },
