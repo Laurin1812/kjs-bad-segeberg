@@ -14,10 +14,21 @@
       "Veranstaltung",
       "Pressemitteilung",
       "Testkategorie",
-      "test22"
+      "test22",
+      "Tierkrankheiten"
     ]
   },
   "beitraege": [
+    {
+      "titel": "",
+      "datum": "",
+      "jahr": "2026",
+      "kategorie": "Allgemein",
+      "bild": "",
+      "text": "",
+      "link": "",
+      "archiviert": false
+    },
     {
       "titel": "Kreisjägertages 2022 in Hartenholm",
       "datum": "18.05.2022",
