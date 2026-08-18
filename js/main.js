@@ -66,12 +66,49 @@ function labelTableCells(root) {
   });
 }
 
+// ── Tabellen: dynamisch stapeln statt fester Mobile-Grenze ──────────────
+// Frank-Wunsch: "ob Handy, ob Bildschirm" – nie mehr seitliches Scrollen in
+// Tabellen, unabhängig von der Fensterbreite. Ein fester @media-Breakpoint
+// reicht nicht, weil manche Tabellen schon bei mittleren Breiten (z.B.
+// Tablet/schmales Desktop-Fenster) nicht mehr reinpassen, andere auch auf
+// dem Handy noch locker passen. Deshalb wird pro Tabelle live gemessen, ob
+// ihre natürliche Breite (scrollWidth) den verfügbaren Platz im Wrapper
+// überschreitet, und danach die .is-stacked-Klasse gesetzt/entfernt (siehe
+// style.css für die eigentliche Karten-Darstellung). Läuft initial, bei
+// jeder DOM-Änderung (MutationObserver, z.B. Termine-Filter) und bei jedem
+// Resize erneut.
+function applyTableLayout(root) {
+  root.querySelectorAll('table').forEach(function (table) {
+    var wrap = table.closest('.content-table-wrap') || table.closest('.termine-table-wrap');
+    if (!wrap) return;
+    // Erst entstapeln, damit scrollWidth die echte (unGESTAPELTE) Breite misst.
+    wrap.classList.remove('is-stacked');
+    var needsStack = table.scrollWidth > wrap.clientWidth + 1;
+    wrap.classList.toggle('is-stacked', needsStack);
+  });
+}
+
+var _tableRelayoutContainers = [];
+var _tableRelayoutTimer = null;
+function scheduleTableRelayout() {
+  if (_tableRelayoutTimer) clearTimeout(_tableRelayoutTimer);
+  _tableRelayoutTimer = setTimeout(function () {
+    _tableRelayoutContainers.forEach(function (container) {
+      applyTableLayout(container);
+    });
+  }, 150);
+}
+window.addEventListener('resize', scheduleTableRelayout);
+
 document.querySelectorAll('.main-content, #seite-inhalt, #page-inhalt').forEach(function (container) {
+  _tableRelayoutContainers.push(container);
   wrapContentTables(container);
   labelTableCells(container);
+  applyTableLayout(container);
   new MutationObserver(function () {
     wrapContentTables(container);
     labelTableCells(container);
+    applyTableLayout(container);
   }).observe(container, { childList: true, subtree: true });
 });
 

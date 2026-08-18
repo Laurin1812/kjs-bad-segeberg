@@ -658,13 +658,12 @@ p  { margin-bottom: 1rem; }
    CSS-basierte Lösung ohne Abhängigkeit von Skript-Timing. */
 .main-content, #seite-inhalt, #page-inhalt { overflow-x: auto; }
 
-/* Tabellen im Markdown (und TipTap-HTML). min-width:max-content als
-   Sicherheitsnetz direkt an der Basis-Regel: verhindert, dass Spalten auf
-   schmalen Screens so eng gequetscht werden, dass in Kombination mit dem
-   word-break unten (siehe .main-content td) Wörter buchstabenweise
-   umbrechen. Die zusätzliche .content-table-wrap-Box (per JS gesetzt,
-   siehe main.js) sorgt zusätzlich für sauberes Scrollen statt Überlauf. */
-.main-content table { width: 100%; min-width: max-content; border-collapse: collapse; margin: 1.5rem 0; }
+/* Tabellen im Markdown (und TipTap-HTML). Kein min-width:max-content mehr
+   (siehe .content-table-wrap.is-stacked weiter unten) – main.js misst pro
+   Tabelle live, ob sie in ihrer natürlichen Breite passt, und wechselt bei
+   Bedarf ins Karten-Layout, statt Spalten zu quetschen oder seitlich
+   scrollen zu lassen. */
+.main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
 .main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }
 .main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); overflow-wrap: break-word; word-break: break-word; }
 .main-content tr:nth-child(even) td { background: var(--bg-light); }
@@ -1080,81 +1079,79 @@ body.kjs-lightbox-lock { overflow: hidden; }
   margin: 1.5rem 0;
 }
 .content-table-wrap table {
-  width: max-content !important;
-  max-width: none !important;
-  min-width: 100% !important;
-  margin: 0 !important;
+  width: 100%;
+  margin: 0;
 }
 
-/* ── Tabellen auf dem Handy: Karten statt seitlichem Wischen ─────────────
-   Frank-Wunsch: kein horizontales Scrollen/Swipen mehr in Tabellen, egal ob
-   Admin/TipTap-Inhaltstabelle oder die Termine-Tabelle – alles muss ohne
-   Wischen sichtbar sein. Ab dieser Breite wird jede Tabellenzeile zu einer
-   eigenen Karte gestapelt; die Spaltenüberschrift erscheint (über das per
-   JS gesetzte data-label-Attribut, siehe main.js labelTableCells()) als
-   Feldbezeichnung vor dem jeweiligen Wert. !important nötig, um die
-   Desktop-Breiten-Erzwingung von .content-table-wrap table (oben) zu
-   überschreiben. */
-@media (max-width: 768px) {
-  .content-table-wrap { overflow-x: visible !important; margin: 1.5rem 0; }
-  .termine-table-wrap { overflow-x: visible; box-shadow: none; }
+/* ── Tabellen: Karten-Layout statt horizontalem Scrollen ──────────────────
+   Frank-Wunsch (nach erstem Versuch mit einer festen Handy-Bildschirmgrenze
+   nochmal verschärft): "ob Handy, ob Bildschirm" – NIE mehr seitliches
+   Wischen, egal wie breit das Fenster ist. Ein fester @media-Breakpoint
+   reicht dafür nicht, weil eine Tabelle schon bei mittleren Fensterbreiten
+   (Tablet, schmaleres Laptop-Fenster) zu breit werden kann, obwohl das
+   Fenster größer als jeder sinnvolle Handy-Breakpoint ist.
+   Stattdessen misst main.js (applyTableLayout) für JEDE Tabelle live, ob
+   ihre natürliche Breite in den verfügbaren Platz passt, und setzt dann die
+   Klasse "is-stacked" auf die Wrapper-Box – unabhängig von der Bildschirm-
+   größe, läuft auch bei jedem Fenster-Resize erneut. Erst mit dieser Klasse
+   greifen die folgenden Regeln: Kopfzeile ausblenden, jede Datenzeile wird
+   zur eigenen Karte, jeder Wert bekommt seine Spaltenüberschrift (über das
+   per JS gesetzte data-label-Attribut) als Feldbezeichnung davor. */
+.content-table-wrap.is-stacked table,
+.termine-table-wrap.is-stacked .termine-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
 
-  .content-table-wrap table,
-  .termine-table {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
+.content-table-wrap.is-stacked table thead,
+.termine-table-wrap.is-stacked .termine-table thead {
+  display: none;
+}
 
-  .content-table-wrap table thead,
-  .termine-table thead {
-    display: none;
-  }
+.content-table-wrap.is-stacked table tbody tr,
+.termine-table-wrap.is-stacked .termine-table tbody tr {
+  display: block;
+  margin-bottom: .9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.content-table-wrap.is-stacked table tbody tr:nth-child(even),
+.termine-table-wrap.is-stacked .termine-table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
 
-  .content-table-wrap table tbody tr,
-  .termine-table tbody tr {
-    display: block;
-    margin-bottom: .9rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-  .content-table-wrap table tbody tr:nth-child(even),
-  .termine-table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
-
-  .content-table-wrap table tbody td,
-  .termine-table tbody td {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    text-align: right;
-    padding: .55rem .85rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-white);
-  }
-  .content-table-wrap table tbody td:last-child,
-  .termine-table tbody td:last-child {
-    border-bottom: none;
-  }
-  .content-table-wrap table tbody td::before,
-  .termine-table tbody td::before {
-    content: attr(data-label);
-    font-weight: 700;
-    font-size: .78rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    text-align: left;
-    color: var(--green-dark);
-    margin-right: .75rem;
-    flex-shrink: 0;
-  }
-  /* Zellen ohne Label (z.B. eine reine Trennzeile) normal anzeigen */
-  .content-table-wrap table tbody td:not([data-label])::before,
-  .termine-table tbody td:not([data-label])::before {
-    content: '';
-    margin: 0;
-  }
+.content-table-wrap.is-stacked table tbody td,
+.termine-table-wrap.is-stacked .termine-table tbody td {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: right;
+  padding: .55rem .85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-white);
+}
+.content-table-wrap.is-stacked table tbody td:last-child,
+.termine-table-wrap.is-stacked .termine-table tbody td:last-child {
+  border-bottom: none;
+}
+.content-table-wrap.is-stacked table tbody td::before,
+.termine-table-wrap.is-stacked .termine-table tbody td::before {
+  content: attr(data-label);
+  font-weight: 700;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-align: left;
+  color: var(--green-dark);
+  margin-right: .75rem;
+  flex-shrink: 0;
+}
+/* Zellen ohne Label (z.B. eine reine Trennzeile) normal anzeigen */
+.content-table-wrap.is-stacked table tbody td:not([data-label])::before,
+.termine-table-wrap.is-stacked .termine-table tbody td:not([data-label])::before {
+  content: '';
+  margin: 0;
 }
 
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
