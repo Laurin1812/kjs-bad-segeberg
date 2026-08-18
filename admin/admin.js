@@ -1918,7 +1918,8 @@
     if (!t) return;
     var html = panelHeader('📅 Termin bearbeiten',
         '<button class="btn btn-outline" onclick="renderTermine(S.section,S.data)">← Zurück</button>' +
-        '<button class="btn btn-primary" onclick="termineSave(' + idx + ')">💾 Speichern</button>') +
+        '<button class="btn btn-primary" onclick="termineSave(' + idx + ')">💾 Speichern</button>',
+        true) +
       '<div class="panel-body"><div class="form-card">' +
         fDate('t-datum', 'Datum', t.datum) +
         fText('t-uhrzeit', 'Uhrzeit', t.uhrzeit, 'z.B. 18:00 Uhr') +
@@ -2005,7 +2006,8 @@
     if (!p) return;
     var html = panelHeader('👤 Person bearbeiten',
         '<button class="btn btn-outline" onclick="renderPersonen(S.section,S.data)">← Zurück</button>' +
-        '<button class="btn btn-primary" onclick="personSave(' + idx + ')">💾 Speichern</button>') +
+        '<button class="btn btn-primary" onclick="personSave(' + idx + ')">💾 Speichern</button>',
+        true) +
       '<div class="panel-body"><div class="form-card">' +
         fText('p-rolle', 'Funktion / Rolle', p.rolle) +
         fText('p-name', 'Name', p.name) +
@@ -2089,7 +2091,8 @@
     if (!h) return;
     var html = panelHeader('🗺️ Hegering bearbeiten',
         '<button class="btn btn-outline" onclick="renderHegeringe(S.section,S.data)">← Zurück</button>' +
-        '<button class="btn btn-primary" onclick="hegeringSave(' + idx + ')">💾 Speichern</button>') +
+        '<button class="btn btn-primary" onclick="hegeringSave(' + idx + ')">💾 Speichern</button>',
+        true) +
       '<div class="panel-body"><div class="form-card">' +
         fText('h-nummer', 'Hegering-Nummer', h.nummer, 'z.B. Hegering 1') +
         fText('h-name', 'Gebietsname', h.name) +
