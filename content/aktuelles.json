@@ -29,7 +29,13 @@
       "archiviert": false,
       "galerie": [],
       "galerie_titel": "Bildergalerie",
-      "downloads": []
+      "downloads": [
+        {
+          "titel": "Vereinsbericht 2023",
+          "datei": "/downloads/1787035203692-vereinsbericht_2023.pdf",
+          "vorschau": ""
+        }
+      ]
     },
     {
       "titel": "Kreisjägertages 2024 in Hartenholm",
