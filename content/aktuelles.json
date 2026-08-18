@@ -24,12 +24,37 @@
       "datum": "17.04.2026",
       "jahr": "2026",
       "kategorie": "Veranstaltung",
-      "bild": "",
+      "bild": "/images/1787039418088-2026_3.jpeg",
       "text": "",
       "link": "",
       "archiviert": false,
-      "galerie": [],
-      "galerie_titel": "Bildergalerie",
+      "galerie": [
+        {
+          "bild": "/images/1787039404836-2026_1.webp",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039410561-2026_2.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039428464-2026_4.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039436657-2026_5.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039443285-2026_6.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039449253-2026_7.webp",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impressionen Kreisjägertages 2026 in Blunk",
       "downloads": [
         {
           "titel": "Jahresbericht KJS Segeberg 2025",
