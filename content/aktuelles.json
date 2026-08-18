@@ -27,9 +27,28 @@
       "text": "Erstmals wurden mit dem Ehrenjagdmesser der Kreisjägerschaft Segeberg Rolf Borkenhagen aus Kisdorf, Wolfgang Harm aus Bad Segeberg, Klaus Rathje aus Groß Rönnau, Klaus-Dieter Schlüter aus Eilsdorf und Jörg Timmermann aus Kisdorf ausgezeichnet. Die Geehrten haben sich in den verschiedenen Funktionen seit vielen Jahren in die Vereinsarbeit eingebracht. \n\nDer Vereinsbricht ist da ",
       "link": "",
       "archiviert": false,
-      "galerie": [],
+      "galerie": [
+        {
+          "bild": "/images/1787033876093-Kreis2024_3.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787033868041-kreis2024_2.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787033859645-Kreis2024_1.jpeg",
+          "titel": ""
+        }
+      ],
       "galerie_titel": "Bildergalerie",
-      "downloads": []
+      "downloads": [
+        {
+          "titel": "Vereinsbericht 2024",
+          "datei": "/downloads/1787033928619-Vereinsbericht_2024.pdf",
+          "vorschau": ""
+        }
+      ]
     },
     {
       "titel": "Papillomaviren bei Damhirschen",
