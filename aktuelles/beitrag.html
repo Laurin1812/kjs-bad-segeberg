@@ -272,7 +272,11 @@
 
       if (b.bild) {
         var imgSrc = b.bild.startsWith('/') ? '..' + b.bild : '../' + b.bild;
-        html += '<img src="' + imgSrc + '" alt="' + b.titel + '" style="width:100%;border-radius:var(--radius-md);box-shadow:var(--shadow-md);margin-bottom:2rem;">';
+        // Frank-Wunsch: das Beitragsbild wirkte auf der Detailseite riesig/
+        // "erschlagend" (bisher volle Breite der Inhaltsspalte, ohne
+        // Größenbegrenzung). Keine Admin-Auswahl gewünscht, einfach pauschal
+        // ca. 30-40% kleiner und zentriert statt auf voller Breite.
+        html += '<img src="' + imgSrc + '" alt="' + b.titel + '" class="beitrag-titelbild">';
       }
 
       if (b.text) {
