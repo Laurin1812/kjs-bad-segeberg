@@ -2,7 +2,14 @@
   "hauptpunkte": [
     {
       "label": "Service",
-      "seiten": []
+      "seiten": [
+        {
+          "slug": "downloads",
+          "nav_label": "Downloads",
+          "veroeffentlicht": true,
+          "in_navigation": true
+        }
+      ]
     }
   ]
 }
