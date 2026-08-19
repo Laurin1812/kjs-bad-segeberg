@@ -1,7 +1,7 @@
 {
   "titel": "Hegeringhundetage",
   "veroeffentlicht": true,
-  "inhalt": "Die Hegeringhundetage sind jährliche Veranstaltungen, bei denen Hundeführer aus den einzelnen Hegeringen gemeinsam mit ihren Jagdhunden trainieren und sich austauschen.\n\n## Ziele\n\nDie Hunde werden nach Ausbildungsstand in Gruppen eingeteilt. Teckel arbeiten beispielsweise eine Schweißfährte, Hunde mit bestandener Brauchbarkeitsprüfung eine Kaninchenschleppe. Die Veranstaltungen dienen sowohl der Praxisvorbereitung auf die Jagdsaison als auch der Kameradschaft unter den Hundeführern.\n\n## Termine nach Hegering\n\n| Hegering | Termin |\n|----------|--------|\n| III, V & XIII | September |\n| IV | Februar |\n| VI | August |\n| VII, VIII, IX & XII | Oktober |\n\n## Teilnahme\n\nFür Informationen zur Teilnahme wenden Sie sich an Ihren zuständigen Hegeringhundewart.",
+  "inhalt": "<p>Die Hegeringhundetage sind jährliche Veranstaltungen, bei denen Hundeführer aus den einzelnen Hegeringen gemeinsam mit ihren Jagdhunden trainieren und sich austauschen.</p><h2>Ziele</h2><p>Die Hunde werden nach Ausbildungsstand in Gruppen eingeteilt. Teckel arbeiten beispielsweise eine Schweißfährte, Hunde mit bestandener Brauchbarkeitsprüfung eine Kaninchenschleppe. Die Veranstaltungen dienen sowohl der Praxisvorbereitung auf die Jagdsaison als auch der Kameradschaft unter den Hundeführern.</p><h2>Termine nach Hegering</h2><table style=\"min-width: 50px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Hegering</p></th><th colspan=\"1\" rowspan=\"1\"><p>Termin</p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>III, V &amp; XIII</p></td><td colspan=\"1\" rowspan=\"1\"><p>September</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>IV</p></td><td colspan=\"1\" rowspan=\"1\"><p>Februar</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>VI</p></td><td colspan=\"1\" rowspan=\"1\"><p>August</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>VII, VIII, IX &amp; XII</p></td><td colspan=\"1\" rowspan=\"1\"><p>Oktober</p></td></tr></tbody></table><h2>Teilnahme</h2><p>Für Informationen zur Teilnahme wenden Sie sich an Ihren zuständigen Hegeringhundewart.</p>",
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
@@ -10,7 +10,9 @@
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
-  "vorschaubild": "/images/1786536130480-Copilot_20260812_135859.png",
+  "vorschaubild": "",
   "kurzbeschreibung": "",
-  "downloads": []
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
