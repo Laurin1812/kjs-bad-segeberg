@@ -537,6 +537,7 @@ function splitPostadresse(raw) {
       termine:    /termine\/(index(\.html)?)?$/,
       aktuelles:  /aktuelles\/(index(\.html)?)?$/,
       faq:        /faq\/(index(\.html)?)?$/,
+      service:    /service(\.html)?$/,
       kontakt:    /kontakt\/(index(\.html)?)?$/
     };
 

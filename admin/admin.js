@@ -2730,14 +2730,14 @@
   ──────────────────────────────────────────────────────────── */
   function renderNavReihenfolge(def, data) {
     var sn  = data.sektionsnamen || {};
-    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','termine','aktuelles','faq','kontakt'];
+    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','termine','aktuelles','faq','service','kontakt'];
     var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil','weitere-themen'];
     var kjs = data.kjs          || [];
     var auf = data.aufgaben     || [];
     var vbr = data.verbraucher  || [];
 
     var HM_LABELS = { startseite:'Startseite', jaeger:'Jäger', verbraucher:'Verbraucher',
-                      termine:'Termine', aktuelles:'Aktuelles', faq:'FAQ', kontakt:'Kontakt' };
+                      termine:'Termine', aktuelles:'Aktuelles', faq:'FAQ', service:'Service', kontakt:'Kontakt' };
     var JD_LABELS = {
       'ueber-uns':           'Über uns',
       'kreisjjaegermeister': 'Kreisjägermeister',
