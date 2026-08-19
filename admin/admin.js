@@ -3704,22 +3704,23 @@
   };
 
   function mdImgParseClasses(raw) {
-    var size = 'img-mittel', hpos = 'img-links', vpos = null, flow = null;
+    var size = 'img-mittel', hpos = 'img-links', vpos = null, flow = null, flat = false;
     (raw || '').trim().split(/\s+/).forEach(function(tok) {
       var c = tok.replace(/^\./, '');
       if (MDIMG_SIZE_CLASSES.indexOf(c)   !== -1) size = c;
       if (MDIMG_HALIGN_CLASSES.indexOf(c) !== -1) hpos = c;
       if (MDIMG_VALIGN_CLASSES.indexOf(c) !== -1) vpos = c;
       if (MDIMG_FLOW_CLASSES.indexOf(c)   !== -1) flow = c;
+      if (c === 'img-flat') flat = true;
     });
     if (!vpos) vpos = 'img-pos-oben';
     // Alte Bilder ohne Umfluss-Klasse: bisheriges Verhalten nachbilden
     if (!flow) flow = (hpos === 'img-zentriert') ? 'img-block' : 'img-flow';
-    return { size: size, hpos: hpos, vpos: vpos, flow: flow };
+    return { size: size, hpos: hpos, vpos: vpos, flow: flow, flat: flat };
   }
 
-  function mdImgStyleFor(size, hpos, vpos, flow) {
-    var style = 'border-radius:4px;height:auto;';
+  function mdImgStyleFor(size, hpos, vpos, flow, flat) {
+    var style = flat ? 'border-radius:0;box-shadow:none;height:auto;' : 'border-radius:4px;height:auto;';
     var marginTop = vpos === 'img-pos-mitte' ? '1.5rem' : (vpos === 'img-pos-unten' ? '3rem' : '0');
 
     if (flow === 'img-flow' && hpos !== 'img-zentriert') {
@@ -3748,7 +3749,7 @@
     img.className = 'mdimg-live-img';
     img.src = entry.url;
     img.alt = entry.alt || '';
-    img.setAttribute('style', mdImgStyleFor(entry.size, entry.hpos, entry.vpos, entry.flow));
+    img.setAttribute('style', mdImgStyleFor(entry.size, entry.hpos, entry.vpos, entry.flow, entry.flat));
     img.onload  = function() { cm.refresh(); };
     img.onerror = function() { wrap.classList.add('mdimg-live--error'); };
 
@@ -3784,7 +3785,7 @@
     while ((m = MDIMG_RE.exec(text))) {
       var cls = mdImgParseClasses(m[3]);
       entries.push({
-        alt: m[1], url: m[2], size: cls.size, hpos: cls.hpos, vpos: cls.vpos, flow: cls.flow,
+        alt: m[1], url: m[2], size: cls.size, hpos: cls.hpos, vpos: cls.vpos, flow: cls.flow, flat: cls.flat,
         from: cm.posFromIndex(m.index),
         to:   cm.posFromIndex(m.index + m[0].length)
       });
@@ -3796,7 +3797,7 @@
       });
       _mdLive.marks.push({
         mark: mark, el: el, alt: entry.alt, url: entry.url,
-        size: entry.size, hpos: entry.hpos, vpos: entry.vpos, flow: entry.flow
+        size: entry.size, hpos: entry.hpos, vpos: entry.vpos, flow: entry.flow, flat: entry.flat
       });
     });
   }
@@ -3839,6 +3840,10 @@
         '<button type="button" class="mdimg-live-btn" data-h="img-zentriert">Zentriert</button>' +
         '<button type="button" class="mdimg-live-btn" data-h="img-rechts">Rechts</button>' +
       '</div>' +
+      '<div class="mdimg-live-row">' +
+        '<span class="mdimg-live-label">Rahmen</span>' +
+        '<button type="button" class="mdimg-live-btn" id="mdimg-live-flat" title="Für Logos/Grafiken mit eigenem weißen Hintergrund: entfernt Schatten &amp; Rundung, damit kein Kasten gegen die weiße Seite entsteht.">Ohne Rahmen</button>' +
+      '</div>' +
       '<div class="mdimg-live-row mdimg-live-row--actions">' +
         '<button type="button" class="btn btn-outline btn-sm" id="mdimg-live-swap">🔄 Bild austauschen</button>' +
         '<button type="button" class="btn btn-outline btn-sm mdimg-live-danger" id="mdimg-live-remove">🗑️ Entfernen</button>' +
@@ -3860,6 +3865,9 @@
           vpos: 'img-pos-oben',
           flow: hpos === 'img-zentriert' ? 'img-block' : 'img-flow'
         });
+      } else if (e.target.id === 'mdimg-live-flat') {
+        var curEntry = _mdLive.marks[_mdLive.panelIndex];
+        applyMdImgChange(_mdLive.panelIndex, { flat: !(curEntry && curEntry.flat) });
       } else if (e.target.id === 'mdimg-live-swap')   openMdImgSwapModal(_mdLive.panelIndex);
       else if (e.target.id === 'mdimg-live-remove') removeMdImg(_mdLive.panelIndex);
     });
@@ -3880,6 +3888,8 @@
     p.querySelectorAll('[data-h]').forEach(function(b) {
       b.classList.toggle('mdimg-live-btn--active', b.getAttribute('data-h') === entry.hpos);
     });
+    var flatBtn = p.querySelector('#mdimg-live-flat');
+    if (flatBtn) flatBtn.classList.toggle('mdimg-live-btn--active', !!entry.flat);
 
     p.style.display = 'flex';
     var rect  = anchorEl.getBoundingClientRect();
@@ -3921,11 +3931,13 @@
     var hpos = patch.hpos || entry.hpos;
     var vpos = patch.vpos || entry.vpos;
     var flow = patch.flow || entry.flow;
+    var flat = patch.flat !== undefined ? patch.flat : entry.flat;
     if (hpos === 'img-zentriert' && flow === 'img-flow') flow = 'img-block';
 
     var classes = [size, hpos];
     if (vpos !== 'img-pos-oben') classes.push(vpos);
     classes.push(flow);
+    if (flat) classes.push('img-flat');
 
     var md = '![' + alt + '](' + url + '){.' + classes.join(' .') + '}';
 
