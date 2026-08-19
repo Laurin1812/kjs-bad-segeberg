@@ -1,16 +1,18 @@
 {
   "titel": "Kurs 1: Junghunde",
   "veroeffentlicht": true,
-  "inhalt": "Der Junghundekurs legt das Fundament für einen zuverlässigen Jagdgebrauchshund. Im Vordergrund stehen Sozialverhalten, Grundkommandos und die jagdliche Vorbereitung.\n\n## Kursinhalte\n\n- **Sozialverhalten** – Umgang mit Menschen, anderen Hunden und Wild\n- **Grundkommandos** – Sitz, Platz, Fuß, Hier\n- **Jagdliche Vorbereitung** – erste Revierarbeit, Schussfestigkeit, Wasserarbeit\n\n## Kontakte\n\n| Hegering | Ansprechpartner | Telefon |\n|----------|-----------------|----------|\n| – | Gerd Büge | 0171-3548114 |\n| – | Stefanie Hausser | 0162 9451130 |\n| – | Arne Lunau | auf Anfrage |\n| – | Norbert Sommer | 0174 3639660 |",
+  "inhalt": "<p>Der Junghundekurs legt das Fundament für einen zuverlässigen Jagdgebrauchshund. Im Vordergrund stehen Sozialverhalten, Grundkommandos und die jagdliche Vorbereitung.</p><h2>Kursinhalte</h2><ul><li><p><strong>Sozialverhalten</strong> – Umgang mit Menschen, anderen Hunden und Wild</p></li><li><p><strong>Grundkommandos</strong> – Sitz, Platz, Fuß, Hier</p></li><li><p><strong>Jagdliche Vorbereitung</strong> – erste Revierarbeit, Schussfestigkeit, Wasserarbeit</p></li></ul><h2>Kontakte</h2><table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Hegering</p></th><th colspan=\"1\" rowspan=\"1\"><p>Ansprechpartner</p></th><th colspan=\"1\" rowspan=\"1\"><p>Telefon</p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Gerd Büge</p></td><td colspan=\"1\" rowspan=\"1\"><p>0171-3548114</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Stefanie Hausser</p></td><td colspan=\"1\" rowspan=\"1\"><p>0162 9451130</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Arne Lunau</p></td><td colspan=\"1\" rowspan=\"1\"><p>auf Anfrage</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Norbert Sommer</p></td><td colspan=\"1\" rowspan=\"1\"><p>0174 3639660</p></td></tr></tbody></table>",
   "untertitel": "",
   "intro": "",
-  "hero_bild": "/images/jungwildrettung.jpg",
+  "hero_bild": "",
   "bild": "",
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
   "bild_groesse": "img-100",
-  "vorschaubild": "/images/naturschutz.webp",
+  "vorschaubild": "/images/download-1-.jpg",
   "kurzbeschreibung": "",
-  "downloads": []
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
