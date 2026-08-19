@@ -523,17 +523,27 @@ p  { margin-bottom: 1rem; }
 .main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
 .main-content a:not(.btn):hover { color: var(--green-dark); }
 .main-content strong { color: var(--green-dark); }
-/* Abstand "eng" – im Admin-Editor per Toolbar-Button pro Absatz/Liste
-   umschaltbar (Frank-Wunsch nach mehr Kontrolle über Abstände). */
+/* Abstand: drei feste Stufen über die Editor-Toolbar-Buttons "Eng/Normal/
+   Weit" pro Absatz/Liste (Frank-Feedback 19.08.2026 – ersetzt einen
+   unzuverlässigen Umschalter durch drei eindeutige, feste Werte). */
 .main-content [data-spacing="compact"],
 #page-inhalt [data-spacing="compact"],
 #seite-inhalt [data-spacing="compact"] { margin-bottom: .15rem; }
-.main-content li[data-spacing] p,
+.main-content li[data-spacing="compact"] p,
 .main-content p[data-spacing="compact"],
-#page-inhalt li[data-spacing] p,
+#page-inhalt li[data-spacing="compact"] p,
 #page-inhalt p[data-spacing="compact"],
-#seite-inhalt li[data-spacing] p,
+#seite-inhalt li[data-spacing="compact"] p,
 #seite-inhalt p[data-spacing="compact"] { line-height: 1.3; }
+.main-content [data-spacing="wide"],
+#page-inhalt [data-spacing="wide"],
+#seite-inhalt [data-spacing="wide"] { margin-bottom: 1.4rem; }
+.main-content li[data-spacing="wide"] p,
+.main-content p[data-spacing="wide"],
+#page-inhalt li[data-spacing="wide"] p,
+#page-inhalt p[data-spacing="wide"],
+#seite-inhalt li[data-spacing="wide"] p,
+#seite-inhalt p[data-spacing="wide"] { line-height: 2.1; }
 /* Video-Einbettung (YouTube, über den Textinhalt-Editor) – responsive statt
    fester Breite/Höhe, damit es auf Handy nicht über den Rand läuft. */
 .main-content div[data-youtube-video],

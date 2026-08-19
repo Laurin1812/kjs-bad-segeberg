@@ -815,10 +815,14 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror img.img-zentriert { float: none; display: block; margin: 1rem auto; }
 /* ── Inline-Bilder: ohne Rahmen (Logos/Grafiken mit eigenem weißen Hintergrund) ── */
 .tt-mount .ProseMirror img.img-flat { box-shadow: none; border-radius: 0; }
-/* ── Abstand "eng" (Frank-Wunsch, per Toolbar-Button umschaltbar) ── */
+/* ── Abstand: drei feste Stufen über die Toolbar-Buttons "Eng/Normal/Weit"
+   (Frank-Feedback 19.08.2026: statt einem unzuverlässigen Umschalter). ── */
 .tt-mount .ProseMirror [data-spacing="compact"] { margin: .05rem 0; }
-.tt-mount .ProseMirror li[data-spacing] p,
+.tt-mount .ProseMirror li[data-spacing="compact"] p,
 .tt-mount .ProseMirror p[data-spacing="compact"] { margin: 0; line-height: 1.3; }
+.tt-mount .ProseMirror [data-spacing="wide"] { margin: 1.1rem 0; }
+.tt-mount .ProseMirror li[data-spacing="wide"] p,
+.tt-mount .ProseMirror p[data-spacing="wide"] { margin: 0; line-height: 2; }
 /* ── Video-Einbettung (YouTube) ── */
 .tt-mount .ProseMirror div[data-youtube-video] { max-width: 100%; margin: .5rem 0; }
 .tt-mount .ProseMirror div[data-youtube-video] iframe { width: 100%; aspect-ratio: 16/9; height: auto; border-radius: 6px; }

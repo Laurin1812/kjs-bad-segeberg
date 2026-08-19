@@ -1369,7 +1369,10 @@
           '</label>' +
           '<button type="button" class="tt-btn" data-cmd="highlight"   onclick="ttCmd(\'' + fieldId + '\',\'highlight\')"   title="Hervorheben (Textmarker)">&#9998;</button>' +
           '<span class="tt-sep"></span>' +
-          '<button type="button" class="tt-btn" data-cmd="spacing"     onclick="ttCmd(\'' + fieldId + '\',\'spacing\')"     title="Abstand: eng/normal umschalten">&#8597;&nbsp;Abstand</button>' +
+          '<span class="tt-imgmenu-label" style="align-self:center;font-size:.75rem;color:var(--text-muted);margin-right:.15rem;">Abstand:</span>' +
+          '<button type="button" class="tt-btn" data-cmd="spacingEng"    onclick="ttCmd(\'' + fieldId + '\',\'spacingEng\')"    title="Eng">Eng</button>' +
+          '<button type="button" class="tt-btn" data-cmd="spacingNormal" onclick="ttCmd(\'' + fieldId + '\',\'spacingNormal\')" title="Normal">Normal</button>' +
+          '<button type="button" class="tt-btn" data-cmd="spacingWeit"   onclick="ttCmd(\'' + fieldId + '\',\'spacingWeit\')"   title="Weit">Weit</button>' +
           '<span class="tt-sep"></span>' +
           '<button type="button" class="tt-btn" onclick="ttToggleTableMenu(event,\'' + fieldId + '\')" title="Tabelle">&#9638;&nbsp;Tabelle</button>' +
           '<button type="button" class="tt-btn" onclick="ttVideo(\'' + fieldId + '\')" title="YouTube-Video einfügen (URL einfügen)">&#9654;&nbsp;Video</button>' +
@@ -4761,9 +4764,17 @@
     var editor = S.tiptapEditors[fieldId];
     var bar    = id('ttbar-' + fieldId);
     if (!editor || !bar) return;
+    // Abstand: an genau EINEM der drei Werte aktiv, nie togglend. isActive
+    // ohne Attribut-Filter prüft nur "ist das überhaupt ein Absatz/eine
+    // Liste"; erst der jeweilige Attribut-Check (spacing:'compact' / 'wide' /
+    // kein spacing-Attribut) entscheidet, welcher der drei Buttons leuchtet.
+    var inBlock = editor.isActive('paragraph') || editor.isActive('bulletList') || editor.isActive('orderedList');
     var isCompact = editor.isActive('paragraph', { spacing: 'compact' }) ||
                     editor.isActive('bulletList', { spacing: 'compact' }) ||
                     editor.isActive('orderedList', { spacing: 'compact' });
+    var isWide    = editor.isActive('paragraph', { spacing: 'wide' }) ||
+                    editor.isActive('bulletList', { spacing: 'wide' }) ||
+                    editor.isActive('orderedList', { spacing: 'wide' });
     var state = {
       bold:        editor.isActive('bold'),
       italic:      editor.isActive('italic'),
@@ -4777,7 +4788,9 @@
       alignCenter: editor.isActive({ textAlign: 'center' }),
       alignRight:  editor.isActive({ textAlign: 'right' }),
       highlight:   editor.isActive('highlight'),
-      spacing:     isCompact
+      spacingEng:    isCompact,
+      spacingWeit:   isWide,
+      spacingNormal: inBlock && !isCompact && !isWide
     };
     bar.querySelectorAll('.tt-btn[data-cmd]').forEach(function(btn) {
       var cmd = btn.getAttribute('data-cmd');
@@ -4803,14 +4816,27 @@
       case 'alignCenter': c.setTextAlign('center').run();         break;
       case 'alignRight':  c.setTextAlign('right').run();          break;
       case 'highlight':   c.toggleHighlight({ color: '#fff3a3' }).run(); break;
-      case 'spacing':
-        var compact = editor.isActive('paragraph', { spacing: 'compact' }) ||
-                       editor.isActive('bulletList', { spacing: 'compact' }) ||
-                       editor.isActive('orderedList', { spacing: 'compact' });
+      // Abstand: drei feste Werte statt Umschalter (Frank-Feedback
+      // 19.08.2026 – ein Toggle-Button ist unzuverlässig, wenn eine Selektion
+      // mehrere Blöcke mit unterschiedlichem Ausgangs-Abstand umfasst: welcher
+      // Wert dann als "nächster" gilt, ist nicht eindeutig. Jeder Button setzt
+      // hier stattdessen IMMER denselben festen Wert – unabhängig vom
+      // aktuellen Zustand, daher immer vorhersagbar.
+      case 'spacingEng':
         ['paragraph', 'bulletList', 'orderedList'].forEach(function(type) {
-          if (editor.isActive(type)) {
-            c.updateAttributes(type, { spacing: compact ? null : 'compact' });
-          }
+          if (editor.isActive(type)) c.updateAttributes(type, { spacing: 'compact' });
+        });
+        c.run();
+        break;
+      case 'spacingNormal':
+        ['paragraph', 'bulletList', 'orderedList'].forEach(function(type) {
+          if (editor.isActive(type)) c.updateAttributes(type, { spacing: null });
+        });
+        c.run();
+        break;
+      case 'spacingWeit':
+        ['paragraph', 'bulletList', 'orderedList'].forEach(function(type) {
+          if (editor.isActive(type)) c.updateAttributes(type, { spacing: 'wide' });
         });
         c.run();
         break;
