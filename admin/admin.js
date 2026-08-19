@@ -1341,6 +1341,7 @@
           '<button type="button" class="tt-btn" data-cmd="bold"        onclick="ttCmd(\'' + fieldId + '\',\'bold\')"        title="Fett (Strg+B)"><b>B</b></button>' +
           '<button type="button" class="tt-btn" data-cmd="italic"      onclick="ttCmd(\'' + fieldId + '\',\'italic\')"      title="Kursiv (Strg+I)"><i>I</i></button>' +
           '<button type="button" class="tt-btn" data-cmd="underline"   onclick="ttCmd(\'' + fieldId + '\',\'underline\')"   title="Unterstreichen (Strg+U)"><u>U</u></button>' +
+          '<button type="button" class="tt-btn" data-cmd="strike"      onclick="ttCmd(\'' + fieldId + '\',\'strike\')"      title="Durchstreichen"><s>S</s></button>' +
           '<span class="tt-sep"></span>' +
           '<button type="button" class="tt-btn" data-cmd="h2"          onclick="ttCmd(\'' + fieldId + '\',\'h2\')"          title="Überschrift H2">H2</button>' +
           '<button type="button" class="tt-btn" data-cmd="h3"          onclick="ttCmd(\'' + fieldId + '\',\'h3\')"          title="Überschrift H3">H3</button>' +
@@ -1348,7 +1349,19 @@
           '<button type="button" class="tt-btn" data-cmd="bulletList"  onclick="ttCmd(\'' + fieldId + '\',\'bulletList\')"  title="Aufzählungsliste">&bull;&nbsp;Liste</button>' +
           '<button type="button" class="tt-btn" data-cmd="orderedList" onclick="ttCmd(\'' + fieldId + '\',\'orderedList\')" title="Nummerierte Liste">1.&nbsp;Liste</button>' +
           '<span class="tt-sep"></span>' +
+          '<button type="button" class="tt-btn" data-cmd="alignLeft"   onclick="ttCmd(\'' + fieldId + '\',\'alignLeft\')"   title="Linksbündig">&#8676;</button>' +
+          '<button type="button" class="tt-btn" data-cmd="alignCenter" onclick="ttCmd(\'' + fieldId + '\',\'alignCenter\')" title="Zentriert">&#8596;</button>' +
+          '<button type="button" class="tt-btn" data-cmd="alignRight"  onclick="ttCmd(\'' + fieldId + '\',\'alignRight\')"  title="Rechtsbündig">&#8677;</button>' +
+          '<span class="tt-sep"></span>' +
+          '<label class="tt-btn tt-color-btn" title="Textfarbe">' +
+            'A<input type="color" class="tt-color-input" value="#1a1a1a" onchange="ttColor(\'' + fieldId + '\', this.value)">' +
+          '</label>' +
+          '<button type="button" class="tt-btn" data-cmd="highlight"   onclick="ttCmd(\'' + fieldId + '\',\'highlight\')"   title="Hervorheben (Textmarker)">&#9998;</button>' +
+          '<span class="tt-sep"></span>' +
+          '<button type="button" class="tt-btn" data-cmd="spacing"     onclick="ttCmd(\'' + fieldId + '\',\'spacing\')"     title="Abstand: eng/normal umschalten">&#8597;&nbsp;Abstand</button>' +
+          '<span class="tt-sep"></span>' +
           '<button type="button" class="tt-btn" onclick="ttToggleTableMenu(event,\'' + fieldId + '\')" title="Tabelle">&#9638;&nbsp;Tabelle</button>' +
+          '<button type="button" class="tt-btn" onclick="ttVideo(\'' + fieldId + '\')" title="YouTube-Video einfügen (URL einfügen)">&#9654;&nbsp;Video</button>' +
           imgBtn +
         '</div>' +
         '<div class="tt-mount" id="tt-' + fieldId + '"></div>' +
@@ -4384,15 +4397,17 @@
      dauerhaft bei „wird geladen…" hängen. */
   function tiptapReady() {
     var T = window.TipTap;
-    return !!(T && T.Editor && T.StarterKit && T.Underline && T.Image &&
-              T.Table && T.TableRow && T.TableCell && T.TableHeader);
+    return !!(T && T.Editor && T.Extension && T.StarterKit && T.Underline && T.Image &&
+              T.Table && T.TableRow && T.TableCell && T.TableHeader &&
+              T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube);
   }
   var _tiptapPromise = null;
   function ensureTiptap() {
     if (tiptapReady()) return Promise.resolve();
     if (_tiptapPromise) return _tiptapPromise;
     var PKGS = ['core', 'starter-kit', 'extension-underline', 'extension-image',
-                'extension-table', 'extension-table-row', 'extension-table-cell', 'extension-table-header'];
+                'extension-table', 'extension-table-row', 'extension-table-cell', 'extension-table-header',
+                'extension-text-align', 'extension-text-style', 'extension-color', 'extension-highlight', 'extension-youtube'];
     // Mehrere CDNs – bei Ausfall des einen wird das andere versucht.
     var CDN = [
       function(p) { return 'https://esm.sh/@tiptap/' + p + '@2'; },
@@ -4406,16 +4421,23 @@
         .then(function(m) {
           var T = {
             Editor:      m[0].Editor || m[0].default,
+            Extension:   m[0].Extension,
             StarterKit:  m[1].default,
             Underline:   m[2].default,
             Image:       m[3].default,
             Table:       m[4].default,
             TableRow:    m[5].default,
             TableCell:   m[6].default,
-            TableHeader: m[7].default
+            TableHeader: m[7].default,
+            TextAlign:   m[8].default,
+            TextStyle:   m[9].default,
+            Color:       m[10].default,
+            Highlight:   m[11].default,
+            Youtube:     m[12].default
           };
-          if (!(T.Editor && T.StarterKit && T.Underline && T.Image &&
-                T.Table && T.TableRow && T.TableCell && T.TableHeader)) {
+          if (!(T.Editor && T.Extension && T.StarterKit && T.Underline && T.Image &&
+                T.Table && T.TableRow && T.TableCell && T.TableHeader &&
+                T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube)) {
             throw new Error('TipTap: Extensions unvollständig geladen');
           }
           window.TipTap = T; // atomar, erst wenn alles da ist
@@ -4504,6 +4526,28 @@
       TT.TableHeader,
       TT.TableCell
     ] : [];
+
+    // Absatz-/Listenabstand einstellbar machen ("Frank-Wunsch": mehr
+    // Word-artige Kontrolle, ohne das Design-System zu sprengen). Statt
+    // jeden Node-Typ einzeln zu ersetzen, wird nur ein globales
+    // data-spacing-Attribut auf Absätzen/Listen ergänzt – gerendert als
+    // data-spacing="compact" im HTML, gesteuert allein über CSS.
+    var SpacingAttrs = TT.Extension.create({
+      name: 'spacingAttrs',
+      addGlobalAttributes: function() {
+        return [{
+          types: ['paragraph', 'bulletList', 'orderedList'],
+          attributes: {
+            spacing: {
+              default: null,
+              parseHTML: function(el) { return el.getAttribute('data-spacing'); },
+              renderHTML: function(attrs) { return attrs.spacing ? { 'data-spacing': attrs.spacing } : {}; }
+            }
+          }
+        }];
+      }
+    });
+
     // Falls (z.B. durch einen Retry-Timer) bereits ein Editor für dieses Feld
     // existiert, vorher sauber entfernen → kein Doppel-Mount. Danach den
     // „Editor wird geladen…"-Platzhalter entfernen, bevor neu gemountet wird.
@@ -4514,7 +4558,13 @@
       extensions: [
         TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
         TT.Underline,
-        ImageWithClass
+        ImageWithClass,
+        TT.TextStyle,
+        TT.Color,
+        TT.Highlight.configure({ multicolor: false }),
+        TT.TextAlign.configure({ types: ['heading', 'paragraph'] }),
+        TT.Youtube.configure({ width: 640, height: 360, nocookie: true }),
+        SpacingAttrs
       ].concat(tableExts),
       content: html,
       editorProps: {
@@ -4683,14 +4733,23 @@
     var editor = S.tiptapEditors[fieldId];
     var bar    = id('ttbar-' + fieldId);
     if (!editor || !bar) return;
+    var isCompact = editor.isActive('paragraph', { spacing: 'compact' }) ||
+                    editor.isActive('bulletList', { spacing: 'compact' }) ||
+                    editor.isActive('orderedList', { spacing: 'compact' });
     var state = {
       bold:        editor.isActive('bold'),
       italic:      editor.isActive('italic'),
       underline:   editor.isActive('underline'),
+      strike:      editor.isActive('strike'),
       h2:          editor.isActive('heading', { level: 2 }),
       h3:          editor.isActive('heading', { level: 3 }),
       bulletList:  editor.isActive('bulletList'),
-      orderedList: editor.isActive('orderedList')
+      orderedList: editor.isActive('orderedList'),
+      alignLeft:   editor.isActive({ textAlign: 'left' }),
+      alignCenter: editor.isActive({ textAlign: 'center' }),
+      alignRight:  editor.isActive({ textAlign: 'right' }),
+      highlight:   editor.isActive('highlight'),
+      spacing:     isCompact
     };
     bar.querySelectorAll('.tt-btn[data-cmd]').forEach(function(btn) {
       var cmd = btn.getAttribute('data-cmd');
@@ -4707,12 +4766,51 @@
       case 'bold':        c.toggleBold().run();                   break;
       case 'italic':      c.toggleItalic().run();                 break;
       case 'underline':   c.toggleUnderline().run();              break;
+      case 'strike':      c.toggleStrike().run();                 break;
       case 'h2':          c.toggleHeading({ level: 2 }).run();    break;
       case 'h3':          c.toggleHeading({ level: 3 }).run();    break;
       case 'bulletList':  c.toggleBulletList().run();             break;
       case 'orderedList': c.toggleOrderedList().run();            break;
+      case 'alignLeft':   c.setTextAlign('left').run();           break;
+      case 'alignCenter': c.setTextAlign('center').run();         break;
+      case 'alignRight':  c.setTextAlign('right').run();          break;
+      case 'highlight':   c.toggleHighlight({ color: '#fff3a3' }).run(); break;
+      case 'spacing':
+        var compact = editor.isActive('paragraph', { spacing: 'compact' }) ||
+                       editor.isActive('bulletList', { spacing: 'compact' }) ||
+                       editor.isActive('orderedList', { spacing: 'compact' });
+        ['paragraph', 'bulletList', 'orderedList'].forEach(function(type) {
+          if (editor.isActive(type)) {
+            c.updateAttributes(type, { spacing: compact ? null : 'compact' });
+          }
+        });
+        c.run();
+        break;
     }
     updateTiptapToolbar(fieldId);
+  };
+
+  // Textfarbe: eigener Handler statt ttCmd, weil der Wert vom <input type=color>
+  // kommt statt von einem festen Button-Klick.
+  window.ttColor = function(fieldId, hexValue) {
+    var editor = S.tiptapEditors[fieldId];
+    if (!editor) return;
+    editor.chain().focus().setColor(hexValue).run();
+  };
+
+  // Video einfügen: aktuell YouTube (offizielle, zuverlässige TipTap-
+  // Extension). Andere Anbieter (z.B. Vimeo) werden absichtlich nicht
+  // versucht einzubetten, um keine kaputten Platzhalter zu riskieren.
+  window.ttVideo = function(fieldId) {
+    var editor = S.tiptapEditors[fieldId];
+    if (!editor) return;
+    var url = window.prompt('YouTube-Video-URL einfügen:', 'https://www.youtube.com/watch?v=');
+    if (!url) return;
+    if (!/youtube\.com|youtu\.be/i.test(url)) {
+      alert('Aktuell werden nur YouTube-Links unterstützt.');
+      return;
+    }
+    editor.commands.setYoutubeVideo({ src: url });
   };
 
   // Tabellen-Dropdown: öffnen/schließen unterhalb des "Tabelle"-Buttons

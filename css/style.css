@@ -511,11 +511,43 @@ p  { margin-bottom: 1rem; }
   margin-bottom: 1rem;
   overflow: hidden;
 }
-.main-content li { margin-bottom: .4rem; color: var(--text-body); list-style: disc; }
+.main-content li { margin-bottom: .3rem; color: var(--text-body); list-style: disc; }
 .main-content ol li { list-style: decimal; }
+/* TipTap umschließt jeden Listenpunkt-Text mit einem <p> (<li><p>…</p></li>).
+   Ohne diesen Reset erbt dieses <p> die normale Absatz-Zeilenhöhe (1.8) und
+   sorgt für sehr große, unschöne Lücken zwischen einzelnen Listenpunkten
+   (Frank-Feedback 19.08.2026). Innerhalb von Listen daher enger setzen. */
+.main-content li p,
+#page-inhalt li p,
+#seite-inhalt li p { margin: 0; line-height: 1.5; }
 .main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
 .main-content a:not(.btn):hover { color: var(--green-dark); }
 .main-content strong { color: var(--green-dark); }
+/* Abstand "eng" – im Admin-Editor per Toolbar-Button pro Absatz/Liste
+   umschaltbar (Frank-Wunsch nach mehr Kontrolle über Abstände). */
+.main-content [data-spacing="compact"],
+#page-inhalt [data-spacing="compact"],
+#seite-inhalt [data-spacing="compact"] { margin-bottom: .15rem; }
+.main-content li[data-spacing] p,
+.main-content p[data-spacing="compact"],
+#page-inhalt li[data-spacing] p,
+#page-inhalt p[data-spacing="compact"],
+#seite-inhalt li[data-spacing] p,
+#seite-inhalt p[data-spacing="compact"] { line-height: 1.3; }
+/* Video-Einbettung (YouTube, über den Textinhalt-Editor) – responsive statt
+   fester Breite/Höhe, damit es auf Handy nicht über den Rand läuft. */
+.main-content div[data-youtube-video],
+#page-inhalt div[data-youtube-video],
+#seite-inhalt div[data-youtube-video] { max-width: 100%; margin: 1.5rem 0; }
+.main-content div[data-youtube-video] iframe,
+#page-inhalt div[data-youtube-video] iframe,
+#seite-inhalt div[data-youtube-video] iframe,
+.main-content iframe,
+#page-inhalt iframe,
+#seite-inhalt iframe {
+  width: 100%; aspect-ratio: 16 / 9; height: auto;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: none;
+}
 /* Bilder im Markdown-Inhalt und dynamisch geladenen Seiten */
 .main-content img,
 #seite-inhalt img,
