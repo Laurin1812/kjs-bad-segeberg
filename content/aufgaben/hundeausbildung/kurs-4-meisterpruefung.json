@@ -1,7 +1,7 @@
 {
   "titel": "Kurs 4: Meisterprüfung",
   "veroeffentlicht": true,
-  "inhalt": "Der Kurs zur Meisterprüfung bereitet auf die höchsten Prüfungsstufen für Jagdgebrauchshunde vor – VGP, VPS und GP.\n\n## Prüfungen\n\n- **VGP** – Verbandsgebrauchsprüfung\n- **VPS** – Vielseitigkeitsprüfung für Stöberhunde\n- **GP** – Gebrauchsprüfung\n\n## Ausbildungsbereiche\n\n- **Waldarbeit** – Totsuche, Schleppe, Verlorensuche\n- **Feldarbeit** – Vorsuche, Vorstehen, Schlepp\n- **Wasserarbeit** – Ente apportieren, Wasserarbeit mit Schuss\n- **Gehorsam** – Freifolge, Schussfestigkeit, Leinenführigkeit\n\nDie Meisterprüfung stellt die höchsten Anforderungen an Mensch und Hund und belegt die vollständige jagdliche Ausbildung des Hundes.",
+  "inhalt": "<h3>Meisterkurs für Jagdgebrauchshunde</h3><p>Der Meisterkurs stellt die höchste Ausbildungsstufe im Jagdgebrauchshundewesen dar. Er richtet sich an erfahrene Hundeführerinnen und Hundeführer, die ihren Hund auf die anspruchsvollsten jagdlichen Leistungsprüfungen vorbereiten möchten. Ziel ist der Nachweis, dass der Hund unter allen jagdlich relevanten Bedingungen zuverlässig, gehorsam und leistungsstark arbeitet.</p><h3>Prüfungen</h3><p>VGP – Verbandsgebrauchsprüfung</p><p>Die Verbandsgebrauchsprüfung gilt als „Meisterprüfung“ der Jagdhundeausbildung. Hier wird die Vielseitigkeit des Hundes in den Bereichen Wald, Feld, Wasser und Gehorsam umfassend geprüft. Der Hund muss zeigen, dass er sämtliche Anforderungen eines voll ausgebildeten Jagdgebrauchshundes sicher beherrscht.</p><p>VPS – Vielseitigkeitsprüfung für Stöberhunde</p><p>Diese Prüfung richtet sich insbesondere an Stöberhunde und überprüft deren Eignung für die praktische Jagd. Besonderes Augenmerk liegt auf selbstständiger Arbeit, Spurwillen, Ausdauer und Gehorsam.</p><p>GP – Gebrauchsprüfung</p><p>Die Gebrauchsprüfung dient dem Nachweis der vollständigen jagdlichen Einsatzfähigkeit eines Hundes. Sie umfasst komplexe Arbeitsfächer und stellt hohe Anforderungen an die Zusammenarbeit zwischen Hund und Führer.</p><h3>Ausbildungsbereiche</h3><p><strong>Waldarbeit</strong></p><p>In der Waldarbeit werden die Fähigkeiten des Hundes bei anspruchsvollen Such- und Bringaufgaben trainiert. Dazu gehören:</p><ul><li><p>Totsuche von Schalenwild</p></li><li><p>Arbeiten auf der Schleppe</p></li><li><p>Verlorensuche im Wald</p></li><li><p>Schweißarbeit und Nachsuche</p></li><li><p>Sicheres Finden und Anzeigen von Wild</p></li></ul><p><strong>Feldarbeit</strong></p><p>Die Feldarbeit verlangt vom Hund eine systematische und weiträumige Suche. Ausbildungsinhalte sind:</p><ul><li><p>Vorsuche und Quersuche</p></li><li><p>Vorstehen von Wild</p></li><li><p>Federwildschleppe</p></li><li><p>Zusammenarbeit mit dem Hundeführer</p></li><li><p>Ruhe vor Wild und Schuss</p></li></ul><p><strong>Wasserarbeit</strong></p><p>Die Wasserarbeit überprüft die Einsatzfähigkeit des Hundes in und an Gewässern:</p><ul><li><p>Apportieren von Enten aus offenem Wasser</p></li><li><p>Arbeit in Schilf- und Deckungsbereichen</p></li><li><p>Wasserarbeit mit Schuss</p></li><li><p>Verlorensuche im Wasser</p></li><li><p>Sicheres Bringen des Wildes</p></li></ul><p><strong>Gehorsam</strong></p><p>Ein zuverlässiger Gehorsam ist Grundlage jeder erfolgreichen Jagdausübung. Geprüft und trainiert werden:</p><ul><li><p>Freifolge ohne Leine</p></li><li><p>Leinenführigkeit</p></li><li><p>Ablegen und Verhalten unter Ablenkung</p></li><li><p>Schussfestigkeit</p></li><li><p>Allgemeine Führigkeit und Gehorsam im Jagdbetrieb</p></li></ul><h3>Höchster Leistungsnachweis</h3><p>Die erfolgreiche Teilnahme an einer Meisterprüfung dokumentiert die vollständige jagdliche Ausbildung des Hundes. Sie bestätigt, dass Hund und Führer als eingespieltes Team selbst anspruchsvollste jagdliche Aufgaben verantwortungsvoll und waidgerecht bewältigen können.</p>",
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
@@ -10,7 +10,9 @@
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
-  "vorschaubild": "/images/jagdhornblasen.jpg",
+  "vorschaubild": "",
   "kurzbeschreibung": "",
-  "downloads": []
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
