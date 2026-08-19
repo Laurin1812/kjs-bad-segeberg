@@ -1,16 +1,44 @@
 {
   "titel": "Service",
-  "untertitel": "",
-  "intro": "<p>Hier finden Sie alle wichtigen Dokumente, Formulare und Downloads der Kreisjägerschaft Segeberg e.V. auf einen Blick.</p>",
-  "bild": "",
+  "untertitel": "<p>Found it — the drag-reorder feature in the admin has a fixed list of known nav items that doesn't know about \"Service\" yet, and the frontend re-ordering logic silently pushes anything not in that list to the front. Fixing both sides now</p>",
+  "intro": "<img src=\"/images/1786867635606-16-08-_2026_10-06-48.png\" alt=\"1786867635606 16 08 2026 10 06 48\" class=\"img-25 img-rechts\"><p>Found it — the drag-reorder feature in the admin has a fixed list of known nav items that doesn't know about \"Service\" yet, and the frontend re-ordering logic silently pushes anything not in that list to the front. Fixing both sides now</p>",
+  "bild": "/images/1787035376172-2023_4.jpg",
   "bild_alt": "",
-  "bild_groesse": "",
-  "hero_bild": "",
-  "inhalt": "",
+  "bild_groesse": "img-25",
+  "hero_bild": "/images/1787033868041-kreis2024_2.jpeg",
+  "inhalt": "<p>Found it — the drag-reorder feature in the admin has a fixed list of known nav items that doesn't know about \"Service\" yet, and the frontend re-ordering logic silently pushes anything not in that list to the front. Fixing both sides now</p><img src=\"/images/1787029894324-Bild-Landesjagdverband-NRW.png\" alt=\"1787029894324 Bild Landesjagdverband NRW\" class=\"img-25 img-links\">",
   "kontakt_name": "",
   "kontakt_email": "",
-  "downloads": [],
-  "galerie": [],
-  "galerie_titel": "",
+  "downloads": [
+    {
+      "titel": "Wie o ffne ich das kleine Infomobil richtig_M ai 2026",
+      "datei": "/downloads/1781194530416-Wie-o-ffne-ich-das-kleine-Infomobil-richtig_M-ai-2026.pdf",
+      "vorschau": ""
+    },
+    {
+      "titel": "2024.11_Merkblatt_Damwild_und_Papillomaviren",
+      "datei": "/downloads/1787031075747-2024.11_Merkblatt_Damwild_und_Papillomaviren.pdf",
+      "vorschau": ""
+    }
+  ],
+  "galerie": [
+    {
+      "bild": "/images/1787033876093-Kreis2024_3.jpeg",
+      "titel": "test"
+    },
+    {
+      "bild": "/images/1787035400882-2023_6.jpg",
+      "titel": "Test"
+    },
+    {
+      "bild": "/images/1787036045772-kreisjaegermeister_17.01.2023.jpeg",
+      "titel": "Test"
+    },
+    {
+      "bild": "/images/1787037368126-2022_2.jpg",
+      "titel": "Test"
+    }
+  ],
+  "galerie_titel": "Test",
   "veroeffentlicht": true
 }
