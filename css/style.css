@@ -822,7 +822,16 @@ p  { margin-bottom: 1rem; }
 .download-item__name { font-weight: 700; font-size: .92rem; color: var(--text-dark); margin-bottom: .2rem; font-family: var(--font-sans); word-break: break-word; }
 .download-item__info { font-size: .78rem; color: var(--text-muted); }
 .download-item__actions { display: flex; gap: .4rem; flex-shrink: 0; }
-.download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); }
+/* clear:both nötig, nicht nur der Clearfix auf .main-content/#seite-inhalt/
+   #page-inhalt weiter oben: der Clearfix sorgt nur dafür, dass der
+   umschließende Container seine Höhe korrekt um gefloatete Bilder (img-links/
+   img-rechts) herum berechnet – er zwingt aber NICHT jeden einzelnen
+   nachfolgenden Block dazu, unterhalb eines Floats zu beginnen. Ohne eigenes
+   clear:both rutschte "Dokumente & Downloads" (wird per JS ans Seitenende
+   angehängt, siehe main.js) neben ein zu kurzes Float-Bild statt sauber
+   darunter zu stehen. */
+.download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); clear: both; }
+.downloads-list { clear: both; }
 
 /* Titelbild eines Aktuelles-Beitrags (aktuelles/beitrag.html): stand vorher
    auf voller Breite der Inhaltsspalte ohne Größenbegrenzung und wirkte laut
@@ -843,7 +852,7 @@ p  { margin-bottom: 1rem; }
 }
 
 /* "Bildergalerie" pro Seite (gleiches Baukasten-Prinzip wie Downloads) */
-.galerie-section { margin-top: 2rem; }
+.galerie-section { margin-top: 2rem; clear: both; }
 .galerie-section__title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 0 0 .75rem; font-family: var(--font-sans); }
 .galerie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
 .galerie-item {
