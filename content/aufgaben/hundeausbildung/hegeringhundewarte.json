@@ -13,6 +13,11 @@
   "vorschaubild": "",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1787145706348-Fitzner_Heidi_2.webp",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie"
 }
