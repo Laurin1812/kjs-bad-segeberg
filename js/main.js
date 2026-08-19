@@ -492,7 +492,15 @@ function splitPostadresse(raw) {
   // ── Navigationsreihenfolge, Sektionsnamen und Hauptmenü-Reihenfolge
   //    aus navigation.json (läuft erst, wenn alle obigen Seiten eingefügt
   //    sind, siehe Kommentar bei insertJobs oben) ─────────────────────
-  Promise.all(insertJobs).then(function() {
+  // WICHTIG: window.__navReady muss SOFORT (synchron) ein echtes Promise
+  // sein, nicht erst tief verschachtelt später zugewiesen werden – sonst
+  // liest die "Verwandte Seiten"-Rechtsnavigation (siehe weiter unten in
+  // dieser Datei, läuft direkt im Anschluss beim Seitenaufbau) noch
+  // "undefined" aus, wartet dadurch gar nicht wirklich und zeigt die
+  // unsortierte Rohreihenfolge statt der in navigation.json gespeicherten
+  // (per Admin-Drag&Drop einstellbaren) Reihenfolge. Deshalb hier direkt
+  // zuweisen und das Ergebnis der Kette per return durchreichen.
+  window.__navReady = Promise.all(insertJobs).then(function() {
     // Reorder <li> children of `sub` to match `items` array order
     // (items kann statische Seiten UND eigene Unterseiten enthalten,
     // z.B. href="/jaeger/vorstand.html" oder href="/seiten/?s=mein-slug")
@@ -557,13 +565,13 @@ function splitPostadresse(raw) {
     var jaegerDD = document.getElementById('jaeger-dropdown');
     var mainNav  = document.querySelector('.main-nav');
 
-    // window.__navReady: wird erst erfüllt, wenn ALLE dynamisch eingefügten
-    // Seiten (KJS Segeberg/Aufgaben/Verbraucher/Weitere Themen) UND die
-    // Umsortierung/Umbenennung aus navigation.json fertig im Menü stehen.
-    // Die generische "Verwandte Seiten"-Navigation weiter unten in dieser
-    // Datei wartet darauf, damit sie das Menü nicht zu früh (unvollständig)
-    // ausliest.
-    window.__navReady = fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
+    // Wird erst erfüllt, wenn ALLE dynamisch eingefügten Seiten (KJS
+    // Segeberg/Aufgaben/Verbraucher/Weitere Themen) UND die Umsortierung/
+    // Umbenennung aus navigation.json fertig im Menü stehen. Per return an
+    // window.__navReady (oben zugewiesen) durchgereicht, damit die
+    // generische "Verwandte Seiten"-Navigation weiter unten in dieser Datei
+    // wirklich darauf warten kann.
+    return fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
 
       // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
       if (jaegerDD) {
