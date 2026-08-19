@@ -884,7 +884,7 @@ p  { margin-bottom: 1rem; }
   border-radius: 0;
   box-shadow: none;
 }
-.galerie-item__caption { padding: .55rem .75rem; font-size: .82rem; color: var(--text-dark); }
+.galerie-item__caption { padding: .55rem .75rem; font-size: .95rem; font-weight: 600; color: var(--text-dark); }
 @media (max-width: 640px) {
   .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
@@ -908,7 +908,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
   border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   background: #000;
 }
-.kjs-lightbox__caption { color: #fff; font-size: .9rem; margin-top: .75rem; text-align: center; }
+.kjs-lightbox__caption { color: #fff; font-size: 1.05rem; font-weight: 600; margin-top: .75rem; text-align: center; }
 .kjs-lightbox__counter { color: rgba(255,255,255,.6); font-size: .8rem; margin-top: .25rem; }
 .kjs-lightbox__close,
 .kjs-lightbox__prev,
