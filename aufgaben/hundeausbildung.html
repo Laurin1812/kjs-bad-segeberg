@@ -181,7 +181,6 @@
             '<p>' + (d.intro||'') + '</p>' +
             bild +
             '<div id="page-inhalt"></div>' +
-            '<div id="jagdhundeschule-teaser"></div>' +
             kontaktStr +
             '<div class="btn-group" style="margin-top:2rem">' +
               '<a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>' +
@@ -196,46 +195,18 @@
             }
           }
 
-          // Vorschau-Kacheln der Jagdhundeschule (Frank-Wunsch): auf dieser
-          // Übersichtsseite war bisher nur ein kleiner Sidebar-Link
-          // "Alle Themen & Kurse" zu sehen – vielen Besuchern war dadurch
-          // nicht klar, dass dahinter noch eine ganze Kurs-Bibliothek (aktuell
-          // über 20 Themen) steckt. Zeigt hier direkt ein paar Beispiel-
-          // Kacheln plus einen deutlichen Button mit der tatsächlichen Anzahl
-          // – gleiches Kachel-Muster wie der Aktuelles-Teaser auf der
-          // Startseite, damit es sich stilistisch einfügt.
+          // Sidebar-CTA "Alle Kurse & Themen ansehen" (rechts, oben in der
+          // Jagdhundeschule-Sidebar-Box) bekommt die tatsächliche Anzahl der
+          // veröffentlichten Kurse/Themen als Beschriftung.
           fetch('/content/aufgaben/hundeausbildung-seiten.json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
-              var teaser = document.getElementById('jagdhundeschule-teaser');
-              if (!teaser) return;
+              var cta = document.getElementById('jagdhundeschule-cta');
+              if (!cta) return;
               var seiten = (data.seiten || []).filter(function(s) { return s.veroeffentlicht !== false; });
-              if (!seiten.length) return;
-              var auswahl = seiten.slice(0, 3);
-              var karten = auswahl.map(function(s) {
-                var label = (s.nav_label || s.slug).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-                var href = 'jagdhundeschule.html?s=' + encodeURIComponent(s.slug);
-                var imgWrap = s.vorschaubild
-                  ? '<img class="news-card__img" src="' + s.vorschaubild + '" alt="' + label + '" loading="lazy">'
-                  : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:140px;"><span style="font-size:2rem;">🐕</span></div>';
-                return '<a href="' + href + '" class="news-card" style="text-decoration:none;color:inherit;">' +
-                  '<div class="news-card__img-wrap">' + imgWrap + '</div>' +
-                  '<div class="news-card__body" style="padding:1rem;">' +
-                    '<h3 class="news-card__title" style="font-size:.95rem;">' + label + '</h3>' +
-                    '<span style="font-size:.82rem;font-weight:600;color:var(--green-main);">Mehr erfahren →</span>' +
-                  '</div>' +
-                '</a>';
-              }).join('');
-
-              teaser.innerHTML =
-                '<div style="margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);">' +
-                  '<h2 style="margin-top:0">Jagdhundeschule</h2>' +
-                  '<p style="color:var(--text-muted);margin-bottom:1.5rem;">Ein Auszug aus unseren Ausbildungskursen, Prüfungen und Themen rund um den Jagdhund.</p>' +
-                  '<div class="news__grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.25rem;margin-bottom:1.5rem;">' +
-                    karten +
-                  '</div>' +
-                  '<a href="jagdhundeschule.html" class="btn btn-primary">Alle ' + seiten.length + ' Kurse &amp; Themen ansehen →</a>' +
-                '</div>';
+              if (seiten.length) {
+                cta.textContent = 'Alle ' + seiten.length + ' Kurse & Themen ansehen →';
+              }
             })
             .catch(function() {});
         })
@@ -248,9 +219,7 @@
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Jagdhundeschule</h4>
-        <ul class="sidebar-nav">
-          <li><a href="jagdhundeschule.html">Alle Themen & Kurse</a></li>
-        </ul>
+        <a href="jagdhundeschule.html" id="jagdhundeschule-cta" class="btn btn-primary" style="display:block;text-align:center;">Alle Kurse & Themen ansehen →</a>
       </div>
       <div class="sidebar-widget">
         <h4>Aufgaben des Hegerings</h4>

@@ -264,6 +264,76 @@
   // ── Seiten laden und sidebar + content rendern ──────────────
   var main = document.getElementById('page-main');
 
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var ICON_PDF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+  var ICON_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
+  var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+
+  // "Dokumente & Downloads" als Sidebar-Karte (gleiches Muster wie überall
+  // sonst auf der Seite) – wird hier manuell gerendert, weil die generische
+  // Auto-Injection in main.js den Content-Pfad aus der URL ableitet
+  // (/content + pathname), diese Sub-Seiten aber alle unter derselben URL
+  // (jagdhundeschule.html?s=slug) laufen und ihren Inhalt aus
+  // /content/aufgaben/hundeausbildung/{slug}.json beziehen.
+  function renderDownloadsSidebar(d) {
+    var sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    var old = sidebar.querySelector('.sidebar-widget--downloads');
+    if (old) old.parentNode.removeChild(old);
+    var list = Array.isArray(d.downloads) ? d.downloads : [];
+    var items = list.filter(function(item) { return item && (item.datei || item.url || item.pfad); });
+    if (!items.length) return;
+    var itemsHtml = items.map(function(item) {
+      var datei = item.datei || item.url || item.pfad;
+      var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+      var iconHtml = item.vorschau
+        ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+        : '<span class="download-item__icon">' + ICON_PDF + '</span>';
+      return '<div class="download-item--sidebar">' +
+        iconHtml +
+        '<span class="download-item__name">' + escHtml(name) + '</span>' +
+        '<span class="download-item__actions">' +
+          '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN + '</a>' +
+          '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
+        '</span>' +
+      '</div>';
+    }).join('');
+    var widget = document.createElement('div');
+    widget.className = 'sidebar-widget sidebar-widget--downloads';
+    widget.innerHTML = '<h4><span class="download-heading-icon">' + ICON_PDF + '</span> Dokumente &amp; Downloads</h4>' +
+      '<div class="downloads-list downloads-list--sidebar">' + itemsHtml + '</div>';
+    var contactBox = sidebar.querySelector('.contact-box');
+    if (contactBox) contactBox.parentNode.insertBefore(widget, contactBox);
+    else sidebar.appendChild(widget);
+  }
+
+  // Bildergalerie – gleiche Klassen (galerie-section/galerie-grid/
+  // galerie-item) wie überall sonst, damit die site-weite Lightbox
+  // (js/main.js, delegierter Klick-Handler) automatisch mitfunktioniert.
+  function renderGalerie(d) {
+    var old = main.querySelector('.galerie-section');
+    if (old) old.parentNode.removeChild(old);
+    var items = (Array.isArray(d.galerie) ? d.galerie : []).filter(function(g) { return g && g.bild; });
+    if (!items.length) return;
+    var cards = items.map(function(g) {
+      var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
+      return '<a href="' + escHtml(g.bild) + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
+        '<img src="' + escHtml(g.bild) + '" alt="' + escHtml(g.titel || '') + '" loading="lazy">' +
+        caption +
+      '</a>';
+    }).join('');
+    var galerieTitel = (d.galerie_titel && d.galerie_titel.trim()) || 'Bildergalerie';
+    var box = document.createElement('div');
+    box.className = 'galerie-section';
+    box.innerHTML = '<div class="galerie-section__title">' + escHtml(galerieTitel) + '</div>' +
+      '<div class="galerie-grid">' + cards + '</div>';
+    main.appendChild(box);
+  }
+
   fetch(MANIFEST)
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -288,14 +358,22 @@
             var bc = document.getElementById('breadcrumb-current');
             if (bc) bc.textContent = titel;
 
+            var bildKlasse = (d.bild_groesse && d.bild_groesse.indexOf('img-') === 0) ? d.bild_groesse
+              : (d.bild_groesse === 'klein' ? 'img-25' : d.bild_groesse === 'mittel' ? 'img-50' : 'img-100');
             var bildHtml = d.bild
-              ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;" onerror="this.style.display=\'none\'">'
+              ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" class="' + bildKlasse + '" style="border-radius:8px;margin-bottom:1.5rem;" onerror="this.style.display=\'none\'">'
               : '';
             var inhaltHtml = '';
             if (d.inhalt) {
               inhaltHtml = typeof marked !== 'undefined'
                 ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt))
                 : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
+            }
+            var kontaktStr = '';
+            if (d.kontakt_name || d.kontakt_email) {
+              kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name || '');
+              if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
+              kontaktStr += '</p>';
             }
             main.innerHTML =
               '<nav style="margin-bottom:1.5rem;">' +
@@ -304,10 +382,13 @@
               '<h2 style="margin-top:0">' + titel.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</h2>' +
               bildHtml +
               '<div id="page-inhalt">' + inhaltHtml + '</div>' +
+              kontaktStr +
               '<div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">' +
                 '<a href="jagdhundeschule.html" class="btn btn-outline-green">← Alle Themen</a>' +
                 '<a href="../kontakt/index.html" class="btn btn-primary">Kontakt aufnehmen</a>' +
               '</div>';
+            renderDownloadsSidebar(d);
+            renderGalerie(d);
           })
           .catch(function() {
             main.innerHTML =
