@@ -843,8 +843,18 @@ p  { margin-bottom: 1rem; }
    ".main-content img"-Regel (gleiche Datei, oben) schlägt – sonst gewinnt
    deren "margin: 1.5rem 0" (höhere Spezifität durch zusätzlichen
    Element-Selektor "img") und die Zentrierung (margin:auto) greift nicht. */
+/* Frank-Wunsch: die Titelbilder der Aktuelles-Beiträge sehen je nach Upload
+   sehr unterschiedlich aus (mal hochkant, mal quer, unterschiedliche
+   Seitenverhältnisse) – dadurch wirkt die Beitragsseite uneinheitlich.
+   Lösung: festes Seitenverhältnis (16:9) + object-fit:cover, damit jedes
+   Titelbild denselben Rahmen exakt ausfüllt. Es wird dabei nur der
+   überstehende Rand (links/rechts oder oben/unten, je nach Originalformat)
+   unsichtbar zugeschnitten, das Bild selbst wird nie gestaucht/verzerrt –
+   object-position:center sorgt dafür, dass die Bildmitte (meist das
+   Hauptmotiv) erhalten bleibt. */
 .main-content .beitrag-titelbild {
   display: block; width: 65%; margin: 0 auto 2rem;
+  aspect-ratio: 16 / 9; object-fit: cover; object-position: center;
   border-radius: var(--radius-md); box-shadow: var(--shadow-md);
 }
 @media (max-width: 768px) {
