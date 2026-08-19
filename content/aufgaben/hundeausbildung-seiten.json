@@ -113,18 +113,18 @@
       "gruppe": ""
     },
     {
-      "slug": "entschaedigungsfond",
-      "nav_label": "Entschädigungsfond",
-      "veroeffentlicht": true,
-      "vorschaubild": "/images/1787163683204-neu.png",
-      "kurzbeschreibung": "",
-      "gruppe": ""
-    },
-    {
       "slug": "brauchbarkeit",
       "nav_label": "Brauchbarkeit",
       "veroeffentlicht": true,
       "vorschaubild": "/images/1781424007487-info2_.jpeg",
+      "kurzbeschreibung": "",
+      "gruppe": ""
+    },
+    {
+      "slug": "entschaedigungsfond",
+      "nav_label": "Entschädigungsfond",
+      "veroeffentlicht": true,
+      "vorschaubild": "/images/1787163683204-neu.png",
       "kurzbeschreibung": "",
       "gruppe": ""
     },
