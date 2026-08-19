@@ -646,6 +646,10 @@ p  { margin-bottom: 1rem; }
 .main-content img.img-50,  #seite-inhalt img.img-50,  #page-inhalt img.img-50  { width: 50%;  max-width: 50%; }
 .main-content img.img-75,  #seite-inhalt img.img-75,  #page-inhalt img.img-75  { width: 75%;  max-width: 75%; }
 .main-content img.img-100, #seite-inhalt img.img-100, #page-inhalt img.img-100 { width: 100%; max-width: 100%; }
+/* "Ohne Rahmen" – für Logos/Grafiken mit eigenem weißen Hintergrund: der
+   sonst überall gültige Schatten+Rundung erzeugt bei solchen Bildern einen
+   sichtbaren Kasten gegen die (ebenfalls weiße) Seite (Frank-Feedback). */
+.main-content img.img-flat, #seite-inhalt img.img-flat, #page-inhalt img.img-flat { box-shadow: none; border-radius: 0; }
 
 /* Clearfix nach gefloateten Bildern – verhindert, dass nachfolgender Text ins Bild fließt */
 .main-content::after,

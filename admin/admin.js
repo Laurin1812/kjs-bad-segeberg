@@ -1265,6 +1265,16 @@
             'Legt fest, wie groß das Inhaltsbild dargestellt wird (25 % = klein, 100 % = volle Breite).') +
           fH(fText('bild_alt', 'Bild-Beschreibung', data.bild_alt),
             'Kurze Beschreibung des Bildes. Hilft Suchmaschinen und wird angezeigt, falls das Bild mal nicht lädt.') +
+          // "Ohne Rahmen": nur für Jagdhundeschule-Seiten, da aktuell nur dort
+          // (aufgaben/jagdhundeschule.html) die Frontend-Vorlage dieses Feld
+          // auch tatsächlich auswertet. Für Logos/Grafiken mit eigenem weißen
+          // Hintergrund (z.B. Landesjagdverband-Logo), wo der sonst überall
+          // sinnvolle Schatten+Rundung wie ein Kasten gegen die weiße Seite
+          // wirkt (Frank-Feedback 19.08.2026).
+          (def.key && def.key.indexOf('jagdhundeschule') !== -1
+            ? fH(fToggle('bild_flat', 'Inhaltsbild ohne Rahmen/Schatten', !!data.bild_flat),
+              'Für Logos oder Grafiken mit eigenem weißen Hintergrund aktivieren, damit kein sichtbarer Kasten gegen die weiße Seite entsteht.')
+            : '') +
           // Vorschaubild + Kurzbeschreibung für Jagdhundeschule-Seiten
           (def.key && def.key.indexOf('jagdhundeschule') !== -1
             ? '<div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem;">' +
@@ -1312,10 +1322,11 @@
     if (S.section && S.section.key === 'mitglied-werden') {
       data.antrag_url = gv('antrag_url');
     }
-    // Jagdhundeschule-spezifische Felder (Kachel-Vorschau)
+    // Jagdhundeschule-spezifische Felder (Kachel-Vorschau + Bild ohne Rahmen)
     if (S.section && S.section.key && S.section.key.indexOf('jagdhundeschule') !== -1) {
       data.vorschaubild     = gv('vorschaubild');
       data.kurzbeschreibung = gv('kurzbeschreibung');
+      data.bild_flat        = toggleVal('bild_flat');
     }
     data.downloads = collectDownloadsList();
     data.galerie = collectGalerieList();
@@ -4646,6 +4657,7 @@
   var _ttClickedEditor = null;
   var SIZE_CLS = ['img-25','img-50','img-75','img-100'];
   var POS_CLS  = ['img-links','img-zentriert','img-rechts'];
+  var FLAT_CLS = ['img-flat'];
 
   function showTtImgMenu(imgEl) {
     var menu = id('tt-img-menu');
@@ -4656,6 +4668,9 @@
     });
     menu.querySelectorAll('[data-pos]').forEach(function(b) {
       b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-pos')) !== -1);
+    });
+    menu.querySelectorAll('[data-flat]').forEach(function(b) {
+      b.classList.toggle('tt-imgmenu-btn--active', cls.indexOf(b.getAttribute('data-flat')) !== -1);
     });
     // Measure first (visibility:hidden), dann mit getBoundingClientRect positionieren
     menu.style.position   = 'fixed';
@@ -4706,6 +4721,19 @@
       return POS_CLS.indexOf(c) === -1;
     });
     cur.push(posClass);
+    applyTtImgClass(cur.join(' '));
+  };
+
+  // "Ohne Rahmen": Umschalter (kein Größen-/Positions-Wert, daher toggle statt
+  // fixem Setzen) – entfernt Schatten & abgerundete Ecken. Gedacht für Logos/
+  // Grafiken mit eigenem weißen Hintergrund, wo der Schatten sonst wie ein
+  // sichtbarer Rahmen/Kasten gegen die (ebenfalls weiße) Seite wirkt.
+  window.ttImgFlat = function() {
+    if (!_ttClickedImg) return;
+    var classes = (_ttClickedImg.className || '').split(' ').filter(Boolean);
+    var isFlat = classes.indexOf('img-flat') !== -1;
+    var cur = classes.filter(function(c) { return FLAT_CLS.indexOf(c) === -1; });
+    if (!isFlat) cur.push('img-flat');
     applyTtImgClass(cur.join(' '));
   };
 

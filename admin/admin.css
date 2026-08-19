@@ -813,6 +813,8 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror img.img-links     { float: left;  margin: .25rem 1rem .5rem 0; }
 .tt-mount .ProseMirror img.img-rechts    { float: right; margin: .25rem 0 .5rem 1rem; }
 .tt-mount .ProseMirror img.img-zentriert { float: none; display: block; margin: 1rem auto; }
+/* ── Inline-Bilder: ohne Rahmen (Logos/Grafiken mit eigenem weißen Hintergrund) ── */
+.tt-mount .ProseMirror img.img-flat { box-shadow: none; border-radius: 0; }
 /* ── Abstand "eng" (Frank-Wunsch, per Toolbar-Button umschaltbar) ── */
 .tt-mount .ProseMirror [data-spacing="compact"] { margin: .05rem 0; }
 .tt-mount .ProseMirror li[data-spacing] p,

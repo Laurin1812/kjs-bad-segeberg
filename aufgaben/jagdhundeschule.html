@@ -360,8 +360,15 @@
 
             var bildKlasse = (d.bild_groesse && d.bild_groesse.indexOf('img-') === 0) ? d.bild_groesse
               : (d.bild_groesse === 'klein' ? 'img-25' : d.bild_groesse === 'mittel' ? 'img-50' : 'img-100');
+            // "Ohne Rahmen" (bild_flat): für Logos/Grafiken mit eigenem weißen
+            // Hintergrund, wo der sonst überall sinnvolle Schatten+Rundung wie
+            // ein sichtbarer Kasten gegen die weiße Seite wirkt. border-radius
+            // muss dafür auch aus dem Inline-Style raus (würde sonst die
+            // img-flat-Klasse überstimmen).
+            var bildStyle = d.bild_flat ? 'margin-bottom:1.5rem;' : 'border-radius:8px;margin-bottom:1.5rem;';
+            if (d.bild_flat) bildKlasse += ' img-flat';
             var bildHtml = d.bild
-              ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" class="' + bildKlasse + '" style="border-radius:8px;margin-bottom:1.5rem;" onerror="this.style.display=\'none\'">'
+              ? '<img src="' + d.bild + '" alt="' + (d.bild_alt || '') + '" class="' + bildKlasse + '" style="' + bildStyle + '" onerror="this.style.display=\'none\'">'
               : '';
             var inhaltHtml = '';
             if (d.inhalt) {
