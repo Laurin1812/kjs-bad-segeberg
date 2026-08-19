@@ -664,17 +664,19 @@ p  { margin-bottom: 1rem; }
    Bedarf ins Karten-Layout, statt Spalten zu quetschen oder seitlich
    scrollen zu lassen. */
 .main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
-.main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }
-/* WICHTIG: kein word-break:break-word hier (nur overflow-wrap:break-word als
-   Notbremse für einzelne extrem lange Wörter/URLs) – word-break:break-word
-   lässt den Browser bei der Tabellen-Spaltenberechnung Zellen praktisch bis
-   auf 0px zusammenschrumpfen (bricht auch kurze Wörter mitten durch), was
-   dazu führte, dass Tabellen NIE als "zu breit" erkannt wurden, dafür aber
-   bis zur Unlesbarkeit gequetscht waren. Mit nur overflow-wrap bleibt die
-   Mindestbreite einer Spalte an ihrem längsten normalen Wort orientiert –
-   genau das, was main.js (applyTableLayout) zur echten Breitenmessung
-   braucht. */
-.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); overflow-wrap: break-word; }
+/* WICHTIG: word-break/overflow-wrap explizit auf "normal" zurückgesetzt
+   (nicht nur weggelassen!) – die weiter oben stehende Regel
+   ".main-content { overflow-wrap: break-word; word-break: break-word; }"
+   (Sicherheitsnetz für Fließtext) VERERBT sich sonst auch in th/td und lässt
+   den Browser bei der Tabellen-Spaltenberechnung auch kurze Wörter/Zahlen
+   mitten durchbrechen, sobald eine Spalte knapp wird ("2018" -> "201"+"8"),
+   selbst ganz ohne horizontalen Überlauf. Tabellenzellen brechen jetzt NUR
+   noch an normalen Wortgrenzen (Leerzeichen/Bindestrich) um. Passt eine
+   Spalte dadurch selbst so nicht mehr rein, erkennt main.js
+   (applyTableLayout) das über die Gesamtbreite der Tabelle und wechselt ins
+   Karten-Layout (.is-stacked) statt einzelne Wörter zu zerreißen. */
+.main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; word-break: normal; overflow-wrap: normal; }
+.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); word-break: normal; overflow-wrap: normal; }
 .main-content tr:nth-child(even) td { background: var(--bg-light); }
 /* Blockquote */
 .main-content blockquote { border-left: 4px solid var(--green-main); margin: 1.5rem 0; padding: .75rem 1.25rem; background: var(--bg-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); font-style: italic; }
@@ -1139,6 +1141,12 @@ body.kjs-lightbox-lock { overflow: hidden; }
   padding: .55rem .85rem;
   border-bottom: 1px solid var(--border);
   background: var(--bg-white);
+  /* Im Karten-Layout steht jedem Wert die volle Zeilenbreite zur Verfügung
+     (kein Spalten-Gedränge mehr) – hier darf overflow-wrap:break-word als
+     Notbremse für einen einzelnen, wirklich unteilbaren sehr langen Wert
+     (z.B. eine lange URL) wieder greifen, ohne das "2018"-Problem oben. */
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .content-table-wrap.is-stacked table tbody td:last-child,
 .termine-table-wrap.is-stacked .termine-table tbody td:last-child {

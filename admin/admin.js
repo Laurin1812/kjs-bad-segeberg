@@ -212,6 +212,7 @@
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
+    { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'standard' },
     { key:'kontaktseite', label:'📞 Kontaktseite', file:'content/einstellungen.json', form:'kontaktseite' },
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
       { key:'kontakt',   label:'Telefonzentrale & Kalender', file:'content/einstellungen.json',    form:'einstellungen' },

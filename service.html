@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Impressum – Kreisjägerschaft Segeberg e.V.</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Service, Dokumente und Downloads der Kreisjägerschaft Segeberg e.V.">
+  <title>Service – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="css/style.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
@@ -20,15 +22,17 @@
 </script>
 </head>
 <body>
+
 <div class="topbar"><div class="container">
   <div class="topbar__left">
     <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
     <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
   </div>
 </div></div>
+
 <header class="site-header">
   <div class="container header-inner">
-    <a href="./index.html" class="site-logo">
+    <a href="index.html" class="site-logo">
       <img src="images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
       <div class="site-logo__text">
         <span class="site-logo__name">Kreisjägerschaft</span>
@@ -36,7 +40,7 @@
       </div>
     </a>
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
-      <li><a href="./index.html">Startseite</a></li>
+      <li><a href="index.html" data-navkey="startseite">Startseite</a></li>
       <li><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
           <li><a href="jaeger/ueber-uns.html">Über uns</a></li>
@@ -53,7 +57,7 @@
               <li><a href="jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
               <li><a href="jaeger/satzung.html">Satzung</a></li>
               <li><a href="jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-                    </ul>
+            </ul>
           </li>
           <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub">
@@ -72,21 +76,23 @@
           </li>
         </ul>
       </li>
-      <li><a href="./verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
+      <li><a href="verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
         <ul class="dropdown">
-          <li><a href="./verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="./verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
         </ul>
       </li>
-      <li><a href="./termine/index.html" data-navkey="termine">Termine</a></li>
-      <li><a href="./aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
-      <li><a href="./faq/index.html" data-navkey="faq">FAQ</a></li>
-      <li><a href="./service.html" data-navkey="service">Service</a></li>
-      <li><a href="./kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
+      <li><a href="termine/index.html" data-navkey="termine">Termine</a></li>
+      <li><a href="aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="faq/index.html" data-navkey="faq">FAQ</a></li>
+      <li class="active"><a href="service.html" data-navkey="service">Service</a></li>
+      <li><a href="kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
 </header>
+
 <nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
   <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
   <ul>
@@ -135,52 +141,80 @@
     <li><a href="kontakt/index.html">Kontakt</a></li>
   </ul>
 </nav>
+
 <div class="page-hero">
-  <div class="container"><h1>Impressum</h1>
-  <nav class="breadcrumb"><a href="index.html">Startseite</a><span class="sep">/</span><span>Impressum</span></nav>
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Service</h1>
+    <nav class="breadcrumb">
+      <a href="index.html">Startseite</a><span class="sep">/</span><span>Service</span>
+    </nav>
   </div>
 </div>
+
 <div class="page-content full">
   <div class="container">
-    <main class="main-content" style="max-width:720px;" id="impressum-content">
-      <p style="color:var(--text-muted);">Wird geladen …</p>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
-    <script>
-      fetch('content/impressum.json')
-        .then(r => r.json())
-        .then(d => {
-          document.getElementById('impressum-content').innerHTML = `
-            <h2>Angaben gemäß § 5 TMG</h2>
-            <p><strong>${d.verein}</strong><br>${d.adresse.replace(/\n/g,'<br>')}</p>
-            ${d.postadresse ? `<p><strong>Postadresse:</strong><br>${d.postadresse.replace(/\n/g,'<br>')}</p>` : ''}
-            <p><strong>Vertreten durch:</strong><br>${d.vertreten_durch}</p>
-            <h3>Kontakt</h3>
-            <p>Telefon: <a href="tel:${d.telefon.replace(/\s|-|\//g,'')}">${d.telefon}</a><br>
-            E-Mail: <a href="mailto:${d.email}">${d.email}</a></p>
-            <h3>Registereintrag</h3>
-            <p>Eingetragen im Vereinsregister.<br>
-            Registergericht: ${d.registergericht}<br>
-            Registernummer: ${d.registernummer}</p>
-            <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
-            <p>${d.verantwortlich.replace(/\n/g,'<br>')}</p>
-            <h3>Haftungsausschluss</h3>
-            <p>Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
-               Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>
-            <h3>Urheberrecht</h3>
-            <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen
-               dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung und Verbreitung bedürfen
-               der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>`;
-        });
-    </script>
   </div>
 </div>
+
 <footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <img src="images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+      <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
+      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
+    </div>
+    <div class="footer-col"><h5>Über die KJS</h5><ul>
+      <li><a href="jaeger/vorstand.html">Vorstand</a></li>
+      <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
+      <li><a href="index.html">Startseite</a></li>
+      <li><a href="service.html">Service</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Informationen</h5><ul>
+      <li><a href="kontakt/index.html">Kontakt</a></li>
+      <li><a href="termine/index.html">Termine</a></li>
+      <li><a href="faq/index.html">FAQ</a></li>
+    </ul></div>
+  </div>
   <div class="footer-bottom">
     <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
     <div class="footer-bottom__links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
   </div>
 </div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/main.js"></script>
+<script>
+  fetch('/content/service.json').then(r=>r.json()).then(d=>{
+    if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
+    var h1 = document.querySelector('.page-hero h1');
+    if(h1 && d.titel) h1.textContent = d.titel;
+    if(d.titel) document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
+    const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" class="${(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')}" style="border-radius:8px;margin-bottom:1.5rem;">` : '';
+    let untertitel = '';
+    if(d.untertitel){ untertitel = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.untertitel) ? d.untertitel : marked.parse(d.untertitel)) : d.untertitel; }
+    let intro = '';
+    if(d.intro){ intro = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.intro) ? d.intro : marked.parse(d.intro)) : d.intro; }
+    let inhalt = '';
+    if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt)) : d.inhalt; }
+    const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
+    document.getElementById('page-main').innerHTML = `
+      ${untertitel ? '<div>' + untertitel + '</div>' : ''}
+      ${intro ? '<div>' + intro + '</div>' : ''}
+      ${bild}
+      ${inhalt ? '<div>' + inhalt + '</div>' : ''}
+      ${kontakt}
+    `;
+  }).catch(()=>{
+    document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
+  });
+</script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
     const ft = document.querySelector('.footer-about p');
