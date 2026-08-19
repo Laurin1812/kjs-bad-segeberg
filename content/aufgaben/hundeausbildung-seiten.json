@@ -121,14 +121,6 @@
       "gruppe": ""
     },
     {
-      "slug": "entschaedigungsfond",
-      "nav_label": "Entschädigungsfond",
-      "veroeffentlicht": true,
-      "vorschaubild": "/images/1787163683204-neu.png",
-      "kurzbeschreibung": "",
-      "gruppe": ""
-    },
-    {
       "slug": "vgp-vps-wanderpokal",
       "nav_label": "VGP/VPS-Wanderpokal",
       "veroeffentlicht": true,
@@ -165,6 +157,14 @@
       "nav_label": "Hunde/Welpen abzugeben",
       "veroeffentlicht": true,
       "vorschaubild": "/images/1780899261226-pixabay-felberwolf-dog-user-ID-3210831_1920-1.png",
+      "kurzbeschreibung": "",
+      "gruppe": ""
+    },
+    {
+      "slug": "entschaedigungsfond",
+      "nav_label": "Entschädigungsfond",
+      "veroeffentlicht": true,
+      "vorschaubild": "/images/1787163683204-neu.png",
       "kurzbeschreibung": "",
       "gruppe": ""
     }
