@@ -1,8 +1,37 @@
 {
   "titel": "Service",
   "hero_bild": "",
-  "kontakt_name": "",
-  "kontakt_email": "",
+  "kontakt_name": "Test",
+  "kontakt_email": "Test",
   "veroeffentlicht": true,
-  "kategorien": []
+  "kategorien": [
+    {
+      "id": "kat-1787240731039-5664",
+      "name": "Umweltschutz",
+      "text": "Das ist ein Test",
+      "dokumente": [
+        {
+          "id": "dok-1787240739488-6194",
+          "titel": "Wie o ffne ich das kleine Infomobil richtig_M ai 2026",
+          "datei": "/downloads/1781194530416-Wie-o-ffne-ich-das-kleine-Infomobil-richtig_M-ai-2026.pdf",
+          "datum": "2026-08-20",
+          "archiviert": false
+        }
+      ]
+    },
+    {
+      "id": "kat-1787240758803-6353",
+      "name": "Test",
+      "text": "Test",
+      "dokumente": [
+        {
+          "id": "dok-1787240765727-1862",
+          "titel": "Jungwildrettung 2023 2026",
+          "datei": "/downloads/1786988504989-Jungwildrettung-2023-2026.pdf",
+          "datum": "2026-08-20",
+          "archiviert": false
+        }
+      ]
+    }
+  ]
 }
