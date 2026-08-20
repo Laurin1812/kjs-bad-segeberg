@@ -489,6 +489,16 @@ p  { margin-bottom: 1rem; }
 }
 .page-hero .container { position: relative; z-index: 1; }
 .page-hero h1 { color: #fff; margin-bottom: .5rem; }
+/* "← Alle Themen" oben im Hero-Bereich (statt klein im Seiteninhalt) -
+   Frank-Wunsch 20.08.2026, z.B. auf den Jagdhundeschule-Kursseiten. Per JS
+   ein-/ausgeblendet: nur auf Unterseiten sichtbar, nicht auf der jeweiligen
+   Übersichtsseite selbst. */
+.page-hero__back {
+  display: inline-flex; align-items: center; gap: .4rem;
+  color: #fff; font-weight: 700; font-size: 1.05rem;
+  margin-bottom: 1rem; text-decoration: none; opacity: .92;
+}
+.page-hero__back:hover { opacity: 1; text-decoration: underline; }
 .breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: rgba(255,255,255,.65); margin-top: .6rem; flex-wrap: wrap; }
 .breadcrumb a { color: rgba(255,255,255,.65); }
 .breadcrumb a:hover { color: #fff; }
