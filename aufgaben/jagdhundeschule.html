@@ -146,7 +146,6 @@
 <div class="page-hero" id="page-hero">
   <div class="page-hero__bg" id="page-hero-bg" style="background-image: url('../images/hundeausbildung.jpg')"></div>
   <div class="container">
-    <a href="jagdhundeschule.html" id="hero-alle-themen" class="page-hero__back" style="display:none;">← Alle Themen</a>
     <h1 id="page-hero-h1">Jagdhundeschule</h1>
     <nav class="breadcrumb" id="page-breadcrumb">
       <a href="../index.html">Startseite</a><span class="sep">/</span>
@@ -358,11 +357,6 @@
             if (h1) h1.textContent = titel;
             var bc = document.getElementById('breadcrumb-current');
             if (bc) bc.textContent = titel;
-            // "← Alle Themen" weiter nach oben in den Hero-Bereich + größer
-            // (Frank-Wunsch 20.08.2026): auf Unterseiten sichtbar, auf der
-            // Übersichtsseite selbst ausgeblendet (siehe else-Zweig unten).
-            var heroBack = document.getElementById('hero-alle-themen');
-            if (heroBack) heroBack.style.display = 'inline-flex';
 
             var bildKlasse = (d.bild_groesse && d.bild_groesse.indexOf('img-') === 0) ? d.bild_groesse
               : (d.bild_groesse === 'klein' ? 'img-25' : d.bild_groesse === 'mittel' ? 'img-50' : 'img-100');
@@ -389,6 +383,7 @@
               kontaktStr += '</p>';
             }
             main.innerHTML =
+              '<a href="jagdhundeschule.html" class="content-back-link">← Zurück zu allen Themen</a>' +
               '<h2 style="margin-top:0">' + titel.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</h2>' +
               bildHtml +
               '<div id="page-inhalt">' + inhaltHtml + '</div>' +
@@ -401,8 +396,6 @@
             renderGalerie(d);
           })
           .catch(function() {
-            var heroBackErr = document.getElementById('hero-alle-themen');
-            if (heroBackErr) heroBackErr.style.display = 'inline-flex';
             main.innerHTML =
               '<p style="color:var(--text-muted)">Diese Seite konnte nicht geladen werden.</p>' +
               '<a href="jagdhundeschule.html" class="btn btn-outline-green" style="margin-top:1rem">← Zurück zur Übersicht</a>';
@@ -410,8 +403,6 @@
 
       } else {
         // ── Übersichtsseite: Bildkacheln ────────────────────────
-        var heroBackOverview = document.getElementById('hero-alle-themen');
-        if (heroBackOverview) heroBackOverview.style.display = 'none';
         if (!seiten.length) {
           main.innerHTML = '<p class="text-muted">Noch keine Seiten vorhanden.</p>';
           return;
