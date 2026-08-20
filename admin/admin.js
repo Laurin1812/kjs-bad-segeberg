@@ -1981,9 +1981,77 @@
   /* ────────────────────────────────────────────────────────────
      AKTUELLES (list + item editor)
   ──────────────────────────────────────────────────────────── */
+  // Liste war bisher unsortiert (rohe Speicher-Reihenfolge) und ohne Filter
+  // - bei wachsender Beitragsanzahl fand Frank nichts mehr wieder (Jahre
+  // sprangen wild durcheinander: 2025, 2026, 2022, ...). Jetzt: Liste wird
+  // immer nach Datum absteigend (neueste zuerst) angezeigt, zusätzlich
+  // Jahr- und Kategorie-Filter oben. Sortierung/Filter wirken nur auf die
+  // ANZEIGE (S.data.beitraege bleibt unangetastet) - die echten Array-
+  // Indizes für Bearbeiten/Löschen/Archivieren bleiben dadurch stabil.
+  function datumToIsoFlexible(datum) {
+    if (!datum) return '';
+    var s = String(datum).trim();
+    // Bereits ISO oder "D.MM.YYYY" (Standardformat aus dem Formular)
+    var iso = datumToIso(s);
+    if (iso) return iso;
+    // "D. Monatsname YYYY" (deutsch ODER versehentlich englisch gespeichert)
+    var m = s.match(/^(\d{1,2})\.?\s+([A-Za-zÄÖÜäöüß]+)\s+(\d{4})$/);
+    if (m) {
+      var MONTHS = {
+        januar:1, jan:1, january:1,
+        februar:2, feb:2, february:2,
+        maerz:3, märz:3, mrz:3, march:3, mar:3,
+        april:4, apr:4,
+        mai:5, may:5,
+        juni:6, jun:6, june:6,
+        juli:7, jul:7, july:7,
+        august:8, aug:8,
+        september:9, sep:9, sept:9,
+        oktober:10, okt:10, october:10, oct:10,
+        november:11, nov:11,
+        dezember:12, dez:12, december:12, dec:12
+      };
+      var mo = MONTHS[m[2].toLowerCase()];
+      if (mo) return m[3] + '-' + String(mo).padStart(2,'0') + '-' + m[1].padStart(2,'0');
+    }
+    return '';
+  }
+
   function renderAktuelles(def, data) {
     var beitraege = data.beitraege || [];
     var einst = data.einstellungen || {};
+    S.aktFilterJahr = S.aktFilterJahr || '';
+    S.aktFilterKat  = S.aktFilterKat  || '';
+
+    // Anzeigeliste: Original-Index i für die Buttons behalten, dann
+    // filtern und nach Datum absteigend sortieren (unparsbare Daten
+    // fallen ans Ende, Reihenfolge untereinander stabil).
+    var indexed = beitraege.map(function(b, i) {
+      return { b: b, i: i, jahr: b.jahr || jahrAusDatum(b.datum), iso: datumToIsoFlexible(b.datum) };
+    });
+    var jahre = [];
+    indexed.forEach(function(e) { if (e.jahr && jahre.indexOf(e.jahr) === -1) jahre.push(e.jahr); });
+    jahre.sort(function(a, b) { return b - a; });
+
+    var gefiltert = indexed.filter(function(e) {
+      if (S.aktFilterJahr && e.jahr !== S.aktFilterJahr) return false;
+      if (S.aktFilterKat && (e.b.kategorie || '') !== S.aktFilterKat) return false;
+      return true;
+    });
+    gefiltert.sort(function(a, b) {
+      if (a.iso && b.iso) return b.iso.localeCompare(a.iso);
+      if (a.iso) return -1;
+      if (b.iso) return 1;
+      return a.i - b.i;
+    });
+
+    var jahrOptions = '<option value="">Alle Jahre</option>' + jahre.map(function(j) {
+      return '<option value="' + escAttr(j) + '"' + (j === S.aktFilterJahr ? ' selected' : '') + '>' + escHtml(j) + '</option>';
+    }).join('');
+    var katOptions = '<option value="">Alle Kategorien</option>' + alleAktuellesKategorien().map(function(k) {
+      return '<option value="' + escAttr(k) + '"' + (k === S.aktFilterKat ? ' selected' : '') + '>' + escHtml(k) + '</option>';
+    }).join('');
+
     var html = panelHeader(def.label,
       '<button class="btn btn-primary" onclick="aktuellesNeu()">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
@@ -1999,9 +2067,23 @@
         '</div>' +
       '</div>' +
 
-      '<p class="text-muted" style="margin-bottom:1rem;">' + beitraege.length + ' Beiträge. Klicken zum Bearbeiten.</p>';
+      // ── Jahr-/Kategorie-Filter (Frank-Wunsch 20.08.2026) ────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🔍 Filtern &amp; Sortieren</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Die Liste ist immer nach Datum sortiert (neueste zuerst). Optional zusätzlich nach Jahr und/oder Kategorie filtern.</p>' +
+        '<div class="field-row" style="align-items:center;gap:1rem;flex-direction:row;flex-wrap:wrap;">' +
+          '<select class="field-input" id="akt-filter-jahr" style="max-width:180px;" onchange="aktuellesFilterChange()">' + jahrOptions + '</select>' +
+          '<select class="field-input" id="akt-filter-kat" style="max-width:220px;" onchange="aktuellesFilterChange()">' + katOptions + '</select>' +
+          (S.aktFilterJahr || S.aktFilterKat
+            ? '<button class="btn btn-sm btn-ghost" onclick="aktuellesFilterReset()">✕ Filter zurücksetzen</button>'
+            : '') +
+        '</div>' +
+      '</div>' +
 
-    beitraege.forEach(function(b, i) {
+      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + beitraege.length + ' Beiträgen. Klicken zum Bearbeiten.</p>';
+
+    gefiltert.forEach(function(entry) {
+      var b = entry.b, i = entry.i;
       var archivBadge = b.archiviert
         ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
         : '';
@@ -2027,6 +2109,17 @@
     html += '</div>';
     id('admin-main').innerHTML = html;
   }
+
+  window.aktuellesFilterChange = function() {
+    S.aktFilterJahr = val('akt-filter-jahr');
+    S.aktFilterKat  = val('akt-filter-kat');
+    renderAktuelles(S.section, S.data);
+  };
+  window.aktuellesFilterReset = function() {
+    S.aktFilterJahr = '';
+    S.aktFilterKat  = '';
+    renderAktuelles(S.section, S.data);
+  };
 
   window.aktuellesNeu = function() {
     var data = S.data;
