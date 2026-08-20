@@ -823,6 +823,17 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror [data-spacing="wide"] { margin: 1.1rem 0; }
 .tt-mount .ProseMirror li[data-spacing="wide"] p,
 .tt-mount .ProseMirror p[data-spacing="wide"] { margin: 0; line-height: 2; }
+/* Abstand-Stufe landet auf der ganzen Liste (ul/ol), nicht auf jedem
+   Listenpunkt – ohne diese Regeln wirkt "Eng"/"Weit" im Editor nur auf den
+   Abstand vor/nach der Liste, nicht zwischen den Punkten (Frank 20.08.2026). */
+.tt-mount .ProseMirror ul[data-spacing="compact"] li,
+.tt-mount .ProseMirror ol[data-spacing="compact"] li { margin: .05rem 0; }
+.tt-mount .ProseMirror ul[data-spacing="compact"] li p,
+.tt-mount .ProseMirror ol[data-spacing="compact"] li p { margin: 0; line-height: 1.25; }
+.tt-mount .ProseMirror ul[data-spacing="wide"] li,
+.tt-mount .ProseMirror ol[data-spacing="wide"] li { margin: 1rem 0; }
+.tt-mount .ProseMirror ul[data-spacing="wide"] li p,
+.tt-mount .ProseMirror ol[data-spacing="wide"] li p { margin: 0; line-height: 2; }
 /* ── Video-Einbettung (YouTube) ── */
 .tt-mount .ProseMirror div[data-youtube-video] { max-width: 100%; margin: .5rem 0; }
 .tt-mount .ProseMirror div[data-youtube-video] iframe { width: 100%; aspect-ratio: 16/9; height: auto; border-radius: 6px; }

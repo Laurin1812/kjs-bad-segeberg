@@ -544,6 +544,35 @@ p  { margin-bottom: 1rem; }
 #page-inhalt p[data-spacing="wide"],
 #seite-inhalt li[data-spacing="wide"] p,
 #seite-inhalt p[data-spacing="wide"] { line-height: 2.1; }
+/* Die Abstand-Stufe landet über die Toolbar auf der GANZEN Liste (ul/ol),
+   nicht auf jedem einzelnen Listenpunkt. Ohne diese Regeln ändert "Eng"/"Weit"
+   daher nur den Abstand vor/nach der ganzen Liste, aber nicht den Abstand
+   zwischen den einzelnen Listenpunkten selbst (Frank-Feedback 20.08.2026 –
+   genau dieser Zwischenzeilen-Abstand soll steuerbar sein). */
+.main-content ul[data-spacing="compact"] li,
+.main-content ol[data-spacing="compact"] li,
+#page-inhalt ul[data-spacing="compact"] li,
+#page-inhalt ol[data-spacing="compact"] li,
+#seite-inhalt ul[data-spacing="compact"] li,
+#seite-inhalt ol[data-spacing="compact"] li { margin-bottom: .05rem; }
+.main-content ul[data-spacing="compact"] li p,
+.main-content ol[data-spacing="compact"] li p,
+#page-inhalt ul[data-spacing="compact"] li p,
+#page-inhalt ol[data-spacing="compact"] li p,
+#seite-inhalt ul[data-spacing="compact"] li p,
+#seite-inhalt ol[data-spacing="compact"] li p { line-height: 1.25; }
+.main-content ul[data-spacing="wide"] li,
+.main-content ol[data-spacing="wide"] li,
+#page-inhalt ul[data-spacing="wide"] li,
+#page-inhalt ol[data-spacing="wide"] li,
+#seite-inhalt ul[data-spacing="wide"] li,
+#seite-inhalt ol[data-spacing="wide"] li { margin-bottom: 1rem; }
+.main-content ul[data-spacing="wide"] li p,
+.main-content ol[data-spacing="wide"] li p,
+#page-inhalt ul[data-spacing="wide"] li p,
+#page-inhalt ol[data-spacing="wide"] li p,
+#seite-inhalt ul[data-spacing="wide"] li p,
+#seite-inhalt ol[data-spacing="wide"] li p { line-height: 2; }
 /* Video-Einbettung (YouTube, über den Textinhalt-Editor) – responsive statt
    fester Breite/Höhe, damit es auf Handy nicht über den Rand läuft. */
 .main-content div[data-youtube-video],
