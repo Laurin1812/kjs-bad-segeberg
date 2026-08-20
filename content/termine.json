@@ -1,11 +1,14 @@
 {
   "termine": [
     {
-      "datum": "14.06.2025",
-      "uhrzeit": "09:00 Uhr",
-      "veranstaltung": "Schweißhundeprüfung Frühjahr",
-      "ort": "Revier Groß Rönnau",
-      "kategorie": "Hundeausbildung",
+      "datum": "",
+      "uhrzeit": "",
+      "veranstaltung": "",
+      "strasse": "",
+      "plz": "",
+      "ort": "",
+      "revier": "",
+      "kategorie": "Kreisveranstaltung",
       "archiviert": false
     },
     {
@@ -111,6 +114,17 @@
       "ort": "Dom zu Bad Segeberg",
       "kategorie": "Tradition",
       "archiviert": false
+    },
+    {
+      "datum": "21.08.2026",
+      "uhrzeit": "09:00 Uhr",
+      "veranstaltung": "Schweißhundeprüfung Frühjahr",
+      "ort": "Revier Groß Rönnau",
+      "kategorie": "Hundeausbildung",
+      "archiviert": false,
+      "strasse": "",
+      "plz": "",
+      "revier": ""
     }
   ]
 }
