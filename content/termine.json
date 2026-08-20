@@ -1,17 +1,6 @@
 {
   "termine": [
     {
-      "datum": "",
-      "uhrzeit": "",
-      "veranstaltung": "",
-      "strasse": "",
-      "plz": "",
-      "ort": "",
-      "revier": "",
-      "kategorie": "Kreisveranstaltung",
-      "archiviert": false
-    },
-    {
       "datum": "21.06.2025",
       "uhrzeit": "14:00 Uhr",
       "veranstaltung": "Jugendveranstaltung – Naturerlebnistag",
