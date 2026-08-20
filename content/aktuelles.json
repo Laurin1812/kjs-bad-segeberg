@@ -13,10 +13,21 @@
       "Jagdhornblasen",
       "Veranstaltung",
       "Pressemitteilung",
-      "Tierkrankheiten"
+      "Tierkrankheiten",
+      "Jagdausbildung"
     ]
   },
   "beitraege": [
+    {
+      "titel": "",
+      "datum": "",
+      "jahr": "2026",
+      "kategorie": "Allgemein",
+      "bild": "",
+      "text": "",
+      "link": "",
+      "archiviert": false
+    },
     {
       "titel": "Hubertusmesse Kaltenkirchen",
       "datum": "1.12.2021",
