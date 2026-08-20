@@ -2338,9 +2338,24 @@
 
   function renderTermine(def, data) {
     var termine = data.termine || [];
+    var einst = data.einstellungen || {};
     var html = panelHeader(def.label,
       '<button class="btn btn-primary" onclick="termineNeu()">➕ Neuer Termin</button>') +
-      '<div class="panel-body">';
+      '<div class="panel-body">' +
+
+      // Überschrift & Einleitungstext der öffentlichen Termine-Seite waren bisher
+      // fest im HTML eingefroren (u.a. mit Jahreszahl "2025") und nirgends
+      // änderbar - jetzt hier editierbar, wie die "Anzeigeeinstellungen" bei
+      // Aktuelles (Frank-Wunsch 20.08.2026).
+      '<div class="form-card">' +
+        '<div class="form-card-title">⚙️ Überschrift &amp; Einleitungstext (Live-Seite)</div>' +
+        fText('t-ueberschrift', 'Überschrift', einst.ueberschrift || 'Veranstaltungskalender 2026') +
+        '<div class="field-row">' +
+          '<label class="field-label" for="f-t-einleitung">Einleitungstext</label>' +
+          '<textarea class="field-input" id="f-t-einleitung" rows="3">' + escHtml(einst.einleitung || 'Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V. sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können.') + '</textarea>' +
+        '</div>' +
+        '<button class="btn btn-sm btn-outline" onclick="termineEinstSave()">Speichern</button>' +
+      '</div>';
 
     if (termine.length === 0) {
       html += '<div class="form-card"><p class="text-muted">Noch keine Termine. Klicken Sie auf "Neuer Termin".</p></div>';
@@ -2441,6 +2456,15 @@
     await doSave(S.section.file, S.data, '📅 Termine: Archivstatus geändert');
     toast(t.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
     renderTermine(S.section, S.data);
+  };
+
+  window.termineEinstSave = async function() {
+    S.data.einstellungen = S.data.einstellungen || {};
+    S.data.einstellungen.ueberschrift = gv('t-ueberschrift');
+    var einlEl = id('f-t-einleitung');
+    S.data.einstellungen.einleitung = einlEl ? einlEl.value : '';
+    await doSave(S.section.file, S.data, '📅 Termine: Überschrift/Einleitung gespeichert');
+    toast('✅ Gespeichert!', 'ok');
   };
 
   window.termineDelete = function(idx) {

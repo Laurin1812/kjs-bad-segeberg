@@ -1,4 +1,8 @@
 {
+  "einstellungen": {
+    "ueberschrift": "Veranstaltungskalender 2026",
+    "einleitung": "Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V. sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können."
+  },
   "termine": [
     {
       "datum": "21.06.2025",

@@ -155,8 +155,8 @@
 <div class="page-content full">
   <div class="container">
     <main class="main-content">
-      <h2>Veranstaltungskalender 2025</h2>
-      <p>Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V.
+      <h2 id="termine-ueberschrift">Veranstaltungskalender 2026</h2>
+      <p id="termine-einleitung">Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V.
          sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können.
       </p>
 
@@ -383,6 +383,18 @@ function buildFilterBar(sichtbareTermine) {
 fetch('../content/termine.json')
   .then(r => r.json())
   .then(data => {
+    // Überschrift & Einleitungstext kommen jetzt aus dem Admin (content/termine.json
+    // -> einstellungen), statt fest im HTML zu stehen - Frank-Wunsch 20.08.2026
+    // (Jahreszahl "2025" war eingefroren und ließ sich nirgends anpassen).
+    const einst = data.einstellungen || {};
+    if (einst.ueberschrift) {
+      const h2 = document.getElementById('termine-ueberschrift');
+      if (h2) h2.textContent = einst.ueberschrift;
+    }
+    if (einst.einleitung) {
+      const p = document.getElementById('termine-einleitung');
+      if (p) p.textContent = einst.einleitung;
+    }
     const alleTermine = data.termine || [];
     const sichtbareTermine = alleTermine.filter(istSichtbar);
     buildFilterBar(sichtbareTermine);
