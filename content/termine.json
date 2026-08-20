@@ -5,98 +5,112 @@
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Schweißhundeprüfung Frühjahr",
       "ort": "Revier Groß Rönnau",
-      "kategorie": "Hundeausbildung"
+      "kategorie": "Hundeausbildung",
+      "archiviert": false
     },
     {
       "datum": "21.06.2025",
       "uhrzeit": "14:00 Uhr",
       "veranstaltung": "Jugendveranstaltung – Naturerlebnistag",
       "ort": "Wildgehege Segeberg",
-      "kategorie": "Jugend"
+      "kategorie": "Jugend",
+      "archiviert": false
     },
     {
       "datum": "28.06.2025",
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Parcours-Schießen Hegering Kaltenkirchen",
       "ort": "Schießanlage Kisdorf",
-      "kategorie": "Schießwesen"
+      "kategorie": "Schießwesen",
+      "archiviert": false
     },
     {
       "datum": "05.07.2025",
       "uhrzeit": "16:00 Uhr",
       "veranstaltung": "Hegeringtreffen Bramstedt",
       "ort": "Schützenhaus Bad Bramstedt",
-      "kategorie": "Hegering"
+      "kategorie": "Hegering",
+      "archiviert": false
     },
     {
       "datum": "19.07.2025",
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Bockjagd-Seminar für Jungjäger",
       "ort": "KJS-Geschäftsstelle Bad Segeberg",
-      "kategorie": "Ausbildung"
+      "kategorie": "Ausbildung",
+      "archiviert": false
     },
     {
       "datum": "26.07.2025",
       "uhrzeit": "10:00 Uhr",
       "veranstaltung": "Naturschutz-Workshop: Biotopmapping",
       "ort": "Treffpunkt: Forsthaus Leezen",
-      "kategorie": "Naturschutz"
+      "kategorie": "Naturschutz",
+      "archiviert": false
     },
     {
       "datum": "02.08.2025",
       "uhrzeit": "18:00 Uhr",
       "veranstaltung": "Kreisvorstandssitzung KJS Segeberg",
       "ort": "Gasthaus Zum Forst, Bad Segeberg",
-      "kategorie": "Vorstand"
+      "kategorie": "Vorstand",
+      "archiviert": false
     },
     {
       "datum": "16.08.2025",
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Übungsschießen – Pflichtpraxis für Mitglieder",
       "ort": "Schießstand Fredesdorf",
-      "kategorie": "Schießwesen"
+      "kategorie": "Schießwesen",
+      "archiviert": false
     },
     {
       "datum": "06.09.2025",
       "uhrzeit": "10:00 Uhr",
       "veranstaltung": "Kreisjägertag 2025",
       "ort": "Festplatz Bad Segeberg",
-      "kategorie": "Kreisveranstaltung"
+      "kategorie": "Kreisveranstaltung",
+      "archiviert": false
     },
     {
       "datum": "20.09.2025",
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Herbst-Schweißhundeprüfung",
       "ort": "Revier Bark",
-      "kategorie": "Hundeausbildung"
+      "kategorie": "Hundeausbildung",
+      "archiviert": false
     },
     {
       "datum": "04.10.2025",
       "uhrzeit": "09:00 Uhr",
       "veranstaltung": "Herbstparcours – Revierübergreifend",
       "ort": "Schießanlage Kisdorf",
-      "kategorie": "Schießwesen"
+      "kategorie": "Schießwesen",
+      "archiviert": false
     },
     {
       "datum": "18.10.2025",
       "uhrzeit": "14:00 Uhr",
       "veranstaltung": "Jagdhornbläser – Konzert zum Erntedank",
       "ort": "St.-Marien-Kirche Bad Segeberg",
-      "kategorie": "Jagdhornblasen"
+      "kategorie": "Jagdhornblasen",
+      "archiviert": false
     },
     {
       "datum": "08.11.2025",
       "uhrzeit": "10:00 Uhr",
       "veranstaltung": "Jahreshauptversammlung KJS Segeberg",
       "ort": "Kulturzentrum Bad Segeberg",
-      "kategorie": "Hauptversammlung"
+      "kategorie": "Hauptversammlung",
+      "archiviert": false
     },
     {
       "datum": "29.11.2025",
       "uhrzeit": "16:00 Uhr",
       "veranstaltung": "Hubertusmesse und Jahresabschluss",
       "ort": "Dom zu Bad Segeberg",
-      "kategorie": "Tradition"
+      "kategorie": "Tradition",
+      "archiviert": false
     }
   ]
 }

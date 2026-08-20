@@ -118,6 +118,87 @@
     });
   };
 
+  // Termine-Kategorien erweiterbar (Frank-Wunsch, wie schon bei Aktuelles):
+  // gleiches Prinzip wie alleAktuellesKategorien/aktuellesKategorieAdd/-Delete
+  // oben, nur auf content/termine.json (Feld einstellungen.kategorien,
+  // Fallback KAT_TERMINE) und S.data.termine[].kategorie bezogen.
+  function alleTermineKategorien() {
+    var kats = (S.data && S.data.einstellungen && S.data.einstellungen.kategorien) || KAT_TERMINE;
+    var used = ((S.data && S.data.termine) || []).map(function(t) {
+      return (t.kategorie || '').trim();
+    }).filter(Boolean);
+    var seen = {};
+    var out = [];
+    kats.concat(used).forEach(function(k) {
+      if (!seen[k]) { seen[k] = true; out.push(k); }
+    });
+    return out;
+  }
+
+  window.termineKategorieAdd = async function() {
+    var neu = await showPrompt('Neue Kategorie', 'Name der neuen Kategorie:');
+    if (!neu) return;
+    neu = neu.trim();
+    if (!neu) return;
+    S.data.einstellungen = S.data.einstellungen || {};
+    var kats = (S.data.einstellungen.kategorien || KAT_TERMINE).slice();
+    if (kats.indexOf(neu) === -1) kats.push(neu);
+    S.data.einstellungen.kategorien = kats;
+    try {
+      await doSave(S.section.file, S.data, '🏷️ Termine: Kategorie "' + neu + '" hinzugefügt');
+      toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
+    } catch (e) {
+      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      return;
+    }
+    var sel = id('f-t-kategorie');
+    if (sel) {
+      if (!sel.querySelector('option[value="' + neu.replace(/"/g, '\\"') + '"]')) {
+        var opt = document.createElement('option');
+        opt.value = neu;
+        opt.textContent = neu;
+        sel.appendChild(opt);
+      }
+      sel.value = neu;
+    }
+  };
+
+  window.termineKategorieDelete = async function() {
+    var sel = id('f-t-kategorie');
+    var val = sel ? sel.value : '';
+    if (!val) return;
+    var usedBy = ((S.data && S.data.termine) || []).filter(function(t) {
+      return (t.kategorie || '').trim() === val;
+    });
+    if (usedBy.length) {
+      await showAlert('Kann nicht gelöscht werden',
+        '„' + val + '" wird noch von ' + usedBy.length +
+        ' Termin' + (usedBy.length === 1 ? '' : 'en') + ' verwendet:\n\n' +
+        usedBy.map(function(t) { return '• ' + (t.veranstaltung || '(ohne Titel)'); }).join('\n') +
+        '\n\nBitte dort erst eine andere Kategorie wählen.');
+      return;
+    }
+    showConfirm('Kategorie löschen', 'Kategorie „' + val + '" wirklich löschen?', async function() {
+      S.data.einstellungen = S.data.einstellungen || {};
+      var kats = (S.data.einstellungen.kategorien || KAT_TERMINE).slice();
+      var idx = kats.indexOf(val);
+      if (idx !== -1) kats.splice(idx, 1);
+      S.data.einstellungen.kategorien = kats;
+      try {
+        await doSave(S.section.file, S.data, '🏷️ Termine: Kategorie "' + val + '" gelöscht');
+        toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
+      } catch (e) {
+        toast('❌ Fehler beim Speichern: ' + e.message, true);
+        return;
+      }
+      if (sel) {
+        var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
+        if (opt) opt.remove();
+        if (sel.options.length) sel.value = sel.options[0].value;
+      }
+    });
+  };
+
   /* ────────────────────────────────────────────────────────────
      STATE
   ──────────────────────────────────────────────────────────── */
@@ -1215,6 +1296,25 @@
     '</div>';
   }
 
+  // Gleiches Kategorie-Dropdown wie fKategorieDropdown oben, nur für Termine
+  // (window.termineKategorieAdd/-Delete, Feld-ID f-t-kategorie).
+  function fTermineKategorieDropdown(val) {
+    var options = alleTermineKategorien();
+    if (val && options.indexOf(val) === -1) options = options.concat([val]);
+    var opts = options.map(function(o) {
+      return '<option value="' + escAttr(o) + '"' + (o === val ? ' selected' : '') + '>' + escHtml(o) + '</option>';
+    }).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label" for="f-t-kategorie">Kategorie</label>' +
+      '<div style="display:flex;gap:.5rem;align-items:center;">' +
+        '<select class="field-input" id="f-t-kategorie" style="flex:1;">' + opts + '</select>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="termineKategorieAdd()" style="white-space:nowrap;">+ Neu</button>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="termineKategorieDelete()" title="Ausgewählte Kategorie löschen" style="white-space:nowrap;">🗑</button>' +
+      '</div>' +
+      '<p class="field-hint">Neue Kategorie über „+ Neu" anlegen, ausgewählte über 🗑 löschen (nur möglich, wenn kein Termin sie mehr verwendet).</p>' +
+    '</div>';
+  }
+
   function fCombobox(id, label, val, options) {
     var listId = 'dl-' + id;
     var opts = options.map(function(o) {
@@ -2219,7 +2319,23 @@
 
   /* ────────────────────────────────────────────────────────────
      TERMINE
+     Frank-Wünsche 20.08.2026: Listenansicht wie bei Aktuelles
+     (.item-card statt Tabelle) inkl. Archiv-Badge/Toggle, Kategorien
+     dauerhaft verwaltbar wie bei Aktuelles, Ort zu Straße/PLZ/Ort +
+     eigenem Revier/Hegering-Feld erweitert (Vorschlagsliste aus
+     content/hegeringe.json, freie Eingabe weiterhin möglich).
   ──────────────────────────────────────────────────────────── */
+  var _hegeringOptionenCache = null;
+  function ladeHegeringOptionen() {
+    if (_hegeringOptionenCache) return Promise.resolve(_hegeringOptionenCache);
+    return fetch('/content/hegeringe.json').then(function(r) { return r.json(); }).then(function(d) {
+      _hegeringOptionenCache = (d.hegeringe || []).map(function(h) {
+        return (h.nummer || '') + (h.name ? ' – ' + h.name : '');
+      }).filter(Boolean);
+      return _hegeringOptionenCache;
+    }).catch(function() { return []; });
+  }
+
   function renderTermine(def, data) {
     var termine = data.termine || [];
     var html = panelHeader(def.label,
@@ -2229,22 +2345,31 @@
     if (termine.length === 0) {
       html += '<div class="form-card"><p class="text-muted">Noch keine Termine. Klicken Sie auf "Neuer Termin".</p></div>';
     } else {
-      html += '<div class="form-card" style="padding:0;overflow:hidden"><table class="termine-table">' +
-        '<thead><tr><th>Datum</th><th>Uhrzeit</th><th>Veranstaltung</th><th>Ort</th><th>Kategorie</th><th></th></tr></thead><tbody>';
+      html += '<p class="text-muted" style="margin-bottom:1rem;">' + termine.length + ' Termine. Klicken zum Bearbeiten.</p>';
       termine.forEach(function(t, i) {
-        html += '<tr onclick="termineEdit(' + i + ')" style="cursor:pointer">' +
-          '<td><strong>' + escHtml(t.datum || '') + '</strong></td>' +
-          '<td>' + escHtml(t.uhrzeit || '') + '</td>' +
-          '<td>' + escHtml(t.veranstaltung || '') + '</td>' +
-          '<td>' + escHtml(t.ort || '') + '</td>' +
-          '<td><span class="item-badge">' + escHtml(t.kategorie || '') + '</span></td>' +
-          '<td class="td-actions">' +
-            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();termineEdit(' + i + ')">✏️</button>' +
-            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();termineDelete(' + i + ')">🗑️</button>' +
-          '</td>' +
-        '</tr>';
+        var archivBadge = t.archiviert
+          ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
+          : '';
+        var ortMeta = [t.ort, t.revier].filter(Boolean).join(' · ');
+        html += '<div class="item-card" onclick="termineEdit(' + i + ')">' +
+          '<div class="item-body">' +
+            '<div class="item-title">' + archivBadge + escHtml(t.veranstaltung || '(Kein Titel)') + '</div>' +
+            '<div class="item-meta">📅 ' + escHtml(t.datum || '') + (t.uhrzeit ? ' · ' + escHtml(t.uhrzeit) : '') +
+              (ortMeta ? ' · ' + escHtml(ortMeta) : '') +
+              (t.kategorie ? ' <span class="item-badge">' + escHtml(t.kategorie) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="item-actions">' +
+            '<button class="btn btn-sm ' + (t.archiviert ? 'btn-outline' : 'btn-ghost') + '" ' +
+              'title="' + (t.archiviert ? 'Aus Archiv zurückholen' : 'Ins Archiv verschieben') + '" ' +
+              'onclick="event.stopPropagation();termineArchivToggle(' + i + ')">' +
+              (t.archiviert ? '↩️ Wiederherstellen' : '📦 Archivieren') +
+            '</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();termineEdit(' + i + ')">Bearbeiten</button>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();termineDelete(' + i + ')">Löschen</button>' +
+          '</div>' +
+        '</div>';
       });
-      html += '</tbody></table></div>';
     }
     html += '</div>';
     id('admin-main').innerHTML = html;
@@ -2252,13 +2377,14 @@
 
   window.termineNeu = function() {
     S.data.termine = S.data.termine || [];
-    S.data.termine.unshift({ datum:'', uhrzeit:'', veranstaltung:'', ort:'', kategorie:'Kreisveranstaltung' });
+    S.data.termine.unshift({ datum:'', uhrzeit:'', veranstaltung:'', strasse:'', plz:'', ort:'', revier:'', kategorie:'Kreisveranstaltung', archiviert:false });
     termineEdit(0);
   };
 
-  window.termineEdit = function(idx) {
+  window.termineEdit = async function(idx) {
     var t = (S.data.termine || [])[idx];
     if (!t) return;
+    var hegeringOptionen = await ladeHegeringOptionen();
     var html = panelHeader('📅 Termin bearbeiten',
         '<button class="btn btn-outline" onclick="renderTermine(S.section,S.data)">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="termineSave(' + idx + ')">💾 Speichern</button>',
@@ -2267,8 +2393,22 @@
         fDate('t-datum', 'Datum', t.datum) +
         fText('t-uhrzeit', 'Uhrzeit', t.uhrzeit, 'z.B. 18:00 Uhr') +
         fText('t-veranstaltung', 'Veranstaltung', t.veranstaltung) +
-        fText('t-ort', 'Ort', t.ort) +
-        fCombobox('t-kategorie', 'Kategorie', t.kategorie, KAT_TERMINE) +
+        fText('t-strasse', 'Straße', t.strasse, 'optional') +
+        '<div class="field-row field-row-2">' +
+          '<div><label class="field-label" for="f-t-plz">PLZ</label>' +
+            '<input class="field-input" type="text" id="f-t-plz" value="' + escAttr(t.plz || '') + '"></div>' +
+          '<div><label class="field-label" for="f-t-ort">Ort</label>' +
+            '<input class="field-input" type="text" id="f-t-ort" value="' + escAttr(t.ort || '') + '"></div>' +
+        '</div>' +
+        fCombobox('t-revier', 'Revier / Hegering', t.revier, hegeringOptionen) +
+        fTermineKategorieDropdown(t.kategorie) +
+        '<div class="field-row" style="align-items:center;gap:.75rem;flex-direction:row;">' +
+          '<label class="field-label" style="min-width:160px;margin:0">Ins Archiv verschieben</label>' +
+          '<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">' +
+            '<input type="checkbox" id="t-archiviert"' + (t.archiviert ? ' checked' : '') + ' style="width:18px;height:18px;cursor:pointer;">' +
+            '<span style="font-size:.85rem;color:var(--text-muted);">Erscheint nicht mehr auf der Live-Seite (zusätzlich werden Termine automatisch 7 Tage nach ihrem Datum ausgeblendet)</span>' +
+          '</label>' +
+        '</div>' +
       '</div></div>';
     id('admin-main').innerHTML = html;
   };
@@ -2278,14 +2418,28 @@
     t.datum        = isoToDatum(gv('t-datum'));
     t.uhrzeit      = gv('t-uhrzeit');
     t.veranstaltung= gv('t-veranstaltung');
+    t.strasse      = gv('t-strasse');
+    t.plz          = gv('t-plz');
     t.ort          = gv('t-ort');
+    t.revier       = gv('t-revier');
     t.kategorie    = gv('t-kategorie');
+    var archCheck  = id('t-archiviert');
+    t.archiviert   = archCheck ? archCheck.checked : (t.archiviert || false);
     // Sort by date
     S.data.termine.sort(function(a, b) {
       return datumToIso(a.datum).localeCompare(datumToIso(b.datum));
     });
     await doSave(S.section.file, S.data, '📅 Termin gespeichert');
     toast('✅ Termin gespeichert!', 'ok');
+    renderTermine(S.section, S.data);
+  };
+
+  window.termineArchivToggle = async function(idx) {
+    var t = (S.data.termine || [])[idx];
+    if (!t) return;
+    t.archiviert = !t.archiviert;
+    await doSave(S.section.file, S.data, '📅 Termine: Archivstatus geändert');
+    toast(t.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
     renderTermine(S.section, S.data);
   };
 

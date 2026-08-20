@@ -160,16 +160,10 @@
          sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können.
       </p>
 
-      <!-- Filter-Leiste -->
-      <div style="display:flex; gap:1rem; flex-wrap:wrap; margin: 2rem 0 1.5rem; padding: 1.25rem; background: var(--bg-light); border-radius: var(--radius-md);">
+      <!-- Filter-Leiste (Kategorien werden dynamisch aus den sichtbaren Terminen ermittelt,
+           da Kategorien im Admin jetzt frei anlegbar/löschbar sind) -->
+      <div id="termine-filter-bar" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin: 2rem 0 1.5rem; padding: 1.25rem; background: var(--bg-light); border-radius: var(--radius-md);">
         <strong style="align-self:center; font-size:.9rem; color:var(--text-muted);">Filter:</strong>
-        <a href="#" class="btn btn-primary btn-sm termine-filter-btn" data-filter="Alle">Alle</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Vorstand">Vorstand</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Schießwesen">Schießwesen</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Hundeausbildung">Hundeausbildung</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Jagdhornblasen">Jagdhornblasen</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Jugend">Jugend</a>
-        <a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="Hegering">Hegering</a>
       </div>
 
       <!-- Tabelle (wird per JavaScript aus content/termine.json geladen) -->
@@ -262,17 +256,71 @@
 
 <script src="../js/main.js"></script>
 <script>
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function pad2(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+
+// Kompaktes Datum "16.08.2025" statt ausgeschriebenem Monatsnamen (Frank-
+// Wunsch 20.08.2026, war zu lang und hat das Layout verschoben). Die Daten
+// liegen im Admin standardmäßig schon als TT.MM.JJJJ vor - hier wird nur
+// noch auf zweistellige Tag/Monat-Schreibweise normalisiert bzw. alte/
+// fehlerhafte Formate (ISO, ausgeschriebener Monatsname deutsch/englisch)
+// zur Sicherheit ins gleiche kompakte Format überführt.
 function formatDatum(raw) {
   if (!raw) return '';
-  var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  var enMon = {January:'Januar',February:'Februar',March:'März',April:'April',May:'Mai',June:'Juni',July:'Juli',August:'August',September:'September',October:'Oktober',November:'November',December:'Dezember'};
-  var fixed = raw.replace(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/g, function(w){return enMon[w]||w;});
-  if (fixed !== raw) return fixed;
-  var m1 = raw.match(/^(\d{1,2})\.(\d{2})\.(\d{4})$/);
-  if (m1) return parseInt(m1[1],10) + '. ' + mon[parseInt(m1[2],10)-1] + ' ' + m1[3];
+  var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m1) return pad2(m1[1]) + '.' + pad2(m1[2]) + '.' + m1[3];
   var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m2) return parseInt(m2[3],10) + '. ' + mon[parseInt(m2[2],10)-1] + ' ' + m2[1];
+  if (m2) return m2[3] + '.' + m2[2] + '.' + m2[1];
+  var MONTHE = { januar:1, jan:1, january:1, februar:2, feb:2, february:2, maerz:3, 'märz':3, march:3, mar:3, april:4, apr:4, mai:5, may:5, juni:6, jun:6, june:6, juli:7, jul:7, july:7, august:8, aug:8, september:9, sep:9, sept:9, oktober:10, okt:10, october:10, oct:10, november:11, nov:11, dezember:12, dez:12, december:12, dec:12 };
+  var m3 = raw.match(/^(\d{1,2})\.?\s+([A-Za-zÄÖÜäöüß]+)\s+(\d{4})$/);
+  if (m3) {
+    var mo = MONTHE[m3[2].toLowerCase()];
+    if (mo) return pad2(m3[1]) + '.' + pad2(mo) + '.' + m3[3];
+  }
   return raw;
+}
+
+// Termin-Datum als Date-Objekt (nur für den Auto-Ausblenden-Vergleich unten,
+// versteht dieselben Formate wie formatDatum).
+function parseDatum(raw) {
+  if (!raw) return null;
+  var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m1) return new Date(+m1[3], +m1[2] - 1, +m1[1]);
+  var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m2) return new Date(+m2[1], +m2[2] - 1, +m2[3]);
+  return null;
+}
+
+// Termine sollen auf der Live-Seite verschwinden, wenn sie im Admin
+// archiviert wurden ODER ihr Datum mehr als 7 Tage zurückliegt (Frank-
+// Wunsch 20.08.2026). Bei unlesbarem Datum sicherheitshalber weiter
+// anzeigen, statt fälschlich auszublenden.
+function istSichtbar(t) {
+  if (t.archiviert) return false;
+  var d = parseDatum(t.datum);
+  if (!d) return true;
+  var grenze = new Date(d.getTime());
+  grenze.setDate(grenze.getDate() + 7);
+  grenze.setHours(23, 59, 59, 999);
+  return grenze >= new Date();
+}
+
+// Straße/PLZ/Ort zusammen mit Revier/Hegering (falls gepflegt) anzeigen;
+// bei alten Terminen, die nur das frühere einfache Ort-Feld haben, bleibt
+// die Darstellung unverändert (nur "Ort").
+function formatOrt(t) {
+  var adressTeile = [];
+  if (t.strasse) adressTeile.push(escHtml(t.strasse));
+  var plzOrt = [t.plz, t.ort].filter(Boolean).join(' ');
+  if (plzOrt) adressTeile.push(escHtml(plzOrt));
+  else if (t.ort) adressTeile.push(escHtml(t.ort));
+  var html = adressTeile.join(', ');
+  if (t.revier) {
+    html += (html ? '<br>' : '') + '<span style="color:var(--text-muted);font-size:.85em;">' + escHtml(t.revier) + '</span>';
+  }
+  return html;
 }
 
 // Goldene Kategorien bekommen badge--gold
@@ -293,32 +341,52 @@ function renderTermine(termine) {
     const gold = goldKategorien.includes(t.kategorie) ? ' badge--gold' : '';
     return `<tr>
       <td><strong>${formatDatum(t.datum)}</strong></td>
-      <td>${t.uhrzeit}</td>
-      <td>${t.veranstaltung}</td>
-      <td>${t.ort}</td>
-      <td><span class="badge${gold}">${t.kategorie}</span></td>
+      <td>${escHtml(t.uhrzeit)}</td>
+      <td>${escHtml(t.veranstaltung)}</td>
+      <td>${formatOrt(t)}</td>
+      <td><span class="badge${gold}">${escHtml(t.kategorie)}</span></td>
     </tr>`;
   }).join('');
+}
+
+// Filter-Leiste wird aus den tatsächlich sichtbaren Terminen aufgebaut (statt
+// fest im HTML hinterlegt), da Kategorien im Admin jetzt frei verwaltet werden.
+function buildFilterBar(sichtbareTermine) {
+  const bar = document.getElementById('termine-filter-bar');
+  if (!bar) return;
+  const kategorien = [];
+  sichtbareTermine.forEach(t => {
+    if (t.kategorie && !kategorien.includes(t.kategorie)) kategorien.push(t.kategorie);
+  });
+  kategorien.sort((a, b) => a.localeCompare(b, 'de'));
+
+  let html = '<strong style="align-self:center; font-size:.9rem; color:var(--text-muted);">Filter:</strong>' +
+    '<a href="#" class="btn btn-primary btn-sm termine-filter-btn" data-filter="Alle">Alle</a>';
+  kategorien.forEach(k => {
+    html += '<a href="#" class="btn btn-outline-green btn-sm termine-filter-btn" data-filter="' + escHtml(k) + '">' + escHtml(k) + '</a>';
+  });
+  bar.innerHTML = html;
+
+  bar.querySelectorAll('.termine-filter-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      aktuellerFilter = btn.dataset.filter;
+      bar.querySelectorAll('.termine-filter-btn').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.filter === aktuellerFilter);
+        b.classList.toggle('btn-outline-green', b.dataset.filter !== aktuellerFilter);
+      });
+      renderTermine(sichtbareTermine);
+    });
+  });
 }
 
 fetch('../content/termine.json')
   .then(r => r.json())
   .then(data => {
-    const termine = data.termine || [];
-    renderTermine(termine);
-
-    // Filter-Buttons aktivieren
-    document.querySelectorAll('.termine-filter-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        aktuellerFilter = btn.dataset.filter;
-        document.querySelectorAll('.termine-filter-btn').forEach(b => {
-          b.classList.toggle('btn-primary', b.dataset.filter === aktuellerFilter);
-          b.classList.toggle('btn-outline-green', b.dataset.filter !== aktuellerFilter);
-        });
-        renderTermine(termine);
-      });
-    });
+    const alleTermine = data.termine || [];
+    const sichtbareTermine = alleTermine.filter(istSichtbar);
+    buildFilterBar(sichtbareTermine);
+    renderTermine(sichtbareTermine);
   })
   .catch(() => {
     const tbody = document.getElementById('termineTableBody');
