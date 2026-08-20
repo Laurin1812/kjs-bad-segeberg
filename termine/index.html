@@ -175,11 +175,12 @@
               <th>Uhrzeit</th>
               <th>Veranstaltung</th>
               <th>Ort</th>
+              <th>Revier</th>
               <th>Kategorie</th>
             </tr>
           </thead>
           <tbody id="termineTableBody">
-            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Termine werden geladen …</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Termine werden geladen …</td></tr>
           </tbody>
         </table>
       </div>
@@ -307,20 +308,16 @@ function istSichtbar(t) {
   return grenze >= new Date();
 }
 
-// Straße/PLZ/Ort zusammen mit Revier/Hegering (falls gepflegt) anzeigen;
-// bei alten Terminen, die nur das frühere einfache Ort-Feld haben, bleibt
-// die Darstellung unverändert (nur "Ort").
+// Straße/PLZ/Ort zusammengefasst (ohne Revier - das steht seit Frank-
+// Feedback 20.08.2026 in einer eigenen Tabellenspalte, damit es nicht mehr
+// zusammen mit der Adresse in einer Zelle "häkelig" wirkt).
 function formatOrt(t) {
   var adressTeile = [];
   if (t.strasse) adressTeile.push(escHtml(t.strasse));
   var plzOrt = [t.plz, t.ort].filter(Boolean).join(' ');
   if (plzOrt) adressTeile.push(escHtml(plzOrt));
   else if (t.ort) adressTeile.push(escHtml(t.ort));
-  var html = adressTeile.join(', ');
-  if (t.revier) {
-    html += (html ? '<br>' : '') + '<span style="color:var(--text-muted);font-size:.85em;">' + escHtml(t.revier) + '</span>';
-  }
-  return html;
+  return adressTeile.join(', ');
 }
 
 // Goldene Kategorien bekommen badge--gold
@@ -334,7 +331,7 @@ function renderTermine(termine) {
     ? termine
     : termine.filter(t => t.kategorie === aktuellerFilter);
   if (gefiltert.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Keine Termine für diesen Filter.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Keine Termine für diesen Filter.</td></tr>';
     return;
   }
   tbody.innerHTML = gefiltert.map(t => {
@@ -344,6 +341,7 @@ function renderTermine(termine) {
       <td>${escHtml(t.uhrzeit)}</td>
       <td>${escHtml(t.veranstaltung)}</td>
       <td>${formatOrt(t)}</td>
+      <td>${t.revier ? '<span class="badge badge--gray">' + escHtml(t.revier) + '</span>' : ''}</td>
       <td><span class="badge${gold}">${escHtml(t.kategorie)}</span></td>
     </tr>`;
   }).join('');
