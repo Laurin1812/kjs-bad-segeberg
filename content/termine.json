@@ -14,6 +14,17 @@
       "strasse": "Hasselbusch 38A",
       "plz": "24558",
       "revier": "Hegering 3 – Bornhöved"
+    },
+    {
+      "datum": "1.12.2026",
+      "uhrzeit": "18:00 ",
+      "veranstaltung": "Hoffest",
+      "strasse": "Mustermeierstr. 7",
+      "plz": "24629",
+      "ort": "Kisdorf",
+      "revier": "Hegering 8 – Kisdorf",
+      "kategorie": "Schießwesen",
+      "archiviert": false
     }
   ]
 }
