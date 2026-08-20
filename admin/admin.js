@@ -212,7 +212,7 @@
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
-    { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'standard' },
+    { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
     { key:'kontaktseite', label:'📞 Kontaktseite', file:'content/einstellungen.json', form:'kontaktseite' },
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
       { key:'kontakt',   label:'Telefonzentrale & Kalender', file:'content/einstellungen.json',    form:'einstellungen' },
@@ -1095,18 +1095,24 @@
       case 'navExtra':        renderNavExtra(def, data);         break;
       case 'navReihenfolge':  renderNavReihenfolge(def, data);   break;
       case 'benutzer':        renderBenutzer();                  break;
+      case 'service':          renderService(def, data);          break;
       default:                renderStandard(def, data);
     }
     // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
     // (für Einstellungs-/Verwaltungsseiten ohne öffentliche Entsprechung
-    // nicht sinnvoll und daher ausgenommen).
-    var NO_DOWNLOADS_FORMS = ['einstellungen','kontaktseite','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
+    // nicht sinnvoll und daher ausgenommen). "service" hat sein eigenes,
+    // kategorie-basiertes Dokumente-System (siehe renderService) und ist
+    // daher hier ebenfalls ausgenommen – sonst würde am Ende der Seite noch
+    // eine leere generische "Dokumente & Downloads"-Box angehängt.
+    var NO_DOWNLOADS_FORMS = ['einstellungen','kontaktseite','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','service'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
     // Bildergalerie: gleiche Seiten wie Downloads, zusätzlich ohne reine
     // Personen-Listen (Vorstand, Obleute, Hegeringe) – dort macht eine
     // Bildergalerie inhaltlich keinen Sinn (Frank-Wunsch, siehe Punkt 2).
+    // Service ist über NO_DOWNLOADS_FORMS bereits ausgenommen (siehe oben),
+    // hier nichts zusätzlich nötig – NO_GALERIE_FORMS erbt es automatisch.
     var NO_GALERIE_FORMS = NO_DOWNLOADS_FORMS.concat(['personen','hegeringe']);
     if (NO_GALERIE_FORMS.indexOf(def.form) === -1) {
       injectGalerieCard(data);
@@ -1331,6 +1337,188 @@
     data.downloads = collectDownloadsList();
     data.galerie = collectGalerieList();
     data.galerie_titel = collectGalerieTitel();
+    return data;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     SERVICE – kategorisierte Dokumenten-Bibliothek (Frank-Wunsch)
+     Ersetzt für diese eine Seite komplett das generische Standard-
+     Seiten-Schema (kein Seiteninhalt/Untertitel/Intro/Galerie mehr).
+     data.kategorien = [{ id, name, text, dokumente:[{id,titel,datei,
+     datum,archiviert}] }]. Jede Kategorie ist ein eigener Block mit
+     eigener, verschachtelter Dokumenten-Liste (zwei Ebenen, analog zu
+     renderDownloadRow/renderDownloadsCard, nur zweistufig). Die Liste
+     wird – wie bei collectDownloadsList – erst beim Speichern komplett
+     aus dem DOM ausgelesen, nicht laufend in S.data gespiegelt (anders
+     als z.B. bei renderFAQ), damit Drag&Drop-Umsortierung nicht extra
+     synchronisiert werden muss.
+  ──────────────────────────────────────────────────────────── */
+  var svcRowSeq = 0; // laufender Zähler für eindeutige Feld-IDs (Datum/Archiviert) je Dokument-Zeile, über alle Kategorien hinweg
+
+  function renderServiceDokRow(d) {
+    var datei = d.datei || '';
+    var fname = datei.split('/').pop();
+    var seq = svcRowSeq++;
+    var datumId  = 'svc-datum-'  + seq;
+    var archivId = 'svc-archiv-' + seq;
+    var dokId = d.id || ('dok-' + Date.now() + '-' + Math.floor(Math.random() * 10000));
+    return '<div class="item-card dok-row" data-dok-id="' + escAttr(dokId) + '">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        '<input class="field-input dok-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Titel des Dokuments (z.B. Merkblatt Biotopschutz 2024)" style="margin-bottom:.35rem;">' +
+        '<div class="item-meta">📄 ' + escHtml(fname) +
+          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener">öffnen</a>' : '') +
+        '</div>' +
+        '<div class="field-row-2" style="margin-top:.6rem;">' +
+          fDate(datumId, 'Datum', d.datum) +
+          fToggle(archivId, 'Archiviert', !!d.archiviert) +
+        '</div>' +
+      '</div>' +
+      '<input type="hidden" class="dok-datei" value="' + escAttr(datei) + '">' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.dok-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderServiceKatCard(kat) {
+    var dokRows = (kat.dokumente || []).map(renderServiceDokRow).join('');
+    var dokListId = 'dok-list-' + kat.id;
+    return '<div class="service-kat-card" data-kat-id="' + escAttr(kat.id) + '">' +
+      '<div class="service-kat-card__head">' +
+        '<span class="item-drag kat-drag" title="Kategorie verschieben">⠿</span>' +
+        '<input class="field-input kat-name" type="text" value="' + escAttr(kat.name || '') + '" placeholder="Name der Kategorie (z.B. Umweltschutz)">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="serviceKatDelete(this)">🗑️ Kategorie löschen</button>' +
+      '</div>' +
+      '<div class="field-row" style="margin-top:.75rem;margin-bottom:.9rem;">' +
+        '<label class="field-label">Kurztext</label>' +
+        '<textarea class="field-textarea kat-text" rows="2" placeholder="Kurzer Beschreibungstext zu dieser Kategorie …">' + escHtml(kat.text || '') + '</textarea>' +
+      '</div>' +
+      '<div class="service-kat-card__dokus">' +
+        '<div class="service-kat-card__dokus-title">Dokumente</div>' +
+        '<div class="service-dok-list" id="' + escAttr(dokListId) + '">' + dokRows + '</div>' +
+        '<p class="text-muted dok-empty" style="font-size:.82rem;' + (dokRows ? 'display:none;' : '') + '">Noch keine Dokumente in dieser Kategorie.</p>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\',\'' + escAttr(dokListId) + '\')">📄 Dokument hinzufügen</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function initServiceSortable() {
+    var outer = id('service-kategorien-list');
+    if (outer && window.Sortable && !outer._sortableInit) {
+      outer._sortableInit = true;
+      Sortable.create(outer, { handle: '.kat-drag', animation: 150 });
+    }
+    document.querySelectorAll('.service-dok-list').forEach(function(el) {
+      if (window.Sortable && !el._sortableInit) {
+        el._sortableInit = true;
+        Sortable.create(el, { handle: '.item-drag', animation: 150 });
+      }
+    });
+  }
+
+  // "+ Neue Kategorie": Name per showPrompt abfragen (kein natives prompt()),
+  // neue leere Kategorie direkt ins DOM einhängen (S.data wird erst beim
+  // Speichern aus dem DOM neu aufgebaut, siehe collectService).
+  window.serviceKatAdd = async function() {
+    var name = await showPrompt('Neue Kategorie', 'Name der Kategorie:');
+    if (!name) return;
+    name = name.trim();
+    if (!name) return;
+    var kat = { id: 'kat-' + Date.now() + '-' + Math.floor(Math.random() * 10000), name: name, text: '', dokumente: [] };
+    var list = id('service-kategorien-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderServiceKatCard(kat);
+    list.appendChild(wrap.firstChild);
+    var empty = id('service-kat-empty');
+    if (empty) empty.style.display = 'none';
+    initServiceSortable();
+    S.dirty = true;
+  };
+
+  // "🗑 Kategorie löschen": bei vorhandenen Dokumenten erst mit Anzahl
+  // nachfragen (showConfirm statt natives confirm()), sonst direkt löschen.
+  window.serviceKatDelete = function(btn) {
+    var card = btn.closest('.service-kat-card');
+    if (!card) return;
+    var count = card.querySelectorAll('.dok-row').length;
+    var msg = count > 0
+      ? ('Diese Kategorie enthält ' + count + ' Dokument(e), die mit gelöscht werden. Fortfahren?')
+      : 'Diese Kategorie wirklich löschen?';
+    showConfirm('Kategorie löschen', msg, function() {
+      card.remove();
+    });
+  };
+
+  function renderService(def, data) {
+    var fH = function(fieldHtml, hintText) { return insertHintAfterLabel(fieldHtml, ttFieldHint(hintText)); };
+    var kats = data.kategorien || [];
+    var katsHtml = kats.map(renderServiceKatCard).join('');
+    var html = panelHeader(def.label) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Seiteninhalt</div>' +
+          fH(fText('titel', 'Seitentitel', data.titel),
+            'Die große Überschrift ganz oben auf der Seite. Kurz und klar halten.') +
+          fH(fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild),
+            'Das große Bild im Kopfbereich, hinter dem Titel. Quer-Format wirkt am besten.') +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Kategorien</div>' +
+          '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+            'Dokumente werden in Kategorien gruppiert (z.B. „Umweltschutz", „Förderung"). Jede Kategorie hat einen kurzen Text ' +
+            'und eine eigene Liste von Dokumenten. Archivierte Dokumente bleiben hier sichtbar, erscheinen aber nicht mehr auf der ' +
+            'öffentlichen Seite. Reihenfolge von Kategorien und Dokumenten per Drag &amp; Drop änderbar.' +
+          '</p>' +
+          '<div id="service-kategorien-list">' + katsHtml + '</div>' +
+          '<p class="text-muted" id="service-kat-empty" style="font-size:.85rem;' + (kats.length ? 'display:none;' : '') + '">Noch keine Kategorien angelegt.</p>' +
+          '<button type="button" class="list-add-btn" onclick="serviceKatAdd()">+ Neue Kategorie</button>' +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Kontakt (optional)</div>' +
+          fH(fText('kontakt_name', 'Kontaktname', data.kontakt_name),
+            'Name der Ansprechperson, die unten auf der Seite angezeigt wird. Optional.') +
+          fH(fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email),
+            'E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
+        '</div>' +
+      '</div>' +
+      saveBar();
+    id('admin-main').innerHTML = html;
+    initServiceSortable();
+    bindSaveBtn();
+  }
+
+  function collectService(data) {
+    data.titel         = gv('titel');
+    data.hero_bild      = gv('hero_bild');
+    data.kontakt_name  = gv('kontakt_name');
+    data.kontakt_email = gv('kontakt_email');
+    var kategorien = [];
+    document.querySelectorAll('#service-kategorien-list > .service-kat-card').forEach(function(katEl) {
+      var katId = katEl.getAttribute('data-kat-id') || ('kat-' + Date.now() + '-' + Math.floor(Math.random() * 10000));
+      var nameEl = katEl.querySelector('.kat-name');
+      var textEl = katEl.querySelector('.kat-text');
+      var name = nameEl ? nameEl.value.trim() : '';
+      var text = textEl ? textEl.value.trim() : '';
+      var dokumente = [];
+      katEl.querySelectorAll('.dok-row').forEach(function(row) {
+        var dateiEl  = row.querySelector('.dok-datei');
+        var titelEl  = row.querySelector('.dok-titel');
+        var dateEl   = row.querySelector('input[type="date"]');
+        var toggleEl = row.querySelector('.toggle');
+        var datei = dateiEl ? dateiEl.value.trim() : '';
+        var titel = titelEl ? titelEl.value.trim() : '';
+        var datum = dateEl ? dateEl.value : '';
+        var archiviert = toggleEl ? toggleEl.getAttribute('data-val') === '1' : false;
+        var dokId = row.getAttribute('data-dok-id') || ('dok-' + Date.now() + '-' + Math.floor(Math.random() * 10000));
+        if (datei) {
+          dokumente.push({ id: dokId, titel: titel, datei: datei, datum: datum, archiviert: archiviert });
+        }
+      });
+      kategorien.push({ id: katId, name: name, text: text, dokumente: dokumente });
+    });
+    data.kategorien = kategorien;
     return data;
   }
 
@@ -1568,7 +1756,18 @@
 
   // Fügt ein Dokument (neu hochgeladen oder aus der Galerie ausgewählt) zur
   // "Dokumente & Downloads"-Liste der aktuell geöffneten Seite hinzu.
-  function addDownloadRow(url, filename) {
+  // targetListId: optionales Ziel für das generalisierte PDF-Modal (siehe
+  // openPdfModal/_pdfModalTargetListId weiter unten) – ohne Angabe (alle
+  // bestehenden Aufrufe auf Standard-Seiten) unverändertes Verhalten:
+  // Dokument landet in der generischen "#downloads-list"-Liste der Seite.
+  // Zeigt targetListId auf eine Service-Kategorie-Dokumentenliste
+  // ("dok-list-..."), wird stattdessen die (andersartige) Service-
+  // Dokumentzeile mit Datum/Archiviert-Feldern erzeugt.
+  function addDownloadRow(url, filename, targetListId) {
+    if (targetListId && targetListId !== 'downloads-list') {
+      addServiceDokRow(targetListId, url, filename);
+      return;
+    }
     var list = id('downloads-list');
     if (!list) return;
     var displayName = filename.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '').trim() || filename;
@@ -1580,6 +1779,29 @@
     initDownloadsSortable();
     S.dirty = true;
     toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
+  }
+
+  // Fügt ein Dokument zur verschachtelten Dokumentenliste einer Service-
+  // Kategorie hinzu (Gegenstück zu addDownloadRow für die zweistufige
+  // Kategorien-Struktur, siehe renderServiceDokRow/renderServiceKatCard).
+  function addServiceDokRow(targetListId, url, filename) {
+    var list = id(targetListId);
+    if (!list) return;
+    var displayName = filename.replace(/^\d+-/, '').replace(/-/g, ' ').replace(/\.pdf$/i, '').trim() || filename;
+    var todayIso = new Date().toISOString().substring(0, 10);
+    var dok = {
+      id: 'dok-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+      titel: displayName, datei: url, datum: todayIso, archiviert: false
+    };
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderServiceDokRow(dok);
+    list.appendChild(wrap.firstChild);
+    var card = list.closest('.service-kat-card');
+    var emptyEl = card ? card.querySelector('.dok-empty') : null;
+    if (emptyEl) emptyEl.style.display = 'none';
+    initServiceSortable();
+    S.dirty = true;
+    toast('✅ Dokument hinzugefügt – Titel/Datum prüfen & Seite speichern', 'ok');
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -3217,6 +3439,7 @@
       case 'downloads':     data = collectDownloads(data); break;
       case 'navExtra':        data = collectNavExtra(data); break;
       case 'navReihenfolge':  data = collectNavReihenfolge(data); break;
+      case 'service':          data = collectService(data); break;
     }
 
     // Universeller "Dokumente & Downloads"-Bereich: falls auf dieser Seite
@@ -4012,9 +4235,17 @@
   //  - 'downloads' : Klick auf eine PDF fügt das Dokument zur "Dokumente &
   //                   Downloads"-Liste der Seite hinzu (kein Markdown-Link)
   var _pdfModalMode = 'insert';
+  // Ziel-Container für Modus 'downloads': normalerweise die generische
+  // "#downloads-list" einer Standard-Seite, bei Service-Kategorien stattdessen
+  // die ID der jeweiligen verschachtelten Dokumentenliste (siehe
+  // renderServiceKatCard: onclick="openPdfModal('downloads','dok-list-...')").
+  // Ohne zweites Argument (alle bestehenden Aufrufe) bleibt das Verhalten
+  // unverändert auf 'downloads-list'.
+  var _pdfModalTargetListId = 'downloads-list';
 
-  function openPdfModal(mode) {
+  function openPdfModal(mode, targetListId) {
     _pdfModalMode = (mode === 'downloads') ? 'downloads' : 'insert';
+    _pdfModalTargetListId = targetListId || 'downloads-list';
     if (_pdfModalMode === 'insert' && !S.mde) {
       toast('❌ Kein Markdown-Editor aktiv – bitte zuerst eine Seite öffnen', 'err');
       return;
@@ -4029,9 +4260,10 @@
     id('pdf-upload-status').textContent = '';
     loadPdfGallery();
   }
-  // Wird über inline onclick="openPdfModal()" / onclick="openPdfModal('downloads')"
-  // aufgerufen (renderStandard etc.) – inline onclick läuft im globalen Scope,
-  // daher muss die Funktion explizit auf window verfügbar gemacht werden.
+  // Wird über inline onclick="openPdfModal()" / onclick="openPdfModal('downloads')" /
+  // onclick="openPdfModal('downloads','dok-list-...')" aufgerufen – inline onclick
+  // läuft im globalen Scope, daher muss die Funktion explizit auf window
+  // verfügbar gemacht werden.
   window.openPdfModal = openPdfModal;
 
   function closePdfModal() {
@@ -4083,7 +4315,7 @@
   // zur "Dokumente & Downloads"-Liste der aktuellen Seite hinzufügen.
   window.pdfItemClick = function(url, filename) {
     if (_pdfModalMode === 'downloads') {
-      addDownloadRow(url, filename);
+      addDownloadRow(url, filename, _pdfModalTargetListId);
       closePdfModal();
     } else {
       insertPdfLink(url, filename);
@@ -4110,7 +4342,7 @@
         await loadPdfGallery();
         // Direkt verwenden: je nach Modus einfügen oder zur Downloads-Liste hinzufügen
         if (_pdfModalMode === 'downloads') {
-          addDownloadRow(url, file.name);
+          addDownloadRow(url, file.name, _pdfModalTargetListId);
           closePdfModal();
         } else {
           insertPdfLink(url, file.name);

@@ -191,26 +191,113 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/main.js"></script>
 <script>
+  // Service-Seite: kategorisierte Dokumenten-Bibliothek (ersetzt das frühere
+  // generische Seiteninhalt-Schema mit Untertitel/Einleitungstext/Inhalt/
+  // Bildergalerie komplett – siehe admin/admin.js renderService/collectService
+  // für die Verwaltung). Die generische "Dokumente & Downloads"/"Bildergalerie"-
+  // Auto-Injektion aus js/main.js greift hier nicht mehr, da content/service.json
+  // keine downloads[]/galerie[]-Felder mehr enthält.
+  function escHtml(s){
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  // Text als einfacher Absatz, HTML-escaped, Zeilenumbrüche als <br>
+  // (bewusst kein marked.parse hier – kein Präzedenzfall/Bedarf für
+  // Formatierung im Kategorie-Kurztext, dafür sicher gegen HTML-Injection).
+  function plainToHtml(s){
+    return escHtml(s || '').replace(/\r\n|\r|\n/g, '<br>');
+  }
+  function formatDatum(iso){
+    var m = iso && String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m) return '';
+    return parseInt(m[3],10) + '.' + m[2] + '.' + m[1];
+  }
+  var ICON_PDF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+  var ICON_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
+  var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+
   fetch('/content/service.json').then(r=>r.json()).then(d=>{
     if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
     var h1 = document.querySelector('.page-hero h1');
     if(h1 && d.titel) h1.textContent = d.titel;
     if(d.titel) document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
-    const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" class="${(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')}" style="border-radius:8px;margin-bottom:1.5rem;">` : '';
-    let untertitel = '';
-    if(d.untertitel){ untertitel = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.untertitel) ? d.untertitel : marked.parse(d.untertitel)) : d.untertitel; }
-    let intro = '';
-    if(d.intro){ intro = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.intro) ? d.intro : marked.parse(d.intro)) : d.intro; }
-    let inhalt = '';
-    if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt)) : d.inhalt; }
+
+    var kategorien = Array.isArray(d.kategorien) ? d.kategorien : [];
+    // Nur nicht-archivierte Dokumente werden überhaupt betrachtet - archivierte
+    // dürfen auf der öffentlichen Seite nie auftauchen, auch nicht versteckt.
+    var sichtbareKategorien = kategorien.map(function(kat){
+      var dokumente = (kat.dokumente || []).filter(function(doc){ return doc && doc.datei && !doc.archiviert; });
+      return { id: kat.id, name: kat.name, text: kat.text, dokumente: dokumente };
+    }).filter(function(kat){ return kat.dokumente.length > 0; });
+
+    // Distinct Jahre aus allen sichtbaren Dokumenten, absteigend sortiert.
+    var jahre = [];
+    sichtbareKategorien.forEach(function(kat){
+      kat.dokumente.forEach(function(doc){
+        var m = doc.datum && String(doc.datum).match(/^(\d{4})/);
+        if(m && jahre.indexOf(m[1]) === -1) jahre.push(m[1]);
+      });
+    });
+    jahre.sort(function(a,b){ return b - a; });
+
+    function buildDownloadItem(doc){
+      var datum = formatDatum(doc.datum);
+      return '<div class="download-item" data-jahr="' + escHtml(doc.datum ? String(doc.datum).substring(0,4) : '') + '">' +
+        '<div class="download-item__icon">' + ICON_PDF + '</div>' +
+        '<div class="download-item__meta">' +
+          '<div class="download-item__name">' + escHtml(doc.titel || '') + '</div>' +
+          '<div class="download-item__info">' + (datum ? '<span class="download-item__date">' + escHtml(datum) + '</span>' : '') + '</div>' +
+        '</div>' +
+        '<span class="download-item__actions">' +
+          '<a href="' + escHtml(doc.datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(doc.titel||'') + ' öffnen">' + ICON_OPEN + '</a>' +
+          '<a href="' + escHtml(doc.datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(doc.titel||'') + ' herunterladen">' + ICON_DOWNLOAD + '</a>' +
+        '</span>' +
+      '</div>';
+    }
+
+    var kategorienHtml = sichtbareKategorien.map(function(kat){
+      var sortiert = kat.dokumente.slice().sort(function(a,b){
+        return (b.datum || '').localeCompare(a.datum || '');
+      });
+      return '<div class="service-kategorie" data-kat="' + escHtml(kat.id || '') + '">' +
+        '<h2 class="service-kategorie-titel">' + escHtml(kat.name || '') + '</h2>' +
+        (kat.text ? '<p class="service-kategorie-text">' + plainToHtml(kat.text) + '</p>' : '') +
+        '<div class="downloads-list">' + sortiert.map(buildDownloadItem).join('') + '</div>' +
+      '</div>';
+    }).join('');
+
+    var jahrFilterHtml = jahre.length ? (
+      '<div class="service-jahr-filter-wrap">' +
+        '<label for="service-jahr-select">Jahr:</label>' +
+        '<select id="service-jahr-select" class="service-jahr-filter">' +
+          '<option value="">Alle Jahre</option>' +
+          jahre.map(function(j){ return '<option value="' + escHtml(j) + '">' + escHtml(j) + '</option>'; }).join('') +
+        '</select>' +
+      '</div>'
+    ) : '';
+
     const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
-    document.getElementById('page-main').innerHTML = `
-      ${untertitel ? '<div>' + untertitel + '</div>' : ''}
-      ${intro ? '<div>' + intro + '</div>' : ''}
-      ${bild}
-      ${inhalt ? '<div>' + inhalt + '</div>' : ''}
-      ${kontakt}
-    `;
+
+    document.getElementById('page-main').innerHTML =
+      jahrFilterHtml +
+      (kategorienHtml || '<p>Aktuell sind keine Dokumente hinterlegt.</p>') +
+      kontakt;
+
+    var select = document.getElementById('service-jahr-select');
+    if(select){
+      select.addEventListener('change', function(){
+        var jahr = select.value;
+        document.querySelectorAll('.service-kategorie').forEach(function(katEl){
+          var items = katEl.querySelectorAll('.download-item');
+          var visibleCount = 0;
+          items.forEach(function(item){
+            var match = !jahr || item.getAttribute('data-jahr') === jahr;
+            item.style.display = match ? '' : 'none';
+            if(match) visibleCount++;
+          });
+          katEl.style.display = visibleCount > 0 ? '' : 'none';
+        });
+      });
+    }
   }).catch(()=>{
     document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
   });
