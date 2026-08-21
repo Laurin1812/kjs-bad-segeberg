@@ -308,7 +308,9 @@
         html += '</div></div>';
       }
 
-      html += '<p style="margin-top:2.5rem;"><a href="index.html" class="btn btn-outline-green">← Zurück zu Aktuelles</a></p>';
+      // Doppelten "Zurück zu Aktuelles"-Link am Seitenende entfernt (Laurin-
+      // Feedback 21.08.2026) - der Link oben im Content-Bereich (siehe weiter
+      // oben) reicht aus, seit es den gibt ist der untere redundant.
 
       document.getElementById('beitrag-inhalt').innerHTML = html;
 
