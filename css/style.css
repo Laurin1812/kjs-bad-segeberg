@@ -152,6 +152,11 @@ p  { margin-bottom: 1rem; }
 .site-logo__text { line-height: 1.2; }
 .site-logo__name { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--green-dark); display: block; }
 .site-logo__sub   { font-size: .88rem; color: var(--text-muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
+/* "e.V." muss klein bleiben, auch wenn der Rest des Logo-Untertitels per
+   text-transform:uppercase großgeschrieben wird (Frank-Feedback 20.08.2026:
+   im Header stand bisher trotz korrektem HTML-Text "E.V." statt "e.V.",
+   weil CSS die Groß/Kleinschreibung beim Rendern überschreibt). */
+.site-logo__sub .no-caps { text-transform: none; }
 
 .main-nav { display: flex; align-items: center; gap: .15rem; }
 .main-nav > li { position: relative; }
