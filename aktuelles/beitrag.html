@@ -267,7 +267,12 @@
       }
 
       // Inhalt rendern
-      var html = '<div class="news-card__meta" style="margin-bottom:1.5rem;">' +
+      // "Zurück zu Aktuelles"-Link oben im weißen Content-Bereich (Frank-
+      // Feedback 21.08.2026: beim Lesen eines Beitrags fehlte ein Zurück-
+      // Link oben, nur unten am Seitenende vorhanden) - gleicher Stil wie
+      // der "Zurück zu allen Themen"-Link auf den Jagdhundeschule-Kursseiten.
+      var html = '<a href="index.html" class="content-back-link">← Zurück zu Aktuelles</a>' +
+        '<div class="news-card__meta" style="margin-bottom:1.5rem;">' +
         '<span class="news-card__cat">' + (b.kategorie || '') + '</span>' +
         '<span class="news-card__date" style="margin-left:1rem;">' + formatDatum(b.datum) + '</span>' +
         '</div>';
