@@ -20,15 +20,34 @@
   },
   "beitraege": [
     {
+      "titel": "",
+      "datum": "",
+      "jahr": "2026",
+      "kategorie": "Allgemein",
+      "bild": "",
+      "text": "",
+      "link": "",
+      "archiviert": false
+    },
+    {
       "titel": "Segeberger Jäger pflanzen weitere Bäume in ihren Reviere",
       "datum": "1.01.2024",
       "jahr": "2024",
       "kategorie": "Naturschutz",
-      "bild": "",
+      "bild": "/images/1787302223438-baum3.jpg",
       "text": "Auf Vermittlung von Henning Schwartinsky (Hegeringleiter Kaltenkirchen) konnten interessierte Jägerinnen und Jäger beim Obsthof Lüders in Seestermühe über 200 Apfelbäume ausgraben und mit in ihre Reviere nehmen. Das einmalige Angebot wurde gut angenommen und über 100 der Obstbäume  der Sorte Hamburger Cox gingen in den Kreis Segeberg. Großer Dank gilt der  Familie Lüders. (Februar 2024)",
       "link": "",
       "archiviert": false,
-      "galerie": [],
+      "galerie": [
+        {
+          "bild": "/images/1787302223438-baum3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787302218370-baum2.jpg",
+          "titel": ""
+        }
+      ],
       "galerie_titel": "Bildergalerie",
       "downloads": []
     },
