@@ -254,8 +254,15 @@
     });
 
     function buildDownloadItem(doc){
+      // Vorschaubild statt generischem PDF-Icon, falls im Admin eines
+      // hinterlegt wurde – gleiches .download-item__thumb-Muster wie die
+      // seitenweite "Dokumente & Downloads"-Liste in js/main.js (Frank-Bug-
+      // Report 21.08.2026: Vorschaubild wurde bisher komplett ignoriert).
+      var iconHtml = doc.vorschau
+        ? '<a href="' + escHtml(doc.datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(doc.vorschau) + '" alt="' + escHtml(doc.titel||'') + '" loading="lazy"></a>'
+        : '<div class="download-item__icon">' + ICON_PDF + '</div>';
       return '<div class="download-item">' +
-        '<div class="download-item__icon">' + ICON_PDF + '</div>' +
+        iconHtml +
         '<div class="download-item__meta">' +
           '<div class="download-item__name">' + escHtml(doc.titel || '') + '</div>' +
         '</div>' +
