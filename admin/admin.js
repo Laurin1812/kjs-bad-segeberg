@@ -3105,19 +3105,41 @@
 
   /* ────────────────────────────────────────────────────────────
      MEDIEN & BILDER (standalone gallery panel)
+
+     Archivierfunktion (21.08.2026, Frank-Wunsch): "Archivieren" darf die
+     Bilddatei NIEMALS im Repo verschieben/umbenennen, da Bilder site-weit
+     per festem Pfad /images/<name> referenziert werden (Aktuelles/Termine/
+     Service-Beiträge, Markdown-Inhalte, Downloads-Vorschaubilder) - eine
+     Verschiebung würde all diese Referenzen live brechen. Stattdessen wird
+     nur der Dateiname in einer separaten Metadaten-Liste geführt
+     (content/medien-archiv.json), die Galerie filtert clientseitig in
+     "Alle Bilder" / "Archivierte Bilder". Die Datei selbst bleibt unverändert
+     am gleichen Ort liegen -> auf der Live-Seite ändert sich nichts.
   ──────────────────────────────────────────────────────────── */
+  var medienFiles = null;        // zuletzt geladene Verzeichnisliste von images/
+  var medienArchivListe = [];    // Dateinamen, die als "archiviert" markiert sind
+  var medienArchivSha = null;    // sha von content/medien-archiv.json (falls vorhanden)
+
   function renderMedian() {
     var html = '<div class="panel-header"><h2>🖼️ Medien & Bilder</h2></div>' +
       '<div class="panel-body panel-body--wide">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Bild hochladen</div>' +
-          '<div class="upload-row" style="margin-bottom:1.25rem;">' +
-            '<label class="btn btn-primary" for="medien-upload-input">📤 Bild hochladen</label>' +
-            '<input type="file" id="medien-upload-input" accept="image/*" style="display:none">' +
-            '<span id="medien-upload-status" style="margin-left:.75rem;color:var(--text-muted);font-size:.85rem;"></span>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">' +
+            '<div class="upload-row" style="margin-bottom:0;">' +
+              '<label class="btn btn-primary" for="medien-upload-input">📤 Bild hochladen</label>' +
+              '<input type="file" id="medien-upload-input" accept="image/*" style="display:none">' +
+              '<span id="medien-upload-status" style="margin-left:.75rem;color:var(--text-muted);font-size:.85rem;"></span>' +
+            '</div>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="medien-archiv-toggle" onclick="medienArchivPanelToggle()">📦 Archivierte Bilder</button>' +
           '</div>' +
           '<div class="form-card-title">Alle Bilder</div>' +
           '<div class="img-gallery" id="medien-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+        '<div class="form-card" id="medien-archiv-panel" style="display:none;">' +
+          '<div class="form-card-title">📦 Archivierte Bilder</div>' +
+          '<p class="text-muted" style="margin:-.5rem 0 1rem;font-size:.85rem;">Archivierte Bilder bleiben auf der Website ganz normal bestehen – sie werden hier nur zur besseren Übersicht aus „Alle Bilder" ausgeblendet. Über „♻️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
+          '<div class="img-gallery" id="medien-archiv-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
         '</div>' +
       '</div>';
     id('admin-main').innerHTML = html;
@@ -3139,33 +3161,102 @@
     });
   }
 
+  window.medienArchivPanelToggle = function() {
+    var panel = id('medien-archiv-panel');
+    if (!panel) return;
+    var offen = panel.style.display !== 'none';
+    panel.style.display = offen ? 'none' : 'block';
+  };
+
+  async function loadMedienArchivListe() {
+    try {
+      var resp = await apiGet('content/medien-archiv.json');
+      medienArchivSha = resp.sha;
+      var data = JSON.parse(fromBase64(resp.content));
+      medienArchivListe = Array.isArray(data.archiviert) ? data.archiviert : [];
+    } catch(e) {
+      // Datei existiert vermutlich noch nicht (erster Aufruf) - leere Liste,
+      // wird beim ersten Archivieren automatisch neu angelegt (doSave/apiPut
+      // ohne sha = neue Datei).
+      medienArchivListe = [];
+      medienArchivSha = null;
+    }
+  }
+
   async function loadMedianGallery() {
     var gallery = id('medien-gallery');
     if (!gallery) return;
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
+    var archivGallery = id('medien-archiv-gallery');
+    if (archivGallery) archivGallery.innerHTML = '<div class="gallery-loading">Wird geladen…</div>';
     try {
-      var files = await apiGetDir('images');
-      var imgs = files.filter(function(f) {
-        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
-      });
-      if (!imgs.length) {
-        gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
-        return;
-      }
-      gallery.innerHTML = imgs.map(function(f) {
-        var url = '/images/' + f.name;
-        return '<div class="gallery-img-wrap" data-path="' + escAttr(f.path) + '">' +
-          '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
-          '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
-          '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
-            '<button class="btn btn-sm btn-outline" style="color:#c0392b;border-color:#c0392b;" onclick="medienDeleteImage(\'' + escAttr(f.path) + '\',\'' + escAttr(f.sha) + '\',\'' + escAttr(f.name) + '\')">🗑️ Löschen</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+      medienFiles = await apiGetDir('images');
+      await loadMedienArchivListe();
+      renderMedienGalerien();
     } catch(e) {
       gallery.innerHTML = '<div class="gallery-loading">Fehler: ' + escHtml(e.message) + '</div>';
     }
   }
+
+  function medienGalleryItemHtml(f, istArchiviert) {
+    var url = '/images/' + f.name;
+    var archivBtn = istArchiviert
+      ? '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">♻️ Wiederherstellen</button>'
+      : '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">📦 Archivieren</button>';
+    return '<div class="gallery-img-wrap" data-path="' + escAttr(f.path) + '">' +
+      '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
+      '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
+      '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
+        archivBtn +
+        '<button class="btn btn-sm btn-outline" style="color:#c0392b;border-color:#c0392b;" onclick="medienDeleteImage(\'' + escAttr(f.path) + '\',\'' + escAttr(f.sha) + '\',\'' + escAttr(f.name) + '\')">🗑️ Löschen</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderMedienGalerien() {
+    var gallery = id('medien-gallery');
+    var archivGallery = id('medien-archiv-gallery');
+    var toggleBtn = id('medien-archiv-toggle');
+    if (!medienFiles) return;
+    var imgs = medienFiles.filter(function(f) {
+      return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+    });
+    var aktive = imgs.filter(function(f) { return medienArchivListe.indexOf(f.name) === -1; });
+    var archiviert = imgs.filter(function(f) { return medienArchivListe.indexOf(f.name) !== -1; });
+
+    if (toggleBtn) toggleBtn.textContent = '📦 Archivierte Bilder (' + archiviert.length + ')';
+
+    if (gallery) {
+      gallery.innerHTML = aktive.length
+        ? aktive.map(function(f) { return medienGalleryItemHtml(f, false); }).join('')
+        : '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
+    }
+    if (archivGallery) {
+      archivGallery.innerHTML = archiviert.length
+        ? archiviert.map(function(f) { return medienGalleryItemHtml(f, true); }).join('')
+        : '<div class="gallery-loading">Keine archivierten Bilder.</div>';
+    }
+  }
+
+  window.medienArchivToggle = async function(name) {
+    var idx = medienArchivListe.indexOf(name);
+    var wirdArchiviert = idx === -1;
+    if (wirdArchiviert) medienArchivListe.push(name); else medienArchivListe.splice(idx, 1);
+    renderMedienGalerien(); // optimistisches UI-Update, Datei bleibt unangetastet
+    try {
+      var result = await doSave('content/medien-archiv.json', { archiviert: medienArchivListe },
+        wirdArchiviert ? ('📦 Bild archiviert: ' + name) : ('♻️ Bild wiederhergestellt: ' + name));
+      if (result && result.content && result.content.sha) medienArchivSha = result.content.sha;
+      toast(wirdArchiviert ? '✅ Bild archiviert.' : '✅ Bild wiederhergestellt.', 'ok');
+    } catch(e) {
+      // Rückgängig machen, wenn das Speichern fehlschlägt
+      var idx2 = medienArchivListe.indexOf(name);
+      if (wirdArchiviert) { if (idx2 !== -1) medienArchivListe.splice(idx2, 1); }
+      else medienArchivListe.push(name);
+      renderMedienGalerien();
+      toast('❌ Fehler: ' + e.message, 'err');
+    }
+  };
 
   window.medienCopyUrl = function(url) {
     navigator.clipboard.writeText(url).then(function() {
@@ -3186,15 +3277,25 @@
           // nach einem DELETE kurzzeitig noch die alte (zwischengespeicherte) Verzeichnis-
           // liste zurück – ein sofortiges Neuladen würde das gerade gelöschte Bild also
           // wieder anzeigen ("Geisterbild", das erst beim zweiten Klick verschwindet).
-          var gallery = id('medien-gallery');
-          if (gallery) {
-            var escSel = (window.CSS && CSS.escape) ? CSS.escape(path) : path.replace(/(["\\\]])/g, '\\$1');
+          var escSel = (window.CSS && CSS.escape) ? CSS.escape(path) : path.replace(/(["\\\]])/g, '\\$1');
+          [id('medien-gallery'), id('medien-archiv-gallery')].forEach(function(gallery) {
+            if (!gallery) return;
             var wrap = gallery.querySelector('[data-path="' + escSel + '"]');
             if (wrap) wrap.remove();
-            if (!gallery.querySelector('.gallery-img-wrap')) {
-              gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
-            }
+          });
+          // aus der Archiv-Liste ebenfalls entfernen (falls dort vorhanden), damit
+          // medien-archiv.json nicht auf eine gelöschte Datei verweist
+          var idx = medienArchivListe.indexOf(name);
+          if (idx !== -1) {
+            medienArchivListe.splice(idx, 1);
+            doSave('content/medien-archiv.json', { archiviert: medienArchivListe }, '📦 Archiv-Eintrag bereinigt (Bild gelöscht): ' + name).catch(function(){});
           }
+          if (medienFiles) medienFiles = medienFiles.filter(function(f) { return f.path !== path; });
+          var g1 = id('medien-gallery'), g2 = id('medien-archiv-gallery');
+          if (g1 && !g1.querySelector('.gallery-img-wrap')) g1.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
+          if (g2 && !g2.querySelector('.gallery-img-wrap')) g2.innerHTML = '<div class="gallery-loading">Keine archivierten Bilder.</div>';
+          var toggleBtn = id('medien-archiv-toggle');
+          if (toggleBtn && g2) toggleBtn.textContent = '📦 Archivierte Bilder (' + g2.querySelectorAll('.gallery-img-wrap').length + ')';
         } catch(e) {
           toast('❌ Fehler: ' + e.message, 'err');
         }
