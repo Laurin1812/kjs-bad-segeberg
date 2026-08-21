@@ -942,8 +942,11 @@ p  { margin-bottom: 1rem; }
 /* =========================================================
    SERVICE – Beiträge mit Kategorie (Akkordeon, Frank-Wunsch 21.08.2026)
    ========================================================= */
-.service-jahr-filter-wrap { display: flex; align-items: center; gap: .6rem; margin: 0 0 2rem; flex-wrap: wrap; }
-.service-jahr-filter-wrap label { font-size: .84rem; font-weight: 600; color: var(--text-dark); }
+/* Jahr- und Kategorie-Filter nebeneinander (Frank-Wunsch 21.08.2026: "so wie
+   auf den anderen Seiten immer vom System ist") - Klasse umbenannt von
+   .service-jahr-filter-wrap, da jetzt auch das Kategorie-Dropdown drin sitzt. */
+.service-filter-wrap { display: flex; align-items: center; gap: .6rem; margin: 0 0 2rem; flex-wrap: wrap; }
+.service-filter-wrap label { font-size: .84rem; font-weight: 600; color: var(--text-dark); }
 .service-jahr-filter {
   padding: .55rem .9rem; border: 1px solid var(--border);
   border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: .88rem;
@@ -977,6 +980,13 @@ p  { margin-bottom: 1rem; }
 .service-beitrag__text { font-size: .92rem; color: var(--text-dark); line-height: 1.7; margin: 0 0 1rem; }
 .service-beitrag__text p:last-child { margin-bottom: 0; }
 .service-beitrag iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: none; border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin: 0 0 1rem; display: block; }
+/* .download-item__thumb ist site-weit als schmale 60x80-Hochformat-Box
+   gedacht (z.B. Dokument-Scan-Vorschau in der Sidebar). Service-Vorschau-
+   bilder sind aber normale Querformat-Fotos (Frank-Feedback 21.08.2026:
+   "sieht katastrophal aus" - das Foto wurde auf einen schmalen Streifen
+   zusammengeschnitten). Eigene, breitere Querformat-Größe nur hier, damit
+   die Sidebar-Variante auf anderen Seiten unverändert bleibt. */
+.download-item__thumb.service-download-item__thumb { width: 110px; height: 74px; }
 .download-item__date { font-size: .78rem; color: var(--text-muted); }
 
 /* Titelbild eines Aktuelles-Beitrags (aktuelles/beitrag.html): stand vorher
