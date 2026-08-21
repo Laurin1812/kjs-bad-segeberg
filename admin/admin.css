@@ -392,28 +392,6 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 }
 .list-add-btn:hover { background: var(--green-light); border-color: var(--green); }
 
-/* ── SERVICE: Kategorien mit verschachtelten Dokumenten ─────────── */
-.service-kat-card {
-  background: var(--white); border: 1.5px solid var(--border);
-  border-left: 4px solid var(--green); border-radius: var(--radius);
-  padding: 1.1rem 1.25rem; margin-bottom: 1rem;
-}
-.service-kat-card.sortable-ghost { opacity: .4; }
-.service-kat-card__head { display: flex; align-items: center; gap: .6rem; }
-.service-kat-card__head .kat-name { flex: 1; font-weight: 600; }
-.kat-drag { cursor: grab; }
-.kat-text { min-height: 60px; }
-.service-kat-card__dokus {
-  margin-top: .75rem; padding-top: .9rem; border-top: 1px dashed var(--border);
-}
-.service-kat-card__dokus-title {
-  font-size: .78rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .05em; color: var(--text-muted); margin-bottom: .6rem;
-}
-.service-dok-list { padding-left: .25rem; }
-.service-dok-list .dok-row { margin-bottom: .6rem; }
-.service-dok-list .dok-row:last-child { margin-bottom: .75rem; }
-
 /* Person list */
 .person-form-fields { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 .person-photo-wrap { display: flex; align-items: center; gap: .75rem; }

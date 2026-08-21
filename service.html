@@ -191,25 +191,32 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/main.js"></script>
 <script>
-  // Service-Seite: kategorisierte Dokumenten-Bibliothek (ersetzt das frühere
-  // generische Seiteninhalt-Schema mit Untertitel/Einleitungstext/Inhalt/
-  // Bildergalerie komplett – siehe admin/admin.js renderService/collectService
-  // für die Verwaltung). Die generische "Dokumente & Downloads"/"Bildergalerie"-
-  // Auto-Injektion aus js/main.js greift hier nicht mehr, da content/service.json
-  // keine downloads[]/galerie[]-Felder mehr enthält.
+  // Service-Seite: Beiträge mit Kategorie (Frank-Wunsch 21.08.2026: Admin-
+  // Aufbau an Aktuelles angleichen – siehe admin/admin.js renderService/
+  // serviceEdit für die Verwaltung). Ersetzt das frühere Schema "Kategorie
+  // enthält mehrere Dokumente" durch eine flache Liste d.beitraege, jeder
+  // Beitrag hat genau eine Kategorie. Kategorien werden hier zu Gruppen
+  // zusammengefasst und als aufklappbares Akkordeon dargestellt (Frank-Wunsch
+  // #85), gleiches <details>/<summary>-Muster wie auf der FAQ-Seite. Die
+  // generische "Dokumente & Downloads"/"Bildergalerie"-Auto-Injektion aus
+  // js/main.js greift hier nicht, da content/service.json keine seitenweiten
+  // downloads[]/galerie[]-Felder mehr enthält (Downloads liegen jetzt pro
+  // Beitrag in b.downloads[]).
   function escHtml(s){
     return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  // Text als einfacher Absatz, HTML-escaped, Zeilenumbrüche als <br>
-  // (bewusst kein marked.parse hier – kein Präzedenzfall/Bedarf für
-  // Formatierung im Kategorie-Kurztext, dafür sicher gegen HTML-Injection).
-  function plainToHtml(s){
-    return escHtml(s || '').replace(/\r\n|\r|\n/g, '<br>');
   }
   function formatDatum(iso){
     var m = iso && String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
     if(!m) return '';
     return parseInt(m[3],10) + '.' + m[2] + '.' + m[1];
+  }
+  // YouTube-URL (watch?v=, youtu.be/, shorts/, embed/) -> Video-ID, damit ein
+  // beliebig eingefügter Link (Admin-Feld "YouTube-Video-Link") zuverlässig
+  // als eingebettetes Video dargestellt werden kann.
+  function youtubeId(url){
+    if(!url) return '';
+    var m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{6,})/);
+    return m ? m[1] : '';
   }
   var ICON_PDF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
   var ICON_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
@@ -221,31 +228,36 @@
     if(h1 && d.titel) h1.textContent = d.titel;
     if(d.titel) document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
 
-    var kategorien = Array.isArray(d.kategorien) ? d.kategorien : [];
-    // Nur nicht-archivierte Dokumente werden überhaupt betrachtet - archivierte
+    // Nur nicht-archivierte Beiträge werden überhaupt betrachtet - archivierte
     // dürfen auf der öffentlichen Seite nie auftauchen, auch nicht versteckt.
-    var sichtbareKategorien = kategorien.map(function(kat){
-      var dokumente = (kat.dokumente || []).filter(function(doc){ return doc && doc.datei && !doc.archiviert; });
-      return { id: kat.id, name: kat.name, text: kat.text, dokumente: dokumente };
-    }).filter(function(kat){ return kat.dokumente.length > 0; });
+    var alleBeitraege = Array.isArray(d.beitraege) ? d.beitraege : [];
+    var sichtbar = alleBeitraege.filter(function(b){ return b && !b.archiviert; });
 
-    // Distinct Jahre aus allen sichtbaren Dokumenten, absteigend sortiert.
+    // Distinct Jahre aus allen sichtbaren Beiträgen, absteigend sortiert.
     var jahre = [];
-    sichtbareKategorien.forEach(function(kat){
-      kat.dokumente.forEach(function(doc){
-        var m = doc.datum && String(doc.datum).match(/^(\d{4})/);
-        if(m && jahre.indexOf(m[1]) === -1) jahre.push(m[1]);
-      });
+    sichtbar.forEach(function(b){
+      var m = b.datum && String(b.datum).match(/^(\d{4})/);
+      if(m && jahre.indexOf(m[1]) === -1) jahre.push(m[1]);
     });
     jahre.sort(function(a,b){ return b - a; });
 
+    // Kategorie-Reihenfolge: erst die im Admin verwaltete Liste (falls
+    // vorhanden), danach alles, was nur an Beiträgen hängt, aber (noch) nicht
+    // in der Liste steht – gleiche Fallback-Logik wie alleAktuellesKategorien
+    // im Admin, damit die Reihenfolge zur Kategorie-Verwaltung passt.
+    var kategorienReihenfolge = (d.einstellungen && d.einstellungen.kategorien) || [];
+    var katOrder = [];
+    var seenKat = {};
+    kategorienReihenfolge.concat(sichtbar.map(function(b){ return b.kategorie || ''; })).forEach(function(k){
+      k = (k || '').trim();
+      if(k && !seenKat[k]){ seenKat[k] = true; katOrder.push(k); }
+    });
+
     function buildDownloadItem(doc){
-      var datum = formatDatum(doc.datum);
-      return '<div class="download-item" data-jahr="' + escHtml(doc.datum ? String(doc.datum).substring(0,4) : '') + '">' +
+      return '<div class="download-item">' +
         '<div class="download-item__icon">' + ICON_PDF + '</div>' +
         '<div class="download-item__meta">' +
           '<div class="download-item__name">' + escHtml(doc.titel || '') + '</div>' +
-          '<div class="download-item__info">' + (datum ? '<span class="download-item__date">' + escHtml(datum) + '</span>' : '') + '</div>' +
         '</div>' +
         '<span class="download-item__actions">' +
           '<a href="' + escHtml(doc.datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(doc.titel||'') + ' öffnen">' + ICON_OPEN + '</a>' +
@@ -254,15 +266,28 @@
       '</div>';
     }
 
-    var kategorienHtml = sichtbareKategorien.map(function(kat){
-      var sortiert = kat.dokumente.slice().sort(function(a,b){
-        return (b.datum || '').localeCompare(a.datum || '');
-      });
-      return '<div class="service-kategorie" data-kat="' + escHtml(kat.id || '') + '">' +
-        '<h2 class="service-kategorie-titel">' + escHtml(kat.name || '') + '</h2>' +
-        (kat.text ? '<p class="service-kategorie-text">' + plainToHtml(kat.text) + '</p>' : '') +
-        '<div class="downloads-list">' + sortiert.map(buildDownloadItem).join('') + '</div>' +
+    function buildBeitrag(b){
+      var ytId = youtubeId(b.video);
+      var jahr = b.datum ? String(b.datum).match(/^(\d{4})/) : null;
+      var downloads = (b.downloads || []).filter(function(dl){ return dl && dl.datei; });
+      return '<div class="service-beitrag" data-jahr="' + escHtml(jahr ? jahr[1] : '') + '">' +
+        '<div class="service-beitrag__titel">' + escHtml(b.titel || '') +
+          (b.datum ? ' <span class="service-beitrag__datum">' + escHtml(formatDatum(b.datum)) + '</span>' : '') +
+        '</div>' +
+        (b.text ? '<div class="service-beitrag__text">' + marked.parse(b.text) + '</div>' : '') +
+        (ytId ? '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '" title="' + escHtml(b.titel||'Video') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>' : '') +
+        (downloads.length ? '<div class="downloads-list">' + downloads.map(buildDownloadItem).join('') + '</div>' : '') +
       '</div>';
+    }
+
+    var kategorienHtml = katOrder.map(function(kat){
+      var beitraegeInKat = sichtbar.filter(function(b){ return (b.kategorie || '').trim() === kat; })
+        .sort(function(a,b){ return (b.datum || '').localeCompare(a.datum || ''); });
+      if(!beitraegeInKat.length) return '';
+      return '<details class="service-kategorie">' +
+        '<summary class="service-kategorie-titel">' + escHtml(kat) + '</summary>' +
+        '<div class="service-kategorie__body">' + beitraegeInKat.map(buildBeitrag).join('') + '</div>' +
+      '</details>';
     }).join('');
 
     var jahrFilterHtml = jahre.length ? (
@@ -279,7 +304,7 @@
 
     document.getElementById('page-main').innerHTML =
       jahrFilterHtml +
-      (kategorienHtml || '<p>Aktuell sind keine Dokumente hinterlegt.</p>') +
+      (kategorienHtml || '<p>Aktuell sind keine Beiträge vorhanden.</p>') +
       kontakt;
 
     var select = document.getElementById('service-jahr-select');
@@ -287,7 +312,7 @@
       select.addEventListener('change', function(){
         var jahr = select.value;
         document.querySelectorAll('.service-kategorie').forEach(function(katEl){
-          var items = katEl.querySelectorAll('.download-item');
+          var items = katEl.querySelectorAll('.service-beitrag');
           var visibleCount = 0;
           items.forEach(function(item){
             var match = !jahr || item.getAttribute('data-jahr') === jahr;
@@ -295,6 +320,7 @@
             if(match) visibleCount++;
           });
           katEl.style.display = visibleCount > 0 ? '' : 'none';
+          if(jahr && visibleCount > 0) katEl.setAttribute('open', '');
         });
       });
     }

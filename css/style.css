@@ -940,7 +940,7 @@ p  { margin-bottom: 1rem; }
 .downloads-list { clear: both; }
 
 /* =========================================================
-   SERVICE – Kategorisierte Dokumenten-Bibliothek
+   SERVICE – Beiträge mit Kategorie (Akkordeon, Frank-Wunsch 21.08.2026)
    ========================================================= */
 .service-jahr-filter-wrap { display: flex; align-items: center; gap: .6rem; margin: 0 0 2rem; flex-wrap: wrap; }
 .service-jahr-filter-wrap label { font-size: .84rem; font-weight: 600; color: var(--text-dark); }
@@ -953,10 +953,30 @@ p  { margin-bottom: 1rem; }
 .service-jahr-filter:focus {
   outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(61,139,64,.12);
 }
-.service-kategorie { margin-bottom: 2.5rem; clear: both; }
-.service-kategorie:last-child { margin-bottom: 0; }
-.service-kategorie-titel { font-weight: 700; color: var(--green-dark); font-size: 1.2rem; margin: 0 0 .5rem; font-family: var(--font-heading); }
-.service-kategorie-text { font-size: .92rem; color: var(--text-dark); margin: 0 0 1rem; line-height: 1.6; }
+/* Kategorien als aufklappbares Akkordeon (Frank-Wunsch #85) – gleiches
+   <details>/<summary>-Muster wie .faq-item auf der FAQ-Seite, nur eigene
+   Klassennamen, da Service inhaltlich etwas anderes zeigt (Beiträge statt
+   Frage/Antwort). */
+.service-kategorie { border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: .75rem; overflow: hidden; clear: both; }
+.service-kategorie summary.service-kategorie-titel {
+  padding: 1.1rem 1.5rem; font-weight: 700; font-size: 1.05rem; margin: 0;
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between;
+  align-items: center; background: var(--bg-white); transition: background var(--transition);
+  color: var(--green-dark); font-family: var(--font-heading);
+}
+.service-kategorie summary::-webkit-details-marker { display: none; }
+.service-kategorie summary:hover { background: var(--green-light); }
+.service-kategorie summary::after { content: '+'; font-size: 1.3rem; color: var(--green-main); flex-shrink: 0; margin-left: 1rem; }
+.service-kategorie[open] summary::after { content: '−'; }
+.service-kategorie[open] summary { background: var(--green-light); }
+.service-kategorie__body { padding: 1.5rem; border-top: 1px solid var(--border); background: var(--bg-white); }
+.service-beitrag { margin-bottom: 2rem; }
+.service-beitrag:last-child { margin-bottom: 0; }
+.service-beitrag__titel { font-weight: 700; font-size: 1rem; color: var(--text-dark); margin: 0 0 .5rem; }
+.service-beitrag__datum { font-weight: 400; font-size: .82rem; color: var(--text-muted); }
+.service-beitrag__text { font-size: .92rem; color: var(--text-dark); line-height: 1.7; margin: 0 0 1rem; }
+.service-beitrag__text p:last-child { margin-bottom: 0; }
+.service-beitrag iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: none; border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin: 0 0 1rem; display: block; }
 .download-item__date { font-size: .78rem; color: var(--text-muted); }
 
 /* Titelbild eines Aktuelles-Beitrags (aktuelles/beitrag.html): stand vorher
