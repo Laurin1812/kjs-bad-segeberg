@@ -987,6 +987,12 @@ p  { margin-bottom: 1rem; }
    zusammengeschnitten). Eigene, breitere Querformat-Größe nur hier, damit
    die Sidebar-Variante auf anderen Seiten unverändert bleibt. */
 .download-item__thumb.service-download-item__thumb { width: 110px; height: 74px; }
+/* In diesem tief verschachtelten Kontext (Akkordeon > Beitrag > Downloads-Liste)
+   löst der Browser "width:100%" auf dem <img> nicht auf die tatsächliche
+   Content-Box der Thumb-Box auf (Messung ergab konsequent ~87px statt 108px,
+   ein Layout-Rendering-Eigenheit, keine CSS-Spezifitätsfrage - feste Pixel
+   umgehen das zuverlässig, da 100%/height:100% hier nicht stabil greifen). */
+.download-item__thumb.service-download-item__thumb img { width: 108px; height: 72px; }
 .download-item__date { font-size: .78rem; color: var(--text-muted); }
 
 /* Titelbild eines Aktuelles-Beitrags (aktuelles/beitrag.html): stand vorher
