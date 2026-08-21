@@ -1110,7 +1110,10 @@ body.kjs-lightbox-lock { overflow: hidden; }
   display: block; flex-shrink: 0; width: 60px; height: 80px;
   border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);
 }
-.download-item__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.download-item__thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none; max-width: none;
+}
 .download-item--sidebar .download-item__name {
   flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark);
   font-family: var(--font-sans); word-break: break-word;
