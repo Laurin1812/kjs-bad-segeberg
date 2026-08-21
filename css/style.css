@@ -368,7 +368,15 @@ p  { margin-bottom: 1rem; }
 }
 .news-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .news-card__img-wrap { aspect-ratio: 16/10; overflow: hidden; }
-.news-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+/* object-position:top statt der object-fit-Standardeinstellung "center"
+   (Frank-Bug-Report 21.08.2026, Aktuelles-Übersicht): bei einem festen
+   16:10-Kachelraster wird jedes Bild, das nicht exakt dieses Seitenverhältnis
+   hat, oben UND unten beschnitten. Bei Personen-/Gruppenfotos sitzt der Kopf
+   meist im oberen Bilddrittel – eine mittige Beschneidung kappt ihn dann als
+   Erstes. "top" verankert stattdessen den oberen Bildrand, beschnitten wird
+   nur unten, Köpfe bleiben erhalten. Das Grid selbst bleibt einheitlich
+   (aspect-ratio bleibt bestehen), nur der sichtbare Ausschnitt ändert sich. */
+.news-card__img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .4s ease; }
 .news-card:hover .news-card__img { transform: scale(1.04); }
 /* Überschreibt die generische Markdown-Bilddarstellung (.main-content img),
    falls eine Kachel-Übersicht (z.B. Jagdhundeschule) innerhalb von .main-content
@@ -378,7 +386,7 @@ p  { margin-bottom: 1rem; }
 #seite-inhalt .news-card__img,
 #page-inhalt .news-card__img {
   width: 100%; height: 100%; margin: 0; border-radius: 0; box-shadow: none;
-  object-fit: cover; display: block;
+  object-fit: cover; object-position: top; display: block;
 }
 .news-card__body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
 /* Badge immer über dem Datum (statt mal nebeneinander, mal untereinander,
