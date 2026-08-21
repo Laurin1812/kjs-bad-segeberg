@@ -1,5 +1,25 @@
 /* KJS Segeberg – main.js */
 
+// ── Markdown-Rendering: Backtick-Codespans deaktivieren ──────────────────
+// Plattdeutsche Texte schreiben den Apostroph manchmal als Backtick
+// (z.B. "op`n Stohl" = "op'n Stohl"). marked.js interpretiert ein Paar
+// Backticks aber als Inline-Code-Span - enthält ein Beitrag zufällig zwei
+// solcher Apostroph-Backticks, wird der komplette Text dazwischen fälschlich
+// in Monospace-Schrift dargestellt (Frank-Bug-Report 20.08.2026, Beitrag
+// "Plattschölers buuten Nistkastens"). Echte Code-Formatierung wird in den
+// Vereinstexten nie gebraucht, deshalb wird die Codespan-Erkennung hier über
+// marked.js' offizielle Erweiterungs-API abgeschaltet - zentral hier, damit
+// es für jede Seite gilt, die diese main.js einbindet (kein Einzelfix pro
+// Seite nötig). Einzelne Backticks werden dadurch als normales Zeichen
+// dargestellt statt als Code-Formatierung interpretiert.
+if (typeof marked !== 'undefined' && marked && typeof marked.use === 'function') {
+  marked.use({
+    tokenizer: {
+      codespan: function () { return undefined; }
+    }
+  });
+}
+
 // ── content/*.json laden ─────────────────────────────────────────────────
 // Direkt von der Netlify-Website (relative Pfade), kein GitHub Raw, kein CDN.
 // Jedes Speichern im Admin erzeugt einen GitHub-Commit → Netlify löst
