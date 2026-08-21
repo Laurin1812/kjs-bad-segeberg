@@ -24,11 +24,24 @@
       "datum": "1.04.2025",
       "jahr": "2025",
       "kategorie": "Veranstaltung",
-      "bild": "",
+      "bild": "/images/1787288279554-IMG_1784.jpeg",
       "text": "**der Vereinsbericht ist hier hochgeladen**",
       "link": "",
       "archiviert": false,
-      "galerie": [],
+      "galerie": [
+        {
+          "bild": "/images/1787288268490-IMG-20250523-WA0019.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787288274381-IMG_1778.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787288285719-IMG-20250523-WA0020.jpg",
+          "titel": ""
+        }
+      ],
       "galerie_titel": "Impressionen",
       "downloads": [
         {
