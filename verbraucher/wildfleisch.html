@@ -225,9 +225,15 @@
     </script>
 
     <aside class="sidebar">
-      <!-- Unterseiten-Kacheln zuerst (Frank-Wunsch 22.08.2026: klarer/
-           auffälliger als vorher, direkt sichtbar statt versteckt unten;
-           "Verbraucher"-Box rutscht dafür eine Position nach unten). -->
+      <!-- Testweise Reihenfolge 22.08.2026 (Laurin-Wunsch): Weiterführende
+           Links ganz oben, dann Unterseiten-Kacheln, dann "Verbraucher". -->
+      <!-- Link-Liste: neuer, optionaler Baustein (Frank-Wunsch 22.08.2026:
+           "Rezepte finden Sie hier", "Wildfleisch bestellen" o.ä.), wird aus
+           d.linkliste im Haupt-Fetch oben befüllt. -->
+      <div class="sidebar-widget" id="linkliste-widget" style="display:none;">
+        <h4>Weiterführende Links</h4>
+        <ul class="sidebar-nav" id="linkliste-nav"></ul>
+      </div>
       <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
         <h4>Unterseiten zu Wildfleisch</h4>
         <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
@@ -253,13 +259,6 @@
       <div class="sidebar-widget">
         <h4>Verbraucher</h4>
         <ul class="sidebar-nav" data-related-nav></ul>
-      </div>
-      <!-- Link-Liste: neuer, optionaler Baustein (Frank-Wunsch 22.08.2026:
-           "Rezepte finden Sie hier", "Wildfleisch bestellen" o.ä.), wird aus
-           d.linkliste im Haupt-Fetch oben befüllt. -->
-      <div class="sidebar-widget" id="linkliste-widget" style="display:none;">
-        <h4>Weiterführende Links</h4>
-        <ul class="sidebar-nav" id="linkliste-nav"></ul>
       </div>
       <div class="contact-box">
         <h4>Wild anfragen</h4>
