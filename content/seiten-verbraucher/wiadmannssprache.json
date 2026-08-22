@@ -10,5 +10,10 @@
   "kontakt_name": "",
   "kontakt_email": "",
   "in_navigation": true,
-  "veroeffentlicht": true
+  "veroeffentlicht": true,
+  "untertitel": "",
+  "bild_groesse": "img-100",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
