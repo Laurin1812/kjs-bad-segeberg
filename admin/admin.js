@@ -2369,10 +2369,89 @@
             fText('statistik_3_label', 'Bezeichnung 3', data.statistik_3_label) +
           '</div>' +
         '</div>' +
+        renderTestimonialsCard(data) +
       '</div>' +
       saveBar();
     id('admin-main').innerHTML = html;
+    initTestimonialsSortable();
     bindSaveBtn();
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     STIMMEN / TESTIMONIALS (Startseite, "Was unsere Jäger und
+     Mitglieder sagen") - war bisher komplett hart im HTML verdrahtet
+     (3 feste Zitate mit Fantasienamen), 22.08.2026 auf Laurin-Wunsch
+     editierbar gemacht. data.testimonials = [{ text, name, rolle, icon }]
+  ──────────────────────────────────────────────────────────── */
+  function renderTestimonialRow(t) {
+    t = t || {};
+    return '<div class="item-card testimonial-row">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        '<textarea class="field-input ts-text" rows="2" placeholder="Zitat-Text">' + escHtml(t.text || '') + '</textarea>' +
+        '<div class="field-row-2" style="margin-top:.5rem;">' +
+          '<input class="field-input ts-name" type="text" value="' + escAttr(t.name || '') + '" placeholder="Name">' +
+          '<input class="field-input ts-rolle" type="text" value="' + escAttr(t.rolle || '') + '" placeholder="Funktion/Rolle">' +
+        '</div>' +
+        '<input class="field-input ts-icon" type="text" value="' + escAttr(t.icon || '') + '" placeholder="Emoji (z.B. 🌿)" style="margin-top:.5rem;max-width:110px;">' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.testimonial-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderTestimonialsCard(data) {
+    var list = data.testimonials || [];
+    var rows = list.map(renderTestimonialRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">💬 Stimmen ("Was unsere Jäger und Mitglieder sagen")</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Zitate, die auf der Startseite unter „Was unsere Jäger und Mitglieder sagen" erscheinen. Reihenfolge per Drag &amp; Drop änderbar.' +
+      '</p>' +
+      '<div id="testimonials-list">' + rows + '</div>' +
+      '<p class="text-muted" id="testimonials-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Zitate hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="testimonialRowAdd()">➕ Zitat hinzufügen</button>' +
+    '</div>';
+  }
+
+  function initTestimonialsSortable() {
+    var el = id('testimonials-list');
+    if (el && window.Sortable && !el._sortableInit) {
+      el._sortableInit = true;
+      Sortable.create(el, { handle: '.item-drag', animation: 150 });
+    }
+  }
+
+  window.testimonialRowAdd = function() {
+    var list = id('testimonials-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderTestimonialRow({});
+    list.appendChild(wrap.firstChild);
+    var empty = id('testimonials-empty');
+    if (empty) empty.style.display = 'none';
+  };
+
+  function collectTestimonialsList() {
+    var result = [];
+    document.querySelectorAll('#testimonials-list .testimonial-row').forEach(function(row) {
+      var textEl = row.querySelector('.ts-text');
+      var nameEl = row.querySelector('.ts-name');
+      var rolleEl = row.querySelector('.ts-rolle');
+      var iconEl = row.querySelector('.ts-icon');
+      var text = textEl ? textEl.value.trim() : '';
+      var name = nameEl ? nameEl.value.trim() : '';
+      if (text && name) {
+        result.push({
+          text: text,
+          name: name,
+          rolle: rolleEl ? rolleEl.value.trim() : '',
+          icon: (iconEl && iconEl.value.trim()) || '🌿'
+        });
+      }
+    });
+    return result;
   }
 
   function collectStartseite(data) {
@@ -2385,6 +2464,7 @@
       data[k] = gv(k);
     });
     data.hero_bild = gv('hero_bild');
+    data.testimonials = collectTestimonialsList();
     return data;
   }
 

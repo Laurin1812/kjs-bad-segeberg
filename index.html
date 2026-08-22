@@ -792,6 +792,27 @@
     if(wkText2 && d.willkommen_text2) wkText2.textContent = d.willkommen_text2;
     if(wkSigName && d.willkommen_signatur_name) wkSigName.textContent = d.willkommen_signatur_name;
     if(wkSigRolle && d.willkommen_signatur_rolle) wkSigRolle.textContent = d.willkommen_signatur_rolle;
+    // Stimmen/Testimonials: waren bisher 3 fest im HTML verdrahtete
+    // Beispiel-Zitate (Fantasienamen) - jetzt aus dem Admin-Feld befüllt.
+    // Ohne gespeicherte Zitate bleiben die vorhandenen HTML-Karten als
+    // Fallback stehen, damit der Bereich nicht leer wirkt.
+    if (Array.isArray(d.testimonials) && d.testimonials.length) {
+      var tsGrid = document.querySelector('.testimonials__grid');
+      if (tsGrid) {
+        tsGrid.innerHTML = d.testimonials.map(function(t) {
+          return '<div class="testimonial-card">' +
+            '<p class="testimonial-card__text">„' + (t.text || '') + '"</p>' +
+            '<div class="testimonial-card__author">' +
+              '<div class="testimonial-card__avatar">' + (t.icon || '🌿') + '</div>' +
+              '<div>' +
+                '<span class="testimonial-card__name">' + (t.name || '') + '</span>' +
+                '<span class="testimonial-card__role">' + (t.rolle || '') + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
   }).catch(function(){});
 </script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
