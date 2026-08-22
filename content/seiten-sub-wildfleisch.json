@@ -5,6 +5,12 @@
       "nav_label": "t",
       "in_navigation": true,
       "veroeffentlicht": true
+    },
+    {
+      "slug": "laurin",
+      "nav_label": "Hans Wurst",
+      "in_navigation": true,
+      "veroeffentlicht": true
     }
   ]
 }
