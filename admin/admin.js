@@ -348,9 +348,12 @@
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
       { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'tiptap' },
-      { key:'weitere', label:'Weitere Themen', group:true, open:false, dynamicChildren:true,
-        navFile:'content/seiten-weitere.json', navKey:'seiten', dir:'content/seiten-weitere',
-        newItemKey:'new-weitere' },
+      // "Weitere Themen" (dynamicChildren, content/seiten-weitere.json) am
+      // 22.08.2026 auf Laurin-Wunsch entfernt ("brauchen wir eigentlich
+      // nicht, verwirrt nur") - loadDynamicChildren() hat einen Guard
+      // (if (!weitereNode) return;) und braucht daher keine eigene Anpassung.
+      // Die öffentliche Anzeige (js/main.js, Flyout im Jäger-Menü) wurde
+      // ebenfalls deaktiviert, siehe dortigen Kommentar.
     ]},
     { key:'verbraucher', label:'🌿 Verbraucher', group:true, open:false, children:[
       { key:'verbraucher-wild', label:'Wildfleisch', group:true, open:false, children:[
@@ -371,8 +374,16 @@
           navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
           parentSlug:'gruenes-klassenzimmer' },
       ]},
-      { key:'new-verbraucher', label:'➕ Neue Verbraucher-Seite', form:'neueSeite', isAdd:true,
-        navFile:'content/seiten-verbraucher.json', navKey:'seiten', dir:'content/seiten-verbraucher' },
+      // Der frühere generische Button "➕ Neue Verbraucher-Seite" (schrieb nach
+      // content/seiten-verbraucher/) wurde am 22.08.2026 entfernt (Frank/Laurin-
+      // Feedback: zwei parallele "Neue Seite"-Systeme unter Verbraucher waren
+      // verwirrend, Seiten landeten im falschen Topf und tauchten in keiner
+      // Sidebar auf). Neue Unterseiten jetzt IMMER über den "➕ Neue Unterseite"-
+      // Button beim jeweiligen Thema (Wildfleisch/Lernort Natur/Grünes
+      // Klassenzimmer) anlegen - siehe new-sub-wild/new-sub-lernort/new-sub-gruen
+      // oben. content/seiten-verbraucher/ bleibt als Alt-Ordner im Repo, wird
+      // aber nicht mehr beschrieben (Bestandsseiten wurden migriert, siehe
+      // content/seiten-sub-wildfleisch/).
     ]},
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
@@ -781,7 +792,10 @@
     var sections = [
       { insertBeforeKey: 'new-kjs',         file: 'content/seiten-kjs.json',         navKey:'seiten', dir: 'content/seiten-kjs',         keyPrefix: 'kjs-dyn',         level: 2 },
       { insertBeforeKey: 'new-aufgaben',    file: 'content/seiten-aufgaben.json',    navKey:'seiten', dir: 'content/seiten-aufgaben',    keyPrefix: 'aufgaben-dyn',    level: 2 },
-      { insertBeforeKey: 'new-verbraucher', file: 'content/seiten-verbraucher.json', navKey:'seiten', dir: 'content/seiten-verbraucher', keyPrefix: 'verbraucher-dyn', level: 2 },
+      // Der generische "verbraucher-dyn"-Eintrag (content/seiten-verbraucher.json)
+      // wurde am 22.08.2026 zusammen mit dem zugehörigen "Neue Verbraucher-
+      // Seite"-Button entfernt (siehe Kommentar bei new-sub-wild weiter unten
+      // in NAV) - Bestandsseiten migriert nach seiten-sub-wildfleisch.
       // Sub-pages under specific Verbraucher pages
       { insertBeforeKey: 'new-sub-wild',    file: 'content/seiten-sub-wildfleisch.json',            navKey:'seiten', dir: 'content/seiten-sub-wildfleisch',            keyPrefix: 'sub-wild-dyn',    level: 3 },
       { insertBeforeKey: 'new-sub-lernort', file: 'content/seiten-sub-lernort-natur.json',          navKey:'seiten', dir: 'content/seiten-sub-lernort-natur',          keyPrefix: 'sub-lernort-dyn', level: 3 },
@@ -1478,6 +1492,17 @@
           '<div class="form-card-title">Seiteninhalt</div>' +
           fH(fText('titel', 'Seitentitel', data.titel),
             'Die große Überschrift ganz oben auf der Seite. Kurz und klar halten.') +
+          // Menü-Bezeichnung: nur bei dynamisch angelegten Unterseiten (isDynamic)
+          // editierbar - bei den fest verdrahteten Hauptseiten gibt es kein Menü-
+          // Manifest, das dieses Feld lesen würde. Ohne dieses Feld war ein
+          // Tippfehler in der Menü-Bezeichnung/URL nur durch Löschen+Neuanlegen
+          // korrigierbar (Frank-Beispiel Waidmannssprache, 22.08.2026) - jetzt
+          // direkt im Formular korrigierbar, wird beim Speichern zusätzlich ins
+          // Manifest zurückgeschrieben (siehe saveCurrentSection).
+          (def.isDynamic
+            ? fH(fText('nav_label', 'Menü-Bezeichnung', data.nav_label),
+                'Wie die Seite im Menü, in der Seitenleiste "Weitere Seiten" und in der Brotkrumen-Navigation heißt. Meist wie der Seitentitel, kann aber abweichen.')
+            : '') +
           fH(fTipTap('untertitel', 'Untertitel', false),
             'Kurzer Text direkt unter dem Titel, als Einstieg in die Seite. Optional.') +
           fH(fTipTap('intro', 'Einleitungstext', true),
@@ -1521,6 +1546,11 @@
           fH(fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email),
             'E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
         '</div>' +
+        // Link-Liste (Seitenleiste): aktuell nur auf der Wildfleisch-Hauptseite
+        // angeboten (Frank-Wunsch 22.08.2026: "Rezepte finden Sie hier",
+        // "Wildfleisch bestellen" o.ä. als frei benennbare Links rechts).
+        // Bei Bedarf einfach die Bedingung um weitere def.key ergänzen.
+        (def.key === 'verbraucher-wild-inhalt' ? renderLinklisteCard(data) : '') +
         renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
@@ -1535,6 +1565,7 @@
     initTiptap('intro',      data.intro      || '');
     initTiptap('inhalt',     data.inhalt     || '');
     initDownloadsSortable();
+    initLinklisteSortable();
     bindSaveBtn();
   }
 
@@ -1549,6 +1580,9 @@
     data.bild_alt      = gv('bild_alt');
     data.kontakt_name  = gv('kontakt_name');
     data.kontakt_email = gv('kontakt_email');
+    if (S.section && S.section.isDynamic) {
+      data.nav_label = gv('nav_label').trim() || data.titel;
+    }
     if (S.section && S.section.key === 'mitglied-werden') {
       data.antrag_url = gv('antrag_url');
     }
@@ -2062,6 +2096,68 @@
       var titel = titelEl ? titelEl.value.trim() : '';
       var vorschau = vorschauEl ? vorschauEl.value.trim() : '';
       if (datei) result.push({ titel: titel, datei: datei, vorschau: vorschau });
+    });
+    return result;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     LINK-LISTE (pro Seite, optional, aktuell nur Wildfleisch)
+     data.linkliste = [{ titel: "...", url: "..." }]
+     Wird als eigener Sidebar-Kasten gerendert (siehe verbraucher/wildfleisch.html).
+  ──────────────────────────────────────────────────────────── */
+  function renderLinklisteRow(l) {
+    return '<div class="item-card linkliste-row">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        '<input class="field-input ln-titel" type="text" value="' + escAttr(l.titel || '') + '" placeholder="Beschriftung (z.B. Rezepte)" style="margin-bottom:.35rem;">' +
+        '<input class="field-input ln-url" type="text" value="' + escAttr(l.url || '') + '" placeholder="https://... oder /pfad">' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.linkliste-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderLinklisteCard(data) {
+    var list = data.linkliste || [];
+    var rows = list.map(renderLinklisteRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">🔗 Link-Liste (Seitenleiste)</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Frei benennbare Links, die als eigener Kasten in der Seitenleiste erscheinen (z.B. "Rezepte", "Wildfleisch bestellen"). Reihenfolge per Drag &amp; Drop änderbar.' +
+      '</p>' +
+      '<div id="linkliste-list">' + rows + '</div>' +
+      '<p class="text-muted" id="linkliste-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Links hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="linklisteRowAdd()">➕ Link hinzufügen</button>' +
+    '</div>';
+  }
+
+  function initLinklisteSortable() {
+    var el = id('linkliste-list');
+    if (el && window.Sortable && !el._sortableInit) {
+      el._sortableInit = true;
+      Sortable.create(el, { handle: '.item-drag', animation: 150 });
+    }
+  }
+
+  window.linklisteRowAdd = function() {
+    var list = id('linkliste-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderLinklisteRow({});
+    list.appendChild(wrap.firstChild);
+    var empty = id('linkliste-empty');
+    if (empty) empty.style.display = 'none';
+  };
+
+  function collectLinklisteList() {
+    var result = [];
+    document.querySelectorAll('#linkliste-list .linkliste-row').forEach(function(row) {
+      var titelEl = row.querySelector('.ln-titel');
+      var urlEl   = row.querySelector('.ln-url');
+      var titel = titelEl ? titelEl.value.trim() : '';
+      var url   = urlEl   ? urlEl.value.trim()   : '';
+      if (titel && url) result.push({ titel: titel, url: url });
     });
     return result;
   }
@@ -4069,30 +4165,48 @@
       data.galerie = collectGalerieList();
       data.galerie_titel = collectGalerieTitel();
     }
+    // Universelle Link-Liste (aktuell nur Wildfleisch, siehe renderStandard).
+    if (id('linkliste-list')) {
+      data.linkliste = collectLinklisteList();
+    }
 
     setSaving(true);
     try {
       var result = await doSave(def.file, data, '💾 ' + def.label + ' gespeichert');
       S.data = data;
 
-      // Jagdhundeschule-Unterseiten: Kachel-Vorschau (Vorschaubild/Kurzbeschreibung)
-      // wird auf der Übersichtsseite NICHT aus der Unterseite selbst gelesen,
-      // sondern aus dem Manifest (hundeausbildung-seiten.json). Ohne diesen
-      // Sync bleibt die Kachel beim Bearbeiten einer bestehenden Seite auf dem
-      // alten Stand, obwohl das Formular ein neues Bild zeigt.
-      if (def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1 && def.slug) {
+      // Dynamisch angelegte Unterseiten (isDynamic): manche Felder werden auf
+      // der öffentlichen Seite NICHT aus der Unterseite selbst gelesen, sondern
+      // aus dem übergeordneten Manifest (z.B. content/seiten-sub-wildfleisch.json
+      // für die "Weitere Seiten"-Sidebar, oder hundeausbildung-seiten.json für
+      // die Kachel-Vorschau). Ohne diesen Sync bleibt das Manifest beim
+      // Bearbeiten einer bestehenden Seite auf dem alten Stand, obwohl das
+      // Formular einen neuen Wert zeigt - war z.B. der Grund, warum eine
+      // falsch geschriebene Menü-Bezeichnung bisher nur durch Löschen+
+      // Neuanlegen korrigierbar war (22.08.2026, Waidmannssprache-Fall).
+      if (def.isDynamic && def.navFile && def.slug) {
         try {
           var manifestResp = await apiGet(def.navFile);
           var manifestData = JSON.parse(fromBase64(manifestResp.content));
           var liste = manifestData[def.navKey] || [];
           var eintrag = liste.filter(function(s) { return s.slug === def.slug; })[0];
           if (eintrag) {
-            eintrag.vorschaubild     = data.vorschaubild     || '';
-            eintrag.kurzbeschreibung = data.kurzbeschreibung || '';
-            await apiPut(def.navFile, manifestData, manifestResp.sha, '🐕 Kachel-Vorschau aktualisiert: ' + (def.label || def.slug));
+            var manifestChanged = false;
+            if (eintrag.nav_label !== data.nav_label) {
+              eintrag.nav_label = data.nav_label || def.slug;
+              manifestChanged = true;
+            }
+            if (def.navFile.indexOf('hundeausbildung-seiten') !== -1) {
+              eintrag.vorschaubild     = data.vorschaubild     || '';
+              eintrag.kurzbeschreibung = data.kurzbeschreibung || '';
+              manifestChanged = true;
+            }
+            if (manifestChanged) {
+              await apiPut(def.navFile, manifestData, manifestResp.sha, '🔀 Unterseite aktualisiert: ' + (data.nav_label || def.slug));
+            }
           }
         } catch(syncErr) {
-          console.warn('Kachel-Vorschau-Sync fehlgeschlagen:', syncErr);
+          console.warn('Manifest-Sync fehlgeschlagen:', syncErr);
         }
       }
 
@@ -6432,7 +6546,9 @@
       { url: '/content/seiten-kjs.json',        icon: '🦌', bereich: 'Jäger / KJS',          dir: 'content/seiten-kjs',         form: 'standard' },
       { url: '/content/seiten-aufgaben.json',    icon: '🦌', bereich: 'Jäger / Aufgaben',      dir: 'content/seiten-aufgaben',    form: 'standard' },
       { url: '/content/seiten-weitere.json',     icon: '🦌', bereich: 'Jäger / Weitere Themen',dir: 'content/seiten-weitere',     form: 'standard' },
-      { url: '/content/seiten-verbraucher.json', icon: '🌿', bereich: 'Verbraucher',            dir: 'content/seiten-verbraucher', form: 'standard' },
+      { url: '/content/seiten-sub-wildfleisch.json',           icon: '🌿', bereich: 'Verbraucher / Wildfleisch',            dir: 'content/seiten-sub-wildfleisch',           form: 'standard' },
+      { url: '/content/seiten-sub-lernort-natur.json',         icon: '🌿', bereich: 'Verbraucher / Lernort Natur',         dir: 'content/seiten-sub-lernort-natur',         form: 'standard' },
+      { url: '/content/seiten-sub-gruenes-klassenzimmer.json', icon: '🌿', bereich: 'Verbraucher / Grünes Klassenzimmer', dir: 'content/seiten-sub-gruenes-klassenzimmer', form: 'standard' },
       { url: '/content/aufgaben/hundeausbildung-seiten.json', icon: '🐕', bereich: 'Aufgaben / Jagdhundeschule', dir: 'content/aufgaben/hundeausbildung', form: 'standard' },
     ];
     manifeste.forEach(function(m) {

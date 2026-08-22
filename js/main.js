@@ -494,20 +494,13 @@ function splitPostadresse(raw) {
       .catch(function(){});
   });
 
-  // seiten-weitere.json → "Weitere Themen"-Flyout im Jäger-Menü
-  insertJobs.push(
-    fetchContent('/content/seiten-weitere.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var publishedSeiten = (data.seiten || []).filter(function(s) {
-          return s.veroeffentlicht === true && s.in_navigation === true;
-        });
-        if (!publishedSeiten.length) return;
-        weitereItem.style.display = '';   // Flyout-Punkt sichtbar machen
-        einfuegenInNav(publishedSeiten, weltereSub);
-      })
-      .catch(function() {})
-  );
+  // "Weitere Themen"-Flyout (seiten-weitere.json) am 22.08.2026 auf
+  // Laurin-Wunsch deaktiviert (unnötiger, verwirrender Menüpunkt - siehe
+  // gleichlautender Kommentar in admin.js). weitereItem bleibt dadurch
+  // dauerhaft display:none wie im HTML vorgegeben, weltereSub bleibt leer.
+  // Bewusst NICHT das HTML in allen Seiten angefasst (rein kosmetischer,
+  // unsichtbarer Rest-Knoten, kein funktionales Risiko) - bei Bedarf
+  // später in einem eigenen Aufräum-Durchgang site-weit entfernbar.
 
   // ── Navigationsreihenfolge, Sektionsnamen und Hauptmenü-Reihenfolge
   //    aus navigation.json (läuft erst, wenn alle obigen Seiten eingefügt

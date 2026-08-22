@@ -146,7 +146,7 @@
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1558030006-450675393462?w=1200&q=50')"></div>
   <div class="container">
-    <h1>🍖 Wildfleisch aus der Region</h1>
+    <h1 id="page-titel">🍖 Wildfleisch aus der Region</h1>
     <nav class="breadcrumb">
       <a href="../index.html">Startseite</a><span class="sep">/</span>
       <a href="index.html">Verbraucher</a><span class="sep">/</span>
@@ -166,6 +166,28 @@
         .then(function(d) {
           var main = document.getElementById('page-main');
           if (!main) return;
+          // Titel/H1 jetzt aus dem Admin-Feld statt fest im HTML (22.08.2026,
+          // Frank konnte diesen Text vorher nirgends bearbeiten).
+          if (d.titel) {
+            var h1El = document.getElementById('page-titel');
+            if (h1El) h1El.textContent = d.titel;
+            document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
+          }
+          // Link-Liste (Seitenleiste) aus demselben JSON befüllen.
+          if (Array.isArray(d.linkliste) && d.linkliste.length) {
+            var lnNav = document.getElementById('linkliste-nav');
+            var lnWidget = document.getElementById('linkliste-widget');
+            if (lnNav && lnWidget) {
+              d.linkliste.forEach(function(l) {
+                if (!l || !l.url) return;
+                var li = document.createElement('li');
+                var externLink = /^https?:\/\//i.test(l.url);
+                li.innerHTML = '<a href="' + l.url + '"' + (externLink ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + (l.titel || l.url) + '</a>';
+                lnNav.appendChild(li);
+              });
+              lnWidget.style.display = '';
+            }
+          }
           if (d.hero_bild) {
             var bg = document.querySelector('.page-hero__bg');
             if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
@@ -203,13 +225,12 @@
     </script>
 
     <aside class="sidebar">
-      <div class="sidebar-widget">
-        <h4>Verbraucher</h4>
-        <ul class="sidebar-nav" data-related-nav></ul>
-      </div>
+      <!-- Unterseiten-Kacheln zuerst (Frank-Wunsch 22.08.2026: klarer/
+           auffälliger als vorher, direkt sichtbar statt versteckt unten;
+           "Verbraucher"-Box rutscht dafür eine Position nach unten). -->
       <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
-        <h4>Weitere Seiten</h4>
-        <ul class="sidebar-nav" id="sub-seiten-nav"></ul>
+        <h4>Unterseiten zu Wildfleisch</h4>
+        <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
         <script>
           fetch('/content/seiten-sub-wildfleisch.json').then(function(r){return r.json();}).then(function(d){
             var nav = document.getElementById('sub-seiten-nav');
@@ -219,12 +240,26 @@
             if (!seiten.length) return;
             seiten.forEach(function(s) {
               var li = document.createElement('li');
-              li.innerHTML = '<a href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' + (s.nav_label || s.slug) + '</a>';
+              li.innerHTML = '<a class="unterseite-tile" href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' +
+                '<span class="unterseite-tile__icon">📄</span>' +
+                '<span class="unterseite-tile__label">' + (s.nav_label || s.slug) + '</span>' +
+              '</a>';
               nav.appendChild(li);
             });
             widget.style.display = '';
           }).catch(function(){});
         </script>
+      </div>
+      <div class="sidebar-widget">
+        <h4>Verbraucher</h4>
+        <ul class="sidebar-nav" data-related-nav></ul>
+      </div>
+      <!-- Link-Liste: neuer, optionaler Baustein (Frank-Wunsch 22.08.2026:
+           "Rezepte finden Sie hier", "Wildfleisch bestellen" o.ä.), wird aus
+           d.linkliste im Haupt-Fetch oben befüllt. -->
+      <div class="sidebar-widget" id="linkliste-widget" style="display:none;">
+        <h4>Weiterführende Links</h4>
+        <ul class="sidebar-nav" id="linkliste-nav"></ul>
       </div>
       <div class="contact-box">
         <h4>Wild anfragen</h4>

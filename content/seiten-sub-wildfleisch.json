@@ -1,16 +1,16 @@
 {
   "seiten": [
     {
-      "slug": "test",
-      "nav_label": "t",
+      "slug": "waidmannssprache",
+      "nav_label": "Waidmannssprache",
       "in_navigation": true,
       "veroeffentlicht": true
     },
     {
-      "slug": "laurin",
-      "nav_label": "Hans Wurst",
+      "slug": "lagerung-wildfleisch",
+      "nav_label": "Lagerung Wildfleisch",
       "in_navigation": true,
-      "veroeffentlicht": true
+      "veroeffentlicht": false
     }
   ]
 }

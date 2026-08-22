@@ -788,6 +788,22 @@ p  { margin-bottom: 1rem; }
 }
 .sidebar-nav li a::before { content: '›'; color: var(--green-main); font-size: 1.2rem; }
 .sidebar-nav li a:hover, .sidebar-nav li.active a { background: var(--green-light); color: var(--green-dark); padding-left: 1.1rem; }
+/* Unterseiten-"Kacheln" in der Sidebar (Verbraucher-Umbau 22.08.2026) -
+   klarer/deutlicher als eine reine Textlink-Liste, aber schmal genug für
+   die Sidebar-Spalte (im Gegensatz zum breiten Kachel-Grid auf der
+   Startseite, siehe .services__grid/.service-card). */
+.unterseiten-tiles { display: flex; flex-direction: column; gap: .6rem; }
+.unterseite-tile {
+  display: flex; align-items: center; gap: .7rem; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: .7rem .85rem; transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.unterseite-tile:hover { transform: translateX(3px); box-shadow: var(--shadow-sm); border-color: var(--green-main); }
+.unterseite-tile__icon {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); color: var(--green-main);
+  display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+}
+.unterseite-tile__label { font-size: .87rem; font-weight: 600; color: var(--text-dark); }
 .contact-box { background: var(--green-main); color: #fff; border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; }
 .contact-box h4 { color: #fff; margin-bottom: 1rem; border-bottom-color: rgba(255,255,255,.2); font-family: var(--font-sans); font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(255,255,255,.2); }
 .contact-box p   { font-size: .87rem; color: rgba(255,255,255,.75); margin-bottom: .4rem; display: flex; align-items: flex-start; gap: .45rem; }

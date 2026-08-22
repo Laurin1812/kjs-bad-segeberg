@@ -210,11 +210,20 @@
   }
 
   // 1. Zuerst in Ordner-Sammlungen suchen (neue Seiten, einzelne JSON-Dateien)
+  // 22.08.2026: die drei "seiten-sub-*"-Ordner (Unterseiten je Verbraucher-
+  // Hauptthema: Wildfleisch/Lernort Natur/Grünes Klassenzimmer) fehlten hier
+  // komplett - jede dort neu angelegte Seite war deshalb technisch nie
+  // auffindbar ("Seite wurde nicht gefunden", Frank-Meldung). Root-Cause-Fix
+  // für #119/Verbraucher-Umbau. content/seiten-verbraucher/ bleibt als
+  // Alt-Ordner-Fallback drin, falls dort noch nicht migrierte Seiten liegen.
   var ordnerPfade = [
     '../content/seiten-kjs/',
     '../content/seiten-aufgaben/',
     '../content/seiten-weitere/',
-    '../content/seiten-verbraucher/'
+    '../content/seiten-verbraucher/',
+    '../content/seiten-sub-wildfleisch/',
+    '../content/seiten-sub-lernort-natur/',
+    '../content/seiten-sub-gruenes-klassenzimmer/'
   ];
 
   function versucheOrdner(i) {
@@ -225,6 +234,9 @@
         '../content/seiten-aufgaben.json',
         '../content/seiten-weitere.json',
         '../content/seiten-verbraucher.json',
+        '../content/seiten-sub-wildfleisch.json',
+        '../content/seiten-sub-lernort-natur.json',
+        '../content/seiten-sub-gruenes-klassenzimmer.json',
         '../content/seiten.json',
         '../content/navigation-extra.json'
       ];
