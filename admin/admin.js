@@ -2883,9 +2883,9 @@
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
             'Diese Angaben erscheinen automatisch auf der Kontaktseite, in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten UND im Impressum – einmal hier ändern, überall aktuell.' +
           '</p>' +
-          fText('ko-telefon', 'Telefon', data.telefon) +
-          fText('ko-email', 'E-Mail', data.email) +
-          fTextarea('ko-adresse', 'Adresse KJS (jede Zeile einzeln)', data.adresse, 3) +
+          fText('ko-telefon', 'Telefon Geschäftsstelle', data.telefon) +
+          fText('ko-email', 'E-Mail Geschäftsstelle', data.email) +
+          fTextarea('ko-adresse', 'Adresse Geschäftsstelle (jede Zeile einzeln)', data.adresse, 3) +
           fTextarea('ko-postadresse', 'Postadresse (nur Name + Anschrift, jede Zeile einzeln – Telefon/E-Mail bitte in die beiden Felder darunter, damit sie als eigene klickbare Zeilen angezeigt werden)', data.postadresse, 4) +
           fText('ko-postadresse-telefon', 'Telefon (zur Postadresse)', data.postadresse_telefon) +
           fText('ko-postadresse-email', 'E-Mail (zur Postadresse)', data.postadresse_email) +
