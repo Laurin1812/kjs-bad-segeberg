@@ -5,6 +5,12 @@
       "nav_label": "Lagerung Wildfleisch",
       "in_navigation": true,
       "veroeffentlicht": false
+    },
+    {
+      "slug": "wiadmannssprache",
+      "nav_label": "Wiadmannssprache",
+      "in_navigation": true,
+      "veroeffentlicht": true
     }
   ]
 }
