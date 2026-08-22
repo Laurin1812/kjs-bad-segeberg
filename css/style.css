@@ -126,9 +126,16 @@ p  { margin-bottom: 1rem; }
 .topbar__social { display: flex; align-items: center; gap: .5rem; }
 .topbar__social a {
   width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: rgba(255,255,255,.12); transition: background var(--transition);
+  border-radius: 50%; transition: filter var(--transition); color: #fff;
 }
-.topbar__social a:hover { background: var(--green-mid); }
+/* Feste Marken-Badges (statt transparentem Icon auf grünem Kreis - wirkte
+   wie ein unklarer bunter Rand). Facebook-Blau + Instagram-Gradient als
+   Kreis-Hintergrund, weißes Icon oben drauf - wie die echten App-Icons. */
+.topbar__social a.topbar__social--facebook { background: #1877F2; }
+.topbar__social a.topbar__social--instagram {
+  background: linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%);
+}
+.topbar__social a:hover { filter: brightness(1.12); }
 .topbar__social a:focus-visible {
   outline: 2px solid rgba(255,255,255,.85); outline-offset: 2px;
 }
