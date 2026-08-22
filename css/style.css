@@ -129,6 +129,9 @@ p  { margin-bottom: 1rem; }
   border-radius: 50%; background: rgba(255,255,255,.12); transition: background var(--transition);
 }
 .topbar__social a:hover { background: var(--green-mid); }
+.topbar__social a:focus-visible {
+  outline: 2px solid rgba(255,255,255,.85); outline-offset: 2px;
+}
 
 /* =========================================================
    HEADER & NAV
