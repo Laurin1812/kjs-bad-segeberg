@@ -376,11 +376,22 @@
     ]},
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
-    { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
     { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
-    { key:'kontaktseite', label:'📞 Kontaktseite', file:'content/einstellungen.json', form:'kontaktseite' },
+    // FAQ und "Kontakt & Stammdaten" bewusst direkt vor/in "Einstellungen"
+    // einsortiert (nicht mehr zwischen Service und Verbraucher-Themen) -
+    // beides sind Rahmendaten/Konfiguration, keine Inhaltsseiten wie
+    // Aktuelles/Termine/Service (Laurin-Feedback 22.08.2026, Carsten-Hinweis
+    // "zentraler Punkt für zentrale, mehrfach verwendete Daten").
+    { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
-      { key:'kontakt',   label:'Telefonzentrale & Kalender', file:'content/einstellungen.json',    form:'einstellungen' },
+      // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
+      // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
+      // Kalender" (hier drin) - beide schrieben schon dieselbe Datei
+      // (content/einstellungen.json), waren aber an zwei verschiedenen
+      // Stellen im Menü mit unterschiedlichen Namen zu finden. Jetzt EIN
+      // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
+      // Kontaktseite), siehe renderKontaktStammdaten().
+      { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
       { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
@@ -1251,8 +1262,7 @@
       case 'hegeringe':    renderHegeringe(def, data);     break;
       case 'kjm':          renderKJM(def, data);           break;
       case 'faq':          renderFAQ(def, data);           break;
-      case 'kontaktseite': renderKontaktseite(def, data);  break;
-      case 'einstellungen':renderEinstellungen(def, data); break;
+      case 'kontaktStammdaten': renderKontaktStammdaten(def, data); break;
       case 'footer':       renderFooter(def, data);        break;
       case 'design':       renderDesign(def, data);        break;
       case 'impressum':    renderImpressum(def, data);     break;
@@ -1270,7 +1280,7 @@
     // aktuellesEdit/serviceEdit) – injectDownloadsCard() erkennt das (early
     // return bei bereits vorhandener Liste) und hängt dort nichts doppelt an,
     // müssen also hier nicht extra ausgenommen werden.
-    var NO_DOWNLOADS_FORMS = ['einstellungen','kontaktseite','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
+    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
@@ -2818,49 +2828,31 @@
   }
 
   /* ────────────────────────────────────────────────────────────
-     EINSTELLUNGEN (Telefonzentrale & Kalender)
-     Hinweis: Kontaktdaten (Adresse/Postadresse/Telefon/E-Mail/Sprechzeiten)
-     sowie Überschrift & Text der Kontaktseite wurden in einen eigenen,
-     sauberen Bereich "📞 Kontaktseite" verschoben (renderKontaktseite unten)
-     - auf Wunsch von Laurin, damit die Kontaktseite an einem Ort komplett
-     bearbeitbar ist statt vermischt mit seitenfremden Einstellungen wie dem
-     Google-Kalender (der zur Termine-Seite gehört). Beide Formulare teilen
-     sich weiterhin dieselbe Datei (content/einstellungen.json) als einzige
-     Quelle der Wahrheit – jedes Formular rührt dabei nur seine eigenen
-     Felder an und lässt die Felder des jeweils anderen unangetastet.
-  ──────────────────────────────────────────────────────────── */
-  function renderEinstellungen(def, data) {
-    var html = panelHeader(def.label) +
-      '<div class="panel-body">' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Telefonzentrale</div>' +
-          fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
-          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
-            'Diese Nummer wird ganz oben auf jeder Seite (Kopfzeile) angezeigt – unabhängig von der Telefonnummer der Geschäftsstelle (siehe „📞 Kontaktseite").' +
-          '</p>' +
-        '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Google Kalender (optional)</div>' +
-          fText('ei-kal-url', 'Google Kalender URL', data.google_kalender_url, 'Einbettungs-URL aus Google Kalender') +
-          fText('ei-kal-titel', 'Kalender-Überschrift', data.google_kalender_titel, 'z.B. Terminbuchung') +
-        '</div>' +
-      '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
-    bindSaveBtn();
-  }
+     KONTAKT & STAMMDATEN (zusammengelegt 22.08.2026)
 
-  function collectEinstellungen(data) {
-    data.telefon_header = gv('ei-telefon-header');
-    data.google_kalender_url   = gv('ei-kal-url');
-    data.google_kalender_titel = gv('ei-kal-titel');
-    return data;
-  }
-
-  /* ────────────────────────────────────────────────────────────
-     KONTAKTSEITE (eigener Bereich, komplette Seite kontakt/index.html:
-     Überschrift, Einleitungstext und der komplette Geschäftsstelle-Block)
+     Vorher gab es hierfür ZWEI getrennte Admin-Bereiche an zwei
+     verschiedenen Stellen im Menü ("📞 Kontaktseite" oben, "Telefonzentrale
+     & Kalender" unter Einstellungen), die aber schon dieselbe Datei
+     (content/einstellungen.json) schrieben - das führte laut Laurin/Carsten
+     genau zu der Verwirrung, die Carsten ansprach ("zentrale Daten müssen an
+     EINEM Ort liegen"). Jetzt EIN Bereich mit klar benannten Blöcken, jeweils
+     danach benannt, WO auf der Website die Daten erscheinen:
+       - Kopfzeile:     nur telefon_header (E-Mail dort ist dieselbe wie im
+                         Kontaktbox-Block unten, wird hier nur informativ
+                         schreibgeschützt angezeigt, damit der Zusammenhang
+                         sofort klar ist - kein Doppel-Eingabefeld für
+                         dieselbe Datenquelle, das würde bei Konflikten beim
+                         Speichern zu Verwirrung führen).
+       - Kontaktbox:     telefon/email/adresse/postadresse/oeffnungszeiten -
+                         erscheint automatisch auf der Kontaktseite, in der
+                         grünen Box auf allen Unterseiten UND im Impressum.
+       - Kontaktseite:   nur die Überschrift/Einleitungstext, die
+                         ausschließlich auf kontakt/index.html stehen.
+       - Google Kalender: eigenständig, gehört zur Termine-Seite, thematisch
+                         kein Kontakt-Feld, aber da es dieselbe Datei nutzt
+                         bleibt es als eigene, klar abgegrenzte Karte hier.
   ──────────────────────────────────────────────────────────── */
-  function renderKontaktseite(def, data) {
+  function renderKontaktStammdaten(def, data) {
     var oz = data.oeffnungszeiten || [];
     var ozHtml = oz.map(function(o, i) {
       return '<div style="display:flex;gap:.5rem;margin-bottom:.5rem;" data-koz="' + i + '">' +
@@ -2873,14 +2865,23 @@
     var html = panelHeader(def.label) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
-          '<div class="form-card-title">Überschrift & Text</div>' +
-          fText('ko-ueberschrift', 'Überschrift', data.kontakt_ueberschrift, 'So erreichen Sie uns') +
-          fTextarea('ko-text', 'Einleitungstext (unter der Überschrift, über dem Formular)', data.kontakt_text, 3) +
+          '<div class="form-card-title">📱 Kopfzeile</div>' +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Wird ganz oben auf jeder Seite angezeigt.' +
+          '</p>' +
+          fText('ei-telefon-header', 'Telefonnummer in der Kopfzeile', data.telefon_header) +
+          '<div class="field-row">' +
+            '<label class="field-label">E-Mail in der Kopfzeile</label>' +
+            '<input class="field-input" type="text" value="' + escAttr(data.email || '') + '" disabled style="background:var(--bg);color:var(--text-muted);">' +
+          '</div>' +
+          '<p style="margin:-.4rem 0 0;color:var(--text-muted);font-size:.82rem;">' +
+            'Das ist dieselbe E-Mail-Adresse wie unten bei „Kontaktbox" – dort ändern, hier zieht sie automatisch nach.' +
+          '</p>' +
         '</div>' +
         '<div class="form-card">' +
-          '<div class="form-card-title">Geschäftsstelle</div>' +
+          '<div class="form-card-title">🟩 Kontaktbox (auf allen Seiten)</div>' +
           '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
-            'Diese Angaben erscheinen auf der Kontaktseite sowie automatisch in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten und im Impressum – einmal hier ändern, überall aktuell.' +
+            'Diese Angaben erscheinen automatisch auf der Kontaktseite, in der grünen „Adresse KJS"-Kontaktbox auf allen Unterseiten UND im Impressum – einmal hier ändern, überall aktuell.' +
           '</p>' +
           fText('ko-telefon', 'Telefon', data.telefon) +
           fText('ko-email', 'E-Mail', data.email) +
@@ -2890,9 +2891,22 @@
           fText('ko-postadresse-email', 'E-Mail (zur Postadresse)', data.postadresse_email) +
         '</div>' +
         '<div class="form-card">' +
-          '<div class="form-card-title">Sprechzeiten</div>' +
+          '<div class="form-card-title">🟩 Kontaktbox: Sprechzeiten</div>' +
           '<div id="koz-list">' + ozHtml + '</div>' +
           '<button class="list-add-btn" onclick="kontaktOzAdd()" style="margin-top:.5rem">+ Zeile hinzufügen</button>' +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">📄 Kontaktseite (nur /kontakt)</div>' +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Nur auf der Kontaktseite selbst sichtbar, oberhalb des Formulars.' +
+          '</p>' +
+          fText('ko-ueberschrift', 'Überschrift', data.kontakt_ueberschrift, 'So erreichen Sie uns') +
+          fTextarea('ko-text', 'Einleitungstext', data.kontakt_text, 3) +
+        '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">📅 Google Kalender (optional, Termine-Seite)</div>' +
+          fText('ei-kal-url', 'Google Kalender URL', data.google_kalender_url, 'Einbettungs-URL aus Google Kalender') +
+          fText('ei-kal-titel', 'Kalender-Überschrift', data.google_kalender_titel, 'z.B. Terminbuchung') +
         '</div>' +
       '</div>' + saveBar();
     id('admin-main').innerHTML = html;
@@ -2901,15 +2915,18 @@
 
   window.kontaktOzDelete = function(i) {
     S.data.oeffnungszeiten.splice(i, 1);
-    renderKontaktseite(S.section, S.data);
+    renderKontaktStammdaten(S.section, S.data);
   };
   window.kontaktOzAdd = function() {
     S.data.oeffnungszeiten = S.data.oeffnungszeiten || [];
     S.data.oeffnungszeiten.push({ tage:'', zeiten:'' });
-    renderKontaktseite(S.section, S.data);
+    renderKontaktStammdaten(S.section, S.data);
   };
 
-  function collectKontaktseite(data) {
+  function collectKontaktStammdaten(data) {
+    data.telefon_header = gv('ei-telefon-header');
+    data.google_kalender_url   = gv('ei-kal-url');
+    data.google_kalender_titel = gv('ei-kal-titel');
     data.kontakt_ueberschrift = gv('ko-ueberschrift');
     data.kontakt_text  = gv('ko-text');
     data.telefon = gv('ko-telefon');
@@ -2998,12 +3015,11 @@
   function renderImpressum(def, data) {
     var html = panelHeader(def.label) +
       '<div class="panel-body"><div class="form-card">' +
+        '<p style="margin:0 0 1rem;color:var(--text-muted);font-size:.82rem;">' +
+          'Adresse, Postadresse, Telefon und E-Mail werden automatisch von „⚙️ Einstellungen → 📞 Kontakt & Stammdaten" übernommen – dort ändern, nicht hier.' +
+        '</p>' +
         fText('imp-verein', 'Vereinsname', data.verein) +
-        fTextarea('imp-adresse', 'Adresse', data.adresse, 3) +
-        fTextarea('imp-postadresse', 'Postadresse (nur ausfüllen, falls abweichend von der Adresse oben)', data.postadresse, 3) +
         fText('imp-vertreten', 'Vertreten durch', data.vertreten_durch) +
-        fText('imp-telefon', 'Telefon', data.telefon) +
-        fText('imp-email', 'E-Mail', data.email) +
         fText('imp-registergericht', 'Registergericht', data.registergericht) +
         fText('imp-registernummer', 'Registernummer', data.registernummer) +
         fTextarea('imp-verantwortlich', 'Verantwortlich (§18)', data.verantwortlich, 2) +
@@ -3014,11 +3030,7 @@
 
   function collectImpressum(data) {
     data.verein           = gv('imp-verein');
-    data.adresse          = gv('imp-adresse');
-    data.postadresse      = gv('imp-postadresse');
     data.vertreten_durch  = gv('imp-vertreten');
-    data.telefon          = gv('imp-telefon');
-    data.email            = gv('imp-email');
     data.registergericht  = gv('imp-registergericht');
     data.registernummer   = gv('imp-registernummer');
     data.verantwortlich   = gv('imp-verantwortlich');
@@ -3868,8 +3880,7 @@
       case 'startseite':    data = collectStartseite(data); break;
       case 'kjm':           data = collectKJM(data); break;
       case 'faq':           data = collectFAQ(data); break;
-      case 'kontaktseite':  data = collectKontaktseite(data); break;
-      case 'einstellungen': data = collectEinstellungen(data); break;
+      case 'kontaktStammdaten': data = collectKontaktStammdaten(data); break;
       case 'footer':        data = collectFooter(data); break;
       case 'design':        data = collectDesign(data); break;
       case 'impressum':     data = collectImpressum(data); break;
