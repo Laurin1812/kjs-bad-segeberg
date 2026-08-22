@@ -2449,7 +2449,7 @@
           text: text,
           name: name,
           rolle: rolleEl ? rolleEl.value.trim() : '',
-          icon: (iconEl && iconEl.value.trim()) || '🌿'
+          icon: iconEl ? iconEl.value.trim() : ''
         });
       }
     });

@@ -804,10 +804,11 @@
       var tsGrid = document.querySelector('.testimonials__grid');
       if (tsGrid) {
         tsGrid.innerHTML = d.testimonials.map(function(t) {
+          var avatar = (t.icon && t.icon.trim()) ? t.icon.trim() : ((t.name || '?').trim().charAt(0).toUpperCase() || '?');
           return '<div class="testimonial-card">' +
             '<p class="testimonial-card__text">„' + (t.text || '') + '"</p>' +
             '<div class="testimonial-card__author">' +
-              '<div class="testimonial-card__avatar">' + (t.icon || '🌿') + '</div>' +
+              '<div class="testimonial-card__avatar">' + avatar + '</div>' +
               '<div>' +
                 '<span class="testimonial-card__name">' + (t.name || '') + '</span>' +
                 '<span class="testimonial-card__role">' + (t.rolle || '') + '</span>' +
