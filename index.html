@@ -735,6 +735,39 @@
 <script src="js/main.js"></script>
 <script>
   fetch('/content/startseite.json').then(function(r){return r.json();}).then(function(d){
+    // Hero-Hintergrund: ein Bild (fest) oder mehrere Bilder (automatische
+    // Diashow mit Crossfade, je Bild eigene Anzeigedauer in Sekunden).
+    // Fallback auf das bisherige hero_bild (Alt-Feld, war nie verdrahtet)
+    // bzw. ohne beides bleibt das feste css/hero.jpg wie gehabt bestehen.
+    var heroSlides = (Array.isArray(d.hero_slides) && d.hero_slides.length)
+      ? d.hero_slides.filter(function(s){ return s && s.bild; })
+      : (d.hero_bild ? [{ bild: d.hero_bild, dauer: 6 }] : []);
+    if (heroSlides.length) {
+      var heroBgAlt = document.querySelector('.hero__bg');
+      var heroOverlayEl = document.querySelector('.hero__overlay');
+      if (heroBgAlt && heroOverlayEl) {
+        heroBgAlt.style.display = 'none';
+        var heroSlideEls = heroSlides.map(function(s, i){
+          var el = document.createElement('div');
+          el.className = 'hero__bg--slide' + (i === 0 ? ' is-active' : '');
+          el.style.backgroundImage = "url('" + s.bild + "')";
+          heroOverlayEl.parentNode.insertBefore(el, heroOverlayEl);
+          return el;
+        });
+        if (heroSlideEls.length > 1) {
+          (function loop(idx){
+            var dauerSek = parseFloat(heroSlides[idx].dauer);
+            if (!dauerSek || dauerSek < 1) dauerSek = 6;
+            setTimeout(function(){
+              var next = (idx + 1) % heroSlideEls.length;
+              heroSlideEls[idx].classList.remove('is-active');
+              heroSlideEls[next].classList.add('is-active');
+              loop(next);
+            }, dauerSek * 1000);
+          })(0);
+        }
+      }
+    }
     // Hero Titel (Zeile 1 + Zeile 2)
     var heroH1 = document.querySelector('.hero__content h1');
     if(heroH1){

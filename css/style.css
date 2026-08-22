@@ -1442,3 +1442,15 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .hero__bg {
   opacity: .85 !important;
 }
+
+/* Hero-Diashow: mehrere Hintergrundbilder mit automatischem Wechsel
+   (Crossfade). Jedes Bild wird per JS als eigenes Layer eingefügt und
+   bekommt denselben Bildausschnitt wie das bisherige feste Hero-Bild
+   (background-size:cover; background-position:center 40%), unabhängig
+   von der ursprünglichen Bildgröße - kein manuelles Zuschneiden nötig. */
+.hero__bg--slide {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center 40%;
+  opacity: 0; transition: opacity 1.4s ease;
+}
+.hero__bg--slide.is-active { opacity: .85; }

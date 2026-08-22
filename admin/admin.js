@@ -2337,7 +2337,7 @@
           fText('hero_titel_zeile2', 'Titel Zeile 2', data.hero_titel_zeile2) +
           fTextarea('hero_untertitel', 'Untertitel-Text', data.hero_untertitel, 2) +
           fText('hero_button_text', 'Button-Text', data.hero_button_text) +
-          fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
+          renderHeroSlidesBlock(data) +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Willkommen-Bereich ("Heger, Schützer und Botschafter der Natur")</div>' +
@@ -2374,7 +2374,93 @@
       saveBar();
     id('admin-main').innerHTML = html;
     initTestimonialsSortable();
+    initHeroSlidesSortable();
     bindSaveBtn();
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     HERO-DIASHOW (Startseiten-Banner) - ersetzt das alte, nie öffentlich
+     verdrahtete Einzelbild-Feld "hero_bild". Ein Bild = festes
+     Hintergrundbild wie bisher. Mehrere Bilder = automatischer Wechsel
+     (Crossfade), jedes Bild mit eigener Anzeigedauer in Sekunden.
+     data.hero_slides = [{ bild, dauer }]. Alle Bilder werden auf der
+     öffentlichen Seite automatisch im gleichen Ausschnitt/Format
+     zugeschnitten (background-size:cover), unabhängig von der
+     ursprünglichen Bildgröße - kein manuelles Zuschneiden nötig.
+  ──────────────────────────────────────────────────────────── */
+  var heroSlideRowSeq = 0;
+
+  function renderHeroSlideRow(sVal) {
+    sVal = sVal || {};
+    var imgId = 'hero-slide-bild-' + (heroSlideRowSeq++);
+    return '<div class="item-card hero-slide-row" data-img-id="' + imgId + '">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        fImage(imgId, 'Bild', sVal.bild) +
+        '<div class="field-row" style="margin-top:.5rem;max-width:220px;">' +
+          '<label class="field-label">Anzeigedauer (Sekunden)</label>' +
+          '<input class="field-input hs-dauer" type="number" min="1" step="1" value="' + escAttr(sVal.dauer || '') + '" placeholder="6">' +
+        '</div>' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.hero-slide-row\').remove()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderHeroSlidesBlock(data) {
+    // Migration: altes hero_bild (war nie live verdrahtet) als ersten Slide
+    // übernehmen, falls noch keine hero_slides-Liste existiert.
+    var list = (data.hero_slides && data.hero_slides.length) ? data.hero_slides :
+      (data.hero_bild ? [{ bild: data.hero_bild, dauer: 6 }] : []);
+    var rows = list.map(renderHeroSlideRow).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label">Hero-Hintergrundbilder</label>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:.25rem 0 .75rem;">' +
+        'Ein Bild = festes Hintergrundbild wie bisher. Mehrere Bilder = automatische Diashow: ' +
+        'jedes Bild wird für die eingestellte Dauer gezeigt und dann sanft zum nächsten überblendet. ' +
+        'Alle Bilder werden automatisch im gleichen Ausschnitt/Format zugeschnitten, unabhängig von ' +
+        'der ursprünglichen Bildgröße.' +
+      '</p>' +
+      '<div id="hero-slides-list">' + rows + '</div>' +
+      '<p class="text-muted" id="hero-slides-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch kein Bild hinterlegt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="heroSlideRowAdd()">🖼️ Bild hinzufügen</button>' +
+    '</div>';
+  }
+
+  function initHeroSlidesSortable() {
+    var el = id('hero-slides-list');
+    if (el && window.Sortable && !el._sortableInit) {
+      el._sortableInit = true;
+      Sortable.create(el, { handle: '.item-drag', animation: 150 });
+    }
+  }
+
+  window.heroSlideRowAdd = function() {
+    var list = id('hero-slides-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderHeroSlideRow({});
+    list.appendChild(wrap.firstChild);
+    var empty = id('hero-slides-empty');
+    if (empty) empty.style.display = 'none';
+    initHeroSlidesSortable();
+    S.dirty = true;
+  };
+
+  function collectHeroSlidesList() {
+    var result = [];
+    document.querySelectorAll('#hero-slides-list .hero-slide-row').forEach(function(row) {
+      var imgId = row.getAttribute('data-img-id');
+      var bildEl = imgId ? id('f-' + imgId) : null;
+      var dauerEl = row.querySelector('.hs-dauer');
+      var bild = bildEl ? bildEl.value.trim() : '';
+      if (!bild) return;
+      var dauer = dauerEl ? parseInt(dauerEl.value, 10) : NaN;
+      if (!dauer || dauer < 1) dauer = 6;
+      result.push({ bild: bild, dauer: dauer });
+    });
+    return result;
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -2465,7 +2551,7 @@
      'statistik_3_zahl','statistik_3_label'].forEach(function(k) {
       data[k] = gv(k);
     });
-    data.hero_bild = gv('hero_bild');
+    data.hero_slides = collectHeroSlidesList();
     data.testimonials_titel = gv('testimonials_titel');
     data.testimonials_untertitel = gv('testimonials_untertitel');
     data.testimonials = collectTestimonialsList();
