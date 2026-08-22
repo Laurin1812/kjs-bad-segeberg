@@ -356,20 +356,25 @@
       // ebenfalls deaktiviert, siehe dortigen Kommentar.
     ]},
     { key:'verbraucher', label:'🌿 Verbraucher', group:true, open:false, children:[
-      { key:'verbraucher-wild', label:'Wildfleisch', group:true, open:false, children:[
-        { key:'verbraucher-wild-inhalt', label:'Seiteninhalt', file:'content/verbraucher/wildfleisch.json', form:'standard' },
+      // 22.08.2026 (Laurin-Feedback): Wildfleisch/Lernort Natur/Grünes
+      // Klassenzimmer tragen jetzt selbst file+form (statt eines separaten
+      // "Seiteninhalt"-Unterpunkts) - ein Klick auf den Gruppennamen öffnet
+      // direkt den Seiteninhalt UND klappt die Unterseiten auf, statt erst
+      // eine Ebene tiefer auf "Seiteninhalt" klicken zu müssen. Siehe
+      // renderSidebar()/navItemEl() für die dafür nötige Sonderbehandlung
+      // von Gruppen mit eigenem file (anders als reine Ordner-Gruppen wie
+      // "Verbraucher" selbst, "Jäger", "Einstellungen" etc.).
+      { key:'verbraucher-wild', label:'Wildfleisch', file:'content/verbraucher/wildfleisch.json', form:'standard', group:true, open:false, children:[
         { key:'new-sub-wild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-sub-wildfleisch.json', navKey:'seiten', dir:'content/seiten-sub-wildfleisch',
           parentSlug:'wildfleisch' },
       ]},
-      { key:'verbraucher-lernort', label:'Lernort Natur', group:true, open:false, children:[
-        { key:'verbraucher-lernort-inhalt', label:'Seiteninhalt', file:'content/verbraucher/lernort-natur.json', form:'standard' },
+      { key:'verbraucher-lernort', label:'Lernort Natur', file:'content/verbraucher/lernort-natur.json', form:'standard', group:true, open:false, children:[
         { key:'new-sub-lernort', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-sub-lernort-natur.json', navKey:'seiten', dir:'content/seiten-sub-lernort-natur',
           parentSlug:'lernort-natur' },
       ]},
-      { key:'verbraucher-gruen', label:'Grünes Klassenzimmer', group:true, open:false, children:[
-        { key:'verbraucher-gruen-inhalt', label:'Seiteninhalt', file:'content/verbraucher/gruenes-klassenzimmer.json', form:'standard' },
+      { key:'verbraucher-gruen', label:'Grünes Klassenzimmer', file:'content/verbraucher/gruenes-klassenzimmer.json', form:'standard', group:true, open:false, children:[
         { key:'new-sub-gruen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
           parentSlug:'gruenes-klassenzimmer' },
@@ -859,7 +864,13 @@
         el.appendChild(wrap);
       } else if (item.children) {
         var level = item.group ? 1 : 2;
-        var header = navItemEl(item, level, false);
+        // Gruppen mit eigenem "file" (z.B. Wildfleisch/Lernort Natur/Grünes
+        // Klassenzimmer, 22.08.2026-Umbau): Header ist klickbar wie eine
+        // normale Seite UND klappt zusätzlich die Unterseiten-Kinder auf -
+        // sonst (reine Ordner-Gruppen wie "Verbraucher", "Jäger") bleibt
+        // der Header ein reiner Auf/Zu-Klapper wie bisher.
+        var hatEigeneSeite = !!item.file;
+        var header = navItemEl(item, level, hatEigeneSeite);
         header.setAttribute('data-key', item.key);
         var chevron = header.querySelector('.nav-chevron');
         var childWrap = document.createElement('div');
@@ -870,6 +881,14 @@
 
         header.addEventListener('click', function(e) {
           if (e.target.closest && e.target.closest('.nav-drag-handle')) return;
+          if (hatEigeneSeite && !(e.target.closest && e.target.closest('.nav-chevron'))) {
+            selectSection(item);
+            if (childWrap.style.display === 'none') {
+              childWrap.style.display = '';
+              if (chevron) chevron.classList.add('open');
+            }
+            return;
+          }
           var isOpen = childWrap.style.display !== 'none';
           childWrap.style.display = isOpen ? 'none' : '';
           if (chevron) chevron.classList.toggle('open', !isOpen);
@@ -1550,7 +1569,7 @@
         // angeboten (Frank-Wunsch 22.08.2026: "Rezepte finden Sie hier",
         // "Wildfleisch bestellen" o.ä. als frei benennbare Links rechts).
         // Bei Bedarf einfach die Bedingung um weitere def.key ergänzen.
-        (def.key === 'verbraucher-wild-inhalt' ? renderLinklisteCard(data) : '') +
+        (def.key === 'verbraucher-wild' ? renderLinklisteCard(data) : '') +
         renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
@@ -6474,23 +6493,32 @@
     _searchIndex = [];
 
     // 1. Alle statischen NAV-Items traversieren
+    function indexItem(item, label, path) {
+      var bereich = path || label;
+      _searchIndex.push({
+        icon: item.label.match(/^./u)?.[0] || '📄',
+        label: label,
+        sub: 'Bereich: ' + bereich,
+        match: [label, item.key || '', item.file || ''].join(' ').toLowerCase(),
+        action: function() { selectSection(item); }
+      });
+    }
     function traverseNav(items, path) {
       items.forEach(function(item) {
         if (item.isAdd) return;
         var label = (item.label || '').replace(/^[🏠🦌🌿📅📰❓⚙️📥🖼️➕]\s*/u, '');
         if (item.group || item.dynamicChildren) {
+          // Gruppen mit eigenem "file" (Wildfleisch/Lernort Natur/Grünes
+          // Klassenzimmer, 22.08.2026-Umbau) haben jetzt selbst editierbaren
+          // Inhalt - ohne diesen Zweig wären sie über die Suche nicht mehr
+          // auffindbar gewesen (vorher gab es dafür einen separaten,
+          // durchsuchbaren "Seiteninhalt"-Unterpunkt).
+          if (item.file) indexItem(item, label, path);
           if (item.children) traverseNav(item.children, path);
           return;
         }
         if (!item.file && item.form !== 'medien') return;
-        var bereich = path || label;
-        _searchIndex.push({
-          icon: item.label.match(/^./u)?.[0] || '📄',
-          label: label,
-          sub: 'Bereich: ' + bereich,
-          match: [label, item.key || '', item.file || ''].join(' ').toLowerCase(),
-          action: function() { selectSection(item); }
-        });
+        indexItem(item, label, path);
       });
     }
     traverseNav(NAV, '');
