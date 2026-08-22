@@ -177,6 +177,8 @@
           if (Array.isArray(d.linkliste) && d.linkliste.length) {
             var lnNav = document.getElementById('linkliste-nav');
             var lnWidget = document.getElementById('linkliste-widget');
+            var lnTitelEl = document.getElementById('linkliste-titel');
+            if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
             if (lnNav && lnWidget) {
               d.linkliste.forEach(function(l) {
                 if (!l || !l.url) return;
@@ -231,7 +233,7 @@
            "Rezepte finden Sie hier", "Wildfleisch bestellen" o.ä.), wird aus
            d.linkliste im Haupt-Fetch oben befüllt. -->
       <div class="sidebar-widget" id="linkliste-widget" style="display:none;">
-        <h4>Weiterführende Links</h4>
+        <h4 id="linkliste-titel">Weiterführende Links</h4>
         <ul class="sidebar-nav" id="linkliste-nav"></ul>
       </div>
       <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">

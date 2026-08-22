@@ -2145,6 +2145,10 @@
       '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
         'Frei benennbare Links, die als eigener Kasten in der Seitenleiste erscheinen (z.B. "Rezepte", "Wildfleisch bestellen"). Reihenfolge per Drag &amp; Drop änderbar.' +
       '</p>' +
+      '<div class="field-row">' +
+        '<label class="field-label" for="f-linkliste-titel">Überschrift des Kastens</label>' +
+        '<input class="field-input" type="text" id="f-linkliste-titel" value="' + escAttr(data.linkliste_titel || '') + '" placeholder="Weiterführende Links">' +
+      '</div>' +
       '<div id="linkliste-list">' + rows + '</div>' +
       '<p class="text-muted" id="linkliste-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Links hinzugefügt.</p>' +
       '<button type="button" class="btn btn-outline btn-sm" onclick="linklisteRowAdd()">➕ Link hinzufügen</button>' +
@@ -2179,6 +2183,13 @@
       if (titel && url) result.push({ titel: titel, url: url });
     });
     return result;
+  }
+
+  // Überschrift des Link-Liste-Kastens (Laurin-Wunsch 22.08.2026: frei
+  // umbenennbar statt fest "Weiterführende Links"). Leer -> Standardwert.
+  function collectLinklisteTitel() {
+    var t = gv('linkliste-titel');
+    return (t && t.trim()) || 'Weiterführende Links';
   }
 
   // Fügt ein Dokument (neu hochgeladen oder aus der Galerie ausgewählt) zur
@@ -4187,6 +4198,7 @@
     // Universelle Link-Liste (aktuell nur Wildfleisch, siehe renderStandard).
     if (id('linkliste-list')) {
       data.linkliste = collectLinklisteList();
+      data.linkliste_titel = collectLinklisteTitel();
     }
 
     setSaving(true);
