@@ -56,5 +56,15 @@
   "galerie": [],
   "galerie_titel": "Bildergalerie",
   "testimonials_titel": "Was unsere Jäger und Mitglieder sagen",
-  "testimonials_untertitel": "Stimmen aus unserer Gemeinschaft"
+  "testimonials_untertitel": "Stimmen aus unserer Gemeinschaft",
+  "hero_slides": [
+    {
+      "bild": "/images/hero.jpg",
+      "dauer": 6
+    },
+    {
+      "bild": "/images/1786891321853-16-08-_2026_16-39-38.png",
+      "dauer": 6
+    }
+  ]
 }
