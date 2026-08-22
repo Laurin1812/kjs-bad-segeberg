@@ -403,7 +403,13 @@
     ]},
     { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
-    { key:'testseite', label:'🧪 Testseite', file:'content/test/testseite.json', form:'tiptap' },
+    // "🧪 Testseite" (content/test/testseite.json) 22.08.2026 aus dem Menü
+    // entfernt (Laurin-Wunsch, Aufräumen) - war ursprünglich das Sandbox-
+    // Fundament, auf dem das TipTap-Formular (form:'tiptap', renderInfomobil)
+    // entwickelt wurde; die Datei content/test/testseite.json bleibt
+    // unangetastet im Repo, nur der Menüpunkt ist weg. renderInfomobil/
+    // collectInfomobil werden weiterhin von "Infomobil" oben verwendet,
+    // nicht mit anfassen.
   ];
 
   /* ────────────────────────────────────────────────────────────
@@ -2307,7 +2313,6 @@
   function renderAktuelles(def, data) {
     S.aktAnsicht = 'alle';
     var beitraege = data.beitraege || [];
-    var einst = data.einstellungen || {};
     S.aktFilterJahr = S.aktFilterJahr || '';
     S.aktFilterKat  = S.aktFilterKat  || '';
 
@@ -2351,18 +2356,11 @@
       '<button class="btn btn-primary" onclick="aktuellesNeu()">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
 
-      // ── Einstellungen ──────────────────────────────────────
-      '<div class="form-card">' +
-        '<div class="form-card-title">⚙️ Anzeigeeinstellungen</div>' +
-        '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Steuert, welche Beiträge auf der Hauptseite erscheinen. Bei 0 = aktuelles Jahr.</p>' +
-        '<div class="field-row" style="align-items:center;gap:1rem;flex-direction:row;flex-wrap:wrap;">' +
-          '<label class="field-label" style="min-width:180px;margin:0">Anzahl anzeigen (0 = aktuelles Jahr)</label>' +
-          '<input class="field-input" type="number" min="0" max="99" id="akt-anzahl" value="' + (einst.hauptseite_anzahl || 0) + '" style="width:80px">' +
-          '<button class="btn btn-sm btn-outline" onclick="aktuellesEinstSave()">Speichern</button>' +
-        '</div>' +
-      '</div>' +
-
       // ── Jahr-/Kategorie-Filter (Frank-Wunsch 20.08.2026) ────
+      // Die frühere "⚙️ Anzeigeeinstellungen"-Karte (Anzahl anzeigen /
+      // hauptseite_anzahl) wurde am 22.08.2026 entfernt - überholt, seit
+      // Besucher auf der öffentlichen Aktuelles-Seite selbst nach Jahr
+      // filtern können (siehe jahresFilter() in aktuelles/index.html).
       '<div class="form-card">' +
         '<div class="form-card-title">🔍 Filtern &amp; Sortieren</div>' +
         '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Die Liste ist immer nach Datum sortiert (neueste zuerst). Optional zusätzlich nach Jahr und/oder Kategorie filtern.</p>' +
@@ -2537,14 +2535,6 @@
     await doSave(S.section.file, S.data, '📰 Aktuelles: Archivstatus geändert');
     toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
     aktuellesAktuelleAnsichtRendern();
-  };
-
-  window.aktuellesEinstSave = async function() {
-    S.data.einstellungen = S.data.einstellungen || {};
-    var anzEl = id('akt-anzahl');
-    S.data.einstellungen.hauptseite_anzahl = anzEl ? (parseInt(anzEl.value, 10) || 0) : 0;
-    await doSave(S.section.file, S.data, '⚙️ Aktuelles: Einstellungen gespeichert');
-    toast('✅ Einstellungen gespeichert!', 'ok');
   };
 
   window.aktuellesDelete = function(idx) {
