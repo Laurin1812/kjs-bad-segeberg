@@ -115,7 +115,7 @@ p  { margin-bottom: 1rem; }
   background: var(--green-main);
   color: rgba(255,255,255,.82);
   font-size: .82rem;
-  padding: .45rem 0;
+  padding: .65rem 0;
 }
 .topbar .container { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .topbar a { color: rgba(255,255,255,.82); }
