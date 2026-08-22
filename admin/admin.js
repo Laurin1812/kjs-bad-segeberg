@@ -377,12 +377,13 @@
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
-    // FAQ und "Kontakt & Stammdaten" bewusst direkt vor/in "Einstellungen"
-    // einsortiert (nicht mehr zwischen Service und Verbraucher-Themen) -
-    // beides sind Rahmendaten/Konfiguration, keine Inhaltsseiten wie
-    // Aktuelles/Termine/Service (Laurin-Feedback 22.08.2026, Carsten-Hinweis
-    // "zentraler Punkt für zentrale, mehrfach verwendete Daten").
-    { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
+    // "Kontakt & Stammdaten" und FAQ bewusst in "Einstellungen" verschoben
+    // (nicht mehr zwischen Service und Verbraucher-Themen als eigene
+    // Top-Level-Punkte) - beides sind Rahmendaten/Konfiguration, keine
+    // Inhaltsseiten wie Aktuelles/Termine/Service (Laurin-Feedback
+    // 22.08.2026, Carsten-Hinweis "zentraler Punkt für zentrale, mehrfach
+    // verwendete Daten"; FAQ auf Laurin-Wunsch 22.08.2026 ebenfalls dorthin
+    // verschoben).
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
       // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
       // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
@@ -392,6 +393,7 @@
       // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
       // Kontaktseite), siehe renderKontaktStammdaten().
       { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
+      { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
       { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
