@@ -6491,5 +6491,20 @@
   window.renderTermine   = renderTermine;
   window.renderPersonen  = renderPersonen;
   window.renderHegeringe = renderHegeringe;
+  // Nachträglich ergänzt (22.08.2026, Fix für #111/#112): renderService und
+  // renderMedian fehlten hier, obwohl sie direkt per onclick="renderService(...)"/
+  // "renderMedian()" aus den jeweiligen Archiv-Unterseiten aufgerufen werden -
+  // Funktionen, die nur als private "function xxx(){}" in der IIFE existieren
+  // (nicht window.xxx = ...), sind für Inline-onclick-Attribute (die im
+  // globalen Scope laufen) unsichtbar und werfen "xxx is not defined". Gleiches
+  // Muster für die neuen serviceAktuelleAnsichtRendern/aktuellesAktuelleAnsichtRendern-
+  // Helfer (Zurück-Button in serviceEdit/aktuellesEdit). Bei künftigen neuen
+  // Funktionen, die per onclick="..." aus gerendertem HTML aufgerufen werden,
+  // IMMER prüfen: entweder direkt als window.xxx = function(){...} definieren,
+  // oder hier in diese Liste aufnehmen - sonst genau dieser Bug erneut.
+  window.renderService = renderService;
+  window.renderMedian   = renderMedian;
+  window.serviceAktuelleAnsichtRendern   = serviceAktuelleAnsichtRendern;
+  window.aktuellesAktuelleAnsichtRendern = aktuellesAktuelleAnsichtRendern;
 
 })();
