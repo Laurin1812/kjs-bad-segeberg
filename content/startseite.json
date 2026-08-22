@@ -35,6 +35,12 @@
   "downloads": [],
   "testimonials": [
     {
+      "text": "Test",
+      "name": "Test",
+      "rolle": "Test",
+      "icon": "🌿"
+    },
+    {
       "text": "Mein Schweißhund und ich sind seit Jahren im Kreis Bad Segeberg im Einsatz. Die Kameradschaft und das gemeinsame Arbeiten für das Wild – das ist es, was uns alle verbindet.",
       "name": "Hans-Peter Schulz",
       "rolle": "Schweißhundeführer",
@@ -48,7 +54,5 @@
     }
   ],
   "galerie": [],
-  "galerie_titel": "Bildergalerie",
-  "testimonials_titel": "Was unsere Jäger und Mitglieder sagen",
-  "testimonials_untertitel": "Stimmen aus unserer Gemeinschaft"
+  "galerie_titel": "Bildergalerie"
 }
