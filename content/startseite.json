@@ -35,12 +35,6 @@
   "downloads": [],
   "testimonials": [
     {
-      "text": "Die Jungwildrettung ist für mich das Herzstück unserer Arbeit. Wenn man im Frühjahr ein Kitz in den Händen hält und weiß, dass man sein Leben gerettet hat – das ist unbezahlbar.",
-      "name": "Thomas Meier",
-      "rolle": "Jungwildrettung, Hegering Kaltenkirchen",
-      "icon": "🌿"
-    },
-    {
       "text": "Mein Schweißhund und ich sind seit Jahren im Kreis Bad Segeberg im Einsatz. Die Kameradschaft und das gemeinsame Arbeiten für das Wild – das ist es, was uns alle verbindet.",
       "name": "Hans-Peter Schulz",
       "rolle": "Schweißhundeführer",
@@ -52,5 +46,7 @@
       "rolle": "Jagdhornbläserin, KJS Segeberg",
       "icon": "📯"
     }
-  ]
+  ],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
