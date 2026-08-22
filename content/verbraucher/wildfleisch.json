@@ -11,5 +11,11 @@
   "bild_groesse": "img-100",
   "downloads": [],
   "galerie": [],
-  "galerie_titel": "Bildergalerie"
+  "galerie_titel": "Bildergalerie",
+  "linkliste": [
+    {
+      "titel": "Rezepte Reh Wild",
+      "url": "https://www.wild-auf-wild.de/"
+    }
+  ]
 }
