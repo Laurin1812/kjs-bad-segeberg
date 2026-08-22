@@ -1574,20 +1574,64 @@
      collectDownloadsList()-Komponente wie bei Aktuelles.
   ──────────────────────────────────────────────────────────── */
 
+  /* ────────────────────────────────────────────────────────────
+     SERVICE – Admin-UX 22.08.2026 auf das Aktuelles-Muster angeglichen
+     (Frank-Wunsch: "gleichbleibendes System" über alle CMS-Bereiche):
+       - Jahr-/Kategorie-Filter oben wie bei Aktuelles (renderAktuelles).
+       - Erscheinungsjahr-Feld pro Beitrag wie bei Aktuelles.
+       - Archivierung NICHT mehr als Badge in derselben Liste (das alte
+         Muster), sondern als eigene Archiv-Unterseite/"Unterordner" wie
+         bei Medien & Bilder (medienArchivSeiteOeffnen) - archivierte
+         Beiträge verschwinden aus der normalen Liste und tauchen nur noch
+         auf der Archiv-Unterseite auf.
+     S.svcAnsicht ('alle'|'archiv') merkt sich, welche der beiden Ansichten
+     gerade offen ist, damit z.B. der "← Zurück"-Button beim Bearbeiten
+     eines archivierten Beitrags wieder zur Archiv-Unterseite zurückführt
+     und nicht immer zur normalen Liste (analog zu
+     medienAktuelleAnsichtNeuRendern für Medien & Bilder).
+  ──────────────────────────────────────────────────────────── */
+  function serviceAktuelleAnsichtRendern() {
+    if (S.svcAnsicht === 'archiv') serviceArchivSeiteOeffnen();
+    else renderService(S.section, S.data);
+  }
+
   function renderService(def, data) {
+    S.svcAnsicht = 'alle';
     var beitraege = data.beitraege || [];
+    S.svcFilterJahr = S.svcFilterJahr || '';
+    S.svcFilterKat  = S.svcFilterKat  || '';
 
     var indexed = beitraege.map(function(b, i) {
-      return { b: b, i: i, iso: datumToIsoFlexible(b.datum) };
+      return { b: b, i: i, jahr: b.jahr || jahrAusDatum(b.datum), iso: datumToIsoFlexible(b.datum) };
     });
-    indexed.sort(function(a, b) {
+    var aktive = indexed.filter(function(e) { return !e.b.archiviert; });
+    var archivAnzahl = indexed.length - aktive.length;
+
+    var jahre = [];
+    aktive.forEach(function(e) { if (e.jahr && jahre.indexOf(e.jahr) === -1) jahre.push(e.jahr); });
+    jahre.sort(function(a, b) { return b - a; });
+
+    var gefiltert = aktive.filter(function(e) {
+      if (S.svcFilterJahr && e.jahr !== S.svcFilterJahr) return false;
+      if (S.svcFilterKat && (e.b.kategorie || '') !== S.svcFilterKat) return false;
+      return true;
+    });
+    gefiltert.sort(function(a, b) {
       if (a.iso && b.iso) return b.iso.localeCompare(a.iso);
       if (a.iso) return -1;
       if (b.iso) return 1;
       return a.i - b.i;
     });
 
+    var jahrOptions = '<option value="">Alle Jahre</option>' + jahre.map(function(j) {
+      return '<option value="' + escAttr(j) + '"' + (j === S.svcFilterJahr ? ' selected' : '') + '>' + escHtml(j) + '</option>';
+    }).join('');
+    var katOptions = '<option value="">Alle Kategorien</option>' + alleServiceKategorien().map(function(k) {
+      return '<option value="' + escAttr(k) + '"' + (k === S.svcFilterKat ? ' selected' : '') + '>' + escHtml(k) + '</option>';
+    }).join('');
+
     var html = panelHeader(def.label,
+      '<button type="button" class="btn btn-outline btn-sm" onclick="serviceArchivSeiteOeffnen()">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
       '<button class="btn btn-primary" onclick="serviceNeu()">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
 
@@ -1601,35 +1645,102 @@
         '<button class="btn btn-sm btn-outline" onclick="serviceEinstSave()">Speichern</button>' +
       '</div>' +
 
-      '<p class="text-muted" style="margin-bottom:1rem;">' + beitraege.length + ' Beitrag' + (beitraege.length === 1 ? '' : 'e') + '. Klicken zum Bearbeiten.</p>';
+      // ── Jahr-/Kategorie-Filter (wie bei Aktuelles) ──────────
+      '<div class="form-card">' +
+        '<div class="form-card-title">🔍 Filtern &amp; Sortieren</div>' +
+        '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Die Liste ist immer nach Datum sortiert (neueste zuerst). Optional zusätzlich nach Jahr und/oder Kategorie filtern.</p>' +
+        '<div class="field-row" style="align-items:center;gap:1rem;flex-direction:row;flex-wrap:wrap;">' +
+          '<select class="field-input" id="svc-filter-jahr" style="max-width:180px;" onchange="serviceFilterChange()">' + jahrOptions + '</select>' +
+          '<select class="field-input" id="svc-filter-kat" style="max-width:220px;" onchange="serviceFilterChange()">' + katOptions + '</select>' +
+          (S.svcFilterJahr || S.svcFilterKat
+            ? '<button class="btn btn-sm btn-ghost" onclick="serviceFilterReset()">✕ Filter zurücksetzen</button>'
+            : '') +
+        '</div>' +
+      '</div>' +
 
-    indexed.forEach(function(entry) {
+      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + aktive.length + ' Beiträgen. Klicken zum Bearbeiten.</p>';
+
+    gefiltert.forEach(function(entry) {
       var b = entry.b, i = entry.i;
-      var archivBadge = b.archiviert
-        ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
-        : '';
       html += '<div class="item-card" onclick="serviceEdit(' + i + ')">' +
         '<div class="item-body">' +
-          '<div class="item-title">' + archivBadge + escHtml(b.titel || '(Kein Titel)') + '</div>' +
+          '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
           '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
             (b.kategorie ? ' <span class="item-badge">' + escHtml(b.kategorie) + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<div class="item-actions">' +
-          '<button class="btn btn-sm ' + (b.archiviert ? 'btn-outline' : 'btn-ghost') + '" ' +
-            'title="' + (b.archiviert ? 'Aus Archiv zurückholen' : 'Ins Archiv verschieben') + '" ' +
-            'onclick="event.stopPropagation();serviceArchivToggle(' + i + ')">' +
-            (b.archiviert ? '↩️ Wiederherstellen' : '📦 Archivieren') +
-          '</button>' +
+          '<button class="btn btn-sm btn-ghost" title="Ins Archiv verschieben" onclick="event.stopPropagation();serviceArchivToggle(' + i + ')">📦 Archivieren</button>' +
           '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();serviceEdit(' + i + ')">Bearbeiten</button>' +
           '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();serviceDelete(' + i + ')">Löschen</button>' +
         '</div>' +
       '</div>';
     });
 
+    if (!gefiltert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine Beiträge in dieser Filteransicht.</p></div>';
+    }
+
     html += '</div>';
     id('admin-main').innerHTML = html;
   }
+
+  window.serviceFilterChange = function() {
+    S.svcFilterJahr = val('svc-filter-jahr');
+    S.svcFilterKat  = val('svc-filter-kat');
+    renderService(S.section, S.data);
+  };
+  window.serviceFilterReset = function() {
+    S.svcFilterJahr = '';
+    S.svcFilterKat  = '';
+    renderService(S.section, S.data);
+  };
+
+  // Eigene "Unterordner"-Ansicht statt Inline-Badge - ersetzt admin-main
+  // komplett, mit "← Zurück"-Button zur normalen Service-Übersicht
+  // (renderService). Gleiches Muster wie medienArchivSeiteOeffnen().
+  window.serviceArchivSeiteOeffnen = function() {
+    S.svcAnsicht = 'archiv';
+    var beitraege = S.data.beitraege || [];
+    var indexed = beitraege.map(function(b, i) { return { b: b, i: i, iso: datumToIsoFlexible(b.datum) }; });
+    var archiviert = indexed.filter(function(e) { return e.b.archiviert; });
+    archiviert.sort(function(a, b) {
+      if (a.iso && b.iso) return b.iso.localeCompare(a.iso);
+      if (a.iso) return -1;
+      if (b.iso) return 1;
+      return a.i - b.i;
+    });
+
+    var html = '<div class="panel-header"><h2>📦 Archivierte Beiträge</h2></div>' +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderService(S.section,S.data)">← Zurück zu Service</button>' +
+          '<p class="text-muted" style="margin-bottom:0;font-size:.85rem;">Archivierte Beiträge erscheinen nicht mehr auf der Service-Seite. Über „↩️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
+        '</div>';
+
+    if (!archiviert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine archivierten Beiträge.</p></div>';
+    } else {
+      archiviert.forEach(function(entry) {
+        var b = entry.b, i = entry.i;
+        html += '<div class="item-card" onclick="serviceEdit(' + i + ')">' +
+          '<div class="item-body">' +
+            '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
+            '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
+              (b.kategorie ? ' <span class="item-badge">' + escHtml(b.kategorie) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="item-actions">' +
+            '<button class="btn btn-sm btn-outline" title="Aus Archiv zurückholen" onclick="event.stopPropagation();serviceArchivToggle(' + i + ')">↩️ Wiederherstellen</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();serviceEdit(' + i + ')">Bearbeiten</button>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();serviceDelete(' + i + ')">Löschen</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+    id('admin-main').innerHTML = html;
+  };
 
   window.serviceEinstSave = async function() {
     S.data.titel          = gv('sv-titel');
@@ -1643,7 +1754,7 @@
   window.serviceNeu = function() {
     var data = S.data;
     data.beitraege = data.beitraege || [];
-    var newB = { titel:'', datum:'', kategorie:(alleServiceKategorien()[0] || 'Allgemein'), text:'', video:'', downloads:[], archiviert:false };
+    var newB = { titel:'', datum:'', jahr: String(new Date().getFullYear()), kategorie:(alleServiceKategorien()[0] || 'Allgemein'), text:'', video:'', downloads:[], archiviert:false };
     data.beitraege.unshift(newB);
     serviceEdit(0);
   };
@@ -1653,11 +1764,16 @@
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     var html = panelHeader('🧰 Beitrag bearbeiten',
-        '<button class="btn btn-outline" onclick="renderService(S.section,S.data)">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="serviceAktuelleAnsichtRendern()">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="serviceSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
+          '<div class="field-row">' +
+            '<label class="field-label" for="svb-jahr">Erscheinungsjahr</label>' +
+            '<input class="field-input" type="number" id="svb-jahr" value="' + escAttr(b.jahr || jahrAusDatum(b.datum)) + '" placeholder="' + escAttr(jahrAusDatum(b.datum) || String(new Date().getFullYear())) + '" style="max-width:140px">' +
+            '<p class="field-hint">Bestimmt, in welchem Archiv-Jahr der Beitrag einsortiert wird (unabhängig vom Datum unten). Normalerweise gleich dem Jahr des Datums.</p>' +
+          '</div>' +
           fDate('svb-datum', 'Datum', b.datum) +
           fText('svb-titel', 'Titel', b.titel) +
           fServiceKategorieDropdown(b.kategorie) +
@@ -1682,6 +1798,7 @@
     var b = S.data.beitraege[idx];
     b.titel      = gv('svb-titel');
     b.datum      = isoToDatum(gv('svb-datum'));
+    b.jahr       = gv('svb-jahr') || jahrAusDatum(b.datum);
     b.kategorie  = gv('svb-kategorie');
     b.text       = getMDE();
     b.video      = gv('svb-video');
@@ -1690,7 +1807,7 @@
     b.downloads  = collectDownloadsList();
     await doSave(S.section.file, S.data, '🧰 Service: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
-    renderService(S.section, S.data);
+    serviceAktuelleAnsichtRendern();
   };
 
   window.serviceArchivToggle = async function(idx) {
@@ -1699,7 +1816,7 @@
     b.archiviert = !b.archiviert;
     await doSave(S.section.file, S.data, '🧰 Service: Archivstatus geändert');
     toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
-    renderService(S.section, S.data);
+    serviceAktuelleAnsichtRendern();
   };
 
   window.serviceDelete = function(idx) {
@@ -1707,7 +1824,7 @@
       S.data.beitraege.splice(idx, 1);
       await doSave(S.section.file, S.data, '🧰 Service: Beitrag gelöscht');
       toast('🗑️ Beitrag gelöscht', 'info');
-      renderService(S.section, S.data);
+      serviceAktuelleAnsichtRendern();
     });
   };
 
