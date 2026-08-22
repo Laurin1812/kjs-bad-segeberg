@@ -1,11 +1,15 @@
 {
   "titel": "Jugendarbeit",
-  "untertitel": "Jugendarbeit der KJS Segeberg",
-  "intro": "Die Nachwuchsförderung liegt uns besonders am Herzen. Mit vielfältigen Programmen begeistern wir Kinder und Jugendliche für Natur, Wald und Wildtiere.",
+  "untertitel": "<p>Jugendarbeit der KJS Segeberg</p>",
+  "intro": "<p>Die Nachwuchsförderung liegt uns besonders am Herzen. Mit vielfältigen Programmen begeistern wir Kinder und Jugendliche für Natur, Wald und Wildtiere.</p>",
   "bild": "",
   "bild_alt": "",
-  "inhalt": "## Naturerlebnistage\n\nRegelmäßig veranstalten wir Naturerlebnistage für Schulklassen, bei denen Kinder heimische Wildtiere kennenlernen und den Wald auf spannende Weise entdecken.\n\n## Grünes Klassenzimmer\n\nUnser „Grünes Klassenzimmer” bietet Schulen und Kindergärten ein praxisnahes Outdoor-Lernprogramm direkt in der Natur. Angebote für alle Altersstufen verfügbar.\n\n## Jagdjugend\n\nDie Kreisjugendgruppe der KJS Segeberg trifft sich regelmäßig zu Veranstaltungen rund um Jagd und Natur. Junge Jägerinnen und Jäger bis 30 Jahre sind herzlich willkommen.!",
-  "kontakt_name": "Sabine Krug",
-  "kontakt_email": "jugend@kjs-bad-segeberg.de",
-  "hero_bild": ""
+  "inhalt": "<h2>Naturerlebnistage</h2><p>Regelmäßig veranstalten wir Naturerlebnistage für Schulklassen, bei denen Kinder heimische Wildtiere kennenlernen und den Wald auf spannende Weise entdecken.</p><h2>Grünes Klassenzimmer</h2><p>Unser „Grünes Klassenzimmer” bietet Schulen und Kindergärten ein praxisnahes Outdoor-Lernprogramm direkt in der Natur. Angebote für alle Altersstufen verfügbar.</p><h2>Jagdjugend</h2><p>Die Kreisjugendgruppe der KJS Segeberg trifft sich regelmäßig zu Veranstaltungen rund um Jagd und Natur. Junge Jägerinnen und Jäger bis 30 Jahre sind herzlich willkommen.!</p>",
+  "kontakt_name": "Jugendobmann Mike Albrecht",
+  "kontakt_email": "mike.albrecht@kjs-bad-segeberg.de",
+  "hero_bild": "",
+  "bild_groesse": "img-100",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
