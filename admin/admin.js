@@ -3112,9 +3112,20 @@
      Service-Beiträge, Markdown-Inhalte, Downloads-Vorschaubilder) - eine
      Verschiebung würde all diese Referenzen live brechen. Stattdessen wird
      nur der Dateiname in einer separaten Metadaten-Liste geführt
-     (content/medien-archiv.json), die Galerie filtert clientseitig in
-     "Alle Bilder" / "Archivierte Bilder". Die Datei selbst bleibt unverändert
-     am gleichen Ort liegen -> auf der Live-Seite ändert sich nichts.
+     (content/medien-archiv.json). Die Datei selbst bleibt unverändert am
+     gleichen Ort liegen -> auf der Live-Seite ändert sich nichts.
+
+     UX (22.08.2026, nach Rücksprache mit Frank): archivierte Bilder klappen
+     NICHT unter der normalen Galerie auf (fühlte sich an wie "ist eh alles
+     sichtbar"), sondern wie ein echter Unterordner/eine zweite Seite - Klick
+     auf "📁 Archivierte Bilder" tauscht die komplette Ansicht aus
+     (medienArchivSeiteOeffnen), mit "← Zurück"-Button zur normalen Ansicht.
+     Außerdem WICHTIG (Frank, 22.08.2026): archivierte Bilder dürfen in
+     KEINER Bildauswahl im Admin mehr auftauchen - weder hier in "Alle
+     Bilder", noch im "Bild auswählen"-Dialog für Hero-/Vorschaubilder
+     (loadGallery), noch im Markdown-Bild-Einfügen-Dialog (loadMdImgGallery,
+     siehe weiter unten) - sonst könnte man versehentlich ein archiviertes
+     Bild neu verwenden, was dem Zweck des Archivierens widerspricht.
   ──────────────────────────────────────────────────────────── */
   var medienFiles = null;        // zuletzt geladene Verzeichnisliste von images/
   var medienArchivListe = [];    // Dateinamen, die als "archiviert" markiert sind
@@ -3131,15 +3142,10 @@
               '<input type="file" id="medien-upload-input" accept="image/*" style="display:none">' +
               '<span id="medien-upload-status" style="margin-left:.75rem;color:var(--text-muted);font-size:.85rem;"></span>' +
             '</div>' +
-            '<button type="button" class="btn btn-outline btn-sm" id="medien-archiv-toggle" onclick="medienArchivPanelToggle()">📦 Archivierte Bilder</button>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="medien-archiv-toggle" onclick="medienArchivSeiteOeffnen()">📁 Archivierte Bilder</button>' +
           '</div>' +
           '<div class="form-card-title">Alle Bilder</div>' +
           '<div class="img-gallery" id="medien-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
-        '</div>' +
-        '<div class="form-card" id="medien-archiv-panel" style="display:none;">' +
-          '<div class="form-card-title">📦 Archivierte Bilder</div>' +
-          '<p class="text-muted" style="margin:-.5rem 0 1rem;font-size:.85rem;">Archivierte Bilder bleiben auf der Website ganz normal bestehen – sie werden hier nur zur besseren Übersicht aus „Alle Bilder" ausgeblendet. Über „♻️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
-          '<div class="img-gallery" id="medien-archiv-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
         '</div>' +
       '</div>';
     id('admin-main').innerHTML = html;
@@ -3161,11 +3167,26 @@
     });
   }
 
-  window.medienArchivPanelToggle = function() {
-    var panel = id('medien-archiv-panel');
-    if (!panel) return;
-    var offen = panel.style.display !== 'none';
-    panel.style.display = offen ? 'none' : 'block';
+  // Eigene "Unterordner"-Ansicht statt Akkordeon: ersetzt admin-main komplett,
+  // mit "← Zurück"-Button zur normalen Medien-Übersicht (renderMedian).
+  window.medienArchivSeiteOeffnen = async function() {
+    var html = '<div class="panel-header"><h2>📦 Archivierte Bilder</h2></div>' +
+      '<div class="panel-body panel-body--wide">' +
+        '<div class="form-card">' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderMedian()">← Zurück zu Medien &amp; Bilder</button>' +
+          '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Archivierte Bilder bleiben auf der Website ganz normal bestehen und tauchen nur hier nicht mehr in der normalen Übersicht oder bei der Bildauswahl auf. Über „♻️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
+          '<div class="img-gallery" id="medien-archiv-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+      '</div>';
+    id('admin-main').innerHTML = html;
+    try {
+      if (!medienFiles) medienFiles = await apiGetDir('images');
+      await loadMedienArchivListe();
+      renderMedienArchivAnsicht();
+    } catch(e) {
+      var g = id('medien-archiv-gallery');
+      if (g) g.innerHTML = '<div class="gallery-loading">Fehler: ' + escHtml(e.message) + '</div>';
+    }
   };
 
   async function loadMedienArchivListe() {
@@ -3187,15 +3208,19 @@
     var gallery = id('medien-gallery');
     if (!gallery) return;
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
-    var archivGallery = id('medien-archiv-gallery');
-    if (archivGallery) archivGallery.innerHTML = '<div class="gallery-loading">Wird geladen…</div>';
     try {
       medienFiles = await apiGetDir('images');
       await loadMedienArchivListe();
-      renderMedienGalerien();
+      renderMedienAlleBilderAnsicht();
     } catch(e) {
       gallery.innerHTML = '<div class="gallery-loading">Fehler: ' + escHtml(e.message) + '</div>';
     }
+  }
+
+  function medienBilderListe() {
+    return (medienFiles || []).filter(function(f) {
+      return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+    });
   }
 
   function medienGalleryItemHtml(f, istArchiviert) {
@@ -3213,36 +3238,41 @@
     '</div>';
   }
 
-  function renderMedienGalerien() {
+  function renderMedienAlleBilderAnsicht() {
     var gallery = id('medien-gallery');
-    var archivGallery = id('medien-archiv-gallery');
     var toggleBtn = id('medien-archiv-toggle');
-    if (!medienFiles) return;
-    var imgs = medienFiles.filter(function(f) {
-      return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
-    });
+    if (!gallery) return;
+    var imgs = medienBilderListe();
     var aktive = imgs.filter(function(f) { return medienArchivListe.indexOf(f.name) === -1; });
     var archiviert = imgs.filter(function(f) { return medienArchivListe.indexOf(f.name) !== -1; });
+    if (toggleBtn) toggleBtn.textContent = '📁 Archivierte Bilder (' + archiviert.length + ')';
+    gallery.innerHTML = aktive.length
+      ? aktive.map(function(f) { return medienGalleryItemHtml(f, false); }).join('')
+      : '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
+  }
 
-    if (toggleBtn) toggleBtn.textContent = '📦 Archivierte Bilder (' + archiviert.length + ')';
+  function renderMedienArchivAnsicht() {
+    var archivGallery = id('medien-archiv-gallery');
+    if (!archivGallery) return;
+    var archiviert = medienBilderListe().filter(function(f) { return medienArchivListe.indexOf(f.name) !== -1; });
+    archivGallery.innerHTML = archiviert.length
+      ? archiviert.map(function(f) { return medienGalleryItemHtml(f, true); }).join('')
+      : '<div class="gallery-loading">Keine archivierten Bilder.</div>';
+  }
 
-    if (gallery) {
-      gallery.innerHTML = aktive.length
-        ? aktive.map(function(f) { return medienGalleryItemHtml(f, false); }).join('')
-        : '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
-    }
-    if (archivGallery) {
-      archivGallery.innerHTML = archiviert.length
-        ? archiviert.map(function(f) { return medienGalleryItemHtml(f, true); }).join('')
-        : '<div class="gallery-loading">Keine archivierten Bilder.</div>';
-    }
+  // Rendert die gerade sichtbare Ansicht neu (Alle Bilder ODER Archiv-Unterseite -
+  // die beiden existieren nie gleichzeitig im DOM, da medienArchivSeiteOeffnen()
+  // admin-main komplett ersetzt statt aufzuklappen).
+  function medienAktuelleAnsichtNeuRendern() {
+    if (id('medien-archiv-gallery')) renderMedienArchivAnsicht();
+    else if (id('medien-gallery')) renderMedienAlleBilderAnsicht();
   }
 
   window.medienArchivToggle = async function(name) {
     var idx = medienArchivListe.indexOf(name);
     var wirdArchiviert = idx === -1;
     if (wirdArchiviert) medienArchivListe.push(name); else medienArchivListe.splice(idx, 1);
-    renderMedienGalerien(); // optimistisches UI-Update, Datei bleibt unangetastet
+    medienAktuelleAnsichtNeuRendern(); // optimistisches UI-Update, Datei bleibt unangetastet
     try {
       var result = await doSave('content/medien-archiv.json', { archiviert: medienArchivListe },
         wirdArchiviert ? ('📦 Bild archiviert: ' + name) : ('♻️ Bild wiederhergestellt: ' + name));
@@ -3253,7 +3283,7 @@
       var idx2 = medienArchivListe.indexOf(name);
       if (wirdArchiviert) { if (idx2 !== -1) medienArchivListe.splice(idx2, 1); }
       else medienArchivListe.push(name);
-      renderMedienGalerien();
+      medienAktuelleAnsichtNeuRendern();
       toast('❌ Fehler: ' + e.message, 'err');
     }
   };
@@ -3273,16 +3303,7 @@
         try {
           await apiDeleteFile(path, sha, '🗑️ Bild gelöscht: ' + name);
           toast('✅ Bild gelöscht.', 'ok');
-          // Direkt aus der Galerie entfernen statt neu zu laden: Die GitHub-API liefert
-          // nach einem DELETE kurzzeitig noch die alte (zwischengespeicherte) Verzeichnis-
-          // liste zurück – ein sofortiges Neuladen würde das gerade gelöschte Bild also
-          // wieder anzeigen ("Geisterbild", das erst beim zweiten Klick verschwindet).
-          var escSel = (window.CSS && CSS.escape) ? CSS.escape(path) : path.replace(/(["\\\]])/g, '\\$1');
-          [id('medien-gallery'), id('medien-archiv-gallery')].forEach(function(gallery) {
-            if (!gallery) return;
-            var wrap = gallery.querySelector('[data-path="' + escSel + '"]');
-            if (wrap) wrap.remove();
-          });
+          if (medienFiles) medienFiles = medienFiles.filter(function(f) { return f.path !== path; });
           // aus der Archiv-Liste ebenfalls entfernen (falls dort vorhanden), damit
           // medien-archiv.json nicht auf eine gelöschte Datei verweist
           var idx = medienArchivListe.indexOf(name);
@@ -3290,12 +3311,7 @@
             medienArchivListe.splice(idx, 1);
             doSave('content/medien-archiv.json', { archiviert: medienArchivListe }, '📦 Archiv-Eintrag bereinigt (Bild gelöscht): ' + name).catch(function(){});
           }
-          if (medienFiles) medienFiles = medienFiles.filter(function(f) { return f.path !== path; });
-          var g1 = id('medien-gallery'), g2 = id('medien-archiv-gallery');
-          if (g1 && !g1.querySelector('.gallery-img-wrap')) g1.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden.</div>';
-          if (g2 && !g2.querySelector('.gallery-img-wrap')) g2.innerHTML = '<div class="gallery-loading">Keine archivierten Bilder.</div>';
-          var toggleBtn = id('medien-archiv-toggle');
-          if (toggleBtn && g2) toggleBtn.textContent = '📦 Archivierte Bilder (' + g2.querySelectorAll('.gallery-img-wrap').length + ')';
+          medienAktuelleAnsichtNeuRendern();
         } catch(e) {
           toast('❌ Fehler: ' + e.message, 'err');
         }
@@ -3986,8 +4002,9 @@
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
     try {
       var files = await apiGetDir('images');
+      await loadMedienArchivListe();
       var imgs = files.filter(function(f) {
-        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name) && medienArchivListe.indexOf(f.name) === -1;
       });
       if (imgs.length === 0) {
         gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie ein Bild hoch.</div>';
@@ -4194,8 +4211,9 @@
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
     try {
       var files = await apiGetDir('images');
+      await loadMedienArchivListe();
       var imgs = files.filter(function(f) {
-        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name) && medienArchivListe.indexOf(f.name) === -1;
       });
       if (imgs.length === 0) {
         gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie eines hoch.</div>';
