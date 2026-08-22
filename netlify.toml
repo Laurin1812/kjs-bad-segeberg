@@ -11,6 +11,12 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+    # Ohne diese Zeile lieferte Netlify admin.js/admin.css mit Standard-Caching
+    # aus - dadurch kam wiederholt eine veraltete admin.js aus dem Browser-
+    # Cache, obwohl längst ein neuer Stand deployed war. Speichern aus einem
+    # alten Tab hat dadurch neue Formularfelder geleert bzw. alte Fallback-
+    # Logik erneut ausgelöst. Gleiche Regel wie /css/* und /js/*.
+    Cache-Control = "no-cache, must-revalidate"
 
 # Browser dazu zwingen, css/js/html immer beim Server zu prüfen (Revalidierung
 # über ETag), statt sie unbegrenzt im Cache zu behalten. Damit greifen

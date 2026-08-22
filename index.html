@@ -803,11 +803,12 @@
       var tsGrid = document.querySelector('.testimonials__grid');
       if (tsGrid) {
         tsGrid.innerHTML = d.testimonials.map(function(t) {
-          var avatar = (t.icon && t.icon.trim()) ? t.icon.trim() : ((t.name || '?').trim().charAt(0).toUpperCase() || '?');
+          var icon = (t.icon && t.icon.trim()) ? t.icon.trim() : '';
+          var avatarHtml = icon ? '<div class="testimonial-card__avatar">' + icon + '</div>' : '';
           return '<div class="testimonial-card">' +
             '<p class="testimonial-card__text">„' + (t.text || '') + '"</p>' +
             '<div class="testimonial-card__author">' +
-              '<div class="testimonial-card__avatar">' + avatar + '</div>' +
+              avatarHtml +
               '<div>' +
                 '<span class="testimonial-card__name">' + (t.name || '') + '</span>' +
                 '<span class="testimonial-card__role">' + (t.rolle || '') + '</span>' +
