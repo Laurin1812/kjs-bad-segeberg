@@ -826,7 +826,7 @@ p  { margin-bottom: 1rem; }
 }
 .person-card__avatar { width: 100%; height: 100%; object-fit: cover; }
 .person-card__body { padding: 1.25rem; }
-.person-card__role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green-main); display: block; margin-bottom: .35rem; }
+.person-card__role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green-main); display: block; margin-bottom: .35rem; line-height: 1.3; min-height: 2.6em; }
 .person-card__name { font-weight: 700; font-size: 1rem; color: var(--text-dark); margin-bottom: .5rem; font-family: var(--font-sans); }
 .person-card__contact { font-size: .82rem; color: var(--text-muted); }
 .person-card__contact a { color: var(--green-main); display: block; margin-bottom: .2rem; }
