@@ -2295,7 +2295,17 @@
     return '';
   }
 
+  // Merkt sich, welche Ansicht (normale Liste vs. Archiv-Unterseite) gerade
+  // offen ist, damit Zurück/Speichern/Löschen/Archivieren aus dem
+  // Bearbeiten-Formular zur richtigen Ansicht zurückführen - gleiches
+  // Muster wie S.svcAnsicht bei Service (siehe dort für Begründung).
+  function aktuellesAktuelleAnsichtRendern() {
+    if (S.aktAnsicht === 'archiv') aktuellesArchivSeiteOeffnen();
+    else renderAktuelles(S.section, S.data);
+  }
+
   function renderAktuelles(def, data) {
+    S.aktAnsicht = 'alle';
     var beitraege = data.beitraege || [];
     var einst = data.einstellungen || {};
     S.aktFilterJahr = S.aktFilterJahr || '';
@@ -2307,11 +2317,17 @@
     var indexed = beitraege.map(function(b, i) {
       return { b: b, i: i, jahr: b.jahr || jahrAusDatum(b.datum), iso: datumToIsoFlexible(b.datum) };
     });
+    // Archivierte Beiträge erscheinen jetzt NICHT mehr inline mit Badge in
+    // dieser Liste, sondern nur noch auf der Archiv-Unterseite (22.08.2026,
+    // wie bei Service/Medien & Bilder) - siehe aktuellesArchivSeiteOeffnen().
+    var aktive = indexed.filter(function(e) { return !e.b.archiviert; });
+    var archivAnzahl = indexed.length - aktive.length;
+
     var jahre = [];
-    indexed.forEach(function(e) { if (e.jahr && jahre.indexOf(e.jahr) === -1) jahre.push(e.jahr); });
+    aktive.forEach(function(e) { if (e.jahr && jahre.indexOf(e.jahr) === -1) jahre.push(e.jahr); });
     jahre.sort(function(a, b) { return b - a; });
 
-    var gefiltert = indexed.filter(function(e) {
+    var gefiltert = aktive.filter(function(e) {
       if (S.aktFilterJahr && e.jahr !== S.aktFilterJahr) return false;
       if (S.aktFilterKat && (e.b.kategorie || '') !== S.aktFilterKat) return false;
       return true;
@@ -2331,6 +2347,7 @@
     }).join('');
 
     var html = panelHeader(def.label,
+      '<button type="button" class="btn btn-outline btn-sm" onclick="aktuellesArchivSeiteOeffnen()">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
       '<button class="btn btn-primary" onclick="aktuellesNeu()">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
 
@@ -2358,31 +2375,28 @@
         '</div>' +
       '</div>' +
 
-      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + beitraege.length + ' Beiträgen. Klicken zum Bearbeiten.</p>';
+      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + aktive.length + ' Beiträgen. Klicken zum Bearbeiten.</p>';
 
     gefiltert.forEach(function(entry) {
       var b = entry.b, i = entry.i;
-      var archivBadge = b.archiviert
-        ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
-        : '';
       html += '<div class="item-card" onclick="aktuellesEdit(' + i + ')">' +
         '<div class="item-body">' +
-          '<div class="item-title">' + archivBadge + escHtml(b.titel || '(Kein Titel)') + '</div>' +
+          '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
           '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
             (b.kategorie ? ' <span class="item-badge">' + escHtml(b.kategorie) + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<div class="item-actions">' +
-          '<button class="btn btn-sm ' + (b.archiviert ? 'btn-outline' : 'btn-ghost') + '" ' +
-            'title="' + (b.archiviert ? 'Aus Archiv zurückholen' : 'Ins Archiv verschieben') + '" ' +
-            'onclick="event.stopPropagation();aktuellesArchivToggle(' + i + ')">' +
-            (b.archiviert ? '↩️ Wiederherstellen' : '📦 Archivieren') +
-          '</button>' +
+          '<button class="btn btn-sm btn-ghost" title="Ins Archiv verschieben" onclick="event.stopPropagation();aktuellesArchivToggle(' + i + ')">📦 Archivieren</button>' +
           '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();aktuellesEdit(' + i + ')">Bearbeiten</button>' +
           '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();aktuellesDelete(' + i + ')">Löschen</button>' +
         '</div>' +
       '</div>';
     });
+
+    if (!gefiltert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine Beiträge in dieser Filteransicht.</p></div>';
+    }
 
     html += '</div>';
     id('admin-main').innerHTML = html;
@@ -2399,6 +2413,53 @@
     renderAktuelles(S.section, S.data);
   };
 
+  // Eigene "Unterordner"-Ansicht statt Inline-Badge - ersetzt admin-main
+  // komplett, mit "← Zurück"-Button zur normalen Aktuelles-Übersicht
+  // (renderAktuelles). Gleiches Muster wie serviceArchivSeiteOeffnen() /
+  // medienArchivSeiteOeffnen() (22.08.2026).
+  window.aktuellesArchivSeiteOeffnen = function() {
+    S.aktAnsicht = 'archiv';
+    var beitraege = S.data.beitraege || [];
+    var indexed = beitraege.map(function(b, i) { return { b: b, i: i, iso: datumToIsoFlexible(b.datum) }; });
+    var archiviert = indexed.filter(function(e) { return e.b.archiviert; });
+    archiviert.sort(function(a, b) {
+      if (a.iso && b.iso) return b.iso.localeCompare(a.iso);
+      if (a.iso) return -1;
+      if (b.iso) return 1;
+      return a.i - b.i;
+    });
+
+    var html = '<div class="panel-header"><h2>📦 Archivierte Beiträge</h2></div>' +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderAktuelles(S.section,S.data)">← Zurück zu Aktuelles</button>' +
+          '<p class="text-muted" style="margin-bottom:0;font-size:.85rem;">Archivierte Beiträge erscheinen nicht mehr auf der Hauptseite. Über „↩️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
+        '</div>';
+
+    if (!archiviert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine archivierten Beiträge.</p></div>';
+    } else {
+      archiviert.forEach(function(entry) {
+        var b = entry.b, i = entry.i;
+        html += '<div class="item-card" onclick="aktuellesEdit(' + i + ')">' +
+          '<div class="item-body">' +
+            '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
+            '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
+              (b.kategorie ? ' <span class="item-badge">' + escHtml(b.kategorie) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="item-actions">' +
+            '<button class="btn btn-sm btn-outline" title="Aus Archiv zurückholen" onclick="event.stopPropagation();aktuellesArchivToggle(' + i + ')">↩️ Wiederherstellen</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();aktuellesEdit(' + i + ')">Bearbeiten</button>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();aktuellesDelete(' + i + ')">Löschen</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+    id('admin-main').innerHTML = html;
+  };
+
   window.aktuellesNeu = function() {
     var data = S.data;
     data.beitraege = data.beitraege || [];
@@ -2412,7 +2473,7 @@
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     var html = panelHeader('📰 Beitrag bearbeiten',
-        '<button class="btn btn-outline" onclick="renderAktuelles(S.section,S.data)">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="aktuellesAktuelleAnsichtRendern()">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="aktuelleSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body">' +
@@ -2466,7 +2527,7 @@
     b.downloads = collectDownloadsList();
     await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
     toast('✅ Beitrag gespeichert!', 'ok');
-    renderAktuelles(S.section, S.data);
+    aktuellesAktuelleAnsichtRendern();
   };
 
   window.aktuellesArchivToggle = async function(idx) {
@@ -2475,7 +2536,7 @@
     b.archiviert = !b.archiviert;
     await doSave(S.section.file, S.data, '📰 Aktuelles: Archivstatus geändert');
     toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
-    renderAktuelles(S.section, S.data);
+    aktuellesAktuelleAnsichtRendern();
   };
 
   window.aktuellesEinstSave = async function() {
@@ -2491,7 +2552,7 @@
       S.data.beitraege.splice(idx, 1);
       await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gelöscht');
       toast('🗑️ Beitrag gelöscht', 'info');
-      renderAktuelles(S.section, S.data);
+      aktuellesAktuelleAnsichtRendern();
     });
   };
 
