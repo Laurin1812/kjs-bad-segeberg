@@ -3980,9 +3980,17 @@
   /* ────────────────────────────────────────────────────────────
      IMAGE PICKER
   ──────────────────────────────────────────────────────────── */
+  var imgPickerZeigtArchiv = false; // Bild-Picker-Modal: normale oder Archiv-Ansicht
+
   window.openImgPicker = function(fieldId) {
     S.imgTarget = fieldId;
+    imgPickerZeigtArchiv = false; // jede neue Öffnung startet in der normalen Ansicht
     id('img-modal').style.display = 'flex';
+    loadGallery();
+  };
+
+  window.imgPickerArchivToggle = function() {
+    imgPickerZeigtArchiv = !imgPickerZeigtArchiv;
     loadGallery();
   };
 
@@ -4000,14 +4008,20 @@
   async function loadGallery() {
     var gallery = id('img-gallery');
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
+    var toggleBtn = id('img-archiv-toggle');
+    if (toggleBtn) toggleBtn.textContent = imgPickerZeigtArchiv ? '📷 Zurück zu allen Bildern' : '📁 Archivierte Bilder';
     try {
       var files = await apiGetDir('images');
       await loadMedienArchivListe();
       var imgs = files.filter(function(f) {
-        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name) && medienArchivListe.indexOf(f.name) === -1;
+        var istBild = f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+        var istArchiviert = medienArchivListe.indexOf(f.name) !== -1;
+        return istBild && (imgPickerZeigtArchiv ? istArchiviert : !istArchiviert);
       });
       if (imgs.length === 0) {
-        gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie ein Bild hoch.</div>';
+        gallery.innerHTML = imgPickerZeigtArchiv
+          ? '<div class="gallery-loading">Keine archivierten Bilder.</div>'
+          : '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie ein Bild hoch.</div>';
         return;
       }
       gallery.innerHTML = imgs.map(function(f) {
@@ -4075,8 +4089,11 @@
   // aktuelle Position: Größe, horizontale/vertikale Position, Textumfluss
   var _mdImgPos = { size: 'img-mittel', hpos: 'img-links', vpos: 'img-pos-oben', flow: 'img-flow' };
 
+  var mdImgZeigtArchiv = false; // "Bild einfügen"-Dialog: normale oder Archiv-Ansicht
+
   function openMdImageModal() {
     if (!S.mde) { toast('❌ Editor nicht bereit', 'err'); return; }
+    mdImgZeigtArchiv = false; // jede neue Öffnung startet in der normalen Ansicht
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
@@ -4205,18 +4222,29 @@
     S._tiptapImageField = null;
   }
 
+  window.mdImgArchivToggle = function() {
+    mdImgZeigtArchiv = !mdImgZeigtArchiv;
+    loadMdImgGallery();
+  };
+
   async function loadMdImgGallery() {
     var gallery = id('mdimg-gallery');
     if (!gallery) return;
     gallery.innerHTML = '<div class="gallery-loading">Bilder werden geladen…</div>';
+    var toggleBtn = id('mdimg-archiv-toggle');
+    if (toggleBtn) toggleBtn.textContent = mdImgZeigtArchiv ? '📷 Zurück zu allen Bildern' : '📁 Archivierte Bilder';
     try {
       var files = await apiGetDir('images');
       await loadMedienArchivListe();
       var imgs = files.filter(function(f) {
-        return f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name) && medienArchivListe.indexOf(f.name) === -1;
+        var istBild = f.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(f.name);
+        var istArchiviert = medienArchivListe.indexOf(f.name) !== -1;
+        return istBild && (mdImgZeigtArchiv ? istArchiviert : !istArchiviert);
       });
       if (imgs.length === 0) {
-        gallery.innerHTML = '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie eines hoch.</div>';
+        gallery.innerHTML = mdImgZeigtArchiv
+          ? '<div class="gallery-loading">Keine archivierten Bilder.</div>'
+          : '<div class="gallery-loading">Noch keine Bilder vorhanden. Laden Sie eines hoch.</div>';
         return;
       }
       gallery.innerHTML = imgs.map(function(f) {
@@ -5597,6 +5625,7 @@
   // Bild-Modal für TipTap öffnen (analog openMdImageModal, aber ohne S.mde-Check)
   window.openTiptapImageModal = function(fieldId) {
     S._tiptapImageField = fieldId;
+    mdImgZeigtArchiv = false; // jede neue Öffnung startet in der normalen Ansicht
     _mdImgSelected = null;
     var opts = id('mdimg-options');
     if (opts) opts.style.display = 'none';
