@@ -452,10 +452,15 @@ p  { margin-bottom: 1rem; }
 .testimonials .section-title { color: #fff; }
 .testimonials .section-subtitle { color: rgba(255,255,255,.65); }
 .testimonials .section-divider { background: var(--gold); }
-.testimonials__grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+/* flex statt grid (22.08.2026, Laurin-Wunsch): bei 1-2 Zitaten sollen die
+   Karten mittig stehen statt links ausgerichtet im Raster hängenzubleiben -
+   flex-wrap mit justify-content:center zentriert automatisch, egal wie
+   viele Zitate gerade vorhanden sind. */
+.testimonials__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; }
 .testimonial-card {
   background: rgba(255,255,255,.07); border-radius: var(--radius-md); padding: 2rem;
   border: 1px solid rgba(255,255,255,.1); position: relative;
+  flex: 1 1 320px; max-width: 380px;
 }
 .testimonial-card::before {
   content: '\201C'; position: absolute; top: .5rem; left: 1.2rem;
@@ -1234,7 +1239,8 @@ body.kjs-lightbox-lock { overflow: hidden; }
   .welcome__image { max-width: 560px; }
   .services__grid { grid-template-columns: repeat(2,1fr); }
   .news__grid { grid-template-columns: repeat(2,1fr); }
-  .testimonials__grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .testimonials__grid { gap: 1.25rem; }
+  .testimonial-card { flex-basis: 100%; max-width: 100%; }
   .stats__grid { gap: 2rem; }
   .page-content .container { grid-template-columns: 1fr; }
   .persons-grid { grid-template-columns: repeat(2,1fr); }

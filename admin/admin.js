@@ -2406,8 +2406,10 @@
     var rows = list.map(renderTestimonialRow).join('');
     return '<div class="form-card">' +
       '<div class="form-card-title">💬 Stimmen ("Was unsere Jäger und Mitglieder sagen")</div>' +
-      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
-        'Zitate, die auf der Startseite unter „Was unsere Jäger und Mitglieder sagen" erscheinen. Reihenfolge per Drag &amp; Drop änderbar.' +
+      fText('testimonials_titel', 'Überschrift', data.testimonials_titel, 'Was unsere Jäger und Mitglieder sagen') +
+      fText('testimonials_untertitel', 'Unterüberschrift', data.testimonials_untertitel, 'Stimmen aus unserer Gemeinschaft') +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:.5rem 0 .75rem;">' +
+        'Zitate, die darunter erscheinen. Reihenfolge per Drag &amp; Drop änderbar.' +
       '</p>' +
       '<div id="testimonials-list">' + rows + '</div>' +
       '<p class="text-muted" id="testimonials-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Zitate hinzugefügt.</p>' +
@@ -2464,6 +2466,8 @@
       data[k] = gv(k);
     });
     data.hero_bild = gv('hero_bild');
+    data.testimonials_titel = gv('testimonials_titel');
+    data.testimonials_untertitel = gv('testimonials_untertitel');
     data.testimonials = collectTestimonialsList();
     return data;
   }

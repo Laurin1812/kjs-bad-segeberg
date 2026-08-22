@@ -600,9 +600,9 @@
 <!-- ===== TESTIMONIALS ===== -->
 <section class="testimonials">
   <div class="container">
-    <h2 class="section-title">Was unsere Jäger und Mitglieder sagen</h2>
+    <h2 class="section-title" id="testimonials-titel">Was unsere Jäger und Mitglieder sagen</h2>
     <div class="section-divider"></div>
-    <p class="section-subtitle">Stimmen aus unserer Gemeinschaft</p>
+    <p class="section-subtitle" id="testimonials-untertitel">Stimmen aus unserer Gemeinschaft</p>
 
     <div class="testimonials__grid">
       <div class="testimonial-card">
@@ -796,6 +796,10 @@
     // Beispiel-Zitate (Fantasienamen) - jetzt aus dem Admin-Feld befüllt.
     // Ohne gespeicherte Zitate bleiben die vorhandenen HTML-Karten als
     // Fallback stehen, damit der Bereich nicht leer wirkt.
+    var tsTitelEl = document.getElementById('testimonials-titel');
+    if (tsTitelEl && d.testimonials_titel) tsTitelEl.textContent = d.testimonials_titel;
+    var tsUntertitelEl = document.getElementById('testimonials-untertitel');
+    if (tsUntertitelEl && d.testimonials_untertitel) tsUntertitelEl.textContent = d.testimonials_untertitel;
     if (Array.isArray(d.testimonials) && d.testimonials.length) {
       var tsGrid = document.querySelector('.testimonials__grid');
       if (tsGrid) {
