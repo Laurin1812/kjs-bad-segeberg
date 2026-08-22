@@ -388,8 +388,10 @@
               bildHtml +
               '<div id="page-inhalt">' + inhaltHtml + '</div>' +
               kontaktStr +
+              // Der "← Alle Themen"-Link steht schon oben (content-back-link, Zeile ~386) -
+              // hier unten nur noch der Kontakt-Button, kein doppelter Zurück-Link mehr
+              // (Laurin-Feedback 22.08.2026, analog zum Aktuelles-Fix #95).
               '<div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">' +
-                '<a href="jagdhundeschule.html" class="btn btn-outline-green">← Alle Themen</a>' +
                 '<a href="../kontakt/index.html" class="btn btn-primary">Kontakt aufnehmen</a>' +
               '</div>';
             renderDownloadsSidebar(d);
