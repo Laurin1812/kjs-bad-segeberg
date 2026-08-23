@@ -1486,4 +1486,17 @@ body.kjs-lightbox-lock { overflow: hidden; }
    23.08.2026 - gleicher Bug-Typ wie schon bei .service-download-item__thumb
    gelöst). Eigene, breitere Größe nur für diesen Kontext. */
 .download-item__thumb.download-item__thumb--breit { width: 110px; height: 74px; }
-.download-item__thumb.download-item__thumb--breit img { width: 110px; height: 74px; }
+/* Echte Ursache des "katastrophal"-Symptoms: #seite-inhalt img (ID-Selektor,
+   Spezifität 101) überstimmt .download-item__thumb img (Klassen-Selektor,
+   Spezifität 11) IMMER, unabhängig von Reihenfolge im Stylesheet - object-fit,
+   margin, border-radius, box-shadow, max-width und sogar height:auto wurden
+   dadurch von der generischen Content-Bild-Regel überschrieben. Gleiches
+   Bug-Muster wie schon bei .galerie-item img gelöst (siehe dort) - Fix per
+   ID-präfigierten Override-Selektoren, die die generische Regel zuverlässig
+   schlagen (Spezifität 111 > 101), statt nur auf Klassen zu setzen. */
+.main-content .download-item__thumb img,
+#seite-inhalt .download-item__thumb img,
+#page-inhalt .download-item__thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none; max-width: none;
+}
