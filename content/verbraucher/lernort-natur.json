@@ -24,6 +24,11 @@
     }
   ],
   "galerie_titel": "Test",
-  "linkliste": [],
+  "linkliste": [
+    {
+      "titel": "Test",
+      "url": "https://www.youtube.com/watch?v=2JF8VMPwUUs"
+    }
+  ],
   "linkliste_titel": "Weiterführende Links"
 }
