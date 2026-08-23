@@ -1,8 +1,8 @@
 {
   "titel": "Rezepte für Wildfleisch Testseite",
-  "nav_label": "R",
+  "nav_label": "Rezepte Wildfleisch",
   "slug": "rezepte-fuer-wildfleisch-testseite",
-  "intro": "Test",
+  "intro": "<p>Test</p>",
   "inhalt": "<p>Test</p>",
   "hero_bild": "/images/1781435792677-drohen.jpg",
   "bild": "/images/1787035388061-2023_5.jpg",
@@ -10,5 +10,10 @@
   "kontakt_name": "Test",
   "kontakt_email": "Test",
   "in_navigation": true,
-  "veroeffentlicht": true
+  "veroeffentlicht": true,
+  "untertitel": "",
+  "bild_groesse": "img-100",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
