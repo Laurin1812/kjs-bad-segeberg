@@ -2,7 +2,7 @@
   "titel": "Testseite",
   "nav_label": "Test",
   "slug": "testseite",
-  "intro": "Test^",
+  "intro": "<p>Test^</p>",
   "inhalt": "<p>Test</p>",
   "hero_bild": "",
   "bild": "/images/1787036045772-kreisjaegermeister_17.01.2023.jpeg",
@@ -10,5 +10,10 @@
   "kontakt_name": "",
   "kontakt_email": "",
   "in_navigation": true,
-  "veroeffentlicht": true
+  "veroeffentlicht": true,
+  "untertitel": "",
+  "bild_groesse": "img-50",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
