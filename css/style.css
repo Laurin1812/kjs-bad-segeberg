@@ -524,11 +524,13 @@ p  { margin-bottom: 1rem; }
 .content-back-link {
   display: inline-flex; align-items: center; gap: .4rem;
   color: var(--green-main); font-weight: 700; font-size: 1.05rem;
-  /* Frank-Feedback 23.08.2026: Link stand nicht auf einer Flucht mit der
-     Überschrift der ersten Sidebar-Box daneben (z.B. "Weitere Beiträge") -
-     .sidebar-widget hat 1.5rem Innenabstand oben, .content-back-link hatte
-     keinen entsprechenden Abstand. margin-top gleicht das an. */
-  margin-top: 1.5rem; margin-bottom: 1.5rem; text-decoration: none;
+  /* Frank-Feedback 23.08.2026: Link soll mit dem OBEREN RAND der ersten
+     Sidebar-Box (.sidebar-widget, grauer Kasten) fluchten, nicht mit deren
+     Überschriften-Text. margin-top:1.5rem (erster Versuch) hat das falsch
+     interpretiert und den Link stattdessen mit dem Text darin ausgerichtet -
+     dadurch stand er sichtbar TIEFER als der Kasten. Zurückgesetzt auf 0,
+     dafür per Feintuning unten an den echten Kasten-Rand angeglichen. */
+  margin-top: 0; margin-bottom: 1.5rem; text-decoration: none;
 }
 .content-back-link:hover { color: var(--green-dark); text-decoration: underline; }
 .breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: rgba(255,255,255,.65); margin-top: .6rem; flex-wrap: wrap; }
