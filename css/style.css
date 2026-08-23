@@ -1477,3 +1477,13 @@ body.kjs-lightbox-lock { overflow: hidden; }
   background: rgba(255,255,255,.14);
   color: #fff;
 }
+
+/* Downloads-Vorschaubild in "breiter" Darstellung (Seiten ohne Sidebar-Layout,
+   z.B. seiten/index.html) - Basis .download-item__thumb ist eine schmale
+   60x80-Hochformat-Box (gedacht für Dokument-Scan-Vorschauen in der
+   Sidebar-Variante), auf normalen Querformat-Fotos wirkte das wie ein
+   sinnlos zusammengeschnittener Streifen ("katastrophal", Laurin-Meldung
+   23.08.2026 - gleicher Bug-Typ wie schon bei .service-download-item__thumb
+   gelöst). Eigene, breitere Größe nur für diesen Kontext. */
+.download-item__thumb.download-item__thumb--breit { width: 110px; height: 74px; }
+.download-item__thumb.download-item__thumb--breit img { width: 110px; height: 74px; }

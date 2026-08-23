@@ -382,9 +382,13 @@
       // 23.08.2026 (Laurin-Wunsch): Waidmannssprache war bisher Unterseite
       // von Wildfleisch, ist jetzt eine eigenständige Hauptseite im
       // Verbraucher-Dropdown wie Wildfleisch/Lernort Natur/Grünes
-      // Klassenzimmer - keine eigenen Unterseiten, daher normaler
-      // Blatt-Eintrag ohne children/new-sub-Button.
-      { key:'verbraucher-waidmannssprache', label:'Waidmannssprache', file:'content/verbraucher/waidmannssprache.json', form:'standard' },
+      // Klassenzimmer - inkl. eigenem Unterseiten-System (gleicher Stil
+      // wie die anderen drei, Laurin-Feedback 23.08.2026: 'überall gleich').
+      { key:'verbraucher-waidmannssprache', label:'Waidmannssprache', file:'content/verbraucher/waidmannssprache.json', form:'standard', group:true, open:false, children:[
+        { key:'new-sub-waidmannssprache', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+          navFile:'content/seiten-sub-waidmannssprache.json', navKey:'seiten', dir:'content/seiten-sub-waidmannssprache',
+          parentSlug:'waidmannssprache' },
+      ]},
       // Der frühere generische Button "➕ Neue Verbraucher-Seite" (schrieb nach
       // content/seiten-verbraucher/) wurde am 22.08.2026 entfernt (Frank/Laurin-
       // Feedback: zwei parallele "Neue Seite"-Systeme unter Verbraucher waren
@@ -1500,6 +1504,14 @@
       '</div>';
   }
 
+  // Die vier Verbraucher-Hauptseiten (Wildfleisch/Lernort Natur/Grünes
+  // Klassenzimmer/Waidmannssprache) sollen im gleichen Stil funktionieren
+  // (Laurin-Wunsch 23.08.2026) - Unterseiten-Kasten-Titel + Link-Liste
+  // gelten für alle vier gleich, statt wie vorher nur für Wildfleisch.
+  function istVerbraucherHauptseite(def) {
+    return !!(def && def.key && def.key.indexOf('verbraucher-') === 0);
+  }
+
   /* ────────────────────────────────────────────────────────────
      STANDARD SEITE FORM
   ──────────────────────────────────────────────────────────── */
@@ -1571,11 +1583,17 @@
           fH(fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email),
             'E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
         '</div>' +
-        // Link-Liste (Seitenleiste): aktuell nur auf der Wildfleisch-Hauptseite
-        // angeboten (Frank-Wunsch 22.08.2026: "Rezepte finden Sie hier",
-        // "Wildfleisch bestellen" o.ä. als frei benennbare Links rechts).
-        // Bei Bedarf einfach die Bedingung um weitere def.key ergänzen.
-        (def.key === 'verbraucher-wild' ? renderLinklisteCard(data) : '') +
+        // Unterseiten-Kasten-Titel + Link-Liste (Seitenleiste): auf allen vier
+        // Verbraucher-Hauptseiten gleich (Laurin-Wunsch 23.08.2026: "überall
+        // im gleichen Stil arbeiten" - vorher nur bei Wildfleisch vorhanden,
+        // was inkonsistent war).
+        (istVerbraucherHauptseite(def)
+          ? '<div class="form-card">' +
+              '<div class="form-card-title">📄 Unterseiten-Kasten (Seitenleiste)</div>' +
+              fText('unterseiten_titel', 'Überschrift des Kastens', data.unterseiten_titel, 'Unterseiten zu ' + (data.titel || def.label)) +
+            '</div>'
+          : '') +
+        (istVerbraucherHauptseite(def) ? renderLinklisteCard(data) : '') +
         renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
@@ -1616,6 +1634,9 @@
       data.vorschaubild     = gv('vorschaubild');
       data.kurzbeschreibung = gv('kurzbeschreibung');
       data.bild_flat        = toggleVal('bild_flat');
+    }
+    if (id('f-unterseiten_titel')) {
+      data.unterseiten_titel = gv('unterseiten_titel');
     }
     data.downloads = collectDownloadsList();
     data.galerie = collectGalerieList();

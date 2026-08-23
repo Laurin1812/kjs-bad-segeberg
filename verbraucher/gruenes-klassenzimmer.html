@@ -171,6 +171,27 @@
             if (h1El) h1El.textContent = d.titel;
             document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
           }
+          // Link-Liste (Seitenleiste) aus demselben JSON befüllen (Laurin-Wunsch
+          // 23.08.2026: gleicher Baustein wie bei Wildfleisch, auf allen vier
+          // Verbraucher-Hauptseiten einheitlich).
+          if (Array.isArray(d.linkliste) && d.linkliste.length) {
+            var lnNav = document.getElementById('linkliste-nav');
+            var lnWidget = document.getElementById('linkliste-widget');
+            var lnTitelEl = document.getElementById('linkliste-titel');
+            if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
+            if (lnNav && lnWidget) {
+              d.linkliste.forEach(function(l) {
+                if (!l || !l.url) return;
+                var li = document.createElement('li');
+                var externLink = /^https?:\/\//i.test(l.url);
+                li.innerHTML = '<a href="' + l.url + '"' + (externLink ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + (l.titel || l.url) + '</a>';
+                lnNav.appendChild(li);
+              });
+              lnWidget.style.display = '';
+            }
+          }
+          var stTitelEl = document.getElementById('sub-seiten-titel');
+          if (stTitelEl && d.unterseiten_titel) stTitelEl.textContent = d.unterseiten_titel;
           if (d.hero_bild) {
             var bg = document.querySelector('.page-hero__bg');
             if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
@@ -210,8 +231,12 @@
       <!-- Unterseiten-Kacheln zuerst (Verbraucher-Umbau 22.08.2026, gleiches
            Muster wie wildfleisch.html: klarer/auffälliger, "Verbraucher"-Box
            rutscht dafür eine Position nach unten). -->
+      <div class="sidebar-widget sidebar-widget--highlight" id="linkliste-widget" style="display:none;">
+        <h4 id="linkliste-titel">Weiterführende Links</h4>
+        <ul class="sidebar-nav" id="linkliste-nav"></ul>
+      </div>
       <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
-        <h4>Unterseiten zu Grünes Klassenzimmer</h4>
+        <h4 id="sub-seiten-titel">Unterseiten zu Grünes Klassenzimmer</h4>
         <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
         <script>
           fetch('/content/seiten-sub-gruenes-klassenzimmer.json').then(function(r){return r.json();}).then(function(d){

@@ -232,7 +232,8 @@
     '../content/seiten-verbraucher/',
     '../content/seiten-sub-wildfleisch/',
     '../content/seiten-sub-lernort-natur/',
-    '../content/seiten-sub-gruenes-klassenzimmer/'
+    '../content/seiten-sub-gruenes-klassenzimmer/',
+    '../content/seiten-sub-waidmannssprache/'
   ];
 
   function versucheOrdner(i) {
@@ -246,6 +247,7 @@
         '../content/seiten-sub-wildfleisch.json',
         '../content/seiten-sub-lernort-natur.json',
         '../content/seiten-sub-gruenes-klassenzimmer.json',
+        '../content/seiten-sub-waidmannssprache.json',
         '../content/seiten.json',
         '../content/navigation-extra.json'
       ];
@@ -366,7 +368,7 @@
           var datei = item.datei || item.url || item.pfad;
           var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
           var iconHtml = item.vorschau
-            ? '<a href="' + datei + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + item.vorschau + '" alt="' + name + '" loading="lazy"></a>'
+            ? '<a href="' + datei + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb download-item__thumb--breit"><img src="' + item.vorschau + '" alt="' + name + '" loading="lazy"></a>'
             : '<div class="download-item__icon">' + ICON_PDF_S + '</div>';
           return '<div class="download-item">' +
             iconHtml +
@@ -378,6 +380,27 @@
           '</div>';
         }).join('') +
         '</div>';
+    }
+
+    // Bildergalerie (gleiches Baukasten-Prinzip wie Downloads/Text) - fehlte
+    // hier bisher komplett, obwohl das Admin-Formular das Feld überall
+    // anbietet (Laurin-Meldung 23.08.2026: "Bildergalerie angelegt, aber
+    // nicht sichtbar"). Gleiche Klassen wie jagdhundeschule.html, damit die
+    // site-weite Lightbox (js/main.js) automatisch mitfunktioniert.
+    var galerieItems = (Array.isArray(seite.galerie) ? seite.galerie : []).filter(function(g) { return g && g.bild; });
+    if (galerieItems.length) {
+      var galerieCards = galerieItems.map(function(g) {
+        var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + g.titel.trim() + '</div>' : '';
+        return '<a href="' + g.bild + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
+          '<img src="' + g.bild + '" alt="' + (g.titel || '') + '" loading="lazy">' +
+          caption +
+        '</a>';
+      }).join('');
+      var galerieTitel = (seite.galerie_titel && seite.galerie_titel.trim()) || 'Bildergalerie';
+      html += '<div class="galerie-section">' +
+        '<div class="galerie-section__title">' + galerieTitel + '</div>' +
+        '<div class="galerie-grid">' + galerieCards + '</div>' +
+      '</div>';
     }
 
     inhaltEl.innerHTML = html;

@@ -188,6 +188,8 @@
             var lnWidget = document.getElementById('linkliste-widget');
             var lnTitelEl = document.getElementById('linkliste-titel');
             if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
+            var stTitelEl = document.getElementById('sub-seiten-titel');
+            if (stTitelEl && d.unterseiten_titel) stTitelEl.textContent = d.unterseiten_titel;
             if (lnNav && lnWidget) {
               d.linkliste.forEach(function(l) {
                 if (!l || !l.url) return;
@@ -246,7 +248,7 @@
         <ul class="sidebar-nav" id="linkliste-nav"></ul>
       </div>
       <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
-        <h4>Unterseiten zu Wildfleisch</h4>
+        <h4 id="sub-seiten-titel">Unterseiten zu Wildfleisch</h4>
         <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
         <script>
           fetch('/content/seiten-sub-wildfleisch.json').then(function(r){return r.json();}).then(function(d){
