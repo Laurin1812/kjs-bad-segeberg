@@ -737,16 +737,25 @@ p  { margin-bottom: 1rem; }
 #seite-inhalt p,
 #page-inhalt p { overflow: visible; }
 
-/* PDF-Links mit 📄-Symbol (für alle Links auf .pdf-Dateien) */
-.main-content a[href$=".pdf"],
-#seite-inhalt a[href$=".pdf"],
-#page-inhalt a[href$=".pdf"] {
+/* PDF-Links mit 📄-Symbol (für alle Links auf .pdf-Dateien) - NICHT für die
+   Downloads-Kästen (.download-item__thumb/.download-action), die haben ihr
+   eigenes Icon/Layout. Ohne die :not()-Ausschlüsse hat diese Regel bisher
+   JEDEN Link auf eine .pdf-Datei getroffen, auch das Vorschaubild und die
+   Öffnen/Herunterladen-Buttons in den Downloads-Listen innerhalb von
+   #seite-inhalt (z.B. seiten/index.html) - das verschobene 📄-Symbol lag
+   dadurch über dem Vorschaubild und die padding-left hat es asymmetrisch
+   zusammengequetscht ("sieht katastrophal aus", Laurin-Meldung 23.08.2026).
+   Reines Layout-/Spezifitäts-Symptom war nur ein Teil des Bugs - das hier
+   war die eigentliche Ursache. */
+.main-content a[href$=".pdf"]:not(.download-item__thumb):not(.download-action),
+#seite-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action),
+#page-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action) {
   padding-left: 1.3em;
   position: relative;
 }
-.main-content a[href$=".pdf"]::before,
-#seite-inhalt a[href$=".pdf"]::before,
-#page-inhalt a[href$=".pdf"]::before {
+.main-content a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before,
+#seite-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before,
+#page-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before {
   content: "📄";
   position: absolute;
   left: 0;
