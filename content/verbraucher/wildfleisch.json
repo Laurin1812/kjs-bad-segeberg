@@ -9,7 +9,13 @@
   "kontakt_email": "wild@kjs-bad-segeberg.de",
   "hero_bild": "",
   "bild_groesse": "img-100",
-  "downloads": [],
+  "downloads": [
+    {
+      "titel": "Wie o ffne ich das kleine Infomobil richtig_M ai 2026",
+      "datei": "/downloads/1781194530416-Wie-o-ffne-ich-das-kleine-Infomobil-richtig_M-ai-2026.pdf",
+      "vorschau": "/images/1787035414249-2023_7.jpg"
+    }
+  ],
   "galerie": [],
   "galerie_titel": "Bildergalerie",
   "linkliste": [
@@ -21,5 +27,7 @@
       "titel": "Rezepte Wildfleisch",
       "url": "https://www.wild-auf-wild.de/"
     }
-  ]
+  ],
+  "unterseiten_titel": "",
+  "linkliste_titel": "Weiterführende Links"
 }
