@@ -14,6 +14,11 @@
   "untertitel": "",
   "bild_groesse": "img-50",
   "downloads": [],
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1787033859645-Kreis2024_1.jpeg",
+      "titel": "Test"
+    }
+  ],
   "galerie_titel": "Bildergalerie"
 }
