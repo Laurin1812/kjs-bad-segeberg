@@ -161,11 +161,23 @@
   </div>
 </div>
 
-<div class="page-content full">
+<div class="page-content">
   <div class="container">
     <main class="main-content" id="seite-inhalt">
       <p style="color:var(--text-muted);">Wird geladen …</p>
     </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-widget" id="sub-nav-widget" style="display:none;">
+        <h4 id="sub-nav-titel">Weitere Seiten</h4>
+        <ul class="unterseiten-tiles" id="sub-nav-list"></ul>
+      </div>
+      <div class="contact-box">
+        <h4>Fragen?</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
   </div>
 </div>
 
@@ -235,6 +247,21 @@
     '../content/seiten-sub-gruenes-klassenzimmer/',
     '../content/seiten-sub-waidmannssprache/'
   ];
+  // Für die "Unterseiten zu X"-Sidebar-Box (22.08.2026 Sidebar-Umbau,
+  // Laurin-Wunsch "Ja, Sidebar wie bei Hauptseiten") - Anzeigename je Ordner
+  // + Pfad zur zugehörigen Manifest-Datei (gleiches Manifest, das auch die
+  // jeweilige Verbraucher-Hauptseite selbst für ihre Unterseiten-Kachelbox
+  // nutzt, z.B. wildfleisch.html -> seiten-sub-wildfleisch.json).
+  var ordnerLabels = [
+    'KJS Segeberg',
+    'Aufgaben der Kreisjägerschaft',
+    'Weitere Themen',
+    'Verbraucher',
+    'Wildfleisch',
+    'Lernort Natur',
+    'Grünes Klassenzimmer',
+    'Waidmannssprache'
+  ];
 
   function versucheOrdner(i) {
     if (i >= ordnerPfade.length) {
@@ -280,7 +307,7 @@
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function(s) {
         if (s.veroeffentlicht === true) {
-          renderSeite(s);
+          renderSeite(s, i);
         } else {
           versucheOrdner(i + 1);
         }
@@ -290,7 +317,85 @@
 
   versucheOrdner(0);
 
-  function renderSeite(seite) {
+  function escHtml(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var ICON_PDF_S      = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+  var ICON_OPEN_S     = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
+  var ICON_DOWNLOAD_S = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
+
+  // Dokumente & Downloads jetzt als Sidebar-Widget (23.08.2026 Sidebar-Umbau,
+  // Laurin-Wunsch "Ja, Sidebar wie bei Hauptseiten") statt mitten im
+  // Fließtext - gleiches Muster wie aufgaben/jagdhundeschule.html.
+  function renderDownloadsSidebar(seite) {
+    var sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    var old = sidebar.querySelector('.sidebar-widget--downloads');
+    if (old) old.parentNode.removeChild(old);
+    var dlList = Array.isArray(seite.downloads) ? seite.downloads
+               : Array.isArray(seite.documents) ? seite.documents
+               : Array.isArray(seite.pdfs) ? seite.pdfs
+               : [];
+    var items = dlList.filter(function(item) { return item && (item.datei || item.url || item.pfad); });
+    if (!items.length) return;
+    var itemsHtml = items.map(function(item) {
+      var datei = item.datei || item.url || item.pfad;
+      var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
+      var iconHtml = item.vorschau
+        ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+        : '<span class="download-item__icon">' + ICON_PDF_S + '</span>';
+      return '<div class="download-item--sidebar">' +
+        iconHtml +
+        '<span class="download-item__name">' + escHtml(name) + '</span>' +
+        '<span class="download-item__actions">' +
+          '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + escHtml(name) + ' öffnen">' + ICON_OPEN_S + '</a>' +
+          '<a href="' + escHtml(datei) + '" download class="download-action" title="Herunterladen" aria-label="' + escHtml(name) + ' herunterladen">' + ICON_DOWNLOAD_S + '</a>' +
+        '</span>' +
+      '</div>';
+    }).join('');
+    var widget = document.createElement('div');
+    widget.className = 'sidebar-widget sidebar-widget--downloads';
+    widget.innerHTML = '<h4><span class="download-heading-icon">' + ICON_PDF_S + '</span> Dokumente &amp; Downloads</h4>' +
+      '<div class="downloads-list downloads-list--sidebar">' + itemsHtml + '</div>';
+    var contactBox = sidebar.querySelector('.contact-box');
+    if (contactBox) contactBox.parentNode.insertBefore(widget, contactBox);
+    else sidebar.appendChild(widget);
+  }
+
+  // Geschwister-Unterseiten ("Unterseiten zu X") in der Sidebar - gleiches
+  // Manifest, das auch die jeweilige Verbraucher-Hauptseite für ihre eigene
+  // Unterseiten-Kachelbox nutzt (z.B. wildfleisch.html -> seiten-sub-
+  // wildfleisch.json). Nur möglich, wenn die Seite über einen ordnerPfade-
+  // Treffer gefunden wurde (ordnerIndex bekannt) - beim Legacy-Manifest-
+  // Fallback bleibt die Box einfach ausgeblendet.
+  function renderSubNavSidebar(seite, ordnerIndex) {
+    var widget = document.getElementById('sub-nav-widget');
+    var navEl = document.getElementById('sub-nav-list');
+    var titelEl = document.getElementById('sub-nav-titel');
+    if (!widget || !navEl) return;
+    if (ordnerIndex == null || !ordnerPfade[ordnerIndex]) return;
+    var manifestUrl = ordnerPfade[ordnerIndex].replace(/\/$/, '') + '.json';
+    fetch(manifestUrl).then(function(r) { return r.ok ? r.json() : { seiten: [] }; }).catch(function() { return { seiten: [] }; }).then(function(d) {
+      var seiten = (d.seiten || []).filter(function(s) {
+        return s.slug !== seite.slug && s.veroeffentlicht !== false && s.in_navigation !== false;
+      });
+      if (!seiten.length) return;
+      if (titelEl) titelEl.textContent = 'Unterseiten zu ' + (ordnerLabels[ordnerIndex] || 'dieser Seite');
+      seiten.forEach(function(s) {
+        var li = document.createElement('li');
+        li.innerHTML = '<a class="unterseite-tile" href="index.html?s=' + encodeURIComponent(s.slug) + '">' +
+          '<span class="unterseite-tile__icon">📄</span>' +
+          '<span class="unterseite-tile__label">' + escHtml(s.nav_label || s.slug) + '</span>' +
+        '</a>';
+        navEl.appendChild(li);
+      });
+      widget.style.display = '';
+    });
+  }
+
+  function renderSeite(seite, ordnerIndex) {
     var titel = seite.titel || 'Seite';
     document.getElementById('seite-titel').textContent = titel;
     document.getElementById('breadcrumb-label').textContent = seite.nav_label || titel;
@@ -350,38 +455,6 @@
       html += '</p>';
     }
 
-    // Dokumente & Downloads (downloads[]/documents[]/pdfs[] aus dem Admin)
-    var dlList = Array.isArray(seite.downloads) ? seite.downloads
-               : Array.isArray(seite.documents) ? seite.documents
-               : Array.isArray(seite.pdfs) ? seite.pdfs
-               : [];
-    var dlItems = dlList.filter(function(item) { return item && (item.datei || item.url || item.pfad); });
-    if (dlItems.length) {
-      var ICON_PDF_S      = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
-      var ICON_OPEN_S     = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
-      var ICON_DOWNLOAD_S = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
-      // Diese Seiten haben kein .sidebar-Layout (volle Breite) – daher die
-      // "breite" Darstellung wie auf der Kreisjägermeister-Seite verwenden.
-      html += '<div class="download-section-title"><span class="download-heading-icon">' + ICON_PDF_S + '</span> Dokumente &amp; Downloads</div>' +
-        '<div class="downloads-list">' +
-        dlItems.map(function(item) {
-          var datei = item.datei || item.url || item.pfad;
-          var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
-          var iconHtml = item.vorschau
-            ? '<a href="' + datei + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb download-item__thumb--breit"><img src="' + item.vorschau + '" alt="' + name + '" loading="lazy"></a>'
-            : '<div class="download-item__icon">' + ICON_PDF_S + '</div>';
-          return '<div class="download-item">' +
-            iconHtml +
-            '<div class="download-item__meta"><div class="download-item__name">' + name + '</div></div>' +
-            '<span class="download-item__actions">' +
-              '<a href="' + datei + '" target="_blank" rel="noopener noreferrer" class="download-action" title="Öffnen" aria-label="' + name + ' öffnen">' + ICON_OPEN_S + '</a>' +
-              '<a href="' + datei + '" download class="download-action" title="Herunterladen" aria-label="' + name + ' herunterladen">' + ICON_DOWNLOAD_S + '</a>' +
-            '</span>' +
-          '</div>';
-        }).join('') +
-        '</div>';
-    }
-
     // Bildergalerie (gleiches Baukasten-Prinzip wie Downloads/Text) - fehlte
     // hier bisher komplett, obwohl das Admin-Formular das Feld überall
     // anbietet (Laurin-Meldung 23.08.2026: "Bildergalerie angelegt, aber
@@ -404,6 +477,11 @@
     }
 
     inhaltEl.innerHTML = html;
+
+    // Downloads jetzt in die Sidebar statt inline im Fließtext (23.08.2026,
+    // Sidebar-Umbau) - und Geschwister-Unterseiten-Liste in der Sidebar.
+    renderDownloadsSidebar(seite);
+    renderSubNavSidebar(seite, ordnerIndex);
   }
 })();
 </script>
