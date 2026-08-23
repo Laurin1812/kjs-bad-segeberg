@@ -11,6 +11,12 @@
       "nav_label": "Lagerung Wildfleisch",
       "in_navigation": true,
       "veroeffentlicht": false
+    },
+    {
+      "slug": "rezepte-fuer-wildfleisch-testseite",
+      "nav_label": "R",
+      "in_navigation": true,
+      "veroeffentlicht": true
     }
   ]
 }
