@@ -1409,8 +1409,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
 
 /* ── Header & Footer Logo-Größe ───────────────────────────────────── */
 .site-logo img    { height: 114px !important; width: auto; }
-.footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block;
-  filter: drop-shadow(0 0 6px rgba(255,255,255,.35)) drop-shadow(0 2px 8px rgba(0,0,0,.3)); }
+.footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block; }
 
 /* Mobile: Logo kleiner */
 @media (max-width: 900px) {
