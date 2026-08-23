@@ -2,9 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Obleute der Kreisjägerschaft Segeberg e.V.">
-  <title>Obleute – Kreisjägerschaft Segeberg e.V.</title>
+  <meta name="description" content="Waidmannssprache – die traditionelle Sprache der Jäger, erklärt von der Kreisjägerschaft Segeberg e.V.">
+  <title>Waidmannssprache – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
@@ -45,7 +46,7 @@
     </a>
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
       <li><a href="../index.html" data-navkey="startseite">Startseite</a></li>
-      <li class="active"><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
+      <li><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
           <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
           <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
@@ -74,13 +75,13 @@
               <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
             </ul>
           </li>
-          <li><a href="infomobil.html">Infomobil</a></li>
+          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
           <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
           </li>
         </ul>
       </li>
-      <li><a href="../verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
+      <li class="active"><a href="../verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
         <ul class="dropdown">
           <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
           <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
@@ -149,52 +150,70 @@
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
   <div class="container">
-    <h1>Obleute</h1>
-    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><span>Jäger</span><span class="sep">/</span><span>Obleute</span></nav>
+    <h1 id="page-titel">🗣️ Waidmannssprache</h1>
+    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Verbraucher</a><span class="sep">/</span><span>Waidmannssprache</span></nav>
   </div>
 </div>
 <div class="page-content">
   <div class="container">
-    <main class="main-content">
-      <h2>Die Obleute der KJS Segeberg</h2>
-      <p>Die Obleute sind die Fachbeauftragten des Vorstands für besondere Aufgabenbereiche.
-         Sie koordinieren die Arbeit in ihrem jeweiligen Fachgebiet und sind Ansprechpartner
-         für alle Mitglieder.</p>
-
-      <!-- Obleute – dynamisch aus content/obleute.json -->
-      <div class="persons-grid" id="obleute-grid" style="margin-top:2rem;">
-        <p style="color:var(--text-muted);">Wird geladen …</p>
-      </div>
-      <script>
-        fetch('../content/obleute.json')
-          .then(r => r.json())
-          .then(data => {
-            document.getElementById('obleute-grid').innerHTML = data.obleute.map(m => `
-              <div class="person-card">
-                <div class="person-card__avatar-wrap">
-                  ${m.bild
-                    ? `<img src="${m.bild}" alt="${m.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;">`
-                    : `<div class="person-card__avatar-placeholder">👤</div>`}
-                </div>
-                <div class="person-card__body">
-                  <span class="person-card__role">${m.rolle}</span>
-                  <div class="person-card__name">${m.name}</div>
-                  <div class="person-card__contact">
-                    ${m.email   ? `<a href="mailto:${m.email}">${m.email}</a>` : ''}
-                    ${m.telefon ? `<a href="tel:${m.telefon.replace(/\s|\/|\./g,'')}">${m.telefon}</a>` : ''}
-                  </div>
-                </div>
-              </div>`).join('');
-          });
-      </script>
+    <main class="main-content" id="page-main">
+      <div class="loading-spinner">Lädt...</div>
     </main>
+    <script>
+      fetch('/content/verbraucher/waidmannssprache.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var main = document.getElementById('page-main');
+          if (!main) return;
+          // Titel/H1 jetzt aus dem Admin-Feld statt fest im HTML (22.08.2026,
+          // Teil des Verbraucher-Umbaus, gleiches Muster wie wildfleisch.html).
+          if (d.titel) {
+            var h1El = document.getElementById('page-titel');
+            if (h1El) h1El.textContent = d.titel;
+            document.title = d.titel + ' – Kreisjägerschaft Segeberg e.V.';
+          }
+          if (d.hero_bild) {
+            var bg = document.querySelector('.page-hero__bg');
+            if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
+          }
+          var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" class="' + ((d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')) + '" style="border-radius:8px;margin-bottom:1.5rem;">' : '';
+          var kontaktStr = '';
+          if (d.kontakt_name || d.kontakt_email) {
+            kontaktStr = '<p><strong>Kontakt:</strong> ' + (d.kontakt_name||'');
+            if (d.kontakt_email) kontaktStr += ' &middot; <a href="mailto:' + d.kontakt_email + '">' + d.kontakt_email + '</a>';
+            kontaktStr += '</p>';
+          }
+          main.innerHTML =
+            '<h2>' + (d.untertitel||'') + '</h2>' +
+            '<p>' + (d.intro||'') + '</p>' +
+            bild +
+            '<div id="page-inhalt"></div>' +
+            kontaktStr +
+            '<div class="btn-group" style="margin-top:2rem">' +
+              '<a href="../termine/index.html" class="btn btn-primary">Termine ansehen</a>' +
+              '<a href="../kontakt/index.html" class="btn btn-outline-green">Kontakt aufnehmen</a>' +
+            '</div>';
+          if (d.inhalt) {
+            var el = document.getElementById('page-inhalt');
+            if (el) {
+              el.innerHTML = typeof marked !== 'undefined'
+                ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt))
+                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+            }
+          }
+        })
+        .catch(function(err) {
+          var main = document.getElementById('page-main');
+          if (main) main.innerHTML = '<p style="color:red">Fehler: ' + (err && err.message ? err.message : String(err)) + '</p>';
+        });
+    </script>
     <aside class="sidebar">
       <div class="sidebar-widget">
-        <h4>KJS Segeberg</h4>
+        <h4>Verbraucher</h4>
         <ul class="sidebar-nav" data-related-nav></ul>
       </div>
       <div class="contact-box">
-        <h4>Geschäftsstelle</h4>
+        <h4>Fragen?</h4>
         <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
         <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
       </div>
@@ -229,6 +248,7 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
   </div>
 </div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{

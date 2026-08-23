@@ -1454,3 +1454,26 @@ body.kjs-lightbox-lock { overflow: hidden; }
   opacity: 0; transition: opacity 1.4s ease;
 }
 .hero__bg--slide.is-active { opacity: .85; }
+
+/* "Weiterführende Links"-Box (Wildfleisch-Seite) optisch hervorheben, damit
+   sie sich von den anderen (neutralen, hellgrauen) Sidebar-Boxen abhebt -
+   Laurin-Wunsch 23.08.2026, Vorbild war ein dunkelgrüner CTA-Kasten. */
+.sidebar-widget--highlight {
+  background: var(--green-dark);
+  border: 1px solid var(--green-dark);
+}
+.sidebar-widget--highlight h4 {
+  color: #fff;
+  border-bottom-color: var(--gold);
+}
+.sidebar-widget--highlight .sidebar-nav li a {
+  color: #fff;
+}
+.sidebar-widget--highlight .sidebar-nav li a::before {
+  color: var(--gold-light);
+}
+.sidebar-widget--highlight .sidebar-nav li a:hover,
+.sidebar-widget--highlight .sidebar-nav li.active a {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}

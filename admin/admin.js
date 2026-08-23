@@ -379,6 +379,12 @@
           navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
           parentSlug:'gruenes-klassenzimmer' },
       ]},
+      // 23.08.2026 (Laurin-Wunsch): Waidmannssprache war bisher Unterseite
+      // von Wildfleisch, ist jetzt eine eigenständige Hauptseite im
+      // Verbraucher-Dropdown wie Wildfleisch/Lernort Natur/Grünes
+      // Klassenzimmer - keine eigenen Unterseiten, daher normaler
+      // Blatt-Eintrag ohne children/new-sub-Button.
+      { key:'verbraucher-waidmannssprache', label:'Waidmannssprache', file:'content/verbraucher/waidmannssprache.json', form:'standard' },
       // Der frühere generische Button "➕ Neue Verbraucher-Seite" (schrieb nach
       // content/seiten-verbraucher/) wurde am 22.08.2026 entfernt (Frank/Laurin-
       // Feedback: zwei parallele "Neue Seite"-Systeme unter Verbraucher waren

@@ -1,12 +1,6 @@
 {
   "seiten": [
     {
-      "slug": "waidmannssprache",
-      "nav_label": "Waidmannssprache",
-      "in_navigation": true,
-      "veroeffentlicht": true
-    },
-    {
       "slug": "lagerung-wildfleisch",
       "nav_label": "Lagerung Wildfleisch",
       "in_navigation": true,
