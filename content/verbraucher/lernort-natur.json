@@ -1,11 +1,29 @@
 {
   "titel": "Lernort Natur",
-  "untertitel": "Natur erleben – Natur verstehen",
-  "intro": "Unser Projekt „Lernort Natur“ bringt Schulklassen und Kindergärten direkt in die Natur des Kreises Bad Segeberg. Erfahrene Jägerinnen und Jäger begleiten die Gruppen und vermitteln spielerisch Wissen über heimische Tiere und Pflanzen.",
-  "bild": "",
+  "untertitel": "<p>Natur erleben – Natur verstehen</p>",
+  "intro": "<p>Unser Projekt „Lernort Natur“ bringt Schulklassen und Kindergärten direkt in die Natur des Kreises Bad Segeberg. Erfahrene Jägerinnen und Jäger begleiten die Gruppen und vermitteln spielerisch Wissen über heimische Tiere und Pflanzen.</p>",
+  "bild": "/images/1787138676932-111.jpg",
   "bild_alt": "",
-  "inhalt": "## Angebote für Schulen und Kindergärten\n\n* Grünes Klassenzimmer – Unterricht im Freien: wir kommen in Ihre Schule oder Sie besuchen uns im Revier. Themen: Wildtierkunde, Wald, Nahrungskreisläufe.\n* Naturerlebnismobil – Unser mobiles Programm kommt zu Ihnen – mit Tierpräparaten, Spurenmaterial und spannenden Geschichten aus dem Wald.\n* Hochsitz statt Tiefschlaf – Nachterlebnisse für Jugendgruppen: Gemeinsam erleben wir die Natur in der Dämmerung und beobachten heimische Wildtiere.\n* Lehrpfad Bad Segeberg – Geführte Wanderungen auf unserem Naturlehrpfad mit informativen Stationen zu Wildtieren und ihren Lebensräumen.\n\n## Buchung und Anfragen\n\nAlle Veranstaltungen sind kostenfrei für Schulen und Kindergärten im Kreis Bad Segeberg. Wir bitten um vorherige Anmeldung per E-Mail oder Telefon.",
+  "inhalt": "<h2>Angebote für Schulen und Kindergärten</h2><ul><li><p>Grünes Klassenzimmer – Unterricht im Freien: wir kommen in Ihre Schule oder Sie besuchen uns im Revier. Themen: Wildtierkunde, Wald, Nahrungskreisläufe.</p></li><li><p>Naturerlebnismobil – Unser mobiles Programm kommt zu Ihnen – mit Tierpräparaten, Spurenmaterial und spannenden Geschichten aus dem Wald.</p></li><li><p>Hochsitz statt Tiefschlaf – Nachterlebnisse für Jugendgruppen: Gemeinsam erleben wir die Natur in der Dämmerung und beobachten heimische Wildtiere.</p></li><li><p>Lehrpfad Bad Segeberg – Geführte Wanderungen auf unserem Naturlehrpfad mit informativen Stationen zu Wildtieren und ihren Lebensräumen.</p></li></ul><h2>Buchung und Anfragen</h2><p>Alle Veranstaltungen sind kostenfrei für Schulen und Kindergärten im Kreis Bad Segeberg. Wir bitten um vorherige Anmeldung per E-Mail oder Telefon.</p>",
   "kontakt_name": "",
   "kontakt_email": "lernort@kjs-bad-segeberg.de",
-  "hero_bild": ""
+  "hero_bild": "",
+  "bild_groesse": "img-50",
+  "unterseiten_titel": "Test",
+  "downloads": [
+    {
+      "titel": "Jungwildrettung 2023 2026",
+      "datei": "/downloads/1786988504989-Jungwildrettung-2023-2026.pdf",
+      "vorschau": "/images/1786866016612-111.jpg"
+    }
+  ],
+  "galerie": [
+    {
+      "bild": "/images/1787033859645-Kreis2024_1.jpeg",
+      "titel": "Test"
+    }
+  ],
+  "galerie_titel": "Test",
+  "linkliste": [],
+  "linkliste_titel": "Weiterführende Links"
 }
