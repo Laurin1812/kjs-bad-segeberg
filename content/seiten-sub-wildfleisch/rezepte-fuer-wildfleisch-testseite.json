@@ -1,0 +1,14 @@
+{
+  "titel": "Rezepte für Wildfleisch Testseite",
+  "nav_label": "R",
+  "slug": "rezepte-fuer-wildfleisch-testseite",
+  "intro": "Test",
+  "inhalt": "<p>Test</p>",
+  "hero_bild": "/images/1781435792677-drohen.jpg",
+  "bild": "/images/1787035388061-2023_5.jpg",
+  "bild_alt": "",
+  "kontakt_name": "Test",
+  "kontakt_email": "Test",
+  "in_navigation": true,
+  "veroeffentlicht": true
+}
