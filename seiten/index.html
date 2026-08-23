@@ -316,9 +316,16 @@
       html += '<p style="font-size:1.1rem;margin-bottom:1.5rem;">' + seite.intro + '</p>';
     }
 
-    // Bild
+    // Bild - Bildgröße (25/50/75/100%) und "ohne Rahmen" (bild_flat)
+    // respektieren, wie bei den anderen Seiten-Vorlagen (z.B. Jagdhundeschule).
+    // Vorher stand hier fest width:100% - die Bildgröße aus dem Admin wurde
+    // nie angewendet (Bug-Meldung Laurin 23.08.2026).
     if (seite.bild) {
-      html += '<img src="' + seite.bild + '" alt="' + (seite.bild_alt || '') + '" style="width:100%;border-radius:8px;margin-bottom:1.5rem;">';
+      var bildKlasse = (seite.bild_groesse && seite.bild_groesse.indexOf('img-') === 0) ? seite.bild_groesse
+        : (seite.bild_groesse === 'klein' ? 'img-25' : seite.bild_groesse === 'mittel' ? 'img-50' : 'img-100');
+      var bildStyle = seite.bild_flat ? 'margin-bottom:1.5rem;' : 'border-radius:8px;margin-bottom:1.5rem;';
+      if (seite.bild_flat) bildKlasse += ' img-flat';
+      html += '<img src="' + seite.bild + '" alt="' + (seite.bild_alt || '') + '" class="' + bildKlasse + '" style="' + bildStyle + '">';
     }
 
     // Hauptinhalt (Markdown)
