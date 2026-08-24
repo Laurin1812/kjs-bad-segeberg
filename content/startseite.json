@@ -54,23 +54,23 @@
   "hero_slides": [
     {
       "bild": "/images/hero.jpg",
-      "dauer": 6
+      "dauer": 4
     },
     {
       "bild": "/images/1786891321853-16-08-_2026_16-39-38.png",
-      "dauer": 6
+      "dauer": 4
     },
     {
       "bild": "/images/1787145950885-dsc_1075-1_51291774416_o_3e9c4af3-3850-4a58-ba78-1b9b549280f2.webp",
-      "dauer": 6
+      "dauer": 4
     },
     {
       "bild": "/images/1787138645724-19-08-_2026_13-10-38.jpg",
-      "dauer": 6
+      "dauer": 4
     },
     {
       "bild": "/images/1787139581916-16.jpg",
-      "dauer": 6
+      "dauer": 4
     }
   ]
 }
