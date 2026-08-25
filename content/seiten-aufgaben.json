@@ -1,3 +1,10 @@
 {
-  "seiten": []
+  "seiten": [
+    {
+      "slug": "hundevermittlung",
+      "nav_label": "Hundevermittlung",
+      "in_navigation": true,
+      "veroeffentlicht": true
+    }
+  ]
 }
