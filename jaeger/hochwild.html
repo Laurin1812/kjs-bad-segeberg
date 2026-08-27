@@ -161,6 +161,24 @@
     <script>
       fetch('../content/jaeger/hochwild.json').then(r=>r.json()).then(d=>{
         if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
+        if (Array.isArray(d.linkliste) && d.linkliste.length) {
+          const lnNav = document.getElementById('linkliste-nav');
+          const lnWidget = document.getElementById('linkliste-widget');
+          const lnTitelEl = document.getElementById('linkliste-titel');
+          if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
+          const stTitelEl = document.getElementById('sub-seiten-titel');
+          if (stTitelEl && d.unterseiten_titel) stTitelEl.textContent = d.unterseiten_titel;
+          if (lnNav && lnWidget) {
+            d.linkliste.forEach(l => {
+              if (!l || !l.url) return;
+              const li = document.createElement('li');
+              const externLink = /^https?:\/\//i.test(l.url);
+              li.innerHTML = '<a href="' + l.url + '"' + (externLink ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + (l.titel || l.url) + '</a>';
+              lnNav.appendChild(li);
+            });
+            lnWidget.style.display = '';
+          }
+        }
         const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" class="${(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')}" style="border-radius:8px;margin-bottom:1.5rem;">` : '';
         let inhalt = '';
         if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt)) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
@@ -181,6 +199,32 @@
       });
     </script>
     <aside class="sidebar">
+      <div class="sidebar-widget sidebar-widget--highlight" id="linkliste-widget" style="display:none;">
+        <h4 id="linkliste-titel">Weiterführende Links</h4>
+        <ul class="sidebar-nav" id="linkliste-nav"></ul>
+      </div>
+      <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
+        <h4 id="sub-seiten-titel">Unterseiten zu Hochwild</h4>
+        <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
+        <script>
+          fetch('/content/seiten-sub-hochwild.json').then(function(r){return r.json();}).then(function(d){
+            var nav = document.getElementById('sub-seiten-nav');
+            var widget = document.getElementById('sub-seiten-widget');
+            if (!nav) return;
+            var seiten = (d.seiten || []).filter(function(s) { return s.veroeffentlicht !== false && s.in_navigation !== false; });
+            if (!seiten.length) return;
+            seiten.forEach(function(s) {
+              var li = document.createElement('li');
+              li.innerHTML = '<a class="unterseite-tile" href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' +
+                '<span class="unterseite-tile__icon">📄</span>' +
+                '<span class="unterseite-tile__label">' + (s.nav_label || s.slug) + '</span>' +
+              '</a>';
+              nav.appendChild(li);
+            });
+            widget.style.display = '';
+          }).catch(function(){});
+        </script>
+      </div>
       <div class="sidebar-widget">
         <h4>KJS Segeberg</h4>
         <ul class="sidebar-nav" data-related-nav></ul>
