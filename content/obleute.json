@@ -50,6 +50,13 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Obmann Begrünung",
+      "name": "Oliver Stein",
+      "email": "olistein@aol.de",
+      "telefon": "0175-9305714",
+      "bild": "/images/logo.png"
+    },
+    {
       "rolle": "Kreishundeobfrau - Borstel",
       "name": "Heidi Fitzner",
       "email": "heidi-fitzner@t-online.de",
@@ -74,13 +81,6 @@
       "rolle": "Kreisbläserobfrau - Schackendorf",
       "name": "Christiane Stock",
       "telefon": "0172-4208808",
-      "bild": "/images/logo.png"
-    },
-    {
-      "rolle": "Obmann Begrünung",
-      "name": "Oliver Stein",
-      "email": "olistein@aol.de",
-      "telefon": "0175-9305714",
       "bild": "/images/logo.png"
     },
     {
