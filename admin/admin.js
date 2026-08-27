@@ -307,7 +307,11 @@
   var NAV = [
     { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
     { key:'jaeger', label:'🦌 Jäger', group:true, open:true, children:[
-      { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard' },
+      { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard', group:true, open:false, children:[
+        { key:'new-sub-ueber-uns', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+          navFile:'content/seiten-sub-ueber-uns.json', navKey:'seiten', dir:'content/seiten-sub-ueber-uns',
+          parentSlug:'ueber-uns' },
+      ]},
       { key:'kjs', label:'KJS Segeberg', group:true, open:true, children:[
         // 'Übersicht' (content/jaeger/uebersicht.json) bewusst aus dem Admin-Menü
         // entfernt (11.08.2026) - die Seite jaeger/index.html mit den 6 Kacheln
@@ -319,19 +323,49 @@
         { key:'vorstand',         label:'Vorstand',           file:'content/vorstand.json',                form:'personen', dataKey:'mitglieder', fields:['rolle','name','email','telefon','bild'], drag:true },
         { key:'obleute',          label:'Obleute',            file:'content/obleute.json',                 form:'personen', dataKey:'obleute',   fields:['rolle','name','email','telefon','bild'], drag:true },
         { key:'hegeringe',        label:'Hegeringe',          file:'content/hegeringe.json',               form:'hegeringe', drag:true },
-        { key:'mitglied-werden',  label:'Mitglied werden',    file:'content/jaeger/mitglied-werden.json',  form:'standard', drag:true },
-        { key:'jaeger-werden',    label:'Jäger/in werden',    file:'content/jaeger/jaeger-werden.json',    form:'standard', drag:true },
-        { key:'niederwild',       label:'Niederwild',         file:'content/jaeger/niederwild.json',       form:'standard', drag:true },
-        { key:'hochwild',         label:'Hochwild',           file:'content/jaeger/hochwild.json',         form:'standard', drag:true },
-        { key:'schiessobleute',   label:'Schießobleute',      file:'content/jaeger/schiessobleute.json',   form:'standard', drag:true },
-        { key:'satzung',          label:'Satzung',            file:'content/jaeger/satzung.json',          form:'standard', drag:true },
-        { key:'landesjagdverband',label:'Landesjagdverband',  file:'content/jaeger/landesjagdverband.json',form:'standard', drag:true },
-        { key:'new-kjs', label:'➕ Neue KJS-Unterseite',  form:'neueSeite', isAdd:true,
-          navFile:'content/seiten-kjs.json', navKey:'seiten', dir:'content/seiten-kjs' },
+        { key:'mitglied-werden', label:'Mitglied werden', file:'content/jaeger/mitglied-werden.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-mitglied-werden', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-mitglied-werden.json', navKey:'seiten', dir:'content/seiten-sub-mitglied-werden',
+            parentSlug:'mitglied-werden' },
+        ]},
+        { key:'jaeger-werden', label:'Jäger/in werden', file:'content/jaeger/jaeger-werden.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-jaeger-werden', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-jaeger-werden.json', navKey:'seiten', dir:'content/seiten-sub-jaeger-werden',
+            parentSlug:'jaeger-werden' },
+        ]},
+        { key:'niederwild', label:'Niederwild', file:'content/jaeger/niederwild.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-niederwild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-niederwild.json', navKey:'seiten', dir:'content/seiten-sub-niederwild',
+            parentSlug:'niederwild' },
+        ]},
+        { key:'hochwild', label:'Hochwild', file:'content/jaeger/hochwild.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-hochwild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-hochwild.json', navKey:'seiten', dir:'content/seiten-sub-hochwild',
+            parentSlug:'hochwild' },
+        ]},
+        { key:'schiessobleute', label:'Schießobleute', file:'content/jaeger/schiessobleute.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-schiessobleute', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-schiessobleute.json', navKey:'seiten', dir:'content/seiten-sub-schiessobleute',
+            parentSlug:'schiessobleute' },
+        ]},
+        { key:'satzung', label:'Satzung', file:'content/jaeger/satzung.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-satzung', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-satzung.json', navKey:'seiten', dir:'content/seiten-sub-satzung',
+            parentSlug:'satzung' },
+        ]},
+        { key:'landesjagdverband', label:'Landesjagdverband', file:'content/jaeger/landesjagdverband.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-landesjagdverband', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-landesjagdverband.json', navKey:'seiten', dir:'content/seiten-sub-landesjagdverband',
+            parentSlug:'landesjagdverband' },
+        ]},
       ]},
       { key:'kjm', label:'Kreisjägermeister', file:'content/kreisjjaegermeister.json', form:'kjm' },
       { key:'aufgaben', label:'Aufgaben der KJS', group:true, open:false, children:[
-        { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard', drag:true },
+        { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-schiessen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-schiessen.json', navKey:'seiten', dir:'content/seiten-sub-schiessen',
+            parentSlug:'schiessen' },
+        ]},
         { key:'auf-hunde', label:'Hundeausbildung', group:true, open:false, drag:true, children:[
           { key:'auf-hunde-uebersicht', label:'Übersichtsseite', file:'content/aufgaben/hundeausbildung.json', form:'standard' },
           { key:'jagdhundeschule-gruppe', label:'🐕 Jagdhundeschule (21 Seiten)', group:true, open:false, children:[
@@ -339,11 +373,31 @@
               navFile:'content/aufgaben/hundeausbildung-seiten.json', navKey:'seiten', dir:'content/aufgaben/hundeausbildung' },
           ]},
         ]},
-        { key:'auf-schweiss',   label:'Schweißhundeführer',    file:'content/aufgaben/schweisshunde.json',  form:'standard', drag:true },
-        { key:'auf-jugend',     label:'Jugendarbeit',          file:'content/aufgaben/jugend.json',         form:'standard', drag:true },
-        { key:'auf-jagdhorn',   label:'Jagdhornblasen',        file:'content/aufgaben/jagdhorn.json',       form:'standard', drag:true },
-        { key:'auf-natur',      label:'Naturschutz',           file:'content/aufgaben/naturschutz.json',    form:'standard', drag:true },
-        { key:'auf-jungwild',   label:'Jungwildrettung',       file:'content/aufgaben/jungwildrettung.json',form:'standard', drag:true },
+        { key:'auf-schweiss', label:'Schweißhundeführer', file:'content/aufgaben/schweisshunde.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-schweisshunde', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-schweisshunde.json', navKey:'seiten', dir:'content/seiten-sub-schweisshunde',
+            parentSlug:'schweisshunde' },
+        ]},
+        { key:'auf-jugend', label:'Jugendarbeit', file:'content/aufgaben/jugend.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-jugend', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-jugend.json', navKey:'seiten', dir:'content/seiten-sub-jugend',
+            parentSlug:'jugend' },
+        ]},
+        { key:'auf-jagdhorn', label:'Jagdhornblasen', file:'content/aufgaben/jagdhorn.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-jagdhorn', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-jagdhorn.json', navKey:'seiten', dir:'content/seiten-sub-jagdhorn',
+            parentSlug:'jagdhorn' },
+        ]},
+        { key:'auf-natur', label:'Naturschutz', file:'content/aufgaben/naturschutz.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-naturschutz', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-naturschutz.json', navKey:'seiten', dir:'content/seiten-sub-naturschutz',
+            parentSlug:'naturschutz' },
+        ]},
+        { key:'auf-jungwild', label:'Jungwildrettung', file:'content/aufgaben/jungwildrettung.json', form:'standard', drag:true, group:true, open:false, children:[
+          { key:'new-sub-jungwildrettung', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-jungwildrettung.json', navKey:'seiten', dir:'content/seiten-sub-jungwildrettung',
+            parentSlug:'jungwildrettung' },
+        ]},
         { key:'new-aufgaben', label:'➕ Neue Aufgaben-Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
@@ -805,8 +859,12 @@
   // Inserts custom pages created via "Neue Unterseite" into the sidebar
   async function loadAllManifestItems() {
     var sections = [
-      { insertBeforeKey: 'new-kjs',         file: 'content/seiten-kjs.json',         navKey:'seiten', dir: 'content/seiten-kjs',         keyPrefix: 'kjs-dyn',         level: 2 },
       { insertBeforeKey: 'new-aufgaben',    file: 'content/seiten-aufgaben.json',    navKey:'seiten', dir: 'content/seiten-aufgaben',    keyPrefix: 'aufgaben-dyn',    level: 2 },
+      // Der generische "kjs-dyn"-Eintrag (content/seiten-kjs.json, Button
+      // "new-kjs") wurde am 27.08.2026 zusammen mit dem NAV-Button entfernt -
+      // der Pool war komplett leer (keine echten Seiten drin) und alle 8
+      // KJS-Segeberg-Seiten haben jetzt ihr eigenes Unterseiten-System
+      // (siehe sub-*-dyn-Einträge unten, gleiches Muster wie Verbraucher).
       // Der generische "verbraucher-dyn"-Eintrag (content/seiten-verbraucher.json)
       // wurde am 22.08.2026 zusammen mit dem zugehörigen "Neue Verbraucher-
       // Seite"-Button entfernt (siehe Kommentar bei new-sub-wild weiter unten
@@ -817,6 +875,24 @@
       { insertBeforeKey: 'new-sub-gruen',   file: 'content/seiten-sub-gruenes-klassenzimmer.json',  navKey:'seiten', dir: 'content/seiten-sub-gruenes-klassenzimmer',  keyPrefix: 'sub-gruen-dyn',   level: 3 },
       // Jagdhundeschule sub-pages
       { insertBeforeKey: 'new-jagdhundeschule', file: 'content/aufgaben/hundeausbildung-seiten.json', navKey:'seiten', dir: 'content/aufgaben/hundeausbildung', keyPrefix: 'jagdhundeschule-dyn', level: 3 },
+      // 27.08.2026: Sub-pages unter den 14 Jäger-/Aufgaben-Seiten, die auf
+      // dasselbe Unterseiten-Muster umgestellt wurden wie Verbraucher/
+      // Wildfleisch (Laurin-Wunsch: "einheitliche Seitenstruktur im
+      // Admin-Bereich", siehe [[project_kjs...]] Memory).
+      { insertBeforeKey: 'new-sub-ueber-uns',        file: 'content/seiten-sub-ueber-uns.json',        navKey:'seiten', dir: 'content/seiten-sub-ueber-uns',        keyPrefix: 'sub-ueber-uns-dyn',        level: 3 },
+      { insertBeforeKey: 'new-sub-mitglied-werden',  file: 'content/seiten-sub-mitglied-werden.json',  navKey:'seiten', dir: 'content/seiten-sub-mitglied-werden',  keyPrefix: 'sub-mitglied-werden-dyn',  level: 3 },
+      { insertBeforeKey: 'new-sub-jaeger-werden',    file: 'content/seiten-sub-jaeger-werden.json',    navKey:'seiten', dir: 'content/seiten-sub-jaeger-werden',    keyPrefix: 'sub-jaeger-werden-dyn',    level: 3 },
+      { insertBeforeKey: 'new-sub-niederwild',       file: 'content/seiten-sub-niederwild.json',       navKey:'seiten', dir: 'content/seiten-sub-niederwild',       keyPrefix: 'sub-niederwild-dyn',       level: 3 },
+      { insertBeforeKey: 'new-sub-hochwild',         file: 'content/seiten-sub-hochwild.json',         navKey:'seiten', dir: 'content/seiten-sub-hochwild',         keyPrefix: 'sub-hochwild-dyn',         level: 3 },
+      { insertBeforeKey: 'new-sub-schiessobleute',   file: 'content/seiten-sub-schiessobleute.json',   navKey:'seiten', dir: 'content/seiten-sub-schiessobleute',   keyPrefix: 'sub-schiessobleute-dyn',   level: 3 },
+      { insertBeforeKey: 'new-sub-satzung',          file: 'content/seiten-sub-satzung.json',          navKey:'seiten', dir: 'content/seiten-sub-satzung',          keyPrefix: 'sub-satzung-dyn',          level: 3 },
+      { insertBeforeKey: 'new-sub-landesjagdverband',file: 'content/seiten-sub-landesjagdverband.json',navKey:'seiten', dir: 'content/seiten-sub-landesjagdverband',keyPrefix: 'sub-landesjagdverband-dyn',level: 3 },
+      { insertBeforeKey: 'new-sub-schiessen',        file: 'content/seiten-sub-schiessen.json',        navKey:'seiten', dir: 'content/seiten-sub-schiessen',        keyPrefix: 'sub-schiessen-dyn',        level: 3 },
+      { insertBeforeKey: 'new-sub-schweisshunde',    file: 'content/seiten-sub-schweisshunde.json',    navKey:'seiten', dir: 'content/seiten-sub-schweisshunde',    keyPrefix: 'sub-schweisshunde-dyn',    level: 3 },
+      { insertBeforeKey: 'new-sub-jugend',           file: 'content/seiten-sub-jugend.json',           navKey:'seiten', dir: 'content/seiten-sub-jugend',           keyPrefix: 'sub-jugend-dyn',           level: 3 },
+      { insertBeforeKey: 'new-sub-jagdhorn',         file: 'content/seiten-sub-jagdhorn.json',         navKey:'seiten', dir: 'content/seiten-sub-jagdhorn',         keyPrefix: 'sub-jagdhorn-dyn',         level: 3 },
+      { insertBeforeKey: 'new-sub-naturschutz',      file: 'content/seiten-sub-naturschutz.json',      navKey:'seiten', dir: 'content/seiten-sub-naturschutz',      keyPrefix: 'sub-naturschutz-dyn',      level: 3 },
+      { insertBeforeKey: 'new-sub-jungwildrettung',  file: 'content/seiten-sub-jungwildrettung.json',  navKey:'seiten', dir: 'content/seiten-sub-jungwildrettung',  keyPrefix: 'sub-jungwildrettung-dyn',  level: 3 },
     ];
 
     for (var i = 0; i < sections.length; i++) {
@@ -1504,12 +1580,20 @@
       '</div>';
   }
 
-  // Die vier Verbraucher-Hauptseiten (Wildfleisch/Lernort Natur/Grünes
-  // Klassenzimmer/Waidmannssprache) sollen im gleichen Stil funktionieren
-  // (Laurin-Wunsch 23.08.2026) - Unterseiten-Kasten-Titel + Link-Liste
-  // gelten für alle vier gleich, statt wie vorher nur für Wildfleisch.
-  function istVerbraucherHauptseite(def) {
-    return !!(def && def.key && def.key.indexOf('verbraucher-') === 0);
+  // 23.08.2026 (Laurin-Wunsch "immer im gleichen Stil"): Unterseiten-Kasten-
+  // Titel + Link-Liste sollen bei JEDER Seite erscheinen, die selbst ein
+  // eigenes "➕ Neue Unterseite"-System hat - nicht nur bei den vier
+  // Verbraucher-Hauptseiten (wo das zuerst gebaut wurde), sondern genauso
+  // bei den 14 Jäger-/Aufgaben-Seiten, die am 23.08.2026 auf dasselbe
+  // Muster umgestellt wurden. Strukturelle Prüfung statt Namens-Präfix:
+  // "hat diese Seite ein Kind-Element, das der Unterseiten-Anlege-Button
+  // ist?" - dadurch automatisch korrekt für jede künftige Seite mit
+  // eigenem Unterseiten-System, ohne dass hier jedes Mal ein neuer Key
+  // ergänzt werden muss.
+  function hatUnterseitenSystem(def) {
+    return !!(def && Array.isArray(def.children) && def.children.some(function(c) {
+      return c && c.isAdd && c.form === 'neueSeite';
+    }));
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -1587,13 +1671,13 @@
         // Verbraucher-Hauptseiten gleich (Laurin-Wunsch 23.08.2026: "überall
         // im gleichen Stil arbeiten" - vorher nur bei Wildfleisch vorhanden,
         // was inkonsistent war).
-        (istVerbraucherHauptseite(def)
+        (hatUnterseitenSystem(def)
           ? '<div class="form-card">' +
               '<div class="form-card-title">📄 Unterseiten-Kasten (Seitenleiste)</div>' +
               fText('unterseiten_titel', 'Überschrift des Kastens', data.unterseiten_titel, 'Unterseiten zu ' + (data.titel || def.label)) +
             '</div>'
           : '') +
-        (istVerbraucherHauptseite(def) ? renderLinklisteCard(data) : '') +
+        (hatUnterseitenSystem(def) ? renderLinklisteCard(data) : '') +
         renderDownloadsCard(data) +
         (def.key === 'mitglied-werden' ?
           '<div class="form-card">' +
