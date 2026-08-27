@@ -3,12 +3,17 @@
   "nav_label": "Hundevermittlung",
   "slug": "hundevermittlung",
   "intro": "",
-  "inhalt": "",
+  "inhalt": "<p><strong>Hunde- und Welpenvermittlung</strong></p><p>Hier können die Mitglieder der Kreisjägerschaft Segeberg ihre Hunde und Welpen zur Abgabe oder zum Verkauf vorstellen.</p><p>Wenn Sie einen Hund oder Welpen anbieten möchten, senden Sie bitte eine E-Mail mit den relevanten Informationen (Rasse, Alter, Geschlecht, Abstammung, Prüfungen, Kontaktdaten und ggf. Fotos) an:</p><p><strong>heidi-fitzner@t-online.de</strong></p><p>Nach Prüfung werden die Angaben auf dieser Seite veröffentlicht, damit interessierte Jägerinnen und Jäger direkt Kontakt mit Ihnen aufnehmen können.</p>",
   "hero_bild": "",
   "bild": "",
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
   "in_navigation": true,
-  "veroeffentlicht": true
+  "veroeffentlicht": true,
+  "untertitel": "",
+  "bild_groesse": "img-100",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
