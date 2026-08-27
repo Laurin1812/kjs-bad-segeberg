@@ -13,7 +13,13 @@
   "veroeffentlicht": true,
   "untertitel": "",
   "bild_groesse": "img-100",
-  "downloads": [],
+  "downloads": [
+    {
+      "titel": "Selbstauskunft_FHülser",
+      "datei": "/downloads/1787845219941-Selbstauskunft_FH-lser.pdf",
+      "vorschau": ""
+    }
+  ],
   "galerie": [],
   "galerie_titel": "Bildergalerie"
 }
