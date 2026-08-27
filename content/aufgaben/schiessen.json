@@ -1,13 +1,15 @@
 {
   "titel": "Schießwesen",
   "untertitel": "<p>Schießwesen in der KJS Segeberg</p>",
-  "intro": "<p></p><p>Das Schießwesen ist ein zentraler Bestandteil der verantwortungsvollen Jagdausübung. Die Kreisjägerschaft Segeberg bietet ihren Mitgliedern ein umfangreiches Schießangebot, das von regelmäßigen Übungsschießen bis hin zu Wettkampfveranstaltungen reicht.</p>",
+  "intro": "",
   "bild": "",
   "bild_alt": "",
-  "inhalt": "## Pflichtschießen\n\nAlle Jägerinnen und Jäger, die aktiv jagen, sind gesetzlich verpflichtet, jährlich ihr Pflichtschießen zu absolvieren. Die Termine und Voraussetzungen entnehmen Sie dem Terminkalender.\n\n## Übungsschießen\n\nDarüber hinaus bieten wir regelmäßige Übungsschießen an, bei denen Mitglieder ihre Schießfertigkeit verbessern und erhalten können. Es werden verschiedene Disziplinen angeboten: Kugelschießen, Schrotschießen und Bogenschießen.\n\n## Schießstände im Kreis!\n\n* Schießstand Fredesdorf (Hauptstandort)\n* Schießanlage Kisdorf\n* Parcoursanlage Bad Bramstedt",
+  "inhalt": "<h2>Schießwesen</h2><p>Das Schießwesen ist ein zentraler Bestandteil einer verantwortungsvollen und waidgerechten Jagdausübung. Die Kreisjägerschaft Segeberg bietet ihren Mitgliedern ein vielfältiges Angebot, um den sicheren Umgang mit Jagdwaffen zu trainieren und die eigene Schießfertigkeit kontinuierlich zu verbessern.</p><h3>Regelmäßiges Training</h3><p>Auf verschiedenen Schießständen der Region haben Jägerinnen und Jäger die Möglichkeit, ihre Fähigkeiten mit Büchse und Flinte unter fachkundiger Anleitung zu trainieren. Dabei stehen Sicherheit, Präzision und die praxisgerechte Vorbereitung auf jagdliche Situationen im Mittelpunkt.</p><h3>Wettkämpfe und Meisterschaften</h3><p>Neben dem Übungsschießen organisiert die Kreisjägerschaft regelmäßig Leistungs- und Vergleichsschießen. Diese Veranstaltungen fördern nicht nur den sportlichen Ehrgeiz, sondern auch den kameradschaftlichen Austausch unter den Teilnehmern.</p><h3>Ausbildung und Nachwuchsförderung</h3><p>Für Jungjäger und jagdliche Nachwuchskräfte bietet die Kreisjägerschaft gezielte Unterstützung bei der Vorbereitung auf Prüfungen und den sicheren Umgang mit der Jagdwaffe. Erfahrene Schießobleute vermitteln dabei sowohl theoretisches Wissen als auch praktische Fertigkeiten.</p><h3>Sicherheit und Verantwortung</h3><p>Ein regelmäßiges Schießtraining trägt maßgeblich dazu bei, Wild tierschutzgerecht und waidgerecht zu erlegen. Die Kreisjägerschaft Segeberg legt daher großen Wert auf eine sichere Waffenhandhabung, verantwortungsbewusstes Verhalten und die fortlaufende Weiterbildung ihrer Mitglieder.</p><p><strong>Informationen zu Schießterminen, Wettbewerben und Ausbildungsmöglichkeiten erhalten Sie beim Obmann für das Schießwesen der Kreisjägerschaft Segeberg.</strong></p>",
   "kontakt_name": "Dieter Hoffmann",
   "kontakt_email": "schiessen@kjs-segeberg.de",
   "hero_bild": "",
   "bild_groesse": "img-100",
-  "downloads": []
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
