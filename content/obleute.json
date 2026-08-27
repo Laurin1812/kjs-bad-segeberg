@@ -97,6 +97,13 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Obmann Begrünung",
+      "name": "Oliver Stein",
+      "email": "olistein@aol.de",
+      "telefon": "0175-9305714",
+      "bild": "/images/logo.png"
+    },
+    {
       "rolle": "Obmann Hegering 4 - Bad Segeberg",
       "name": "Wolfgang Harm",
       "telefon": "0175-5179180",
@@ -154,13 +161,6 @@
       "rolle": "Obfrau Hegering 13 - Norderstedt",
       "name": "Wanja Ellerbrock",
       "telefon": "0177-2927121",
-      "bild": "/images/logo.png"
-    },
-    {
-      "rolle": "Obmann Begrünung",
-      "name": "Oliver Stein",
-      "email": "olistein@aol.de",
-      "telefon": "0175-9305714",
       "bild": "/images/logo.png"
     }
   ]
