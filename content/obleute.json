@@ -162,6 +162,13 @@
       "name": "Wanja Ellerbrock",
       "telefon": "0177-2927121",
       "bild": "/images/logo.png"
+    },
+    {
+      "rolle": "Obmann Begrünung",
+      "name": "Gerd Büge",
+      "email": "info@gaertnerhof-buege.de",
+      "telefon": "04195-1383",
+      "bild": "/images/logo.png"
     }
   ]
 }
