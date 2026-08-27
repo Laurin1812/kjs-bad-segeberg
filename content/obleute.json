@@ -98,6 +98,13 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Obmann Begrünung",
+      "name": "Gerd Büge",
+      "email": "info@gaertnerhof-buege.de",
+      "telefon": "04195-1383",
+      "bild": "/images/logo.png"
+    },
+    {
       "rolle": "Obmann Hegering 3 - Bornhöved",
       "name": "Ferdinand Führer",
       "telefon": "0173-9779256",
@@ -107,13 +114,6 @@
       "rolle": "Obmann Hegering 4 - Bad Segeberg",
       "name": "Wolfgang Harm",
       "telefon": "0175-5179180",
-      "bild": "/images/logo.png"
-    },
-    {
-      "rolle": "Obmann Begrünung",
-      "name": "Gerd Büge",
-      "email": "info@gaertnerhof-buege.de",
-      "telefon": "04195-1383",
       "bild": "/images/logo.png"
     },
     {
