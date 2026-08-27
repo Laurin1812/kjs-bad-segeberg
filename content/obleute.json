@@ -77,6 +77,13 @@
       "bild": "/images/logo.png"
     },
     {
+      "rolle": "Obmann Begrünung",
+      "name": "Oliver Stein",
+      "email": "olistein@aol.de",
+      "telefon": "0175-9305714",
+      "bild": "/images/logo.png"
+    },
+    {
       "rolle": "Obmann Hegering 1 - Wardersee",
       "name": "Marcel Zickermann",
       "email": "",
@@ -94,13 +101,6 @@
       "rolle": "Obmann Hegering 3 - Bornhöved",
       "name": "Ferdinand Führer",
       "telefon": "0173-9779256",
-      "bild": "/images/logo.png"
-    },
-    {
-      "rolle": "Obmann Begrünung",
-      "name": "Oliver Stein",
-      "email": "olistein@aol.de",
-      "telefon": "0175-9305714",
       "bild": "/images/logo.png"
     },
     {
