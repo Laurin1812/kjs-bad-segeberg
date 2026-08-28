@@ -297,7 +297,7 @@
         (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">📍 ' + escHtml(standort) + '</p>' : '') +
         (typZeileText ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:1rem;">' + escHtml(typZeileText) + '</p>' : '') +
         '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:1.5rem;">' + escHtml(preisText(a)) + '</p>' +
-        '<a href="#hb-kontakt" class="btn btn-primary">Anbieter kontaktieren</a>' +
+        '<a href="#hb-kontakt" class="btn btn-primary" id="hb-kontakt-btn">Anbieter kontaktieren</a>' +
       '</div>';
 
       var html = '<a href="index.html" class="content-back-link">← Zurück zur Hundebörse</a>';
@@ -342,11 +342,19 @@
         html += '<h2>Abstammung &amp; jagdliche Informationen</h2><div class="steckbrief"><dl>' + abstammung + '</dl></div>';
       }
 
-      // ── Galerie (weitere Bilder außer dem Hauptbild) ─────────
-      var weitereBilder = galerie.slice(1);
-      if (weitereBilder.length) {
+      // ── Galerie (ALLE hochgeladenen Bilder, inkl. Hauptbild) ─
+      // Vorher: galerie.slice(1) hat das erste Bild (= das oben groß gezeigte
+      // Hauptbild) aus der unteren Galerie herausgefiltert. Das führte dazu,
+      // dass z.B. bei 3 gespeicherten Bildern öffentlich nur 2 in der Galerie
+      // auftauchten (Laurin-Bug-Report 28.08.2026) – im Admin waren weiterhin
+      // alle 3 sichtbar, da dort keine Filterung stattfindet. Jetzt zeigt die
+      // Galerie bewusst alle Bilder inkl. Hauptbild als Thumbnails, damit für
+      // Besucher nachvollziehbar bleibt, dass wirklich alle Bilder da sind
+      // (auch bei 8-10 Bildern funktioniert das unverändert über dasselbe
+      // auto-fill-Grid). Abschnitt nur zeigen, wenn es mehr als ein Bild gibt.
+      if (galerie.length > 1) {
         html += '<div class="galerie-section"><div class="galerie-section__title">Galerie</div><div class="galerie-grid">';
-        weitereBilder.forEach(function(g) {
+        galerie.forEach(function(g) {
           var src = toSrc(g.bild);
           var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
           html += '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
@@ -364,11 +372,31 @@
       document.getElementById('hb-detail-inhalt').innerHTML = html;
 
       // ── Anbieter-Kontaktbox ───────────────────────────────────
+      // Anbieter/Ansprechpartner: wenn beide Felder gefüllt UND identisch
+      // sind, stand vorher derselbe Name zweimal direkt untereinander
+      // (Laurin-Bug-Report 28.08.2026). Jetzt: unterschiedliche Namen →
+      // beide mit klarem Label, gleicher Name (oder nur eines der beiden
+      // Felder gefüllt) → einmal unter "Anbieter" anzeigen.
+      var providerName  = (a.providerName  || '').trim();
+      var contactPerson = (a.contactPerson || '').trim();
       var kontaktZeilen = '';
-      if (a.providerName) kontaktZeilen += '<p>' + escHtml(a.providerName) + '</p>';
-      if (a.contactPerson) kontaktZeilen += '<p>' + escHtml(a.contactPerson) + '</p>';
+      if (providerName && contactPerson && providerName.toLowerCase() !== contactPerson.toLowerCase()) {
+        kontaktZeilen += '<p><strong>Anbieter:</strong> ' + escHtml(providerName) + '</p>';
+        kontaktZeilen += '<p><strong>Ansprechpartner:</strong> ' + escHtml(contactPerson) + '</p>';
+      } else if (providerName || contactPerson) {
+        kontaktZeilen += '<p><strong>Anbieter:</strong> ' + escHtml(providerName || contactPerson) + '</p>';
+      }
       if (a.phone) kontaktZeilen += '<p>📞 <a href="tel:' + escHtml(a.phone.replace(/\s|-|\//g,'')) + '">' + escHtml(a.phone) + '</a></p>';
       if (a.email) kontaktZeilen += '<p>📧 <a href="mailto:' + escHtml(a.email) + '">' + escHtml(a.email) + '</a></p>';
+
+      // Defensiv: falls dieser Codepfad aus irgendeinem Grund (z.B. bfcache,
+      // künftige Änderungen) mehr als einmal liefe, erst eine evtl. bereits
+      // vorhandene Box entfernen statt eine zweite einzufügen (Laurin-
+      // Bug-Report 28.08.2026: zeitweise doppelter Seitenleisten-Block,
+      // nicht zuverlässig reproduzierbar – hier trotzdem hart abgesichert).
+      var vorhandeneBox = document.getElementById('hb-kontakt');
+      if (vorhandeneBox) vorhandeneBox.parentNode.removeChild(vorhandeneBox);
+
       if (kontaktZeilen) {
         var betreff = encodeURIComponent('Anfrage zu: ' + (a.title || 'Ihrer Hundebörse-Anzeige'));
         var mailtoHref = a.email ? ('mailto:' + a.email + '?subject=' + betreff) : null;
@@ -378,7 +406,36 @@
         box.innerHTML = '<h4>Anbieter</h4>' + kontaktZeilen +
           (mailtoHref ? '<p style="margin-top:1rem;"><a href="' + mailtoHref + '" class="btn btn-outline btn-sm">Anfrage senden</a></p>' : '');
         var sidebarWidget = document.querySelector('.sidebar .sidebar-widget');
-        if (sidebarWidget) sidebarWidget.parentNode.insertBefore(box, sidebarWidget.nextSibling);
+        if (sidebarWidget && sidebarWidget.parentNode) {
+          sidebarWidget.parentNode.insertBefore(box, sidebarWidget.nextSibling);
+        }
+      }
+
+      // ── "Anbieter kontaktieren"-Button ────────────────────────
+      // Vorher: reiner #hb-kontakt-Anchor-Link. Fühlte sich wie ein toter
+      // Button an, weil er ohne sichtbare Reaktion einfach nur (unauffällig)
+      // dorthin scrollte – und wenn gar keine Kontaktdaten hinterlegt waren,
+      // existierte das Sprungziel nicht einmal (Laurin-Bug-Report
+      // 28.08.2026). Jetzt: sauberer Scroll + kurzes optisches Hervorheben
+      // der Box; falls (noch) keine Kontaktbox existiert, direkter Fallback
+      // auf mailto/tel bzw. die allgemeine KJS-Kontaktbox, damit der Button
+      // nie folgenlos bleibt. Kein neues Backend/Formular – weiterhin der
+      // bestehende mailto-Ansatz für "Anfrage senden".
+      var kontaktBtn = document.getElementById('hb-kontakt-btn');
+      if (kontaktBtn) {
+        kontaktBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var ziel = document.getElementById('hb-kontakt') || document.querySelector('.sidebar .contact-box');
+          if (ziel) {
+            ziel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            ziel.classList.add('hb-kontakt-highlight');
+            setTimeout(function() { ziel.classList.remove('hb-kontakt-highlight'); }, 1600);
+          } else if (a.email) {
+            window.location.href = 'mailto:' + a.email + '?subject=' + encodeURIComponent('Anfrage zu: ' + (a.title || 'Ihrer Hundebörse-Anzeige'));
+          } else if (a.phone) {
+            window.location.href = 'tel:' + a.phone.replace(/\s|-|\//g,'');
+          }
+        });
       }
     })
     .catch(zeigeFehlermeldung);

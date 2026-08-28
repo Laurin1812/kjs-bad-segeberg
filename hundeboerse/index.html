@@ -274,9 +274,11 @@
           '<h3 class="news-card__title">' + escHtml(a.title || '(Ohne Titel)') + '</h3>' +
           '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(a.breed || '') + '</p>' +
           (standort ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">📍 ' + escHtml(standort) + '</p>' : '') +
-          '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .6rem;">' + escHtml(typZeile(a)) + '</p>' +
-          '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .75rem;">' + escHtml(preisText(a)) + '</p>' +
-          '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Details ansehen →</span>' +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(typZeile(a)) + '</p>' +
+          '<div class="hb-card-footer">' +
+            '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .5rem;">' + escHtml(preisText(a)) + '</p>' +
+            '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Details ansehen →</span>' +
+          '</div>' +
         '</div>' +
       '</a>' +
     '</article>';

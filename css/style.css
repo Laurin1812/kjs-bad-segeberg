@@ -472,6 +472,32 @@ p  { margin-bottom: 1rem; }
   .steckbrief dl { grid-template-columns: 1fr; }
 }
 
+/* Kachel-Übersicht: Preis + "Details ansehen" sollen bei jeder Karte einer
+   Reihe auf derselben Höhe sitzen (Laurin-Bug-Report 28.08.2026), auch wenn
+   die Infozeilen darüber (Rasse/Standort/Typ) je nach Anzeige unterschiedlich
+   viele Zeilen brauchen. Anders als bei .news-card__excerpt (Aktuelles, siehe
+   oben) lässt sich das hier nicht per fester Zeilenzahl lösen, weil die
+   Standort-Zeile ganz wegfallen kann. Deshalb Flexbox mit margin-top:auto auf
+   dem Footer – dafür muss die gesamte Kettenglied-Kette bis zur Karte hoch
+   ein Flex-Container sein: .news-card ist es schon (column), aber ihr
+   einziges Kind ist der verlinkende <a> (display:block) – ohne den auch zum
+   Flex-Container zu machen, bleibt .news-card__body{flex:1} wirkungslos.
+   Bewusst nur unter #hb-grid (Hundebörse-Übersicht) skopiert, damit die
+   Aktuelles-Kacheln (nutzen dieselben .news-card-Klassen) unangetastet
+   bleiben. */
+#hb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#hb-grid .hb-card-footer { margin-top: auto; }
+
+/* "Anbieter kontaktieren"-Button auf der Detailseite scrollt zur Anbieter-
+   Kontaktbox und hebt sie kurz optisch hervor, statt nur unauffällig
+   dorthin zu springen (Laurin-Bug-Report 28.08.2026). */
+.hb-kontakt-highlight { animation: hbKontaktPulse 1.6s ease; }
+@keyframes hbKontaktPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(184,134,11,.65); }
+  60%  { box-shadow: 0 0 0 16px rgba(184,134,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(184,134,11,0); }
+}
+
 /* =========================================================
    TESTIMONIALS
    ========================================================= */
