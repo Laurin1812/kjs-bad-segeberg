@@ -1409,7 +1409,7 @@
     // aktuellesEdit/serviceEdit) – injectDownloadsCard() erkennt das (early
     // return bei bereits vorhandener Liste) und hängt dort nichts doppelt an,
     // müssen also hier nicht extra ausgenommen werden.
-    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer'];
+    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
@@ -2209,8 +2209,10 @@
         '<div id="hb-price-wrap" style="display:' + ((a.priceType === 'fixed' || a.priceType === 'negotiable') ? 'block' : 'none') + '">' +
           fText('hb-price', 'Preis (€)', a.price) +
         '</div>' +
-        fText('hb-postalCode', 'PLZ', a.postalCode) +
-        fText('hb-city', 'Ort', a.city) +
+        '<div class="field-row-2">' +
+          fText('hb-postalCode', 'PLZ', a.postalCode) +
+          fText('hb-city', 'Ort', a.city) +
+        '</div>' +
         '<p class="field-hint">Es wird später nur der grobe Standort (PLZ/Ort) öffentlich angezeigt, keine genaue Adresse.</p>' +
       '</div>' +
 
@@ -2222,10 +2224,14 @@
 
       '<div class="form-card">' +
         '<div class="form-card-title">🧬 Abstammung</div>' +
-        fText('hb-father', 'Vater', a.father) +
-        fText('hb-fatherTests', 'Prüfungen Vater', a.fatherTests) +
-        fText('hb-mother', 'Mutter', a.mother) +
-        fText('hb-motherTests', 'Prüfungen Mutter', a.motherTests) +
+        '<div class="field-row-2">' +
+          fText('hb-father', 'Vater', a.father) +
+          fText('hb-mother', 'Mutter', a.mother) +
+        '</div>' +
+        '<div class="field-row-2">' +
+          fText('hb-fatherTests', 'Prüfungen Vater', a.fatherTests) +
+          fText('hb-motherTests', 'Prüfungen Mutter', a.motherTests) +
+        '</div>' +
       '</div>' +
 
       '<div class="form-card">' +
@@ -2233,7 +2239,7 @@
         fMarkdown('hb-description', 'Freitext-Beschreibung', a.description) +
       '</div>' +
 
-      renderGalerieCard(a) +
+      renderHundeboerseGalerieCard(a) +
 
       '<div class="form-card">' +
         '<div class="form-card-title">📞 Anbieter / Kontaktdaten</div>' +
@@ -2304,7 +2310,6 @@
     a.phone         = gv('hb-phone');
     a.contactNotes  = gv('hb-contactNotes');
     a.galerie       = collectGalerieList();
-    a.galerie_titel = collectGalerieTitel();
     a.updatedAt = new Date().toISOString();
     return a;
   }
@@ -2456,6 +2461,36 @@
     if (el) el.style.display = 'none';
   };
 
+  // Hundebörse-eigene Bildergalerie-Karte: technisch dieselbe Basis wie die
+  // generische renderGalerieCard() (gleiche #galerie-list-Struktur, gleiche
+  // renderGalerieRow()/collectGalerieList()), aber ohne das allgemeine
+  // "Überschrift der Galerie"-Feld und mit Hundebörse-spezifischem Hinweistext
+  // + Obergrenze von 10 Bildern (Frank-Wunsch 28.08.2026). Die generische
+  // renderGalerieCard() bleibt für alle anderen Seiten unverändert.
+  var HB_MAX_BILDER = 10;
+  function renderHundeboerseGalerieCard(data) {
+    var list = data.galerie || [];
+    var rows = list.map(renderGalerieRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">🖼️ Bildergalerie</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Laden Sie bis zu 10 Bilder hoch. Das erste Bild wird als Hauptbild der Anzeige verwendet. ' +
+        'Die Reihenfolge kann per Drag &amp; Drop geändert werden.' +
+      '</p>' +
+      '<div id="galerie-list">' + rows + '</div>' +
+      '<p class="text-muted" id="galerie-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Bilder hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="hundeboerseGalerieAdd()">🖼️ Bild hinzufügen</button>' +
+    '</div>';
+  }
+  window.hundeboerseGalerieAdd = function() {
+    var list = id('galerie-list');
+    var count = list ? list.querySelectorAll('.galerie-row').length : 0;
+    if (count >= HB_MAX_BILDER) {
+      toast('Maximal ' + HB_MAX_BILDER + ' Bilder pro Anzeige.', 'info');
+      return;
+    }
+    window.addGalerieRow();
+  };
 
   /* ────────────────────────────────────────────────────────────
      INFOMOBIL – TipTap Rich-Text-Editor

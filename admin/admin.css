@@ -305,6 +305,9 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .field-textarea { resize: vertical; min-height: 80px; }
 .field-select { cursor: pointer; }
 .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) {
+  .field-row-2 { grid-template-columns: 1fr; }
+}
 
 /* Image field */
 .image-field { }
