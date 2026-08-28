@@ -1,3 +1,39 @@
 {
-  "anzeigen": []
+  "anzeigen": [
+    {
+      "id": "hb-test-1",
+      "status": "published",
+      "createdAt": "2026-08-28T10:00:00.000Z",
+      "updatedAt": "2026-08-28T10:00:00.000Z",
+      "type": "single",
+      "title": "TESTANZEIGE - Deutsch Drahthaar Rüde",
+      "breed": "Deutsch Drahthaar",
+      "color": "braunschimmel",
+      "coat": "rauhhaarig",
+      "priceType": "negotiable",
+      "price": "1200",
+      "postalCode": "23795",
+      "city": "Bad Segeberg",
+      "description": "Dies ist eine **Testanzeige** zur Prüfung des Datenflusses zwischen Admin und öffentlicher Hundebörse.\n\n- Wesensfest\n- Jagdlich gefördert",
+      "father": "Testvater vom Segeberger Forst",
+      "fatherTests": "VJP, HZP",
+      "mother": "Testmutter von der Trave",
+      "motherTests": "VJP",
+      "huntingTests": "VJP, HZP bestanden",
+      "trainingLevel": "Grundgehorsam vorhanden, an der Ente eingearbeitet",
+      "providerName": "KJS Testverein",
+      "contactPerson": "Max Mustermann",
+      "email": "test@example.com",
+      "phone": "0170 1234567",
+      "contactNotes": "Nur zu Testzwecken.",
+      "dogName": "Testo",
+      "birthDate": "15.03.2025",
+      "gender": "male",
+      "litterDate": "",
+      "maleCount": "",
+      "femaleCount": "",
+      "galerie": [],
+      "galerie_titel": "Bilder"
+    }
+  ]
 }
