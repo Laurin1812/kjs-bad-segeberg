@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aktuelle Hunde und Würfe der Kreisjägerschaft Segeberg e.V.">
+  <title>Hundebörse – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div class="topbar"><div class="container">
+  <div class="topbar__left">
+    <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
+    <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
+  </div>
+  <div class="topbar__right">
+    <div class="topbar__social">
+      <a href="#" aria-label="Facebook" title="Facebook" class="topbar__social--facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+      <a href="#" aria-label="Instagram" title="Instagram" class="topbar__social--instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></a>
+    </div>
+  </div>
+
+</div></div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="../index.html" class="site-logo">
+      <img src="../images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
+      <div class="site-logo__text">
+        <span class="site-logo__name">Kreisjägerschaft</span>
+        <span class="site-logo__sub">Segeberg <span class="no-caps">e.V.</span></span>
+      </div>
+    </a>
+    <nav aria-label="Hauptnavigation"><ul class="main-nav">
+      <li><a href="../index.html" data-navkey="startseite">Startseite</a></li>
+      <li><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
+        <ul class="dropdown" id="jaeger-dropdown">
+          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
+          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+          <li class="has-sub"><a href="#">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+              <li><a href="../jaeger/obleute.html">Obleute</a></li>
+              <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+              <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+              <li><a href="../jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
+              <li><a href="../jaeger/niederwild.html">Niederwild</a></li>
+              <li><a href="../jaeger/hochwild.html">Hochwild</a></li>
+              <li><a href="../jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
+              <li><a href="../jaeger/satzung.html">Satzung</a></li>
+              <li><a href="../jaeger/landesjagdverband.html">Landesjagdverband</a></li>
+            </ul>
+          </li>
+          <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub">
+              <li><a href="../aufgaben/schiessen.html">Schie&#223;wesen</a></li>
+              <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+              <li><a href="../aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
+              <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+              <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+              <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+              <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+            </ul>
+          </li>
+          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
+          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
+            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
+        <ul class="dropdown">
+          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+          <li><a href="../verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
+        </ul>
+      </li>
+      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
+      <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
+      <li><a href="../service.html" data-navkey="service">Service</a></li>
+      <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
+    </ul></nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
+  <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
+  <ul>
+    <li><a href="../index.html">Startseite</a></li>
+    <li>
+      <details>
+        <summary>Jäger</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
+          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
+          <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
+          <li><a href="../jaeger/obleute.html">Obleute</a></li>
+          <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
+          <li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
+          <li><a href="../jaeger/niederwild.html">Niederwild</a></li>
+          <li><a href="../jaeger/hochwild.html">Hochwild</a></li>
+          <li><a href="../jaeger/schiessobleute.html">Schießobleute</a></li>
+          <li><a href="../jaeger/satzung.html">Satzung</a></li>
+          <li><a href="../jaeger/landesjagdverband.html">Landesjagdverband</a></li>
+          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
+          <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
+          <li><a href="../aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
+          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
+          <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
+          <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
+          <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
+          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>Verbraucher</summary>
+        <ul class="mobile-nav__sub">
+          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
+          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
+          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
+          <li><a href="../verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
+        </ul>
+      </details>
+    </li>
+    <li><a href="../termine/index.html">Termine</a></li>
+    <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../faq/index.html">FAQ</a></li>
+    <li><a href="../service.html">Service</a></li>
+    <li><a href="../kontakt/index.html">Kontakt</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Hundebörse</h1>
+    <nav class="breadcrumb">
+      <a href="../index.html">Startseite</a><span class="sep">/</span><span>Hundebörse</span>
+    </nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+    <main class="main-content" id="hb-main">
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:1.5rem;">
+        Hier finden Sie aktuell angebotene Jagdhunde und Würfe. Entdecken Sie die aktuellen Angebote oder bieten Sie selbst einen Hund bzw. Wurf an.
+      </p>
+      <p style="margin-bottom:2.5rem;">
+        <a href="anbieten.html" class="btn btn-primary">+ Hund / Wurf anbieten</a>
+      </p>
+
+      <h2 style="margin-bottom:1.5rem;">Aktuelle Hunde &amp; Würfe</h2>
+      <div class="news__grid" id="hb-grid">
+        <p style="color:var(--text-muted);">Anzeigen werden geladen …</p>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Hund/Wurf anbieten</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">Sie möchten selbst einen Hund oder Wurf über die KJS Hundebörse anbieten?</p>
+        <p style="margin-top:.75rem;"><a href="anbieten.html" class="btn btn-outline-green btn-sm">+ Anzeige aufgeben</a></p>
+      </div>
+      <div class="contact-box">
+        <h4>Kontakt</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  function formatDatum(raw) {
+    if (!raw) return '';
+    var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (m1) return parseInt(m1[1],10) + '. ' + mon[parseInt(m1[2],10)-1] + ' ' + m1[3];
+    var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m2) return parseInt(m2[3],10) + '. ' + mon[parseInt(m2[2],10)-1] + ' ' + m2[1];
+    return raw;
+  }
+
+  function alterText(geburtsdatum) {
+    var m = geburtsdatum && geburtsdatum.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (!m) return '';
+    var geburt = new Date(parseInt(m[3],10), parseInt(m[2],10)-1, parseInt(m[1],10));
+    if (isNaN(geburt.getTime())) return '';
+    var heute = new Date();
+    var monate = (heute.getFullYear()-geburt.getFullYear())*12 + (heute.getMonth()-geburt.getMonth());
+    if (heute.getDate() < geburt.getDate()) monate--;
+    if (monate < 0) monate = 0;
+    if (monate < 24) return monate + (monate === 1 ? ' Monat' : ' Monate');
+    var jahre = Math.floor(monate/12);
+    return jahre + (jahre === 1 ? ' Jahr' : ' Jahre');
+  }
+
+  function preisText(a) {
+    if (a.priceType === 'fixed') return a.price ? (a.price + ' €') : 'Festpreis';
+    if (a.priceType === 'negotiable') return a.price ? (a.price + ' € VB') : 'VB';
+    if (a.priceType === 'on_request') return 'Preis auf Anfrage';
+    return 'Keine Preisangabe';
+  }
+
+  function typLabel(t) { return t === 'litter' ? 'WURF' : 'EINZELHUND'; }
+
+  function typZeile(a) {
+    if (a.type === 'litter') {
+      var teile = [];
+      if (a.litterDate) teile.push('Wurf vom ' + formatDatum(a.litterDate));
+      var anzahl = [];
+      if (a.maleCount) anzahl.push(a.maleCount + ' Rüden');
+      if (a.femaleCount) anzahl.push(a.femaleCount + ' Hündinnen');
+      if (anzahl.length) teile.push(anzahl.join(', '));
+      return teile.join(' · ');
+    }
+    var teile2 = [];
+    if (a.gender) teile2.push(a.gender === 'male' ? 'Rüde' : 'Hündin');
+    var alter = alterText(a.birthDate);
+    if (alter) teile2.push(alter);
+    return teile2.join(' · ');
+  }
+
+  function renderKarte(a, i) {
+    var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
+    var imgSrc = toSrc(bild);
+    var standort = [a.postalCode, a.city].filter(Boolean).join(' ');
+    return '<article class="news-card">' +
+      '<a href="detail.html?i=' + i + '" style="text-decoration:none;color:inherit;display:block;">' +
+        '<div class="news-card__img-wrap">' +
+          (imgSrc
+            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.title || '') + '" loading="lazy">'
+            : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
+        '</div>' +
+        '<div class="news-card__body">' +
+          '<div class="news-card__meta">' +
+            '<span class="news-card__cat">' + typLabel(a.type) + '</span>' +
+          '</div>' +
+          '<h3 class="news-card__title">' + escHtml(a.title || '(Ohne Titel)') + '</h3>' +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(a.breed || '') + '</p>' +
+          (standort ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">📍 ' + escHtml(standort) + '</p>' : '') +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .6rem;">' + escHtml(typZeile(a)) + '</p>' +
+          '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .75rem;">' + escHtml(preisText(a)) + '</p>' +
+          '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Details ansehen →</span>' +
+        '</div>' +
+      '</a>' +
+    '</article>';
+  }
+
+  fetch('../content/hundeboerse.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var alle = data.anzeigen || [];
+      var indexed = alle.map(function(a, i) { return { a: a, i: i }; });
+      var veroeffentlicht = indexed.filter(function(e) { return e.a.status === 'published'; });
+      veroeffentlicht.sort(function(x, y) {
+        var dx = x.a.createdAt || '', dy = y.a.createdAt || '';
+        return dy.localeCompare(dx);
+      });
+
+      var grid = document.getElementById('hb-grid');
+      if (!veroeffentlicht.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;background:var(--bg-light);border-radius:var(--radius-md);">' +
+          '<p style="font-size:2.5rem;margin-bottom:1rem;">🐕</p>' +
+          '<h3 style="color:var(--green-dark);margin-bottom:.5rem;">Aktuell sind keine Anzeigen veröffentlicht.</h3>' +
+          '<p style="color:var(--text-muted);">Schauen Sie gerne bald wieder vorbei.</p>' +
+        '</div>';
+        return;
+      }
+      grid.innerHTML = veroeffentlicht.map(function(e) { return renderKarte(e.a, e.i); }).join('');
+    })
+    .catch(function() {
+      document.getElementById('hb-grid').innerHTML = '<p style="color:var(--text-muted);">Anzeigen konnten nicht geladen werden.</p>';
+    });
+})();
+</script>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-grid">
+    <div class="footer-about">
+      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
+      <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
+      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
+      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
+    </div>
+    <div class="footer-col"><h5>Über die KJS</h5><ul>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
+      <li><a href="../index.html">Startseite</a></li><li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../termine/index.html">Termine</a></li>
+    </ul></div>
+    <div class="footer-col"><h5>Informationen</h5><ul>
+      <li><a href="../kontakt/index.html">Kontakt</a></li><li><a href="../faq/index.html">FAQ</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
+    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
+  </div>
+</div></footer>
+<script src="../js/main.js"></script>
+<script>
+  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
+    const ft = document.querySelector('.footer-about p');
+    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
+    const cp = document.querySelector('.footer-bottom span');
+    if(cp && d.copyright) cp.textContent = d.copyright;
+    const fbLinkTop = document.querySelector('.topbar__social a[aria-label="Facebook"]');
+    if(fbLinkTop && d.facebook_url) fbLinkTop.href = d.facebook_url;
+    const igLinkTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
+    if(igLinkTop && d.instagram_url) igLinkTop.href = d.instagram_url;
+  }).catch(()=>{});
+</script>
+</body>
+</html>

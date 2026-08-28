@@ -446,6 +446,33 @@ p  { margin-bottom: 1rem; }
 .news__more { text-align: center; margin-top: 3rem; }
 
 /* =========================================================
+   HUNDEBÖRSE (öffentlich, Phase 2)
+   Nutzt bewusst dieselben Bausteine wie der Rest der Seite: .news__grid/
+   .news-card für die Kachel-Übersicht (siehe NEWS oben), .galerie-grid/
+   .galerie-item für die Bildergalerie, .page-content/.sidebar-widget/
+   .contact-box für den Seitenrahmen. Nur die Detailseiten-Kopfzeile
+   (Bild links, Eckdaten rechts) und der Steckbrief-Kasten sind neu, beide
+   ausschließlich mit vorhandenen CSS-Variablen (Farben/Radius/Schatten). */
+.hb-detail-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: start; margin-bottom: 2.5rem; }
+@media (max-width: 900px) {
+  .hb-detail-top { grid-template-columns: 1fr; }
+}
+.hb-main-image {
+  display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+.steckbrief { background: var(--bg-light); border-radius: var(--radius-md); padding: 1.5rem; margin: 1rem 0 2rem; }
+.steckbrief dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem 2rem; margin: 0; }
+.steckbrief dt {
+  font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-muted); margin-bottom: .15rem;
+}
+.steckbrief dd { margin: 0; font-size: .95rem; color: var(--text-dark); font-weight: 600; }
+@media (max-width: 600px) {
+  .steckbrief dl { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
    TESTIMONIALS
    ========================================================= */
 .testimonials { background: var(--green-main); padding-block: 5rem; }
