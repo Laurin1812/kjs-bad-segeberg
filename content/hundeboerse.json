@@ -1,6 +1,50 @@
 {
   "anzeigen": [
     {
+      "id": "hb-1787934902815",
+      "status": "archived",
+      "createdAt": "2026-08-28T16:35:02.814Z",
+      "updatedAt": "2026-08-28T16:41:50.666Z",
+      "type": "single",
+      "title": "Jagdlich geführter Deutsch Kurzhaar Rüde abzugeben",
+      "breed": "Deutsch Kurzhaar",
+      "color": "Dunkelbraun mit Brustfleck",
+      "coat": "Kurzhaar",
+      "priceType": "fixed",
+      "price": "1.850",
+      "postalCode": "23795",
+      "city": "Bad Segeberg",
+      "description": "Bruno ist ein jagdlich geführter Deutsch Kurzhaar Rüde mit einem ausgeglichenen und menschenbezogenen Wesen.\n\nEr wird regelmäßig im Revier eingesetzt und kennt sowohl die Arbeit im Feld als auch im Wald und am Wasser. Bruno arbeitet konzentriert, zeigt eine gute Führerbindung und verfügt über einen ausgeprägten Finderwillen.\n\nIm Alltag ist er freundlich und unkompliziert. Er kennt das Leben im Haus sowie im Zwinger und fährt problemlos im Auto mit.\n\nFür Bruno wird ein jagdlich aktives Zuhause gesucht, in dem er weiterhin entsprechend seiner Anlagen eingesetzt und gefördert wird.\n\nEine Besichtigung und ein persönliches Kennenlernen sind nach vorheriger Absprache möglich.",
+      "father": "Falko vom Holsteiner Bruch",
+      "fatherTests": "VJP, HZP, VGP I. Preis",
+      "mother": "Enna vom Segeberger Forst",
+      "motherTests": "VJP, HZP, VGP II. Preis",
+      "huntingTests": "VJP 72 Punkte, HZP 181 Punkte",
+      "trainingLevel": "Bruno wird regelmäßig jagdlich geführt und ist mit Wald-, Feld- und Wasserarbeit vertraut. Er arbeitet zuverlässig auf Schweiß und zeigt eine ausgeprägte Führerbezogenheit. Autofahrten, Zwinger und das Zusammenleben im Haus sind ihm bekannt.",
+      "providerName": "Hans Petersen",
+      "contactPerson": "Hans Petersen",
+      "email": "hans.petersen@example.de",
+      "phone": "0172 9876543",
+      "contactNotes": "Bitte bevorzugt telefonisch ab 17:00 Uhr Kontakt aufnehmen.",
+      "dogName": "Bruno vom Segeberger Forst",
+      "birthDate": "18.03.2024",
+      "gender": "male",
+      "litterDate": "",
+      "maleCount": "",
+      "femaleCount": "",
+      "galerie": [
+        {
+          "bild": "/images/1787934528232-ChatGPT-Image-28.-Aug.-2026--18_28_24.png",
+          "titel": "Test"
+        },
+        {
+          "bild": "/images/1787835576397-27-08-_2026_14-50-12.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bilder"
+    },
+    {
       "id": "hb-1787928820753",
       "status": "archived",
       "createdAt": "2026-08-28T14:53:40.753Z",
