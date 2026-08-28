@@ -4,7 +4,7 @@
       "id": "hb-1787934902815",
       "status": "published",
       "createdAt": "2026-08-28T16:35:02.814Z",
-      "updatedAt": "2026-08-28T16:43:40.083Z",
+      "updatedAt": "2026-08-28T16:53:29.316Z",
       "type": "single",
       "title": "Jagdlich geführter Deutsch Kurzhaar Rüde abzugeben",
       "breed": "Deutsch Kurzhaar",
@@ -39,7 +39,11 @@
         },
         {
           "bild": "/images/1787835576397-27-08-_2026_14-50-12.jpg",
-          "titel": ""
+          "titel": "test"
+        },
+        {
+          "bild": "/images/1787831642212-IMG_9670.JPG",
+          "titel": "test"
         }
       ],
       "galerie_titel": "Bilder"
