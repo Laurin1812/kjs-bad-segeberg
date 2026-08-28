@@ -394,6 +394,21 @@
       // vorhandene Box entfernen statt eine zweite einzufügen (Laurin-
       // Bug-Report 28.08.2026: zeitweise doppelter Seitenleisten-Block,
       // nicht zuverlässig reproduzierbar – hier trotzdem hart abgesichert).
+      //
+      // ROOT CAUSE GEFUNDEN (28.08.2026): js/main.js läuft auf JEDER Seite
+      // ein sitegweites Skript, das ALLE Elemente mit der Klasse
+      // "contact-box" per querySelectorAll einsammelt und ihren innerHTML
+      // asynchron (nach Laden von content/einstellungen.json) durch den
+      // Geschäftsstelle/Postadresse-Block ersetzt. Diese Box hier verwendete
+      // bisher ebenfalls die Klasse "contact-box" für ihr Styling – wurde
+      // die async-Antwort erst NACH dem Einfügen dieser Anbieter-Box fertig,
+      // überschrieb main.js sie mit dem Geschäftsstelle-Inhalt. Dadurch
+      // wirkte es, als gäbe es zwei Geschäftsstelle-Blöcke und keinen
+      // Anbieter-Block – exakt das von Laurin beschriebene (nicht zuverlässig
+      // reproduzierbare, weil timing-abhängige) Verhalten. Fix: eigene Klasse
+      // "hb-anbieter-box" statt "contact-box", damit main.js sie nicht mehr
+      // anfasst; das identische Aussehen wird in css/style.css über
+      // ".contact-box, .hb-anbieter-box { ... }" sichergestellt.
       var vorhandeneBox = document.getElementById('hb-kontakt');
       if (vorhandeneBox) vorhandeneBox.parentNode.removeChild(vorhandeneBox);
 
@@ -401,7 +416,7 @@
         var betreff = encodeURIComponent('Anfrage zu: ' + (a.title || 'Ihrer Hundebörse-Anzeige'));
         var mailtoHref = a.email ? ('mailto:' + a.email + '?subject=' + betreff) : null;
         var box = document.createElement('div');
-        box.className = 'contact-box';
+        box.className = 'hb-anbieter-box';
         box.id = 'hb-kontakt';
         box.innerHTML = '<h4>Anbieter</h4>' + kontaktZeilen +
           (mailtoHref ? '<p style="margin-top:1rem;"><a href="' + mailtoHref + '" class="btn btn-outline btn-sm">Anfrage senden</a></p>' : '');
