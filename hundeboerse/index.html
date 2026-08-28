@@ -260,8 +260,15 @@
     var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
     var imgSrc = toSrc(bild);
     var standort = [a.postalCode, a.city].filter(Boolean).join(' ');
+    // WICHTIG (Laurin-Rückmeldung 28.08.2026): Der vorherige Fix für die
+    // Kachel-Höhen (#hb-grid .news-card > a { display:flex; ... } in
+    // css/style.css) griff live NICHT, weil dieser <a>-Wrapper hier bisher
+    // ein Inline-style="...display:block;" hatte - Inline-Styles gewinnen
+    // IMMER gegen externe CSS-Regeln, unabhängig von Spezifität. Deshalb
+    // jetzt kein "display:block" mehr inline setzen; die Flex-Regel aus
+    // css/style.css kommt dadurch tatsächlich zum Tragen.
     return '<article class="news-card">' +
-      '<a href="detail.html?i=' + i + '" style="text-decoration:none;color:inherit;display:block;">' +
+      '<a href="detail.html?i=' + i + '" style="text-decoration:none;color:inherit;">' +
         '<div class="news-card__img-wrap">' +
           (imgSrc
             ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.title || '') + '" loading="lazy">'

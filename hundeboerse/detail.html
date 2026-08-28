@@ -444,7 +444,7 @@
           if (ziel) {
             ziel.scrollIntoView({ behavior: 'smooth', block: 'center' });
             ziel.classList.add('hb-kontakt-highlight');
-            setTimeout(function() { ziel.classList.remove('hb-kontakt-highlight'); }, 1600);
+            setTimeout(function() { ziel.classList.remove('hb-kontakt-highlight'); }, 2000);
           } else if (a.email) {
             window.location.href = 'mailto:' + a.email + '?subject=' + encodeURIComponent('Anfrage zu: ' + (a.title || 'Ihrer Hundebörse-Anzeige'));
           } else if (a.phone) {

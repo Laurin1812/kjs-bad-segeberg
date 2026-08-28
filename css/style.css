@@ -490,12 +490,24 @@ p  { margin-bottom: 1rem; }
 
 /* "Anbieter kontaktieren"-Button auf der Detailseite scrollt zur Anbieter-
    Kontaktbox und hebt sie kurz optisch hervor, statt nur unauffällig
-   dorthin zu springen (Laurin-Bug-Report 28.08.2026). */
-.hb-kontakt-highlight { animation: hbKontaktPulse 1.6s ease; }
+   dorthin zu springen (Laurin-Bug-Report 28.08.2026).
+   Rückmeldung 28.08.2026: Der Klick-Handler feuert nachweislich zuverlässig
+   (per echtem Maus-Klick auf der deployten Staging-Seite geprüft), aber der
+   ursprüngliche Effekt (schneller, dünner werdender Ring, .65 Deckkraft) war
+   zu schwach/kurz, um zuverlässig aufzufallen - besonders wenn die Anbieter-
+   Box (z.B. auf Desktop direkt neben Preis/Button) ohnehin schon vollständig
+   sichtbar ist und scrollIntoView daher kaum sichtbar scrollt. Der einzige
+   Hinweis war dann ein kaum wahrnehmbarer, schnell verblassender Ring -
+   wirkte dadurch wie "nichts passiert". Jetzt: kräftigerer, deckender Ring,
+   der ca. 1s lang sichtbar STEHEN bleibt statt sofort zu verblassen, plus
+   ein leichtes Skalieren der Box für zusätzliche Aufmerksamkeit. Gesamtdauer
+   2s (JS-Timeout in hundeboerse/detail.html entsprechend angepasst). */
+.hb-kontakt-highlight { animation: hbKontaktPulse 2s ease-in-out; }
 @keyframes hbKontaktPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(184,134,11,.65); }
-  60%  { box-shadow: 0 0 0 16px rgba(184,134,11,0); }
-  100% { box-shadow: 0 0 0 0 rgba(184,134,11,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(184,134,11,0); transform: scale(1); }
+  12%  { box-shadow: 0 0 0 8px rgba(184,134,11,.9); transform: scale(1.015); }
+  55%  { box-shadow: 0 0 0 8px rgba(184,134,11,.9); transform: scale(1.015); }
+  100% { box-shadow: 0 0 0 0 rgba(184,134,11,0); transform: scale(1); }
 }
 
 /* =========================================================
