@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Mitglied werden bei der Kreisjägerschaft Segeberg e.V.">
-  <title>Mitglied werden – Kreisjägerschaft Segeberg e.V.</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hund oder Wurf bei der KJS Hundebörse anbieten – Kreisjägerschaft Segeberg e.V.">
+  <title>Hund / Wurf anbieten – Hundebörse – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
@@ -21,6 +22,7 @@
 </script>
 </head>
 <body>
+
 <div class="topbar"><div class="container">
   <div class="topbar__left">
     <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
@@ -34,6 +36,7 @@
   </div>
 
 </div></div>
+
 <header class="site-header">
   <div class="container header-inner">
     <a href="../index.html" class="site-logo">
@@ -45,7 +48,7 @@
     </a>
     <nav aria-label="Hauptnavigation"><ul class="main-nav">
       <li><a href="../index.html" data-navkey="startseite">Startseite</a></li>
-      <li class="active"><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
+      <li><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
         <ul class="dropdown" id="jaeger-dropdown">
           <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
           <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
@@ -74,7 +77,7 @@
               <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
             </ul>
           </li>
-          <li><a href="infomobil.html">Infomobil</a></li>
+          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
           <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
             <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
           </li>
@@ -98,6 +101,7 @@
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
 </header>
+
 <nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
   <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
   <ul>
@@ -148,97 +152,32 @@
     <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
   </ul>
 </nav>
+
+
 <div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
   <div class="container">
-    <h1>Mitglied werden</h1>
-    <nav class="breadcrumb"><a href="../index.html">Startseite</a><span class="sep">/</span><span>Jäger</span><span class="sep">/</span><span>Mitglied werden</span></nav>
+    <h1>Hund / Wurf anbieten</h1>
+    <nav class="breadcrumb">
+      <a href="../index.html">Startseite</a><span class="sep">/</span><a href="index.html">Hundebörse</a><span class="sep">/</span><span>Hund / Wurf anbieten</span>
+    </nav>
   </div>
 </div>
-<div class="page-content">
+
+<div class="page-content full">
   <div class="container">
-    <main class="main-content" id="page-main">
-      <div class="loading-spinner">Lädt...</div>
+    <main class="main-content">
+      <h2 style="margin-bottom:1.5rem;">Hund / Wurf anbieten</h2>
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:2rem;">
+        Das Formular zum Einstellen eines Hundes oder Wurfes wird derzeit vorbereitet.
+      </p>
+      <p>
+        <a href="index.html" class="btn btn-primary">&larr; Zur&uuml;ck zur Hundeb&ouml;rse</a>
+      </p>
     </main>
-    <script>
-      fetch('../content/jaeger/mitglied-werden.json').then(r=>r.json()).then(d=>{
-        if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
-        if (Array.isArray(d.linkliste) && d.linkliste.length) {
-          const lnNav = document.getElementById('linkliste-nav');
-          const lnWidget = document.getElementById('linkliste-widget');
-          const lnTitelEl = document.getElementById('linkliste-titel');
-          if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
-          const stTitelEl = document.getElementById('sub-seiten-titel');
-          if (stTitelEl && d.unterseiten_titel) stTitelEl.textContent = d.unterseiten_titel;
-          if (lnNav && lnWidget) {
-            d.linkliste.forEach(l => {
-              if (!l || !l.url) return;
-              const li = document.createElement('li');
-              const externLink = /^https?:\/\//i.test(l.url);
-              li.innerHTML = '<a href="' + l.url + '"' + (externLink ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + (l.titel || l.url) + '</a>';
-              lnNav.appendChild(li);
-            });
-            lnWidget.style.display = '';
-          }
-        }
-        const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" class="${(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')}" style="border-radius:8px;margin-bottom:1.5rem;">` : '';
-        let inhalt = '';
-        if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt)) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
-        const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
-        document.getElementById('page-main').innerHTML = `
-          <h2>${d.untertitel||''}</h2>
-          <p>${d.intro||''}</p>
-          ${bild}
-          ${inhalt ? '<div><p>' + inhalt + '</p></div>' : ''}
-          ${kontakt}
-          <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
-            <a href="${d.antrag_url || '../downloads/index.html'}" class="btn btn-primary">Mitgliedsantrag online</a>
-            <a href="../kontakt/index.html" class="btn btn-outline-green">Fragen? Kontakt aufnehmen</a>
-          </div>
-        `;
-      }).catch(()=>{
-        document.getElementById('page-main').innerHTML = '<p>Inhalt konnte nicht geladen werden.</p>';
-      });
-    </script>
-    <aside class="sidebar">
-      <div class="sidebar-widget sidebar-widget--highlight" id="linkliste-widget" style="display:none;">
-        <h4 id="linkliste-titel">Weiterführende Links</h4>
-        <ul class="sidebar-nav" id="linkliste-nav"></ul>
-      </div>
-      <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
-        <h4 id="sub-seiten-titel">Unterseiten zu Mitglied werden</h4>
-        <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
-        <script>
-          fetch('/content/seiten-sub-mitglied-werden.json').then(function(r){return r.json();}).then(function(d){
-            var nav = document.getElementById('sub-seiten-nav');
-            var widget = document.getElementById('sub-seiten-widget');
-            if (!nav) return;
-            var seiten = (d.seiten || []).filter(function(s) { return s.veroeffentlicht !== false && s.in_navigation !== false; });
-            if (!seiten.length) return;
-            seiten.forEach(function(s) {
-              var li = document.createElement('li');
-              li.innerHTML = '<a class="unterseite-tile" href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' +
-                '<span class="unterseite-tile__icon">📄</span>' +
-                '<span class="unterseite-tile__label">' + (s.nav_label || s.slug) + '</span>' +
-              '</a>';
-              nav.appendChild(li);
-            });
-            widget.style.display = '';
-          }).catch(function(){});
-        </script>
-      </div>
-      <div class="sidebar-widget">
-        <h4>KJS Segeberg</h4>
-        <ul class="sidebar-nav" data-related-nav></ul>
-      </div>
-      <div class="contact-box">
-        <h4>Geschäftsstelle</h4>
-        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
-        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
-      </div>
-    </aside>
   </div>
 </div>
+
 <footer class="site-footer"><div class="container">
   <div class="footer-grid">
     <div class="footer-about">
@@ -248,18 +187,14 @@
       <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
     </div>
     <div class="footer-col"><h5>Über die KJS</h5><ul>
-      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
+      <li><a href="../jaeger/vorstand.html">Vorstand</a></li><li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
     </ul></div>
     <div class="footer-col"><h5>Schnellübersicht</h5><ul>
-      <li><a href="../index.html">Startseite</a></li>
-      <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
-      <li><a href="../downloads/index.html">Downloads</a></li>
+      <li><a href="../index.html">Startseite</a></li><li><a href="../aktuelles/index.html">Aktuelles</a></li>
+      <li><a href="../termine/index.html">Termine</a></li>
     </ul></div>
     <div class="footer-col"><h5>Informationen</h5><ul>
-      <li><a href="../kontakt/index.html">Kontakt</a></li>
-      <li><a href="../termine/index.html">Termine</a></li>
-      <li><a href="../faq/index.html">FAQ</a></li>
+      <li><a href="../kontakt/index.html">Kontakt</a></li><li><a href="../faq/index.html">FAQ</a></li>
     </ul></div>
   </div>
   <div class="footer-bottom">
@@ -267,7 +202,6 @@
     <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
   </div>
 </div></footer>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
 <script>
   fetch('/content/footer.json').then(r=>r.json()).then(d=>{
@@ -275,10 +209,6 @@
     if(ft && d.ueber_text) ft.textContent = d.ueber_text;
     const cp = document.querySelector('.footer-bottom span');
     if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
     const fbLinkTop = document.querySelector('.topbar__social a[aria-label="Facebook"]');
     if(fbLinkTop && d.facebook_url) fbLinkTop.href = d.facebook_url;
     const igLinkTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
