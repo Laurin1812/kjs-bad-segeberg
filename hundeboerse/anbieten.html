@@ -155,7 +155,7 @@
 
 
 <div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
+  <div class="page-hero__bg" id="hb-anbieten-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
   <div class="container">
     <h1>Hund / Wurf anbieten</h1>
     <nav class="breadcrumb">
@@ -167,12 +167,254 @@
 <div class="page-content full">
   <div class="container">
     <main class="main-content">
-      <h2 style="margin-bottom:1.5rem;">Hund / Wurf anbieten</h2>
       <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:2rem;">
-        Das Formular zum Einstellen eines Hundes oder Wurfes wird derzeit vorbereitet.
+        Füllen Sie das Formular aus, um einen Hund oder Wurf einzustellen. Ihre Anzeige wird vor der Veröffentlichung durch die Kreisjägerschaft geprüft.
       </p>
-      <p>
-        <a href="index.html" class="btn btn-primary">&larr; Zur&uuml;ck zur Hundeb&ouml;rse</a>
+
+      <div class="hb-error-summary" id="hbErrorSummary">
+        <strong>Bitte prüfen Sie folgende Angaben:</strong>
+        <ul id="hbErrorList"></ul>
+      </div>
+
+      <form id="hbAngebotForm" novalidate>
+
+        <!-- 1. Art der Anzeige -->
+        <div class="kontakt-form hb-form-section">
+          <h3>1. Art der Anzeige *</h3>
+          <div class="hb-typ-toggle">
+            <label class="hb-typ-option" id="hbTypOptionSingle">
+              <input type="radio" name="hbTyp" value="single" id="hb-typ-single" checked>
+              🐕 Einzelhund
+            </label>
+            <label class="hb-typ-option" id="hbTypOptionLitter">
+              <input type="radio" name="hbTyp" value="litter" id="hb-typ-litter">
+              🐕‍🦺 Wurf
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Grunddaten -->
+        <div class="kontakt-form hb-form-section">
+          <h3>2. Grunddaten</h3>
+          <div class="form-group" id="hbGroup-title">
+            <label for="hb-title">Titel *</label>
+            <input type="text" id="hb-title" placeholder="z. B. Jagdlich geführter Deutsch Kurzhaar Rüde abzugeben">
+            <p class="hb-error-text">Bitte geben Sie einen Titel für die Anzeige an.</p>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group" id="hbGroup-breed">
+              <label for="hb-breed">Rasse *</label>
+              <input type="text" id="hb-breed" placeholder="z. B. Deutsch Kurzhaar">
+              <p class="hb-error-text">Bitte geben Sie die Rasse an.</p>
+            </div>
+            <div class="form-group">
+              <label for="hb-color">Farbe</label>
+              <input type="text" id="hb-color" placeholder="z. B. Dunkelbraun mit Brustfleck">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="hb-coat">Haarart</label>
+            <input type="text" id="hb-coat" placeholder="z. B. Kurzhaar">
+          </div>
+
+          <!-- Einzelhund-spezifisch -->
+          <div id="hbBlockSingle">
+            <div class="form-group">
+              <label for="hb-dogName">Name des Hundes</label>
+              <input type="text" id="hb-dogName" placeholder="z. B. Bruno">
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group" id="hbGroup-birthDate">
+                <label for="hb-birthDate">Geburtsdatum *</label>
+                <input type="date" id="hb-birthDate">
+                <p class="hb-error-text">Bitte geben Sie das Geburtsdatum an.</p>
+              </div>
+              <div class="form-group" id="hbGroup-gender">
+                <label for="hb-gender">Geschlecht *</label>
+                <select id="hb-gender">
+                  <option value="">Bitte wählen …</option>
+                  <option value="male">Rüde</option>
+                  <option value="female">Hündin</option>
+                </select>
+                <p class="hb-error-text">Bitte geben Sie das Geschlecht an.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wurf-spezifisch -->
+          <div id="hbBlockLitter" style="display:none;">
+            <div class="form-group" id="hbGroup-litterDate">
+              <label for="hb-litterDate">Wurfdatum *</label>
+              <input type="date" id="hb-litterDate">
+              <p class="hb-error-text">Bitte geben Sie das Wurfdatum an.</p>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="hb-maleCount">Anzahl Rüden</label>
+                <input type="number" id="hb-maleCount" min="0" step="1" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label for="hb-femaleCount">Anzahl Hündinnen</label>
+                <input type="number" id="hb-femaleCount" min="0" step="1" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Preis & Standort -->
+        <div class="kontakt-form hb-form-section">
+          <h3>3. Preis &amp; Standort</h3>
+          <div class="form-group">
+            <label for="hb-priceType">Preisart</label>
+            <select id="hb-priceType">
+              <option value="fixed">Festpreis</option>
+              <option value="negotiable">Verhandlungsbasis (VB)</option>
+              <option value="on_request" selected>Preis auf Anfrage</option>
+              <option value="none">Keine Preisangabe</option>
+            </select>
+          </div>
+          <div class="form-group" id="hb-price-wrap" style="display:none;">
+            <label for="hb-price">Preis (€)</label>
+            <input type="number" id="hb-price" min="0" step="1" placeholder="z. B. 1200">
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group" id="hbGroup-postalCode">
+              <label for="hb-postalCode">PLZ *</label>
+              <input type="text" id="hb-postalCode" inputmode="numeric" placeholder="z. B. 23795">
+              <p class="hb-error-text">Bitte geben Sie eine gültige 5-stellige PLZ an.</p>
+            </div>
+            <div class="form-group" id="hbGroup-city">
+              <label for="hb-city">Ort *</label>
+              <input type="text" id="hb-city" placeholder="z. B. Bad Segeberg">
+              <p class="hb-error-text">Bitte geben Sie den Ort an.</p>
+            </div>
+          </div>
+          <p class="hb-section-hint" style="margin-bottom:0;">Es wird nur der ungefähre Standort veröffentlicht, keine genaue Adresse.</p>
+        </div>
+
+        <!-- 4. Jagdliche Informationen -->
+        <div class="kontakt-form hb-form-section">
+          <h3>4. Jagdliche Informationen <span class="hb-optional-tag">(optional)</span></h3>
+          <div class="form-group">
+            <label for="hb-huntingTests">Prüfungen</label>
+            <input type="text" id="hb-huntingTests" placeholder="z. B. VJP 72 Punkte, HZP 181 Punkte">
+          </div>
+          <div class="form-group">
+            <label for="hb-trainingLevel">Ausbildungsstand / weitere Angaben</label>
+            <textarea id="hb-trainingLevel" placeholder="z. B. regelmäßig im Revier eingesetzt, wasser- und fährtenfest …"></textarea>
+          </div>
+        </div>
+
+        <!-- 5. Abstammung -->
+        <div class="kontakt-form hb-form-section">
+          <h3>5. Abstammung <span class="hb-optional-tag">(optional)</span></h3>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="hb-father">Vater</label>
+              <input type="text" id="hb-father" placeholder="Name des Vaters">
+            </div>
+            <div class="form-group">
+              <label for="hb-fatherTests">Prüfungen Vater</label>
+              <input type="text" id="hb-fatherTests" placeholder="z. B. VJP, HZP">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="hb-mother">Mutter</label>
+              <input type="text" id="hb-mother" placeholder="Name der Mutter">
+            </div>
+            <div class="form-group">
+              <label for="hb-motherTests">Prüfungen Mutter</label>
+              <input type="text" id="hb-motherTests" placeholder="z. B. VJP, HZP">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Beschreibung -->
+        <div class="kontakt-form hb-form-section">
+          <h3>6. Beschreibung *</h3>
+          <div class="form-group" id="hbGroup-description">
+            <label for="hb-description">Freitext</label>
+            <textarea id="hb-description" style="min-height:180px;" placeholder="Beschreiben Sie den Hund bzw. Wurf – Wesen, Erfahrung, Umgebung, was den Hund/Wurf ausmacht …"></textarea>
+            <p class="hb-error-text">Bitte geben Sie eine Beschreibung an.</p>
+          </div>
+        </div>
+
+        <!-- 7. Bilder -->
+        <div class="kontakt-form hb-form-section" id="hbGroup-images">
+          <h3>7. Bilder *</h3>
+          <p class="hb-section-hint">Mindestens 1, maximal 10 Bilder. Mehrere Bilder können gleichzeitig ausgewählt werden. Das erste Bild ist das Hauptbild – per Ziehen (Drag &amp; Drop) können Sie die Reihenfolge ändern. Erlaubte Formate: JPG, PNG, WebP.</p>
+          <div class="hb-img-grid" id="hbImgGrid"></div>
+          <label class="hb-img-add-label" id="hbImgAddLabel" for="hbImagesInput">📷 Bilder auswählen</label>
+          <input type="file" id="hbImagesInput" accept="image/png,image/jpeg,image/webp" multiple style="display:none;">
+          <p class="hb-img-count" id="hbImgCount">0 / 10 Bilder ausgewählt</p>
+          <p class="hb-img-limit-note" id="hbImgLimitNote">Es können maximal 10 Bilder hochgeladen werden. Überzählige Bilder wurden nicht hinzugefügt.</p>
+          <p class="hb-error-text" id="hbImagesError">Bitte laden Sie mindestens ein Bild hoch.</p>
+        </div>
+
+        <!-- 8. Anbieter / Kontakt -->
+        <div class="kontakt-form hb-form-section">
+          <h3>8. Anbieter / Kontakt</h3>
+          <div class="form-grid-2">
+            <div class="form-group" id="hbGroup-providerName">
+              <label for="hb-providerName">Name des Anbieters *</label>
+              <input type="text" id="hb-providerName" placeholder="Vor- und Nachname bzw. Verein">
+              <p class="hb-error-text">Bitte geben Sie den Namen des Anbieters an.</p>
+            </div>
+            <div class="form-group">
+              <label for="hb-contactPerson">Ansprechpartner (optional)</label>
+              <input type="text" id="hb-contactPerson" placeholder="falls abweichend vom Anbieter">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group" id="hbGroup-email">
+              <label for="hb-email">E-Mail *</label>
+              <input type="email" id="hb-email" placeholder="max@beispiel.de">
+              <p class="hb-error-text">Bitte geben Sie eine gültige E-Mail-Adresse an.</p>
+            </div>
+            <div class="form-group">
+              <label for="hb-phone">Telefon / Mobil</label>
+              <input type="tel" id="hb-phone" placeholder="z. B. 0172 1234567">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="hb-contactNotes">Weitere Hinweise (optional)</label>
+            <textarea id="hb-contactNotes" placeholder="z. B. am besten erreichbar abends, Besichtigung nach Absprache …"></textarea>
+          </div>
+        </div>
+
+        <!-- 9. Hinweise / Zustimmung -->
+        <div class="kontakt-form hb-form-section">
+          <h3>9. Hinweise &amp; Zustimmung</h3>
+          <div class="form-group" id="hbGroup-confirmCorrect" style="display:flex; align-items:flex-start; gap:.75rem;">
+            <input type="checkbox" id="hb-confirmCorrect" style="width:auto; margin-top:.2rem;">
+            <label for="hb-confirmCorrect" style="font-size:.88rem; font-weight:400; color:var(--text-dark);">
+              Ich bestätige, dass meine Angaben korrekt sind. *
+            </label>
+          </div>
+          <p class="hb-error-text" id="hbConfirmCorrectError">Bitte bestätigen Sie die Richtigkeit Ihrer Angaben.</p>
+          <div class="form-group" id="hbGroup-confirmPrivacy" style="display:flex; align-items:flex-start; gap:.75rem;">
+            <input type="checkbox" id="hb-confirmPrivacy" style="width:auto; margin-top:.2rem;">
+            <label for="hb-confirmPrivacy" style="font-size:.88rem; font-weight:400; color:var(--text-dark);">
+              Ich bin mit der Verarbeitung meiner eingegebenen Daten gemäß der <a href="../datenschutz.html">Datenschutzerklärung</a> einverstanden. *
+            </label>
+          </div>
+          <p class="hb-error-text" id="hbConfirmPrivacyError">Bitte stimmen Sie der Datenverarbeitung zu.</p>
+          <p class="hb-section-hint" style="margin-top:1rem;margin-bottom:0;">Ihre Anzeige wird erst nach Prüfung durch die Kreisjägerschaft veröffentlicht.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+          Anzeige zur Prüfung einreichen
+        </button>
+
+        <div class="hb-success-box" id="hbSuccessBox">
+          <h3>✅ Formular erfolgreich geprüft</h3>
+          <p>Die technische Übermittlung der Anzeige wird aktuell vorbereitet. Ihre eingegebenen Daten wurden in diesem Test nicht versendet.</p>
+        </div>
+      </form>
+
+      <p style="margin-top:2rem;">
+        <a href="index.html" class="btn btn-outline-green">&larr; Zur&uuml;ck zur Hundeb&ouml;rse</a>
       </p>
     </main>
   </div>
@@ -214,6 +456,295 @@
     const igLinkTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
     if(igLinkTop && d.instagram_url) igLinkTop.href = d.instagram_url;
   }).catch(()=>{});
+</script>
+<script>
+  // Hero-Bild: gleiche Logik wie hundeboerse/index.html (Phase 3, 28.08.2026).
+  fetch('../content/hundeboerse.json').then(function(r){ return r.json(); }).then(function(data){
+    if (data.hero_bild) {
+      var p = data.hero_bild;
+      var src = p.indexOf('/') === 0 ? '..' + p : '../' + p;
+      document.getElementById('hb-anbieten-hero-bg').style.backgroundImage = "url('" + src + "')";
+    }
+  }).catch(function(){});
+</script>
+<script>
+(function() {
+  'use strict';
+
+  var MAX_IMAGES = 10;
+
+  // ── Art der Anzeige: umschalten zwischen Einzelhund-/Wurf-Feldern ──────
+  var typRadios = document.querySelectorAll('input[name="hbTyp"]');
+  var blockSingle = document.getElementById('hbBlockSingle');
+  var blockLitter = document.getElementById('hbBlockLitter');
+  var optSingle = document.getElementById('hbTypOptionSingle');
+  var optLitter = document.getElementById('hbTypOptionLitter');
+
+  function currentTyp() {
+    return document.getElementById('hb-typ-litter').checked ? 'litter' : 'single';
+  }
+  function updateTypUI() {
+    var isLitter = currentTyp() === 'litter';
+    blockSingle.style.display = isLitter ? 'none' : '';
+    blockLitter.style.display = isLitter ? '' : 'none';
+    optSingle.classList.toggle('is-active', !isLitter);
+    optLitter.classList.toggle('is-active', isLitter);
+  }
+  typRadios.forEach(function(r) { r.addEventListener('change', updateTypUI); });
+  updateTypUI();
+
+  // ── Preisart: Preisfeld nur bei Festpreis/VB ────────────────────────────
+  var priceTypeSelect = document.getElementById('hb-priceType');
+  var priceWrap = document.getElementById('hb-price-wrap');
+  function updatePriceUI() {
+    var v = priceTypeSelect.value;
+    priceWrap.style.display = (v === 'fixed' || v === 'negotiable') ? '' : 'none';
+  }
+  priceTypeSelect.addEventListener('change', updatePriceUI);
+  updatePriceUI();
+
+  // ── Bilder: Auswahl, Vorschau, Entfernen, Drag&Drop-Reihenfolge ─────────
+  // Clientseitige Verkleinerung/Komprimierung (Canvas, keine Library) – auf
+  // Wunsch geprüft und bewusst einfach gehalten: max. 1920px lange Kante,
+  // JPEG-Qualität .85. Betrifft nur die Vorschau/Datenhaltung im Browser;
+  // die eigentliche Upload-/Speicherlösung ist Teil der noch offenen
+  // Server-Anbindung (Phase 3, 28.08.2026 – bewusst noch nicht gebaut).
+  function compressImage(file) {
+    return new Promise(function(resolve) {
+      if (!file.type || file.type.indexOf('image/') !== 0 || typeof createImageBitmap !== 'function') {
+        resolve({ blob: file, url: URL.createObjectURL(file) });
+        return;
+      }
+      createImageBitmap(file).then(function(bitmap) {
+        var maxDim = 1920;
+        var scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+        var w = Math.max(1, Math.round(bitmap.width * scale));
+        var h = Math.max(1, Math.round(bitmap.height * scale));
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(bitmap, 0, 0, w, h);
+        canvas.toBlob(function(blob) {
+          if (!blob) { resolve({ blob: file, url: URL.createObjectURL(file) }); return; }
+          resolve({ blob: blob, url: URL.createObjectURL(blob) });
+        }, 'image/jpeg', 0.85);
+      }).catch(function() {
+        resolve({ blob: file, url: URL.createObjectURL(file) });
+      });
+    });
+  }
+
+  var images = []; // { url, name }
+  var dragSrcIndex = null;
+  var imgGrid = document.getElementById('hbImgGrid');
+  var imgInput = document.getElementById('hbImagesInput');
+  var imgAddLabel = document.getElementById('hbImgAddLabel');
+  var imgCount = document.getElementById('hbImgCount');
+  var imgLimitNote = document.getElementById('hbImgLimitNote');
+
+  function renderImages() {
+    imgGrid.innerHTML = '';
+    images.forEach(function(img, idx) {
+      var item = document.createElement('div');
+      item.className = 'hb-img-item';
+      item.draggable = true;
+      item.innerHTML = (idx === 0 ? '<span class="hb-img-item__main">Hauptbild</span>' : '') +
+        '<img src="' + img.url + '" alt="">' +
+        '<button type="button" class="hb-img-item__remove" aria-label="Bild entfernen" data-idx="' + idx + '">✕</button>';
+      item.addEventListener('dragstart', function() {
+        dragSrcIndex = idx;
+        item.classList.add('hb-img-dragging');
+      });
+      item.addEventListener('dragend', function() { item.classList.remove('hb-img-dragging'); });
+      item.addEventListener('dragover', function(e) { e.preventDefault(); item.classList.add('hb-img-dragover'); });
+      item.addEventListener('dragleave', function() { item.classList.remove('hb-img-dragover'); });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('hb-img-dragover');
+        if (dragSrcIndex === null || dragSrcIndex === idx) return;
+        var moved = images.splice(dragSrcIndex, 1)[0];
+        images.splice(idx, 0, moved);
+        dragSrcIndex = null;
+        renderImages();
+      });
+      imgGrid.appendChild(item);
+    });
+    imgGrid.querySelectorAll('.hb-img-item__remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var i = parseInt(btn.getAttribute('data-idx'), 10);
+        images.splice(i, 1);
+        renderImages();
+      });
+    });
+    imgCount.textContent = images.length + ' / ' + MAX_IMAGES + ' Bilder ausgewählt';
+    var atLimit = images.length >= MAX_IMAGES;
+    imgAddLabel.classList.toggle('is-disabled', atLimit);
+    imgInput.disabled = atLimit;
+    if (images.length > 0) {
+      document.getElementById('hbGroup-images').classList.remove('hb-field-error');
+    }
+  }
+
+  imgInput.addEventListener('change', function() {
+    var files = Array.prototype.slice.call(imgInput.files || []);
+    var freeSlots = MAX_IMAGES - images.length;
+    var toAdd = files.slice(0, freeSlots);
+    var overflow = files.length > freeSlots;
+    imgLimitNote.classList.toggle('is-visible', overflow);
+    Promise.all(toAdd.map(compressImage)).then(function(results) {
+      results.forEach(function(r) { images.push({ url: r.url, name: '' }); });
+      renderImages();
+    });
+    imgInput.value = '';
+  });
+
+  renderImages();
+
+  // ── Validierung ──────────────────────────────────────────────────────
+  var form = document.getElementById('hbAngebotForm');
+  var errorSummary = document.getElementById('hbErrorSummary');
+  var errorList = document.getElementById('hbErrorList');
+  var successBox = document.getElementById('hbSuccessBox');
+
+  function clearErrors() {
+    document.querySelectorAll('.hb-field-error').forEach(function(el) { el.classList.remove('hb-field-error'); });
+    errorSummary.classList.remove('is-visible');
+    errorList.innerHTML = '';
+    document.getElementById('hbImagesError').style.display = 'none';
+    document.getElementById('hbConfirmCorrectError').style.display = 'none';
+    document.getElementById('hbConfirmPrivacyError').style.display = 'none';
+  }
+
+  function markError(groupId, message, firstInvalidRef) {
+    var group = document.getElementById(groupId);
+    if (group) group.classList.add('hb-field-error');
+    errorList.innerHTML += '<li>' + message + '</li>';
+    if (!firstInvalidRef.el && group) firstInvalidRef.el = group;
+  }
+
+  function isEmpty(id) {
+    var el = document.getElementById(id);
+    return !el || !el.value || !el.value.trim();
+  }
+
+  function validate() {
+    clearErrors();
+    var firstInvalid = { el: null };
+    var typ = currentTyp();
+
+    if (isEmpty('hb-title')) markError('hbGroup-title', 'Titel fehlt.', firstInvalid);
+    if (isEmpty('hb-breed')) markError('hbGroup-breed', 'Rasse fehlt.', firstInvalid);
+
+    if (typ === 'single') {
+      if (isEmpty('hb-birthDate')) markError('hbGroup-birthDate', 'Geburtsdatum fehlt.', firstInvalid);
+      if (isEmpty('hb-gender')) markError('hbGroup-gender', 'Geschlecht fehlt.', firstInvalid);
+    } else {
+      if (isEmpty('hb-litterDate')) markError('hbGroup-litterDate', 'Wurfdatum fehlt.', firstInvalid);
+    }
+
+    var plz = document.getElementById('hb-postalCode').value.trim();
+    if (!plz) {
+      markError('hbGroup-postalCode', 'PLZ fehlt.', firstInvalid);
+    } else if (!/^\d{5}$/.test(plz)) {
+      markError('hbGroup-postalCode', 'PLZ muss aus 5 Ziffern bestehen.', firstInvalid);
+    }
+    if (isEmpty('hb-city')) markError('hbGroup-city', 'Ort fehlt.', firstInvalid);
+    if (isEmpty('hb-description')) markError('hbGroup-description', 'Beschreibung fehlt.', firstInvalid);
+    if (isEmpty('hb-providerName')) markError('hbGroup-providerName', 'Name des Anbieters fehlt.', firstInvalid);
+
+    var email = document.getElementById('hb-email').value.trim();
+    if (!email) {
+      markError('hbGroup-email', 'E-Mail fehlt.', firstInvalid);
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      markError('hbGroup-email', 'E-Mail-Adresse ist ungültig.', firstInvalid);
+    }
+
+    if (images.length < 1) {
+      var imgGroup = document.getElementById('hbGroup-images');
+      imgGroup.classList.add('hb-field-error');
+      document.getElementById('hbImagesError').style.display = 'block';
+      errorList.innerHTML += '<li>Mindestens ein Bild fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = imgGroup;
+    }
+
+    if (!document.getElementById('hb-confirmCorrect').checked) {
+      document.getElementById('hbGroup-confirmCorrect').classList.add('hb-field-error');
+      document.getElementById('hbConfirmCorrectError').style.display = 'block';
+      errorList.innerHTML += '<li>Bestätigung der Richtigkeit fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = document.getElementById('hbGroup-confirmCorrect');
+    }
+    if (!document.getElementById('hb-confirmPrivacy').checked) {
+      document.getElementById('hbGroup-confirmPrivacy').classList.add('hb-field-error');
+      document.getElementById('hbConfirmPrivacyError').style.display = 'block';
+      errorList.innerHTML += '<li>Zustimmung zur Datenverarbeitung fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = document.getElementById('hbGroup-confirmPrivacy');
+    }
+
+    if (firstInvalid.el) {
+      errorSummary.classList.add('is-visible');
+      return firstInvalid.el;
+    }
+    return null;
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    successBox.classList.remove('is-visible');
+
+    var firstInvalidEl = validate();
+    if (firstInvalidEl) {
+      errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function() {
+        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var focusable = firstInvalidEl.querySelector('input, select, textarea');
+        if (focusable) focusable.focus();
+      }, 400);
+      return;
+    }
+
+    // Phase 3: noch keine echte Übermittlung. Die Daten würden – sobald die
+    // Server-/API-Architektur geklärt ist – hier zusammengestellt und
+    // gesendet. Feldnamen orientieren sich bewusst schon an den Feldern in
+    // content/hundeboerse.json (siehe admin.js hundeboerseNeu()), damit eine
+    // spätere Anbindung ohne Umbenennungen möglich ist.
+    var typ = currentTyp();
+    var wuerdeGesendetWerden = {
+      status: 'pending',
+      type: typ,
+      title: document.getElementById('hb-title').value.trim(),
+      breed: document.getElementById('hb-breed').value.trim(),
+      color: document.getElementById('hb-color').value.trim(),
+      coat: document.getElementById('hb-coat').value.trim(),
+      dogName: typ === 'single' ? document.getElementById('hb-dogName').value.trim() : '',
+      birthDate: typ === 'single' ? document.getElementById('hb-birthDate').value : '',
+      gender: typ === 'single' ? document.getElementById('hb-gender').value : '',
+      litterDate: typ === 'litter' ? document.getElementById('hb-litterDate').value : '',
+      maleCount: typ === 'litter' ? document.getElementById('hb-maleCount').value : '',
+      femaleCount: typ === 'litter' ? document.getElementById('hb-femaleCount').value : '',
+      priceType: document.getElementById('hb-priceType').value,
+      price: document.getElementById('hb-price').value,
+      postalCode: document.getElementById('hb-postalCode').value.trim(),
+      city: document.getElementById('hb-city').value.trim(),
+      huntingTests: document.getElementById('hb-huntingTests').value.trim(),
+      trainingLevel: document.getElementById('hb-trainingLevel').value.trim(),
+      father: document.getElementById('hb-father').value.trim(),
+      fatherTests: document.getElementById('hb-fatherTests').value.trim(),
+      mother: document.getElementById('hb-mother').value.trim(),
+      motherTests: document.getElementById('hb-motherTests').value.trim(),
+      description: document.getElementById('hb-description').value.trim(),
+      providerName: document.getElementById('hb-providerName').value.trim(),
+      contactPerson: document.getElementById('hb-contactPerson').value.trim(),
+      email: document.getElementById('hb-email').value.trim(),
+      phone: document.getElementById('hb-phone').value.trim(),
+      contactNotes: document.getElementById('hb-contactNotes').value.trim(),
+      galerie: images.map(function(img) { return { bild: '(noch nicht hochgeladen – Testzustand)' }; })
+    };
+    console.log('[Hundebörse-Formular] Testlauf – würde übermittelt werden (nicht gesendet):', wuerdeGesendetWerden);
+
+    successBox.classList.add('is-visible');
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+})();
 </script>
 </body>
 </html>

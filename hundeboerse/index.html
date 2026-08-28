@@ -154,7 +154,7 @@
 </nav>
 
 <div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
+  <div class="page-hero__bg" id="hb-index-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
   <div class="container">
     <h1>Hundebörse</h1>
     <nav class="breadcrumb">
@@ -294,6 +294,12 @@
   fetch('../content/hundeboerse.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
+      // Hero-Bild: im Admin unter Hundebörse konfigurierbar (Phase 3,
+      // 28.08.2026). Ohne gesetztes Bild bleibt das bisherige Standardbild
+      // (bereits als Inline-style im HTML hinterlegt) unverändert bestehen.
+      if (data.hero_bild) {
+        document.getElementById('hb-index-hero-bg').style.backgroundImage = "url('" + toSrc(data.hero_bild) + "')";
+      }
       var alle = data.anzeigen || [];
       var indexed = alle.map(function(a, i) { return { a: a, i: i }; });
       var veroeffentlicht = indexed.filter(function(e) { return e.a.status === 'published'; });

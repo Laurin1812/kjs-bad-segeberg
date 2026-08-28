@@ -262,6 +262,15 @@
       document.getElementById('hb-detail-titel').textContent = a.title || '(Ohne Titel)';
       document.getElementById('hb-detail-breadcrumb').textContent = a.title || 'Anzeige';
 
+      // Hero-Bild-Reihenfolge (Phase 3, 28.08.2026): das im Admin unter
+      // Hundebörse konfigurierte Hero-Bild ist die Basis (ersetzt das bisher
+      // hart codierte Platzhalterbild), das Hauptbild der jeweiligen Anzeige
+      // überschreibt es aber weiterhin, wenn vorhanden - das persönliche
+      // Hundefoto ist auf der Detailseite die bessere/aussagekräftigere
+      // Kopfzeile als ein generisches Hero-Bild.
+      if (data.hero_bild) {
+        document.getElementById('hb-hero-bg').style.backgroundImage = "url('" + toSrc(data.hero_bild) + "')";
+      }
       var galerie = (a.galerie || []).filter(function(g) { return g && g.bild; });
       var hauptbild = galerie[0] ? toSrc(galerie[0].bild) : '';
       if (hauptbild) document.getElementById('hb-hero-bg').style.backgroundImage = "url('" + hauptbild + "')";

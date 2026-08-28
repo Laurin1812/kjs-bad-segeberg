@@ -2073,6 +2073,12 @@
       '<button class="btn btn-primary" onclick="hundeboerseNeu()">➕ Neue Anzeige</button>') +
       '<div class="panel-body">' +
       '<div class="form-card">' +
+        '<div class="form-card-title">🖼️ Hero-Bild (Hundebörse-Übersicht &amp; Detailseiten)</div>' +
+        '<p class="field-hint">Wird als Kopfbild oben auf der öffentlichen Hundebörse-Übersicht und den Anzeigen-Detailseiten verwendet. Ohne eigenes Bild wird das bisherige Standard-Hintergrundbild genutzt.</p>' +
+        fImage('hb-hero_bild', 'Hero-Hintergrundbild', data.hero_bild) +
+        '<button class="btn btn-outline btn-sm" onclick="hundeboerseHeroSave()">💾 Hero-Bild speichern</button>' +
+      '</div>' +
+      '<div class="form-card">' +
         '<div class="form-card-title">🔍 Status</div>' +
         '<div style="display:flex;flex-wrap:wrap;">' +
           tab('', 'Alle', counts.alle) +
@@ -2127,6 +2133,18 @@
 
   window.hundeboerseFilter = function(status) {
     S.hbFilterStatus = status;
+    renderHundeboerse(S.section, S.data);
+  };
+
+  // Hero-Bild ist ein Feld auf oberster Ebene von content/hundeboerse.json
+  // (neben "anzeigen"), unabhängig von einzelnen Anzeigen - eigener kleiner
+  // Speichern-Button statt über die generische saveCurrentSection()-Logik,
+  // da renderHundeboerse() komplett eigenständig ist (kein saveBar()).
+  // Nutzt den bestehenden fImage()/openImgPicker()-Baustein, kein neues
+  // Mediensystem (Laurin-Vorgabe, Phase 3, 28.08.2026).
+  window.hundeboerseHeroSave = async function() {
+    S.data.hero_bild = gv('hb-hero_bild');
+    await doSave(S.section.file, S.data, '🐕 Hundebörse: Hero-Bild aktualisiert');
     renderHundeboerse(S.section, S.data);
   };
 
