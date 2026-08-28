@@ -2330,7 +2330,7 @@
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
       toast('✅ Anzeige freigegeben!', 'ok');
       renderHundeboerse(S.section, S.data);
-    });
+    }, 'Freigeben', 'btn-primary');
   };
 
   window.hundeboerseFreigeben = function(idx) {
@@ -2342,7 +2342,7 @@
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
       toast('✅ Anzeige freigegeben!', 'ok');
       renderHundeboerse(S.section, S.data);
-    });
+    }, 'Freigeben', 'btn-primary');
   };
 
   window.hundeboerseAblehnen = async function(idx) {
@@ -5923,10 +5923,20 @@
   ──────────────────────────────────────────────────────────── */
   var _confirmCallback = null;
 
-  function showConfirm(title, msg, cb) {
+  // okLabel/okClass sind optional (Standard: "Löschen" / rot btn-danger),
+  // damit bestehende Lösch-Bestätigungen unverändert bleiben. Für nicht-
+  // destruktive Aktionen (z. B. Hundebörse "Freigeben") müssen Beschriftung
+  // UND Farbe des Bestätigungsbuttons explizit passend übergeben werden –
+  // sonst zeigt der wiederverwendete Dialog fälschlich "Löschen" in Rot an,
+  // obwohl die dahinterliegende Aktion korrekt ist (Laurin-Bug-Report,
+  // Hundebörse "Speichern & Freigeben", 2026-08-28).
+  function showConfirm(title, msg, cb, okLabel, okClass) {
     _confirmCallback = cb;
     id('confirm-title').textContent = title;
     id('confirm-msg').textContent   = msg;
+    var okBtn = id('confirm-ok');
+    okBtn.textContent = okLabel || 'Löschen';
+    okBtn.className = 'btn ' + (okClass || 'btn-danger');
     id('confirm-modal').style.display = 'flex';
   }
 

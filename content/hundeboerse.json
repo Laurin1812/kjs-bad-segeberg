@@ -43,6 +43,19 @@
         }
       ],
       "galerie_titel": "Bilder"
+    },
+    {
+      "status": "published",
+      "type": "single",
+      "title": "TEST-Anzeige (Datenfluss-Verifikation, bitte löschen)",
+      "breed": "Testrasse",
+      "gender": "male",
+      "priceType": "on_request",
+      "postalCode": "23795",
+      "city": "Bad Segeberg",
+      "createdAt": "2026-08-28T18:00:00.000Z",
+      "updatedAt": "2026-08-28T18:00:00.000Z",
+      "galerie": []
     }
   ]
 }
