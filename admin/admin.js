@@ -457,6 +457,7 @@
     { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
+    { key:'hundeboerse', label:'🐕 Hundebörse', file:'content/hundeboerse.json', form:'hundeboerse' },
     // "Kontakt & Stammdaten" und FAQ bewusst in "Einstellungen" verschoben
     // (nicht mehr zwischen Service und Verbraucher-Themen als eigene
     // Top-Level-Punkte) - beides sind Rahmendaten/Konfiguration, keine
@@ -1398,6 +1399,7 @@
       case 'navReihenfolge':  renderNavReihenfolge(def, data);   break;
       case 'benutzer':        renderBenutzer();                  break;
       case 'service':          renderService(def, data);          break;
+      case 'hundeboerse':      renderHundeboerse(def, data);       break;
       default:                renderStandard(def, data);
     }
     // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
@@ -1997,6 +1999,463 @@
       serviceAktuelleAnsichtRendern();
     });
   };
+
+  /* ────────────────────────────────────────────────────────────
+     HUNDEBÖRSE – Phase 1 (Admin-Verwaltung)
+     28.08.2026: Neues Modul nach Frank-Briefing, technisch 1:1 nach dem
+     Service-Muster gebaut (ein JSON mit data.anzeigen = [...], Status-
+     Filterleiste statt Jahr/Kategorie, eigene Bearbeiten-Vollansicht,
+     bestehende Feld-/Galerie-Komponenten wiederverwendet). Die eigentliche
+     öffentliche Einreichung/Speicherung ist bewusst NICHT Teil dieser
+     Phase – die Server-/Datenbank-Architektur wird separat mit Carsten
+     geklärt (siehe HUNDEBOERSE-KONZEPT.md). Diese Admin-Verwaltung dient
+     zunächst zum Anlegen/Testen von Anzeigen auf Staging.
+     Bilder laufen bewusst über dieselbe Bildergalerie-Komponente wie bei
+     Aktuelles/Service (data.galerie / data.galerie_titel), keine eigene
+     Kopie – erstes Bild in der Liste gilt als Hauptbild.
+  ──────────────────────────────────────────────────────────── */
+  var HB_STATUS = [
+    { value:'pending',   label:'Wartet auf Freigabe' },
+    { value:'published', label:'Veröffentlicht' },
+    { value:'rejected',  label:'Abgelehnt' },
+    { value:'archived',  label:'Archiviert' }
+  ];
+  function hbStatusLabel(s) {
+    var m = HB_STATUS.filter(function(x) { return x.value === s; })[0];
+    return m ? m.label : (s || 'Entwurf');
+  }
+  function hbTypLabel(t) { return t === 'litter' ? 'Wurf' : 'Einzelhund'; }
+  function hbPreisText(a) {
+    if (a.priceType === 'fixed' || a.priceType === 'negotiable') {
+      var txt = a.price ? (a.price + ' €') : '';
+      return a.priceType === 'negotiable' ? (txt ? txt + ' VB' : 'VB') : txt;
+    }
+    if (a.priceType === 'on_request') return 'Auf Anfrage';
+    return '';
+  }
+  function hbDatumAnzeige(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+
+  function renderHundeboerse(def, data) {
+    var anzeigen = data.anzeigen || [];
+    S.hbFilterStatus = S.hbFilterStatus || '';
+
+    var indexed = anzeigen.map(function(a, i) { return { a: a, i: i }; });
+    var counts = { alle: indexed.length, pending: 0, published: 0, rejected: 0, archived: 0 };
+    indexed.forEach(function(e) {
+      if (counts[e.a.status] !== undefined) counts[e.a.status]++;
+    });
+
+    var gefiltert = S.hbFilterStatus
+      ? indexed.filter(function(e) { return e.a.status === S.hbFilterStatus; })
+      : indexed;
+    gefiltert.sort(function(x, y) {
+      var dx = x.a.createdAt || '', dy = y.a.createdAt || '';
+      if (dx && dy) return dy.localeCompare(dx);
+      if (dx) return -1;
+      if (dy) return 1;
+      return y.i - x.i;
+    });
+
+    function tab(value, label, count) {
+      var active = S.hbFilterStatus === value;
+      return '<button type="button" class="btn btn-sm ' + (active ? 'btn-primary' : 'btn-outline') +
+        '" onclick="hundeboerseFilter(\'' + value + '\')" style="margin:0 .4rem .4rem 0;">' +
+        escHtml(label) + ' (' + count + ')</button>';
+    }
+
+    var html = panelHeader(def.label,
+      '<button class="btn btn-primary" onclick="hundeboerseNeu()">➕ Neue Anzeige</button>') +
+      '<div class="panel-body">' +
+      '<div class="form-card">' +
+        '<div class="form-card-title">🔍 Status</div>' +
+        '<div style="display:flex;flex-wrap:wrap;">' +
+          tab('', 'Alle', counts.alle) +
+          tab('pending', 'Wartet auf Freigabe', counts.pending) +
+          tab('published', 'Veröffentlicht', counts.published) +
+          tab('rejected', 'Abgelehnt', counts.rejected) +
+          tab('archived', 'Archiviert', counts.archived) +
+        '</div>' +
+      '</div>' +
+      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + counts.alle + ' Anzeigen. Klicken zum Bearbeiten.</p>';
+
+    gefiltert.forEach(function(entry) {
+      var a = entry.a, i = entry.i;
+      var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
+      var thumb = bild
+        ? '<img src="' + escAttr(bild) + '" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;">'
+        : '<div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🐕</div>';
+      var metaParts = [];
+      if (a.breed) metaParts.push(escHtml(a.breed));
+      if (a.city || a.postalCode) metaParts.push(escHtml([a.postalCode, a.city].filter(Boolean).join(' ')));
+      if (a.createdAt) metaParts.push('📅 ' + escHtml(hbDatumAnzeige(a.createdAt)));
+
+      html += '<div class="item-card" onclick="hundeboerseEdit(' + i + ')">' +
+        thumb +
+        '<div class="item-body">' +
+          '<div class="item-title">' + escHtml(a.title || '(Kein Titel)') +
+            '<span class="item-badge">' + hbTypLabel(a.type) + '</span>' +
+            '<span class="item-badge">' + hbStatusLabel(a.status) + '</span>' +
+          '</div>' +
+          '<div class="item-meta">' + metaParts.join(' · ') + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-sm btn-ghost" title="Vorschau" onclick="event.stopPropagation();hundeboerseVorschau(' + i + ')">👁️</button>' +
+          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();hundeboerseEdit(' + i + ')">Bearbeiten</button>' +
+          (a.status === 'pending'
+            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();hundeboerseFreigeben(' + i + ')">✅ Freigeben</button>'
+            : '') +
+          (a.status === 'published' || a.status === 'rejected'
+            ? '<button class="btn btn-sm btn-ghost" title="Archivieren" onclick="event.stopPropagation();hundeboerseArchivieren(' + i + ')">📦</button>'
+            : '') +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();hundeboerseDelete(' + i + ')">Löschen</button>' +
+        '</div>' +
+      '</div>';
+    });
+
+    if (!gefiltert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine Anzeigen in dieser Ansicht.</p></div>';
+    }
+    html += '</div>';
+    id('admin-main').innerHTML = html;
+  }
+
+  window.hundeboerseFilter = function(status) {
+    S.hbFilterStatus = status;
+    renderHundeboerse(S.section, S.data);
+  };
+
+  window.hundeboerseNeu = function() {
+    var data = S.data;
+    data.anzeigen = data.anzeigen || [];
+    var now = new Date().toISOString();
+    var neu = {
+      id: 'hb-' + Date.now(),
+      status: 'pending',
+      createdAt: now, updatedAt: now,
+      type: 'single', title: '', breed: '', color: '', coat: '',
+      priceType: 'on_request', price: '',
+      postalCode: '', city: '', description: '',
+      father: '', fatherTests: '', mother: '', motherTests: '',
+      huntingTests: '', trainingLevel: '',
+      providerName: '', contactPerson: '', email: '', phone: '', contactNotes: '',
+      dogName: '', birthDate: '', gender: '',
+      litterDate: '', maleCount: '', femaleCount: '',
+      galerie: [], galerie_titel: 'Bilder'
+    };
+    data.anzeigen.unshift(neu);
+    hundeboerseEdit(0);
+  };
+
+  window.hundeboerseEdit = function(idx) {
+    destroyMDE();
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    var isLitter = a.type === 'litter';
+    var titel = a.title ? ('Anzeige bearbeiten: ' + a.title) : 'Neue Anzeige';
+
+    var html = panelHeader(titel,
+        '<button class="btn btn-outline" onclick="renderHundeboerse(S.section,S.data)">← Zurück zur Hundebörse</button>' +
+        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">👁️ Vorschau</button>' +
+        '<button class="btn btn-outline" onclick="hundeboerseSave(' + idx + ')">💾 Speichern</button>' +
+        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">✅ Speichern &amp; Freigeben</button>',
+        true) +
+      '<div class="panel-body">' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📌 Status</div>' +
+        fSelect('hb-status', 'Aktueller Status', a.status || 'pending', HB_STATUS) +
+        '<p class="field-hint">Eingegangen am ' + escHtml(hbDatumAnzeige(a.createdAt)) +
+          (a.updatedAt ? (' · zuletzt geändert am ' + escHtml(hbDatumAnzeige(a.updatedAt))) : '') + '</p>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">🐕 Grunddaten</div>' +
+        '<div class="field-row">' +
+          '<label class="field-label">Art der Anzeige</label>' +
+          '<div class="mdimg-size-row" id="hb-typ-group">' +
+            '<button type="button" class="mdimg-size-btn' + (!isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="single" onclick="hundeboerseTypSet(\'single\')">🐕 Einzelhund</button>' +
+            '<button type="button" class="mdimg-size-btn' + (isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="litter" onclick="hundeboerseTypSet(\'litter\')">🐕‍🦺 Wurf</button>' +
+          '</div>' +
+          '<input type="hidden" id="f-hb-type" value="' + escAttr(a.type || 'single') + '">' +
+        '</div>' +
+        fText('hb-title', 'Titel', a.title) +
+        fText('hb-breed', 'Rasse', a.breed) +
+        '<div id="hb-block-single" style="display:' + (isLitter ? 'none' : 'block') + '">' +
+          fText('hb-dogName', 'Name des Hundes', a.dogName) +
+          fDate('hb-birthDate', 'Geburtsdatum', a.birthDate) +
+          fSelect('hb-gender', 'Geschlecht', a.gender || '', [{value:'',label:'Bitte wählen …'},{value:'male',label:'Rüde'},{value:'female',label:'Hündin'}]) +
+        '</div>' +
+        '<div id="hb-block-litter" style="display:' + (isLitter ? 'block' : 'none') + '">' +
+          fDate('hb-litterDate', 'Wurfdatum', a.litterDate) +
+          fText('hb-maleCount', 'Anzahl Rüden', a.maleCount) +
+          fText('hb-femaleCount', 'Anzahl Hündinnen', a.femaleCount) +
+        '</div>' +
+        fText('hb-color', 'Farbe', a.color) +
+        fText('hb-coat', 'Haarart', a.coat) +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">💶 Preis &amp; Standort</div>' +
+        fSelect('hb-priceType', 'Preisart', a.priceType || 'on_request', [
+          {value:'fixed',label:'Festpreis'}, {value:'negotiable',label:'Verhandlungsbasis (VB)'},
+          {value:'on_request',label:'Auf Anfrage'}, {value:'none',label:'Keine Angabe / kostenlose Abgabe'}
+        ]) +
+        '<div id="hb-price-wrap" style="display:' + ((a.priceType === 'fixed' || a.priceType === 'negotiable') ? 'block' : 'none') + '">' +
+          fText('hb-price', 'Preis (€)', a.price) +
+        '</div>' +
+        fText('hb-postalCode', 'PLZ', a.postalCode) +
+        fText('hb-city', 'Ort', a.city) +
+        '<p class="field-hint">Es wird später nur der grobe Standort (PLZ/Ort) öffentlich angezeigt, keine genaue Adresse.</p>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">🎯 Jagdliche Informationen</div>' +
+        fTextarea('hb-huntingTests', 'Prüfungen', a.huntingTests, 3) +
+        fTextarea('hb-trainingLevel', 'Ausbildungsstand / weitere Angaben', a.trainingLevel, 3) +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">🧬 Abstammung</div>' +
+        fText('hb-father', 'Vater', a.father) +
+        fText('hb-fatherTests', 'Prüfungen Vater', a.fatherTests) +
+        fText('hb-mother', 'Mutter', a.mother) +
+        fText('hb-motherTests', 'Prüfungen Mutter', a.motherTests) +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📝 Beschreibung</div>' +
+        fMarkdown('hb-description', 'Freitext-Beschreibung', a.description) +
+      '</div>' +
+
+      renderGalerieCard(a) +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📞 Anbieter / Kontaktdaten</div>' +
+        fText('hb-providerName', 'Name des Anbieters', a.providerName) +
+        fText('hb-contactPerson', 'Ansprechpartner', a.contactPerson) +
+        fText('hb-email', 'E-Mail', a.email) +
+        fText('hb-phone', 'Telefon/Mobil', a.phone) +
+        fTextarea('hb-contactNotes', 'Weitere Hinweise (optional)', a.contactNotes, 2) +
+      '</div>' +
+
+      '<div class="form-card" style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:flex-end;">' +
+        '<button class="btn btn-danger-outline" onclick="hundeboerseAblehnen(' + idx + ')">🚫 Anzeige ablehnen</button>' +
+        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">👁️ Vorschau der Anzeige</button>' +
+        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">✅ Anzeige freigeben</button>' +
+      '</div>' +
+      '</div>';
+
+    id('admin-main').innerHTML = html;
+    initMDE('hb-description');
+    initGalerieSortable();
+
+    var ptEl = id('f-hb-priceType');
+    if (ptEl) ptEl.addEventListener('change', function() {
+      var wrap = id('hb-price-wrap');
+      if (wrap) wrap.style.display = (this.value === 'fixed' || this.value === 'negotiable') ? 'block' : 'none';
+    });
+  };
+
+  window.hundeboerseTypSet = function(typ) {
+    var typEl = id('f-hb-type');
+    if (typEl) typEl.value = typ;
+    document.querySelectorAll('#hb-typ-group .mdimg-size-btn').forEach(function(btn) {
+      btn.classList.toggle('mdimg-size-btn--active', btn.getAttribute('data-val') === typ);
+    });
+    var single = id('hb-block-single'), litter = id('hb-block-litter');
+    if (single) single.style.display = (typ === 'litter') ? 'none' : 'block';
+    if (litter) litter.style.display = (typ === 'litter') ? 'block' : 'none';
+  };
+
+  function hundeboerseCollect(idx) {
+    var a = S.data.anzeigen[idx];
+    a.status        = gv('hb-status');
+    a.type          = val('f-hb-type') || 'single';
+    a.title         = gv('hb-title');
+    a.breed         = gv('hb-breed');
+    a.color         = gv('hb-color');
+    a.coat          = gv('hb-coat');
+    a.dogName       = gv('hb-dogName');
+    a.birthDate     = isoToDatum(gv('hb-birthDate'));
+    a.gender        = gv('hb-gender');
+    a.litterDate    = isoToDatum(gv('hb-litterDate'));
+    a.maleCount     = gv('hb-maleCount');
+    a.femaleCount   = gv('hb-femaleCount');
+    a.priceType     = gv('hb-priceType');
+    a.price         = gv('hb-price');
+    a.postalCode    = gv('hb-postalCode');
+    a.city          = gv('hb-city');
+    a.huntingTests  = gv('hb-huntingTests');
+    a.trainingLevel = gv('hb-trainingLevel');
+    a.father        = gv('hb-father');
+    a.fatherTests   = gv('hb-fatherTests');
+    a.mother        = gv('hb-mother');
+    a.motherTests   = gv('hb-motherTests');
+    a.description   = getMDE();
+    a.providerName  = gv('hb-providerName');
+    a.contactPerson = gv('hb-contactPerson');
+    a.email         = gv('hb-email');
+    a.phone         = gv('hb-phone');
+    a.contactNotes  = gv('hb-contactNotes');
+    a.galerie       = collectGalerieList();
+    a.galerie_titel = collectGalerieTitel();
+    a.updatedAt = new Date().toISOString();
+    return a;
+  }
+
+  window.hundeboerseSave = async function(idx) {
+    hundeboerseCollect(idx);
+    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
+    toast('✅ Anzeige gespeichert!', 'ok');
+    renderHundeboerse(S.section, S.data);
+  };
+
+  window.hundeboerseFreigebenAusEdit = function(idx) {
+    hundeboerseCollect(idx);
+    showConfirm('Anzeige freigeben', 'Diese Anzeige jetzt freigeben? Sie soll später auf der öffentlichen Hundebörse erscheinen.', async function() {
+      var a = S.data.anzeigen[idx];
+      a.status = 'published';
+      a.updatedAt = new Date().toISOString();
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
+      toast('✅ Anzeige freigegeben!', 'ok');
+      renderHundeboerse(S.section, S.data);
+    });
+  };
+
+  window.hundeboerseFreigeben = function(idx) {
+    showConfirm('Anzeige freigeben', 'Diese Anzeige jetzt freigeben? Sie soll später auf der öffentlichen Hundebörse erscheinen.', async function() {
+      var a = (S.data.anzeigen || [])[idx];
+      if (!a) return;
+      a.status = 'published';
+      a.updatedAt = new Date().toISOString();
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
+      toast('✅ Anzeige freigegeben!', 'ok');
+      renderHundeboerse(S.section, S.data);
+    });
+  };
+
+  window.hundeboerseAblehnen = async function(idx) {
+    hundeboerseCollect(idx);
+    var a = S.data.anzeigen[idx];
+    a.status = 'rejected';
+    a.updatedAt = new Date().toISOString();
+    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige abgelehnt');
+    toast('🚫 Anzeige abgelehnt', 'info');
+    renderHundeboerse(S.section, S.data);
+  };
+
+  window.hundeboerseArchivieren = async function(idx) {
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    a.status = 'archived';
+    a.updatedAt = new Date().toISOString();
+    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige archiviert');
+    toast('📦 Anzeige archiviert', 'ok');
+    renderHundeboerse(S.section, S.data);
+  };
+
+  window.hundeboerseDelete = function(idx) {
+    showConfirm('Anzeige löschen', 'Diese Anzeige wirklich unwiderruflich löschen?', async function() {
+      S.data.anzeigen.splice(idx, 1);
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gelöscht');
+      toast('🗑️ Anzeige gelöscht', 'info');
+      renderHundeboerse(S.section, S.data);
+    });
+  };
+
+  window.hundeboerseVorschau = function(idx) {
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    var bilder = a.galerie || [];
+    var haupt = bilder[0] ? bilder[0].bild : '';
+    var thumbs = bilder.slice(1).map(function(g) {
+      return '<img src="' + escAttr(g.bild) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:6px;">';
+    }).join('');
+
+    var eckdaten = [];
+    if (a.breed) eckdaten.push('<strong>Rasse:</strong> ' + escHtml(a.breed));
+    if (a.type === 'litter') {
+      if (a.litterDate) eckdaten.push('<strong>Wurfdatum:</strong> ' + escHtml(a.litterDate));
+      var counts = [];
+      if (a.maleCount) counts.push(a.maleCount + ' Rüden');
+      if (a.femaleCount) counts.push(a.femaleCount + ' Hündinnen');
+      if (counts.length) eckdaten.push('<strong>Welpen:</strong> ' + escHtml(counts.join(', ')));
+    } else {
+      if (a.gender) eckdaten.push('<strong>Geschlecht:</strong> ' + (a.gender === 'male' ? 'Rüde' : 'Hündin'));
+      if (a.birthDate) eckdaten.push('<strong>Geburtsdatum:</strong> ' + escHtml(a.birthDate));
+    }
+    if (a.color) eckdaten.push('<strong>Farbe:</strong> ' + escHtml(a.color));
+    if (a.coat) eckdaten.push('<strong>Haarart:</strong> ' + escHtml(a.coat));
+    var preisText = hbPreisText(a);
+    if (preisText) eckdaten.push('<strong>Preis:</strong> ' + escHtml(preisText));
+    if (a.city || a.postalCode) eckdaten.push('<strong>Standort:</strong> ' + escHtml([a.postalCode, a.city].filter(Boolean).join(' ')));
+
+    var beschreibung = a.description
+      ? (window.marked && typeof window.marked.parse === 'function' ? window.marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>')
+      : '';
+
+    var abstammung = [];
+    if (a.father) abstammung.push('<strong>Vater:</strong> ' + escHtml(a.father) + (a.fatherTests ? ' (' + escHtml(a.fatherTests) + ')' : ''));
+    if (a.mother) abstammung.push('<strong>Mutter:</strong> ' + escHtml(a.mother) + (a.motherTests ? ' (' + escHtml(a.motherTests) + ')' : ''));
+
+    var jagdlich = [];
+    if (a.huntingTests) jagdlich.push('<strong>Prüfungen:</strong> ' + escHtml(a.huntingTests));
+    if (a.trainingLevel) jagdlich.push('<strong>Ausbildungsstand:</strong> ' + escHtml(a.trainingLevel));
+
+    var kontakt = [];
+    if (a.providerName) kontakt.push(escHtml(a.providerName));
+    if (a.contactPerson) kontakt.push('Ansprechpartner: ' + escHtml(a.contactPerson));
+    if (a.email) kontakt.push('✉️ ' + escHtml(a.email));
+    if (a.phone) kontakt.push('📞 ' + escHtml(a.phone));
+
+    var body =
+      '<p class="text-muted" style="font-size:.8rem;margin-top:-.5rem;">Interne Admin-Vorschau – so ist der aktuelle Datenstand, das endgültige öffentliche Layout entsteht erst in Phase 2.</p>' +
+      (haupt ? '<img src="' + escAttr(haupt) + '" alt="" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:.75rem;">' : '') +
+      (thumbs ? '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">' + thumbs + '</div>' : '') +
+      '<h3 style="margin-bottom:.25rem;">' + escHtml(a.title || '(Kein Titel)') +
+        ' <span class="item-badge">' + hbTypLabel(a.type) + '</span>' +
+        ' <span class="item-badge">' + hbStatusLabel(a.status) + '</span></h3>' +
+      (eckdaten.length ? '<p style="line-height:1.8;">' + eckdaten.join('<br>') + '</p>' : '') +
+      (beschreibung ? '<div style="margin:1rem 0;">' + beschreibung + '</div>' : '') +
+      (abstammung.length ? '<p><strong>Abstammung</strong><br>' + abstammung.join('<br>') + '</p>' : '') +
+      (jagdlich.length ? '<p><strong>Jagdliche Informationen</strong><br>' + jagdlich.join('<br>') + '</p>' : '') +
+      (kontakt.length ? '<p style="margin-top:1rem;"><strong>Anbieter</strong><br>' + kontakt.join('<br>') + '</p>' : '');
+
+    hbShowModal('Vorschau: ' + (a.title || 'Anzeige'), body);
+  };
+
+  function hbShowModal(title, bodyHtml) {
+    var el = id('hb-preview-modal');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'hb-preview-modal';
+      el.className = 'modal';
+      el.style.display = 'none';
+      el.innerHTML =
+        '<div class="modal-backdrop" onclick="hbCloseModal()"></div>' +
+        '<div class="modal-box" style="max-width:560px;">' +
+          '<div class="modal-head"><h3 id="hb-preview-title"></h3>' +
+            '<button class="modal-close-btn" onclick="hbCloseModal()" aria-label="Schließen">✕</button>' +
+          '</div>' +
+          '<div class="modal-body" id="hb-preview-body"></div>' +
+        '</div>';
+      document.body.appendChild(el);
+    }
+    id('hb-preview-title').textContent = title;
+    id('hb-preview-body').innerHTML = bodyHtml;
+    el.style.display = 'flex';
+  }
+  window.hbCloseModal = function() {
+    var el = id('hb-preview-modal');
+    if (el) el.style.display = 'none';
+  };
+
 
   /* ────────────────────────────────────────────────────────────
      INFOMOBIL – TipTap Rich-Text-Editor
