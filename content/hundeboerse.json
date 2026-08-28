@@ -1,3 +1,48 @@
 {
-  "anzeigen": []
+  "anzeigen": [
+    {
+      "id": "hb-1787928820753",
+      "status": "archived",
+      "createdAt": "2026-08-28T14:53:40.753Z",
+      "updatedAt": "2026-08-28T16:34:27.363Z",
+      "type": "litter",
+      "title": "Deutsch Drahthaar – Wurf vom 12. Juni 2026",
+      "breed": "Deutsch Drahthaar",
+      "color": "Braunschimmel",
+      "coat": "Drahthaar",
+      "priceType": "negotiable",
+      "price": "1200",
+      "postalCode": "24568",
+      "city": "Kaltenkirchen",
+      "description": "Unsere Hündin Bora vom Hegering hat am 12. Juni 2026 fünf gesunde Welpen bekommen. Der Wurf besteht aus drei Rüden und zwei Hündinnen.\n\nDie Welpen wachsen im Haus und im Zwinger mit engem Familienanschluss auf und werden frühzeitig an unterschiedliche Umweltreize gewöhnt. Beide Elterntiere werden jagdlich geführt und verfügen über entsprechende Leistungsprüfungen.\n\nBei Abgabe sind die Welpen geimpft, entwurmt und gechippt. Die Abgabe erfolgt frühestens ab der 8. Lebenswoche.\n\nBei Interesse freuen wir uns über eine persönliche Kontaktaufnahme.",
+      "father": "Aiko vom Hegering",
+      "fatherTests": "VJP, HZP, VGP I. Preis, VSwP",
+      "mother": "Bora vom Hegering",
+      "motherTests": "VJP, HZP, VGP II. Preis",
+      "huntingTests": "VJP, HZP, VGP",
+      "trainingLevel": "Die Elterntiere werden jagdlich geführt und stammen aus leistungsgeprüften Linien. Die Welpen wachsen im engen Familienanschluss auf und werden an verschiedene Umweltreize gewöhnt.",
+      "providerName": "Max Mustermann",
+      "contactPerson": "Max Mustermann",
+      "email": "max.mustermann@example.de",
+      "phone": "0171 1234567",
+      "contactNotes": "Besichtigung nach vorheriger Terminabsprache möglich.",
+      "dogName": "",
+      "birthDate": "",
+      "gender": "",
+      "litterDate": "12.06.2026",
+      "maleCount": "3",
+      "femaleCount": "2",
+      "galerie": [
+        {
+          "bild": "/images/1787835576397-27-08-_2026_14-50-12.jpg",
+          "titel": "Test Bild"
+        },
+        {
+          "bild": "/images/1787934528232-ChatGPT-Image-28.-Aug.-2026--18_28_24.png",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bilder"
+    }
+  ]
 }
