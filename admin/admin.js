@@ -7447,5 +7447,11 @@
   window.renderMedian   = renderMedian;
   window.serviceAktuelleAnsichtRendern   = serviceAktuelleAnsichtRendern;
   window.aktuellesAktuelleAnsichtRendern = aktuellesAktuelleAnsichtRendern;
+  // Hundebörse-Edit-Ansicht ruft dies per onclick="renderHundeboerse(...)" auf
+  // dem "← Zurück zur Hundebörse"-Button auf - genau das oben beschriebene
+  // Muster, hier bei der Einführung der Hundebörse trotz Warnung erneut
+  // übersehen (Laurin-Bug-Report, 2026-08-28: Button reagierte nicht,
+  // Konsole zeigte "renderHundeboerse is not defined").
+  window.renderHundeboerse = renderHundeboerse;
 
 })();
