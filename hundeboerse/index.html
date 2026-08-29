@@ -91,12 +91,12 @@
           <li><a href="../verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
         </ul>
       </li>
-      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
+      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
       <li><a href="../service.html" data-navkey="service">Service</a></li>
       <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
@@ -144,12 +144,12 @@
         </ul>
       </details>
     </li>
-    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
+    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../faq/index.html">FAQ</a></li>
     <li><a href="../service.html">Service</a></li>
     <li><a href="../kontakt/index.html">Kontakt</a></li>
-    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
   </ul>
 </nav>
 
@@ -180,11 +180,14 @@
     </main>
 
     <aside class="sidebar">
-      <div class="sidebar-widget">
-        <h4>Hund/Wurf anbieten</h4>
-        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">Sie möchten selbst einen Hund oder Wurf über die KJS Hundebörse anbieten?</p>
-        <p style="margin-top:.75rem;"><a href="anbieten.html" class="btn btn-outline-green btn-sm">+ Anzeige aufgeben</a></p>
-      </div>
+      <!-- Die frühere zweite "Hund/Wurf anbieten"-Box hier in der Seitenleiste
+           wurde entfernt (Frank-Feedback über Laurin, 29.08.2026): sie
+           duplizierte den bereits prominenten grünen Button oben im
+           Hauptinhalt ("+ Hund / Wurf anbieten"). Eine alleinstehende
+           Kontakt-Box in der Seitenleiste ist ein etabliertes Muster auf
+           dieser Seite (siehe z.B. aktuelles/index.html, jaeger/vorstand.html)
+           und wirkt dank align-items:start im Grid nicht unausgewogen, auch
+           wenn sie kürzer ist als der Hauptinhalt. -->
       <div class="contact-box">
         <h4>Kontakt</h4>
         <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>

@@ -91,12 +91,12 @@
           <li><a href="../verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
         </ul>
       </li>
-      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
+      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
       <li><a href="../service.html" data-navkey="service">Service</a></li>
       <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
@@ -144,12 +144,12 @@
         </ul>
       </details>
     </li>
-    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
+    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../faq/index.html">FAQ</a></li>
     <li><a href="../service.html">Service</a></li>
     <li><a href="../kontakt/index.html">Kontakt</a></li>
-    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
   </ul>
 </nav>
 
@@ -397,6 +397,40 @@
     else sidebar.appendChild(widget);
   }
 
+  // Hundebörse-Verweis in der Seitenleiste (Laurin-Wunsch 29.08.2026): Frank
+  // will auf der Hundevermittlung-Seite (Jäger > Aufgaben der Kreisjägerschaft
+  // > Hundevermittlung) weiterhin selbst redaktionellen Text pflegen - die
+  // Hundebörse soll die Seite NICHT ersetzen, sondern nur als auffälliger
+  // grüner Hinweiskasten in der Seitenleiste verlinkt werden. Titel/Text/
+  // Button-Beschriftung kommen aus den ganz normalen Seitenfeldern
+  // hundeboerse_cta_titel/_text/_button (admin.js renderStandard/
+  // collectStandard, nur für def.slug === 'hundevermittlung' sichtbar) -
+  // "keine neue parallele Content-Verwaltung". Da seiten/index.html als
+  // gemeinsamer Renderer für ~20 verschiedene Seiten dient, ist die Anzeige
+  // rein datengetrieben: der Kasten erscheint auf JEDER Seite, bei der diese
+  // Felder befüllt sind (aktuell nur Hundevermittlung), und bleibt überall
+  // sonst unsichtbar. Das Linkziel ist bewusst fest verdrahtet auf die
+  // Hundebörse-Übersicht.
+  function renderHundeboerseCtaSidebar(seite) {
+    var sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    var old = sidebar.querySelector('.sidebar-widget--hundeboerse-cta');
+    if (old) old.parentNode.removeChild(old);
+    var titel  = (seite.hundeboerse_cta_titel  || '').trim();
+    var text   = (seite.hundeboerse_cta_text   || '').trim();
+    var button = (seite.hundeboerse_cta_button || '').trim();
+    if (!titel && !text && !button) return;
+    var widget = document.createElement('div');
+    widget.className = 'sidebar-widget sidebar-widget--highlight sidebar-widget--hundeboerse-cta';
+    widget.innerHTML =
+      '<h4>' + escHtml(titel || 'Hundebörse') + '</h4>' +
+      (text ? '<p>' + escHtml(text) + '</p>' : '') +
+      '<a href="../hundeboerse/index.html" class="btn btn-gold btn-sm">' + escHtml(button || 'ZUR HUNDEBÖRSE →') + '</a>';
+    var anchor = sidebar.querySelector('.sidebar-widget--downloads') || sidebar.querySelector('.contact-box');
+    if (anchor) anchor.parentNode.insertBefore(widget, anchor);
+    else sidebar.appendChild(widget);
+  }
+
   // Geschwister-Unterseiten ("Unterseiten zu X") in der Sidebar - gleiches
   // Manifest, das auch die jeweilige Verbraucher-Hauptseite für ihre eigene
   // Unterseiten-Kachelbox nutzt (z.B. wildfleisch.html -> seiten-sub-
@@ -514,6 +548,7 @@
     // Downloads jetzt in die Sidebar statt inline im Fließtext (23.08.2026,
     // Sidebar-Umbau) - und Geschwister-Unterseiten-Liste in der Sidebar.
     renderDownloadsSidebar(seite);
+    renderHundeboerseCtaSidebar(seite);
     renderSubNavSidebar(seite, ordnerIndex);
   }
 })();

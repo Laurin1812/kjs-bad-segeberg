@@ -91,12 +91,12 @@
           <li><a href="../verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
         </ul>
       </li>
-      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
+      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
+      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
       <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
       <li><a href="../service.html" data-navkey="service">Service</a></li>
       <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-      <li><a href="../hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
     </ul></nav>
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
   </div>
@@ -144,12 +144,12 @@
         </ul>
       </details>
     </li>
-    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../aktuelles/index.html">Aktuelles</a></li>
+    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
+    <li><a href="../termine/index.html">Termine</a></li>
     <li><a href="../faq/index.html">FAQ</a></li>
     <li><a href="../service.html">Service</a></li>
     <li><a href="../kontakt/index.html">Kontakt</a></li>
-    <li><a href="../hundeboerse/index.html">Hundeb&#246;rse</a></li>
   </ul>
 </nav>
 
@@ -328,6 +328,25 @@
               <input type="text" id="hb-motherTests" placeholder="z. B. VJP, HZP">
             </div>
           </div>
+          <div class="form-group">
+            <label>Zuchtverband vorhanden?</label>
+            <div class="hb-typ-toggle" style="max-width:420px;">
+              <label class="hb-typ-option" id="hbZvOptionJa">
+                <input type="radio" name="hbZuchtverbandVorhanden" value="ja" id="hb-zuchtverbandVorhanden-ja">
+                Ja
+              </label>
+              <label class="hb-typ-option" id="hbZvOptionNein">
+                <input type="radio" name="hbZuchtverbandVorhanden" value="nein" id="hb-zuchtverbandVorhanden-nein" checked>
+                Nein
+              </label>
+            </div>
+          </div>
+          <div class="form-group" id="hbGroup-zuchtverband" style="display:none;">
+            <label for="hb-zuchtverband">Zuchtverband</label>
+            <input type="text" id="hb-zuchtverband" list="hb-zuchtverband-liste" placeholder="z. B. JGHV, VDH, DK …">
+            <datalist id="hb-zuchtverband-liste"></datalist>
+            <p class="hb-section-hint" style="margin-top:.35rem;margin-bottom:0;">Vorschläge aus bereits verwendeten Zuchtverbänden oder eigenen Namen eingeben.</p>
+          </div>
         </div>
 
         <!-- 6. Beschreibung -->
@@ -465,6 +484,16 @@
       var src = p.indexOf('/') === 0 ? '..' + p : '../' + p;
       document.getElementById('hb-anbieten-hero-bg').style.backgroundImage = "url('" + src + "')";
     }
+    // Zuchtverband-Vorschläge (28.08.2026): dieselbe wachsende Liste, die
+    // auch der Admin-Editor unter "Abstammung" pflegt (content/hundeboerse.json
+    // -> "zuchtverbaende"), damit hier dieselben bereits bekannten Namen
+    // vorgeschlagen werden. Das Feld bleibt trotzdem ein freies Textfeld.
+    var liste = document.getElementById('hb-zuchtverband-liste');
+    if (liste && Array.isArray(data.zuchtverbaende)) {
+      liste.innerHTML = data.zuchtverbaende.map(function(v) {
+        return '<option value="' + String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '">';
+      }).join('');
+    }
   }).catch(function(){});
 </script>
 <script>
@@ -502,6 +531,20 @@
   }
   priceTypeSelect.addEventListener('change', updatePriceUI);
   updatePriceUI();
+
+  // ── Zuchtverband: Freitextfeld nur bei "Ja" einblenden (28.08.2026) ─────
+  var zuchtverbandRadios = document.querySelectorAll('input[name="hbZuchtverbandVorhanden"]');
+  var zuchtverbandWrap = document.getElementById('hbGroup-zuchtverband');
+  var zvOptionJa = document.getElementById('hbZvOptionJa');
+  var zvOptionNein = document.getElementById('hbZvOptionNein');
+  function updateZuchtverbandUI() {
+    var ja = document.getElementById('hb-zuchtverbandVorhanden-ja').checked;
+    zuchtverbandWrap.style.display = ja ? '' : 'none';
+    zvOptionJa.classList.toggle('is-active', ja);
+    zvOptionNein.classList.toggle('is-active', !ja);
+  }
+  zuchtverbandRadios.forEach(function(r) { r.addEventListener('change', updateZuchtverbandUI); });
+  updateZuchtverbandUI();
 
   // ── Bilder: Auswahl, Vorschau, Entfernen, Drag&Drop-Reihenfolge ─────────
   // Clientseitige Verkleinerung/Komprimierung (Canvas, keine Library) – auf
@@ -731,6 +774,9 @@
       fatherTests: document.getElementById('hb-fatherTests').value.trim(),
       mother: document.getElementById('hb-mother').value.trim(),
       motherTests: document.getElementById('hb-motherTests').value.trim(),
+      hasZuchtverband: document.getElementById('hb-zuchtverbandVorhanden-ja').checked,
+      zuchtverband: document.getElementById('hb-zuchtverbandVorhanden-ja').checked
+        ? document.getElementById('hb-zuchtverband').value.trim() : '',
       description: document.getElementById('hb-description').value.trim(),
       providerName: document.getElementById('hb-providerName').value.trim(),
       contactPerson: document.getElementById('hb-contactPerson').value.trim(),

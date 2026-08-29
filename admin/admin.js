@@ -1687,6 +1687,26 @@
             fText('antrag_url', 'Mitgliedsantrag-URL', data.antrag_url, 'https://...') +
           '</div>'
         : '') +
+        // Hundebörse-Verweis (Seitenleiste): nur auf der Hundevermittlung-Seite
+        // (Frank behält seinen eigenen Redaktionstext auf dieser Seite - die
+        // Hundebörse ersetzt sie nicht, sondern wird nur als grüner CTA-Kasten
+        // in der Seitenleiste verlinkt, Laurin-Wunsch 29.08.2026). Titel/Text/
+        // Button-Beschriftung sind hier admin-editierbar über das ganz normale
+        // Seiten-Formular ("keine neue parallele Content-Verwaltung") - das
+        // Linkziel selbst ist bewusst fest verdrahtet auf die Hundebörse-
+        // Übersicht (siehe seiten/index.html renderHundeboerseCtaSidebar()).
+        // Leer lassen = Kasten wird nicht angezeigt.
+        (def.slug === 'hundevermittlung' ?
+          '<div class="form-card">' +
+            '<div class="form-card-title">🐕 Hundebörse-Verweis (Seitenleiste)</div>' +
+            fH(fText('hundeboerse_cta_titel', 'Überschrift', data.hundeboerse_cta_titel, 'Hundebörse'),
+              'Überschrift des grünen Hinweiskastens in der Seitenleiste.') +
+            fH(fText('hundeboerse_cta_text', 'Text', data.hundeboerse_cta_text, 'Aktuelle Jagdhunde und Würfe entdecken oder selbst eine Anzeige aufgeben.'),
+              'Kurzer erklärender Text unter der Überschrift.') +
+            fH(fText('hundeboerse_cta_button', 'Button-Beschriftung', data.hundeboerse_cta_button, 'ZUR HUNDEBÖRSE →'),
+              'Beschriftung des Buttons, der zur Hundebörse-Übersicht führt. Leer lassen, um den Kasten auszublenden.') +
+          '</div>'
+        : '') +
       '</div>' +
       saveBar();
     id('admin-main').innerHTML = html;
@@ -1714,6 +1734,11 @@
     }
     if (S.section && S.section.key === 'mitglied-werden') {
       data.antrag_url = gv('antrag_url');
+    }
+    if (S.section && S.section.slug === 'hundevermittlung') {
+      data.hundeboerse_cta_titel  = gv('hundeboerse_cta_titel');
+      data.hundeboerse_cta_text   = gv('hundeboerse_cta_text');
+      data.hundeboerse_cta_button = gv('hundeboerse_cta_button');
     }
     // Jagdhundeschule-spezifische Felder (Kachel-Vorschau + Bild ohne Rahmen)
     if (S.section && S.section.key && S.section.key.indexOf('jagdhundeschule') !== -1) {
@@ -2160,6 +2185,7 @@
       priceType: 'on_request', price: '',
       postalCode: '', city: '', description: '',
       father: '', fatherTests: '', mother: '', motherTests: '',
+      hasZuchtverband: false, zuchtverband: '',
       huntingTests: '', trainingLevel: '',
       providerName: '', contactPerson: '', email: '', phone: '', contactNotes: '',
       dogName: '', birthDate: '', gender: '',
@@ -2250,6 +2276,10 @@
           fText('hb-fatherTests', 'Prüfungen Vater', a.fatherTests) +
           fText('hb-motherTests', 'Prüfungen Mutter', a.motherTests) +
         '</div>' +
+        fToggle('hb-hasZuchtverband', 'Zuchtverband vorhanden?', a.hasZuchtverband === true) +
+        '<div id="hb-zuchtverband-wrap" style="display:' + (a.hasZuchtverband === true ? 'block' : 'none') + '">' +
+          fCombobox('hb-zuchtverband', 'Zuchtverband', a.zuchtverband, S.data.zuchtverbaende || []) +
+        '</div>' +
       '</div>' +
 
       '<div class="form-card">' +
@@ -2284,6 +2314,16 @@
       var wrap = id('hb-price-wrap');
       if (wrap) wrap.style.display = (this.value === 'fixed' || this.value === 'negotiable') ? 'block' : 'none';
     });
+
+    // Zuchtverband-Feld nur einblenden, wenn "Ja" gewählt ist. Läuft NACH
+    // dem inline onclick="toggleBtn(this)" des fToggle-Buttons (weil dieser
+    // Listener erst nach dem Rendern angehängt wird), liest also bereits den
+    // neuen data-val-Zustand.
+    var zvBtn = id('f-hb-hasZuchtverband');
+    if (zvBtn) zvBtn.addEventListener('click', function() {
+      var wrap = id('hb-zuchtverband-wrap');
+      if (wrap) wrap.style.display = (this.getAttribute('data-val') === '1') ? 'block' : 'none';
+    });
   };
 
   window.hundeboerseTypSet = function(typ) {
@@ -2296,6 +2336,26 @@
     if (single) single.style.display = (typ === 'litter') ? 'none' : 'block';
     if (litter) litter.style.display = (typ === 'litter') ? 'block' : 'none';
   };
+
+  // Wartbare Vorschlagsliste für "Zuchtverband" (28.08.2026, Laurin/Frank-
+  // Wunsch nach gemeinsamer Prüfung): keine neue Datenbank/Library - die
+  // bekannten Verbandsnamen leben einfach als Array "zuchtverbaende" auf
+  // oberster Ebene von content/hundeboerse.json (neben "anzeigen" und
+  // "hero_bild") und wachsen automatisch, sobald jemand einen noch nicht
+  // bekannten Namen einträgt. fCombobox() zeigt sie als <datalist>-
+  // Vorschläge, das Feld bleibt aber immer ein freies Textfeld.
+  function hbZuchtverbandMerken(wert) {
+    wert = (wert || '').trim();
+    if (!wert) return;
+    S.data.zuchtverbaende = S.data.zuchtverbaende || [];
+    var vorhanden = S.data.zuchtverbaende.some(function(v) {
+      return v.toLowerCase() === wert.toLowerCase();
+    });
+    if (!vorhanden) {
+      S.data.zuchtverbaende.push(wert);
+      S.data.zuchtverbaende.sort(function(a, b) { return a.localeCompare(b, 'de'); });
+    }
+  }
 
   function hundeboerseCollect(idx) {
     var a = S.data.anzeigen[idx];
@@ -2321,6 +2381,9 @@
     a.fatherTests   = gv('hb-fatherTests');
     a.mother        = gv('hb-mother');
     a.motherTests   = gv('hb-motherTests');
+    a.hasZuchtverband = toggleVal('hb-hasZuchtverband');
+    a.zuchtverband  = a.hasZuchtverband ? gv('hb-zuchtverband') : '';
+    hbZuchtverbandMerken(a.zuchtverband);
     a.description   = getMDE();
     a.providerName  = gv('hb-providerName');
     a.contactPerson = gv('hb-contactPerson');
@@ -2426,6 +2489,8 @@
     var abstammung = [];
     if (a.father) abstammung.push('<strong>Vater:</strong> ' + escHtml(a.father) + (a.fatherTests ? ' (' + escHtml(a.fatherTests) + ')' : ''));
     if (a.mother) abstammung.push('<strong>Mutter:</strong> ' + escHtml(a.mother) + (a.motherTests ? ' (' + escHtml(a.motherTests) + ')' : ''));
+    if (a.hasZuchtverband === true && a.zuchtverband) abstammung.push('<strong>Zuchtverband:</strong> ' + escHtml(a.zuchtverband));
+    else if (a.hasZuchtverband === false) abstammung.push('<strong>Zuchtverband:</strong> Kein Zuchtverband');
 
     var jagdlich = [];
     if (a.huntingTests) jagdlich.push('<strong>Prüfungen:</strong> ' + escHtml(a.huntingTests));

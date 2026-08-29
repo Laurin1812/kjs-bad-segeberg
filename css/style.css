@@ -472,6 +472,29 @@ p  { margin-bottom: 1rem; }
   .steckbrief dl { grid-template-columns: 1fr; }
 }
 
+/* Hundebörse-Detailseite: Kontaktbereich am Ende des Hauptinhalts
+   (28.08.2026, Laurin/Frank-Feedback - ersetzt die vorherige doppelte
+   Kontaktführung aus CTA-Button + grüner Sidebar-Box mit nochmals
+   "Anfrage senden"). Bewusst helles Grün statt sattem Grün-auf-Weiß wie
+   die alte Sidebar-Box, damit .btn-primary/.btn-outline-green (grüner
+   Text/Rand auf hellem Grund) gut lesbar bleiben und keine der beiden
+   Aktionen den früheren ".btn-outline:hover{background:#fff}"-Weißblitz
+   wiederholt. */
+.hb-kontaktbereich {
+  background: var(--green-light); border: 1px solid var(--green-main);
+  border-radius: var(--radius-md); padding: 1.75rem 2rem; margin: 2rem 0 1rem;
+}
+.hb-kontaktbereich h2 { margin-top: 0; margin-bottom: 1.1rem; }
+.hb-kontaktbereich__info p { margin: 0 0 .55rem; font-size: .97rem; color: var(--text-dark); }
+.hb-kontaktbereich__info p strong { color: var(--green-dark); margin-right: .3rem; }
+.hb-kontaktbereich__info a { color: var(--green-dark); font-weight: 600; }
+.hb-kontaktbereich__actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-top: 1.25rem; }
+@media (max-width: 600px) {
+  .hb-kontaktbereich { padding: 1.4rem 1.25rem; }
+  .hb-kontaktbereich__actions { flex-direction: column; }
+  .hb-kontaktbereich__actions .btn { width: 100%; justify-content: center; }
+}
+
 /* Kachel-Übersicht: Preis + "Details ansehen" sollen bei jeder Karte einer
    Reihe auf derselben Höhe sitzen (Laurin-Bug-Report 28.08.2026), auch wenn
    die Infozeilen darüber (Rasse/Standort/Typ) je nach Anzeige unterschiedlich
@@ -1005,18 +1028,10 @@ p  { margin-bottom: 1rem; }
    wirkten. Beide Überschriften nutzen jetzt denselben Stil wie .contact-box h4. */
 .contact-box h4.contact-box__sub { margin-top: 1.1rem; font-size: .95rem; opacity: .9; }
 
-/* .hb-anbieter-box: optisch identisch zu .contact-box (Hundebörse-Detailseite,
-   Anbieter-Kontaktbox), aber bewusst NICHT die Klasse "contact-box" selbst –
-   js/main.js sammelt sitegweit ALLE ".contact-box"-Elemente ein und überschreibt
-   ihren Inhalt asynchron mit dem Geschäftsstelle/Postadresse-Block. Genau das
-   führte zu Laurins Bug-Report vom 28.08.2026 (zeitweise doppelter
-   Geschäftsstelle-Block statt Anbieter-Block auf der Detailseite) – siehe
-   Kommentar in hundeboerse/detail.html. */
-.hb-anbieter-box { background: var(--green-main); color: #fff; border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; }
-.hb-anbieter-box h4 { color: #fff; margin-bottom: 1rem; font-family: var(--font-sans); font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(255,255,255,.2); }
-.hb-anbieter-box p { font-size: .87rem; color: rgba(255,255,255,.75); margin-bottom: .4rem; }
-.hb-anbieter-box a { color: rgba(255,255,255,.88); }
-.hb-anbieter-box a:hover { color: #fff; }
+/* Hinweis: die frühere ".hb-anbieter-box" (grüne Sidebar-Kontaktbox auf der
+   Hundebörse-Detailseite) wurde am 28.08.2026 entfernt und durch den
+   Kontaktbereich ".hb-kontaktbereich" im Hauptinhalt ersetzt (siehe dort) -
+   die Box selbst wird nicht mehr erzeugt, ihre CSS-Regeln wurden entfernt. */
 
 /* =========================================================
    PERSON CARDS
@@ -1657,6 +1672,28 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .sidebar-widget--highlight .sidebar-nav li.active a {
   background: rgba(255,255,255,.14);
   color: #fff;
+}
+
+/* Hundebörse-Verweis in der Seitenleiste generischer Inhaltsseiten (z.B.
+   Hundevermittlung unter Jäger > Aufgaben der Kreisjägerschaft) - nutzt
+   bewusst dieselbe dunkelgrüne .sidebar-widget--highlight-Optik wie die
+   "Weiterführende Links"-Box, statt eine neue Kastenfarbe einzuführen
+   (Laurin-Wunsch 29.08.2026: vorhandene Sidebar-Strukturen wiederverwenden).
+   Titel/Text/Button sind über das normale Seiten-Formular im Admin
+   editierbar (seiten/index.html liest hundeboerse_cta_titel/_text/_button
+   aus dem jeweiligen content/seiten-*/*.json) - der Kasten erscheint nur,
+   wenn mindestens eines dieser Felder befüllt ist, betrifft also nur
+   Seiten, für die das im Admin gesetzt wurde. */
+.sidebar-widget--hundeboerse-cta p {
+  color: rgba(255,255,255,.92);
+  font-size: .88rem;
+  line-height: 1.6;
+  margin: 0 0 1.1rem;
+}
+.sidebar-widget--hundeboerse-cta .btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Downloads-Vorschaubild in "breiter" Darstellung (Seiten ohne Sidebar-Layout,

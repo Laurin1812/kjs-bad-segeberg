@@ -21,5 +21,8 @@
     }
   ],
   "galerie": [],
-  "galerie_titel": "Bildergalerie"
+  "galerie_titel": "Bildergalerie",
+  "hundeboerse_cta_titel": "Hundebörse",
+  "hundeboerse_cta_text": "Aktuelle Jagdhunde und Würfe entdecken oder selbst eine Anzeige aufgeben.",
+  "hundeboerse_cta_button": "ZUR HUNDEBÖRSE →"
 }
