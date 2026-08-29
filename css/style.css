@@ -1681,7 +1681,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
    (Laurin-Wunsch 29.08.2026: vorhandene Sidebar-Strukturen wiederverwenden).
    Titel/Text/Button sind über das normale Seiten-Formular im Admin
    editierbar (seiten/index.html liest hundeboerse_cta_titel/_text/_button
-   aus dem jeweiligen content/seiten-*/*.json) - der Kasten erscheint nur,
+   aus der jeweiligen Seiten-JSON-Datei) - der Kasten erscheint nur,
    wenn mindestens eines dieser Felder befüllt ist, betrifft also nur
    Seiten, für die das im Admin gesetzt wurde. */
 .sidebar-widget--hundeboerse-cta p {
