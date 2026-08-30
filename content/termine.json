@@ -25,6 +25,17 @@
       "revier": "Hegering 8 – Kisdorf",
       "kategorie": "Schießwesen",
       "archiviert": false
+    },
+    {
+      "datum": "26.11.2026",
+      "uhrzeit": "20:00",
+      "veranstaltung": "Damwildstammtisch",
+      "strasse": "Steenbucks Gastoff",
+      "plz": "24568 ",
+      "ort": "Kattendorf ",
+      "revier": "Hegering 8 – Kisdorf",
+      "kategorie": "Hegering",
+      "archiviert": false
     }
   ]
 }
