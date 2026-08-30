@@ -3,17 +3,5 @@
     "ueberschrift": "Veranstaltungskalender 2026 / 2027",
     "einleitung": "Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V. sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können."
   },
-  "termine": [
-    {
-      "datum": "1.12.2026",
-      "uhrzeit": "18:00 ",
-      "veranstaltung": "Hoffest",
-      "strasse": "Mustermeierstr. 7",
-      "plz": "24629",
-      "ort": "Kisdorf",
-      "revier": "Hegering 8 – Kisdorf",
-      "kategorie": "Schießwesen",
-      "archiviert": false
-    }
-  ]
+  "termine": []
 }
