@@ -3,5 +3,17 @@
     "ueberschrift": "Veranstaltungskalender 2026 / 2027",
     "einleitung": "Hier finden Sie alle aktuellen Termine und Veranstaltungen der Kreisjägerschaft Segeberg e.V. sowie der angeschlossenen Hegeringe. Bitte beachten Sie, dass sich Termine kurzfristig ändern können."
   },
-  "termine": []
+  "termine": [
+    {
+      "datum": "10.10.2026",
+      "uhrzeit": "9:00",
+      "veranstaltung": "Großkalieberschießen mit Jagdparcours & anschließenden Grillen",
+      "strasse": "Schießstand 1",
+      "plz": "24628",
+      "ort": "Hartenholm",
+      "revier": "",
+      "kategorie": "Schießwesen",
+      "archiviert": false
+    }
+  ]
 }
