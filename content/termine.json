@@ -5,6 +5,17 @@
   },
   "termine": [
     {
+      "datum": "27.09.2026",
+      "uhrzeit": "10:00",
+      "veranstaltung": "Hegering Hundetag der Hergeringe VIII und IX (Kaltenkirchen",
+      "strasse": "Schmalfelder Str. 999",
+      "plz": "24568",
+      "ort": "Kaltenkirchen",
+      "revier": "",
+      "kategorie": "Hundeausbildung",
+      "archiviert": false
+    },
+    {
       "datum": "10.10.2026",
       "uhrzeit": "9:00",
       "veranstaltung": "Großkalieberschießen mit Jagdparcours & anschließenden Grillen",
