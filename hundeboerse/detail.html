@@ -292,9 +292,36 @@
       var hatKontaktdaten = !!(a.email || a.phone);
 
       // ── Oberer Bereich: Bild links, Eckdaten rechts ──────────────
-      var linksHtml = hauptbild
-        ? '<img src="' + hauptbild + '" alt="' + escHtml(a.title || '') + '" class="hb-main-image">'
-        : '<div style="background:var(--green-light);border-radius:var(--radius-md);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;"><img src="../images/logo.png" alt="KJS" style="height:80px;opacity:.3;"></div>';
+      // Bildergalerie (29.08.2026, Laurin-Wunsch nach Frank-Feedback):
+      // vorher gab es das Hauptbild oben UND weiter unten im Inhalt einen
+      // separaten "Galerie"-Abschnitt mit denselben Bildern noch einmal.
+      // Jetzt gehören alle Bilder direkt zum Hauptbild: darunter eine
+      // Thumbnail-Reihe mit ALLEN Bildern (auch dem aktuell großen), ein
+      // Klick auf ein Thumbnail tauscht nur das große Bild aus (kein
+      // Linkziel/neuer Tab mehr nötig - die einzige Aufgabe der Thumbnails
+      // ist das Umschalten). Bei nur einem Bild wird gar keine Thumbnail-
+      // Reihe gerendert, damit 1 Bild genauso aufgeräumt aussieht wie 10.
+      var linksHtml;
+      if (galerie.length) {
+        var thumbsHtml = '';
+        if (galerie.length > 1) {
+          thumbsHtml = '<div class="hb-thumbs" id="hb-thumbs">' +
+            galerie.map(function(g, gi) {
+              var gSrc = toSrc(g.bild);
+              var gAlt = escHtml(g.titel || a.title || '');
+              return '<button type="button" class="hb-thumb' + (gi === 0 ? ' is-active' : '') + '" data-src="' + gSrc + '" data-alt="' + gAlt + '" aria-label="Bild ' + (gi + 1) + ' von ' + galerie.length + ' anzeigen">' +
+                '<img src="' + gSrc + '" alt="' + gAlt + '" loading="lazy">' +
+              '</button>';
+            }).join('') +
+          '</div>';
+        }
+        linksHtml = '<div class="hb-gallery">' +
+          '<img src="' + hauptbild + '" alt="' + escHtml(a.title || '') + '" class="hb-main-image" id="hb-main-image">' +
+          thumbsHtml +
+        '</div>';
+      } else {
+        linksHtml = '<div class="hb-gallery"><div style="background:var(--green-light);border-radius:var(--radius-md);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;"><img src="../images/logo.png" alt="KJS" style="height:80px;opacity:.3;"></div></div>';
+      }
 
       var typZeileText = '';
       if (a.type === 'litter') {
@@ -380,27 +407,6 @@
         html += (typeof marked !== 'undefined' ? marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>');
       }
 
-      // ── Galerie (ALLE hochgeladenen Bilder, inkl. Hauptbild) ─
-      // Vorher: galerie.slice(1) hat das erste Bild (= das oben groß gezeigte
-      // Hauptbild) aus der unteren Galerie herausgefiltert. Das führte dazu,
-      // dass z.B. bei 3 gespeicherten Bildern öffentlich nur 2 in der Galerie
-      // auftauchten (Laurin-Bug-Report 28.08.2026) – im Admin waren weiterhin
-      // alle 3 sichtbar, da dort keine Filterung stattfindet. Jetzt zeigt die
-      // Galerie bewusst alle Bilder inkl. Hauptbild als Thumbnails, damit für
-      // Besucher nachvollziehbar bleibt, dass wirklich alle Bilder da sind
-      // (auch bei 8-10 Bildern funktioniert das unverändert über dasselbe
-      // auto-fill-Grid). Abschnitt nur zeigen, wenn es mehr als ein Bild gibt.
-      if (galerie.length > 1) {
-        html += '<div class="galerie-section"><div class="galerie-section__title">Galerie</div><div class="galerie-grid">';
-        galerie.forEach(function(g) {
-          var src = toSrc(g.bild);
-          var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
-          html += '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
-            '<img src="' + src + '" alt="' + escHtml(g.titel || '') + '" loading="lazy">' + caption + '</a>';
-        });
-        html += '</div></div>';
-      }
-
       // ── Standort ──────────────────────────────────────────────
       if (standort) {
         html += '<h2>Standort</h2><p>📍 ' + escHtml(standort) +
@@ -442,6 +448,24 @@
       }
 
       document.getElementById('hb-detail-inhalt').innerHTML = html;
+
+      // ── Bildergalerie: Klick auf Thumbnail tauscht das Hauptbild ──
+      // Ein einziger Event-Listener auf den Container (Delegation) statt
+      // pro Thumbnail, funktioniert unabhängig davon, ob 2 oder 10 Bilder
+      // vorhanden sind. Das aktuell gezeigte Hauptbild bleibt als
+      // Thumbnail sichtbar und wird nur farblich hervorgehoben.
+      var thumbsWrap = document.getElementById('hb-thumbs');
+      if (thumbsWrap) {
+        var mainImgEl = document.getElementById('hb-main-image');
+        thumbsWrap.addEventListener('click', function(e) {
+          var btn = e.target.closest('.hb-thumb');
+          if (!btn || !mainImgEl) return;
+          mainImgEl.src = btn.getAttribute('data-src');
+          mainImgEl.alt = btn.getAttribute('data-alt') || mainImgEl.alt;
+          thumbsWrap.querySelectorAll('.hb-thumb').forEach(function(t) { t.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+        });
+      }
 
       // ── "Anbieter kontaktieren"-Button (oben) ─────────────────
       // Scrollt sauber zum neuen Kontaktbereich unten und hebt ihn kurz
