@@ -16,6 +16,17 @@
         "service",
         "kontakt"
     ],
+    "hauptmenu_meta": {
+        "startseite":  { "label": "Startseite",  "href": "/",                       "navkey": "startseite" },
+        "jaeger":      { "href": "#", "navkey": "jaeger" },
+        "verbraucher": { "href": "#", "navkey": "verbraucher" },
+        "aktuelles":   { "label": "Aktuelles",   "href": "/aktuelles/index.html",   "navkey": "aktuelles" },
+        "hundeboerse": { "label": "Hundebörse",  "href": "/hundeboerse/index.html", "navkey": "hundeboerse" },
+        "termine":     { "label": "Termine",     "href": "/termine/index.html",     "navkey": "termine" },
+        "faq":         { "label": "FAQ",         "href": "/faq/index.html",         "navkey": "faq" },
+        "service":     { "label": "Service",     "href": "/service.html",           "navkey": "service" },
+        "kontakt":     { "label": "Kontakt",     "href": "/kontakt/index.html",     "navkey": "kontakt" }
+    },
     "jaeger_dropdown": [
         "kreisjjaegermeister",
         "ueber-uns",
@@ -24,15 +35,15 @@
         "infomobil",
         "weitere-themen"
     ],
+    "jaeger_dropdown_meta": {
+        "kreisjjaegermeister": { "label": "Kreisjägermeister", "href": "/kreisjjaegermeister/index.html" },
+        "ueber-uns":           { "label": "Über uns",          "href": "/jaeger/ueber-uns.html" },
+        "kjs-segeberg":        { "dropdown": true },
+        "aufgaben":            { "dropdown": true },
+        "infomobil":           { "label": "Infomobil", "href": "/jaeger/infomobil.html" },
+        "weitere-themen":      { "hidden": true }
+    },
     "kjs": [
-        {
-            "label": "Über uns",
-            "href": "/jaeger/ueber-uns.html"
-        },
-        {
-            "label": "Übersicht",
-            "href": "/jaeger/index.html"
-        },
         {
             "label": "Landesjagdverband",
             "href": "/jaeger/landesjagdverband.html"

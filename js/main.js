@@ -271,15 +271,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileN
   }
 })();
 
-// Active nav link highlighting
-(function() {
-  const path = window.location.pathname;
-  document.querySelectorAll('.main-nav a, .mobile-nav a').forEach(a => {
-    if (a.getAttribute('href') && path.includes(a.getAttribute('href')) && a.getAttribute('href') !== '/') {
-      a.closest('li')?.classList.add('active');
-    }
-  });
-})();
+// Hinweis: Die frühere separate "Active nav link highlighting" hier wurde
+// mit Architektur-Audit Phase 2 (31.08.2026) entfernt - sie funktionierte
+// wegen unterschiedlich tiefer relativer Links (z.B. "../hundeboerse/index.html")
+// ohnehin nur zufällig (z.B. gar nicht auf den Hundebörse-Unterseiten) und ist
+// jetzt durch die URL-basierte Berechnung im zentralen Navigations-Modul
+// weiter oben (isActiveSection(), direkt beim Rendern von .main-nav/.mobile-nav
+// aus navigation.json) ersetzt, die zuverlässig für alle Seitentiefen gilt.
 
 // Smooth scroll for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -397,413 +395,354 @@ function splitPostadresse(raw) {
     .catch(function() {});
 })();
 
-// Eigene Seiten nach Bereich in die Navigation verteilen + anschließend
-// die gespeicherte Gesamt-Reihenfolge aus navigation.json anwenden
-(function() {
-  var weitereItem = document.getElementById('weitere-themen-item');
-  var weltereSub  = document.getElementById('weitere-themen-sub');
-  if (!weitereItem || !weltereSub) return;
+/* =========================================================
+   ZENTRALE NAVIGATION (Architektur-Audit Phase 2, 31.08.2026)
 
-  // "Weitere Themen"-Unterpunkt bleibt versteckt –
-  // Seiten aus seiten-weitere.json erscheinen direkt im Jäger-Dropdown
+   Vorher: pro HTML-Datei komplett ausgeschriebenes <ul class="main-nav">
+   und eine eigene flache <details>-Liste fürs Handy-Menü (~42 Dateien),
+   zusätzlich nachträglich per main.js umsortiert/umbenannt anhand von
+   navigation.json, UND ein drittes, unabhängiges System, das eigene
+   Admin-Unterseiten (seiten-kjs.json usw.) direkt ins bereits gerenderte
+   DOM nachschob. Drei Mechanismen für eine einzige sichtbare Navigation -
+   das führte u.a. dazu, dass "Hundevermittlung" (per Admin angelegt) am
+   Desktop im Aufgaben-Flyout auftauchte, im Handy-Menü aber komplett fehlte,
+   weil die Handy-Spiegelung nur bestehende <li> umsortierte, nie aber neue
+   einfügte - und dazu, dass der aktive Menüpunkt auf den Hundebörse-
+   Unterseiten (anbieten.html/detail.html) nie gesetzt wurde, weil dort schlicht
+   niemand das statische class="active" von Hand ergänzt hatte.
 
-  // Hilfsfunktion: Unter-Dropdown im Jäger-Menü per Link-Text finden
-  function findJaegerSub(textSnippet) {
-    var dd = document.getElementById('jaeger-dropdown');
-    if (!dd) return null;
-    var hasSubs = dd.querySelectorAll('.has-sub');
-    for (var i = 0; i < hasSubs.length; i++) {
-      var a = hasSubs[i].querySelector(':scope > a');
-      if (a && a.textContent.includes(textSnippet)) {
-        return hasSubs[i].querySelector('ul.dropdown--sub');
-      }
-    }
-    return null;
+   Jetzt: navigation.json ist die EINE Quelle für Reihenfolge, Beschriftung,
+   Link und Sichtbarkeit des Hauptmenüs. Die bereits bestehenden, im
+   Admin-Panel "Navigation & Reihenfolge" per Drag & Drop editierbaren Felder
+   (sektionsnamen/hauptmenu/jaeger_dropdown/kjs/aufgaben/verbraucher) bleiben
+   unverändert in Struktur und Bedeutung, damit dieses Panel unverändert
+   weiterfunktioniert - ergänzt wurden nur zwei neue, rein strukturelle
+   Metadaten-Felder (hauptmenu_meta/jaeger_dropdown_meta) mit Label/Link für
+   die Punkte, die vorher ausschließlich im statischen HTML standen. Eigene
+   Admin-Unterseiten werden jetzt VOR dem Rendern in dieselben Datenarrays
+   gemischt statt hinterher per DOM-Manipulation eingefügt - Desktop und
+   Handy entstehen dadurch aus exakt denselben Daten (Punkt 5 der
+   Phase-2-Vorgabe), inklusive derselben eigenen Unterseiten.
+   ========================================================= */
+(function () {
+  var mainNavRoot = document.getElementById('mainNav');
+  var mobileNavRoot = document.getElementById('mobileNavList');
+  if (!mainNavRoot || !mobileNavRoot) { window.__navReady = Promise.resolve(); return; }
+
+  // Absichtlich KEINE zweite vollständige Navigationsstruktur als Fallback
+  // (das wäre wieder eine zweite, dauerhaft mitzupflegende Datenquelle,
+  // Punkt 6 der Phase-2-Vorgabe) - nur ein minimaler Not-Anker, falls
+  // navigation.json ausnahmsweise nicht ladbar ist, damit die Seite nicht
+  // komplett ohne Hauptnavigation dasteht.
+  var FALLBACK_NAV = {
+    sektionsnamen: {},
+    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'hundeboerse', 'termine', 'faq', 'service', 'kontakt'],
+    hauptmenu_meta: {
+      startseite:  { label: 'Startseite',  href: '/',                        navkey: 'startseite' },
+      jaeger:      { href: '#', navkey: 'jaeger' },
+      verbraucher: { href: '#', navkey: 'verbraucher' },
+      aktuelles:   { label: 'Aktuelles',   href: '/aktuelles/index.html',    navkey: 'aktuelles' },
+      hundeboerse: { label: 'Hundebörse',  href: '/hundeboerse/index.html',  navkey: 'hundeboerse' },
+      termine:     { label: 'Termine',     href: '/termine/index.html',      navkey: 'termine' },
+      faq:         { label: 'FAQ',         href: '/faq/index.html',          navkey: 'faq' },
+      service:     { label: 'Service',     href: '/service.html',            navkey: 'service' },
+      kontakt:     { label: 'Kontakt',     href: '/kontakt/index.html',      navkey: 'kontakt' }
+    },
+    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil'],
+    jaeger_dropdown_meta: {
+      'kreisjjaegermeister': { label: 'Kreisjägermeister', href: '/kreisjjaegermeister/index.html' },
+      'ueber-uns':           { label: 'Über uns',          href: '/jaeger/ueber-uns.html' },
+      'kjs-segeberg':        { dropdown: true },
+      'aufgaben':            { dropdown: true },
+      'infomobil':           { label: 'Infomobil', href: '/jaeger/infomobil.html' }
+    },
+    kjs: [], aufgaben: [], verbraucher: []
+  };
+
+  // Netlify liefert intern verlinkte Seiten ohne ".html"-Endung aus und kürzt
+  // ".../index.html" sogar auf nur den Ordner ("Pretty URLs") - das greift
+  // aber nur bei Links, die schon beim Deploy als statisches HTML vorliegen.
+  // Von main.js per JS erzeugte <a>-Elemente durchlaufen diese Umschreibung
+  // nicht. Damit per JSON gerenderte Links optisch/im href-Attribut exakt
+  // gleich aussehen wie die vorher statischen (kein ".html" im Linkziel),
+  // wird dieselbe Kürzung hier clientseitig nachgebildet.
+  function prettyHref(href) {
+    if (!href || href === '#' || /^https?:\/\//i.test(href)) return href;
+    var h = href.replace(/(^|\/)index\.html?$/i, '$1');
+    if (h === '') h = '/';
+    h = h.replace(/\.html?$/i, '');
+    return h;
   }
 
-  // Hilfsfunktion: Top-Level-Dropdown per Link-Text finden
-  function findTopDropdown(textSnippet) {
-    var items = document.querySelectorAll('.main-nav > li');
-    for (var i = 0; i < items.length; i++) {
-      var a = items[i].querySelector(':scope > a');
-      if (a && a.textContent.includes(textSnippet)) {
-        return items[i].querySelector('ul.dropdown');
-      }
-    }
-    return null;
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // Hilfsfunktion: Seiten-Liste in Ziel-Dropdown einfügen
-  function einfuegenInNav(seiten, target) {
-    (seiten || []).filter(function(s) {
-      return s.veroeffentlicht === true && s.in_navigation === true;
-    }).forEach(function(s) {
-      var href = '/seiten/?s=' + encodeURIComponent(s.slug);
-      if (target && !target.querySelector('a[href="' + href + '"]')) {
-        var li = document.createElement('li');
-        var a  = document.createElement('a');
-        a.href = href;
-        a.textContent = s.nav_label || s.titel;
-        li.appendChild(a);
-        target.appendChild(li);
-      }
+  // Welcher Hauptpunkt auf der aktuell angezeigten Seite als aktiv gilt.
+  // Ersetzt die frühere zweigleisige Lösung (von Hand gesetztes
+  // class="active" pro Datei UND eine zusätzliche, mit relativen Pfaden
+  // nicht zuverlässig funktionierende Laufzeit-Erkennung, siehe Kommentar
+  // weiter oben in dieser Datei) durch eine einzige, aus dem aktuellen
+  // URL-Pfad berechnete Regel (Punkt 4 der Phase-2-Vorgabe).
+  var SECTION_PREFIXES = {
+    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/'],
+    verbraucher: ['/verbraucher/'],
+    aktuelles: ['/aktuelles/'],
+    hundeboerse: ['/hundeboerse/'],
+    termine: ['/termine/'],
+    faq: ['/faq/'],
+    kontakt: ['/kontakt/']
+  };
+  function isActiveSection(key) {
+    var path = window.location.pathname;
+    if (key === 'startseite') return /^\/(index\.html?)?$/i.test(path);
+    if (key === 'service') return /^\/service(\.html)?$/i.test(path);
+    return (SECTION_PREFIXES[key] || []).some(function (p) { return path.indexOf(p) === 0; });
+  }
+
+  function leafHtml(item) {
+    return '<li><a href="' + escHtml(prettyHref(item.href)) + '">' + escHtml(item.label) + '</a></li>';
+  }
+
+  function flyoutHtml(labelText, items) {
+    return '<li class="has-sub"><a href="#">' + escHtml(labelText) + ' <span class="arrow-right">&#9658;</span></a>' +
+      '<ul class="dropdown dropdown--sub">' + items.map(leafHtml).join('') + '</ul></li>';
+  }
+
+  function mobileLeafHtml(item) {
+    return '<li><a href="' + escHtml(prettyHref(item.href)) + '">' + escHtml(item.label) + '</a></li>';
+  }
+
+  function mobileDetailsHtml(labelText, itemsHtml) {
+    return '<li><details><summary>' + escHtml(labelText) + '</summary>' +
+      '<ul class="mobile-nav__sub">' + itemsHtml + '</ul></details></li>';
+  }
+
+  // Inhalt des Jäger-Dropdowns wird für Desktop (verschachtelte Flyouts) UND
+  // Handy (eine flache Liste, Punkt 5 der Phase-2-Vorgabe) aus demselben
+  // jaeger_dropdown-Array + denselben kjs/aufgaben-Daten gebaut - nur die
+  // Ausgabe (onLeaf/onFlyout) unterscheidet sich.
+  function buildJaegerChildren(nav, onLeaf, onFlyout) {
+    var sn = nav.sektionsnamen || {};
+    var jdMeta = nav.jaeger_dropdown_meta || {};
+    var out = '';
+    (nav.jaeger_dropdown || []).forEach(function (jkey) {
+      var jmeta = jdMeta[jkey];
+      if (!jmeta || jmeta.hidden) return;
+      if (jkey === 'kjs-segeberg') out += onFlyout(sn.kjs || 'KJS Segeberg', nav.kjs || []);
+      else if (jkey === 'aufgaben') out += onFlyout(sn.aufgaben || 'Aufgaben der Kreisjägerschaft', nav.aufgaben || []);
+      else out += onLeaf(jmeta);
     });
+    return out;
   }
 
-  // Alle Sektions-Dateien laden
-  var sektionen = [
-    { url: '/content/seiten-kjs.json',        target: function() { return findJaegerSub('KJS Segeberg'); } },
-    { url: '/content/seiten-aufgaben.json',    target: function() { return findJaegerSub('Aufgaben'); } },
-    { url: '/content/seiten-verbraucher.json', target: function() { return findTopDropdown('Verbraucher'); } },
-    // Legacy: alte seiten.json mit bereich-Feld
-    { url: '/content/seiten.json', bereich: true }
-  ];
+  function renderDesktopNav(nav) {
+    var sn = nav.sektionsnamen || {};
+    var html = '';
 
-  // insertJobs sammelt alle Promises, die eigene Unterseiten in die Menüs
-  // einfügen. Die finale Sortierung anhand von navigation.json darf erst
-  // starten, NACHDEM alle diese Seiten im DOM stehen – sonst landen frisch
-  // eingefügte Seiten nach der Umsortierung wieder am Ende und die per
-  // Drag & Drop im Admin gespeicherte Reihenfolge wird auf der Website
-  // nicht korrekt angezeigt.
-  var insertJobs = sektionen.map(function(s) {
-    return fetchContent(s.url)
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        if (s.bereich) {
-          // Legacy seiten.json: bereich-Feld auswerten
-          (data.seiten || []).filter(function(p) {
-            return p.veroeffentlicht === true && p.in_navigation === true;
-          }).forEach(function(p) {
-            var bereich = p.bereich || 'weitere-themen';
-            var t = bereich === 'kjs' ? findJaegerSub('KJS Segeberg')
-                  : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
-                  : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
-                  : document.getElementById('weitere-themen-sub');
-            var href = '/seiten/?s=' + encodeURIComponent(p.slug);
-            if (t && !t.querySelector('a[href="' + href + '"]')) {
-              var li = document.createElement('li');
-              var a  = document.createElement('a');
-              a.href = href; a.textContent = p.nav_label || p.titel;
-              li.appendChild(a); t.appendChild(li);
-            }
-          });
-        } else {
-          einfuegenInNav(data.seiten, s.target());
-        }
-      })
-      .catch(function(){});
-  });
-
-  // "Weitere Themen"-Flyout (seiten-weitere.json) am 22.08.2026 auf
-  // Laurin-Wunsch deaktiviert (unnötiger, verwirrender Menüpunkt - siehe
-  // gleichlautender Kommentar in admin.js). weitereItem bleibt dadurch
-  // dauerhaft display:none wie im HTML vorgegeben, weltereSub bleibt leer.
-  // Bewusst NICHT das HTML in allen Seiten angefasst (rein kosmetischer,
-  // unsichtbarer Rest-Knoten, kein funktionales Risiko) - bei Bedarf
-  // später in einem eigenen Aufräum-Durchgang site-weit entfernbar.
-
-  // ── Navigationsreihenfolge, Sektionsnamen und Hauptmenü-Reihenfolge
-  //    aus navigation.json (läuft erst, wenn alle obigen Seiten eingefügt
-  //    sind, siehe Kommentar bei insertJobs oben) ─────────────────────
-  // WICHTIG: window.__navReady muss SOFORT (synchron) ein echtes Promise
-  // sein, nicht erst tief verschachtelt später zugewiesen werden – sonst
-  // liest die "Verwandte Seiten"-Rechtsnavigation (siehe weiter unten in
-  // dieser Datei, läuft direkt im Anschluss beim Seitenaufbau) noch
-  // "undefined" aus, wartet dadurch gar nicht wirklich und zeigt die
-  // unsortierte Rohreihenfolge statt der in navigation.json gespeicherten
-  // (per Admin-Drag&Drop einstellbaren) Reihenfolge. Deshalb hier direkt
-  // zuweisen und das Ergebnis der Kette per return durchreichen.
-  window.__navReady = Promise.all(insertJobs).then(function() {
-    // Reorder <li> children of `sub` to match `items` array order
-    // (items kann statische Seiten UND eigene Unterseiten enthalten,
-    // z.B. href="/jaeger/vorstand.html" oder href="/seiten/?s=mein-slug")
-    function reorderSub(sub, items) {
-      if (!sub || !items || !items.length) return;
-      // Netlify liefert interne Links ohne ".html" aus (Pretty URLs) – deshalb
-      // Dateiname beidseitig ohne Endung/Query vergleichen, sonst matcht nichts.
-      function baseName(href) {
-        return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
+    (nav.hauptmenu || []).forEach(function (key) {
+      if (key === 'jaeger') {
+        var sub = buildJaegerChildren(nav, leafHtml, flyoutHtml);
+        // "Weitere Themen": seit 22.08.2026 auf Laurin-Wunsch deaktiviert
+        // (siehe admin.js) - Platzhalter bleibt unsichtbar im DOM (kein
+        // funktionales Risiko, spätere Aufräumaktion außerhalb dieser
+        // Phase). Bewusst nicht Teil von jaeger_dropdown_meta, da dauerhaft
+        // leer/inaktiv.
+        sub += '<li class="has-sub" id="weitere-themen-item" style="display:none;">' +
+          '<a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>' +
+          '<ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul></li>';
+        html += '<li' + (isActiveSection('jaeger') ? ' class="active"' : '') + '>' +
+          '<a href="#" data-navkey="jaeger">' + escHtml(sn.jaeger || 'Jäger') + ' <span class="arrow">▾</span></a>' +
+          '<ul class="dropdown" id="jaeger-dropdown">' + sub + '</ul></li>';
+        return;
       }
-      items.forEach(function(item) {
-        var filename = baseName(item.href);
-        sub.querySelectorAll(':scope > li').forEach(function(li) {
-          var a = li.querySelector('a');
-          if (a && a.getAttribute('href') && filename && baseName(a.getAttribute('href')) === filename) {
-            sub.appendChild(li);
-          }
+      if (key === 'verbraucher') {
+        var vSub = (nav.verbraucher || []).map(leafHtml).join('');
+        html += '<li' + (isActiveSection('verbraucher') ? ' class="active"' : '') + '>' +
+          '<a href="#" data-navkey="verbraucher">' + escHtml(sn.verbraucher || 'Verbraucher') + ' <span class="arrow">▾</span></a>' +
+          '<ul class="dropdown">' + vSub + '</ul></li>';
+        return;
+      }
+      var meta = (nav.hauptmenu_meta || {})[key];
+      if (!meta) return;
+      html += '<li' + (isActiveSection(key) ? ' class="active"' : '') + '>' +
+        '<a href="' + escHtml(prettyHref(meta.href)) + '" data-navkey="' + escHtml(meta.navkey || key) + '">' +
+        escHtml(meta.label || key) + '</a></li>';
+    });
+
+    mainNavRoot.innerHTML = html;
+  }
+
+  function renderMobileNav(nav) {
+    var sn = nav.sektionsnamen || {};
+    var html = '';
+
+    (nav.hauptmenu || []).forEach(function (key) {
+      if (key === 'jaeger') {
+        var sub = buildJaegerChildren(nav, mobileLeafHtml, function (label, items) {
+          return items.map(mobileLeafHtml).join('');
         });
+        html += mobileDetailsHtml(sn.jaeger || 'Jäger', sub);
+        return;
+      }
+      if (key === 'verbraucher') {
+        html += mobileDetailsHtml(sn.verbraucher || 'Verbraucher', (nav.verbraucher || []).map(mobileLeafHtml).join(''));
+        return;
+      }
+      var meta = (nav.hauptmenu_meta || {})[key];
+      if (!meta) return;
+      html += '<li><a href="' + escHtml(prettyHref(meta.href)) + '">' + escHtml(meta.label || key) + '</a></li>';
+    });
+
+    mobileNavRoot.innerHTML = html;
+  }
+
+  // Hauptmenü/Dropdowns beim Verlassen mit der Maus mit kurzer Verzögerung
+  // schließen (Frank-Bug-Report: sofortiges Zuklappen beim leicht diagonalen
+  // Rüberfahren zum Untermenü, weil das bisher rein per CSS ":hover"
+  // gesteuert war). Läuft jetzt erst NACH dem Rendern (vorher eine
+  // eigenständige IIFE weiter unten in dieser Datei, siehe Hinweis dort),
+  // weil .main-nav/.has-sub erst nach dem Laden von navigation.json existieren.
+  function wireHoverFlyouts() {
+    var CLOSE_DELAY = 350; // ms
+    var timers = new WeakMap();
+    function openNow(elm) {
+      var t = timers.get(elm);
+      if (t) { clearTimeout(t); timers.delete(elm); }
+      elm.classList.add('nav-open');
+    }
+    function closeDelayed(elm) {
+      var t = timers.get(elm);
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { elm.classList.remove('nav-open'); timers.delete(elm); }, CLOSE_DELAY);
+      timers.set(elm, t);
+    }
+    function wire(selector) {
+      document.querySelectorAll(selector).forEach(function (elm) {
+        elm.addEventListener('mouseenter', function () { openNow(elm); });
+        elm.addEventListener('mouseleave', function () { closeDelayed(elm); });
       });
     }
+    wire('.main-nav > li');   // Hauptmenü-Dropdowns (Jäger, Verbraucher, ...)
+    wire('.has-sub');         // Verschachtelte Flyout-Untermenüs (KJS Segeberg, Aufgaben ...)
+  }
 
-    // Rename the text node of a nav link (preserves inner <span> elements)
-    function renameNavLink(el, newText) {
-      if (!el) return;
-      el.childNodes.forEach(function(node) {
-        if (node.nodeType === 3 && node.textContent.trim()) {
-          node.textContent = newText + ' ';
-        }
+  function fetchJsonSafe(path) {
+    return fetchContent(path).then(function (r) { return r.json(); }).catch(function () { return null; });
+  }
+
+  function filteredSeiten(list) {
+    return (list || []).filter(function (s) { return s.veroeffentlicht === true && s.in_navigation === true; })
+      .map(function (s) { return { label: s.nav_label || s.titel, href: '/seiten/?s=' + encodeURIComponent(s.slug) }; });
+  }
+
+  // Eigene Admin-Unterseiten (seiten-kjs.json/seiten-aufgaben.json/
+  // seiten-verbraucher.json + legacy seiten.json mit bereich-Feld) werden
+  // VOR dem Rendern in die kjs/aufgaben/verbraucher-Arrays gemischt, an den
+  // Anfang gestellt (das entspricht der bisherigen sichtbaren Reihenfolge,
+  // die durch das alte nachträgliche Umsortieren zufällig entstand - siehe
+  // vorherige main.js-Version). Dadurch entstehen Desktop- und Handy-Menü
+  // aus derselben, bereits vollständigen Datenbasis.
+  function mergeDynamicSeiten(nav, results) {
+    var dynKjs = filteredSeiten(results[1] && results[1].seiten);
+    var dynAufgaben = filteredSeiten(results[2] && results[2].seiten);
+    var dynVerbraucher = filteredSeiten(results[3] && results[3].seiten);
+
+    ((results[4] && results[4].seiten) || [])
+      .filter(function (p) { return p.veroeffentlicht === true && p.in_navigation === true; })
+      .forEach(function (p) {
+        var entry = { label: p.nav_label || p.titel, href: '/seiten/?s=' + encodeURIComponent(p.slug) };
+        var bereich = p.bereich || 'weitere-themen';
+        if (bereich === 'kjs') dynKjs.push(entry);
+        else if (bereich === 'aufgaben') dynAufgaben.push(entry);
+        else if (bereich === 'verbraucher') dynVerbraucher.push(entry);
+        // 'weitere-themen': Flyout ist seit 22.08.2026 deaktiviert, Eintrag bleibt ungenutzt.
       });
-    }
 
-    // Map nav key to main-nav <li> by matching first <a> href pattern
-    // Netlify liefert interne Links ohne ".html"-Endung aus (Pretty URLs) –
-    // UND kürzt "/ordner/index.html" sogar auf "/ordner/" (kein "index" mehr
-    // im Pfad, nur der Ordner mit Schrägstrich). Alle drei Formen müssen hier
-    // erkannt werden, sonst matcht z.B. "termine" nach dem Deploy gar nichts
-    // mehr (siehe auch reorderSub()/baseName() oben für dieselbe Ursache).
-    var KEY_HREF = {
-      startseite: /^(\.\.\/)*(index(\.html)?)?\/?$/,
-      jaeger:     /jaeger\/(index(\.html)?)?$/,
-      verbraucher:/verbraucher\/(index(\.html)?)?$/,
-      termine:    /termine\/(index(\.html)?)?$/,
-      aktuelles:  /aktuelles\/(index(\.html)?)?$/,
-      hundeboerse:/hundeboerse\/(index(\.html)?)?$/,
-      faq:        /faq\/(index(\.html)?)?$/,
-      service:    /service(\.html)?$/,
-      kontakt:    /kontakt\/(index(\.html)?)?$/
+    return {
+      sektionsnamen: nav.sektionsnamen || {},
+      hauptmenu: nav.hauptmenu || FALLBACK_NAV.hauptmenu,
+      hauptmenu_meta: nav.hauptmenu_meta || FALLBACK_NAV.hauptmenu_meta,
+      jaeger_dropdown: nav.jaeger_dropdown || FALLBACK_NAV.jaeger_dropdown,
+      jaeger_dropdown_meta: nav.jaeger_dropdown_meta || FALLBACK_NAV.jaeger_dropdown_meta,
+      kjs: dynKjs.concat(nav.kjs || []),
+      aufgaben: dynAufgaben.concat(nav.aufgaben || []),
+      verbraucher: dynVerbraucher.concat(nav.verbraucher || [])
     };
+  }
 
-    // Robusterer Abgleich für Hauptmenü-Punkte: bevorzugt das feste
-    // data-navkey-Attribut (unabhängig vom href, funktioniert auch wenn ein
-    // Punkt wie "Jäger" bewusst auf "#" zeigt, siehe KJS-Segeberg-Fix weiter
-    // unten). Fällt nur zurück auf den href-Regex, falls data-navkey auf
-    // einer Seite mal fehlen sollte.
-    function matchesNavKey(a, key) {
-      if (!a) return false;
-      var dk = a.getAttribute('data-navkey');
-      if (dk) return dk === key;
-      var pattern = KEY_HREF[key];
-      return !!(pattern && pattern.test(a.getAttribute('href') || ''));
-    }
+  // Eigene Hauptpunkte aus navigation-extra.json, vor FAQ eingefügt - jetzt
+  // in Desktop UND Handy (vorher fehlte diese Einfügung im Handy-Menü
+  // komplett, aktuell nicht sichtbar, da navigation-extra.json derzeit leer ist).
+  function insertNavigationExtra() {
+    return fetchJsonSafe('/content/navigation-extra.json').then(function (data) {
+      if (!data || !data.hauptpunkte || !data.hauptpunkte.length) return;
 
-    var jaegerDD = document.getElementById('jaeger-dropdown');
-    var mainNav  = document.querySelector('.main-nav');
+      data.hauptpunkte.forEach(function (hp) {
+        var seiten = (hp.seiten || []).filter(function (s) { return s.veroeffentlicht === true && s.in_navigation === true; });
+        if (!seiten.length || !hp.label) return;
 
-    // Wird erst erfüllt, wenn ALLE dynamisch eingefügten Seiten (KJS
-    // Segeberg/Aufgaben/Verbraucher/Weitere Themen) UND die Umsortierung/
-    // Umbenennung aus navigation.json fertig im Menü stehen. Per return an
-    // window.__navReady (oben zugewiesen) durchgereicht, damit die
-    // generische "Verwandte Seiten"-Navigation weiter unten in dieser Datei
-    // wirklich darauf warten kann.
-    return fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
-
-      // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
-      if (jaegerDD) {
-        // KJS Segeberg sub-menu
-        if (d.kjs && d.kjs.length) {
-          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-            var a = hs.querySelector(':scope > a');
-            if (a && a.textContent.indexOf('KJS') !== -1) {
-              reorderSub(hs.querySelector('ul.dropdown--sub'), d.kjs);
-            }
-          });
-        }
-        // Aufgaben sub-menu
-        if (d.aufgaben && d.aufgaben.length) {
-          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-            var a = hs.querySelector(':scope > a');
-            if (a && a.textContent.indexOf('Aufgaben') !== -1) {
-              reorderSub(hs.querySelector('ul.dropdown--sub'), d.aufgaben);
-            }
-          });
-        }
-      }
-      // Verbraucher dropdown
-      if (d.verbraucher && d.verbraucher.length && mainNav) {
-        mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-          var a = li.querySelector(':scope > a');
-          if (a && a.textContent.indexOf('Verbraucher') !== -1) {
-            reorderSub(li.querySelector('ul.dropdown'), d.verbraucher);
-          }
-        });
-      }
-
-      // ── 2. Section name renaming (FEATURE 2) ───────────────────
-      if (d.sektionsnamen) {
-        var sn = d.sektionsnamen;
-        if (jaegerDD) {
-          // KJS Segeberg label
-          if (sn.kjs) {
-            jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-              var a = hs.querySelector(':scope > a');
-              if (a && a.textContent.indexOf('KJS') !== -1) renameNavLink(a, sn.kjs);
-            });
-          }
-          // Aufgaben label
-          if (sn.aufgaben) {
-            jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-              var a = hs.querySelector(':scope > a');
-              if (a && a.textContent.indexOf('Aufgaben') !== -1) renameNavLink(a, sn.aufgaben);
-            });
-          }
-        }
-        // Jäger main nav label
-        if (sn.jaeger && mainNav) {
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, 'jaeger')) renameNavLink(a, sn.jaeger);
-          });
-        }
-        // Verbraucher main nav label
-        if (sn.verbraucher && mainNav) {
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, 'verbraucher')) renameNavLink(a, sn.verbraucher);
-          });
-        }
-      }
-
-      // ── 3. Main menu reordering (FEATURE 3) ────────────────────
-      if (d.hauptmenu && d.hauptmenu.length && mainNav) {
-        d.hauptmenu.forEach(function(key) {
-          if (!KEY_HREF[key]) return;
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, key)) {
-              mainNav.appendChild(li); // move to end in specified order
-            }
-          });
-        });
-      }
-
-      // ── 4. Jäger-Dropdown Direktpunkte umsortieren (FEATURE 4) ───
-      if (d.jaeger_dropdown && d.jaeger_dropdown.length && jaegerDD) {
-        var JAEGER_MATCH = {
-          'ueber-uns':           function(li) { var a = li.querySelector(':scope > a'); return a && /ueber-uns/.test(a.getAttribute('href') || ''); },
-          'kreisjjaegermeister': function(li) { var a = li.querySelector(':scope > a'); return a && /kreisjjaegermeister/.test(a.getAttribute('href') || ''); },
-          'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && li.classList.contains('has-sub') && /KJS/.test(a.textContent || ''); },
-          'aufgaben':            function(li) { var a = li.querySelector(':scope > a'); return a && /Aufgaben/.test(a.textContent || ''); },
-          'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); },
-          'weitere-themen':      function(li) { return li.id === 'weitere-themen-item'; }
-        };
-        d.jaeger_dropdown.forEach(function(key) {
-          var match = JAEGER_MATCH[key];
-          if (!match) return;
-          jaegerDD.querySelectorAll(':scope > li').forEach(function(li) {
-            if (match(li)) jaegerDD.appendChild(li);
-          });
-        });
-      }
-
-      // ── 5. Mobile-Nav: gleiche Reihenfolge wie Desktop anwenden ──
-      // Handy-Menü ist eine eigene flache Liste (kein has-sub-Flyout wie
-      // am Desktop) – Gruppen werden über die href-Listen aus
-      // navigation.json (kjs/aufgaben) erkannt und dann als zusammen-
-      // hängender Block in der gespeicherten Reihenfolge einsortiert.
-      (function() {
-        function hrefBase(href) {
-          return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
-        }
-        var jaegerDetails = Array.prototype.filter.call(
-          document.querySelectorAll('#mobileNav details'),
-          function(det) {
-            var sum = det.querySelector('summary');
-            return sum && sum.textContent.trim() === 'Jäger';
-          }
-        )[0];
-        var mobileSub = jaegerDetails && jaegerDetails.querySelector('ul.mobile-nav__sub');
-        if (!mobileSub) return;
-
-        var kjsHrefs = (d.kjs || []).map(function(i) { return hrefBase(i.href); });
-        var aufgabenHrefs = (d.aufgaben || []).map(function(i) { return hrefBase(i.href); });
-
-        var groups = { 'ueber-uns': [], 'kreisjjaegermeister': [], infomobil: [], kjs: [], aufgaben: [], rest: [] };
-        Array.prototype.forEach.call(mobileSub.querySelectorAll(':scope > li'), function(li) {
-          var a = li.querySelector('a');
-          var href = a ? (a.getAttribute('href') || '') : '';
-          var base = hrefBase(href);
-          if (/ueber-uns/.test(href)) groups['ueber-uns'].push(li);
-          else if (/kreisjjaegermeister/.test(href)) groups['kreisjjaegermeister'].push(li);
-          else if (/infomobil/.test(href)) groups.infomobil.push(li);
-          else if (kjsHrefs.indexOf(base) !== -1) groups.kjs.push({ li: li, base: base });
-          else if (aufgabenHrefs.indexOf(base) !== -1) groups.aufgaben.push({ li: li, base: base });
-          else groups.rest.push(li);
-        });
-
-        function sortByOrder(items, order) {
-          var out = [];
-          order.forEach(function(base) {
-            var found = items.filter(function(it) { return it.base === base; })[0];
-            if (found) out.push(found.li);
-          });
-          return out;
-        }
-
-        var KEY_LIS = {
-          'ueber-uns':           groups['ueber-uns'],
-          'kreisjjaegermeister': groups['kreisjjaegermeister'],
-          'kjs-segeberg':        sortByOrder(groups.kjs, kjsHrefs),
-          'aufgaben':            sortByOrder(groups.aufgaben, aufgabenHrefs),
-          'infomobil':           groups.infomobil,
-          'weitere-themen':      []
-        };
-
-        (d.jaeger_dropdown || []).forEach(function(key) {
-          (KEY_LIS[key] || []).forEach(function(li) { mobileSub.appendChild(li); });
-        });
-        // Sicherheitsnetz: alles nicht Zugeordnete (z.B. neue Seiten) hinten anhängen
-        groups.rest.forEach(function(li) { mobileSub.appendChild(li); });
-      })();
-
-    }).catch(function() {
-      // navigation.json not yet present – silently keep original order
-    });
-  });
-})();
-
-// Eigene Hauptpunkte aus navigation-extra.json in die Hauptnavigation einfügen
-(function() {
-  fetchContent('/content/navigation-extra.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var nav = document.querySelector('.main-nav');
-      if (!nav || !data.hauptpunkte || !data.hauptpunkte.length) return;
-
-      data.hauptpunkte.forEach(function(hp) {
-        var seiten = (hp.seiten || []).filter(function(s) {
-          return s.veroeffentlicht === true && s.in_navigation === true;
-        });
-        if (!seiten.length) return;
-
-        var li = document.createElement('li');
-
+        var desktopLi = document.createElement('li');
+        var mobileHtml;
         if (seiten.length === 1) {
-          // Einzelne Seite → direkt verlinken
-          var a = document.createElement('a');
-          a.href = '/seiten/?s=' + encodeURIComponent(seiten[0].slug);
-          a.textContent = hp.label;
-          li.appendChild(a);
+          var href = escHtml('/seiten/?s=' + encodeURIComponent(seiten[0].slug));
+          var label = escHtml(hp.label);
+          desktopLi.innerHTML = '<a href="' + href + '">' + label + '</a>';
+          mobileHtml = '<li><a href="' + href + '">' + label + '</a></li>';
         } else {
-          // Mehrere Seiten → Dropdown
-          var a = document.createElement('a');
-          a.href = '#';
-          a.innerHTML = hp.label + ' <span class="arrow">&#9662;</span>';
-          li.appendChild(a);
-          var ul = document.createElement('ul');
-          ul.className = 'dropdown';
-          seiten.forEach(function(s) {
-            var sli = document.createElement('li');
-            var sa = document.createElement('a');
-            sa.href = '/seiten/?s=' + encodeURIComponent(s.slug);
-            sa.textContent = s.nav_label || s.titel;
-            sli.appendChild(sa);
-            ul.appendChild(sli);
-          });
-          li.appendChild(ul);
+          var subHtml = seiten.map(function (s) {
+            return '<li><a href="' + escHtml('/seiten/?s=' + encodeURIComponent(s.slug)) + '">' + escHtml(s.nav_label || s.titel) + '</a></li>';
+          }).join('');
+          desktopLi.innerHTML = '<a href="#">' + escHtml(hp.label) + ' <span class="arrow">&#9662;</span></a>' +
+            '<ul class="dropdown">' + subHtml + '</ul>';
+          mobileHtml = mobileDetailsHtml(hp.label, subHtml);
         }
 
-        // Vor FAQ einfügen (oder am Ende der Nav)
-        var faqItem = Array.from(nav.querySelectorAll(':scope > li > a')).find(function(a) {
+        var faqLink = Array.prototype.find.call(mainNavRoot.querySelectorAll(':scope > li > a'), function (a) {
           return a.textContent.trim() === 'FAQ';
         });
-        if (faqItem) {
-          nav.insertBefore(li, faqItem.closest('li'));
-        } else {
-          nav.appendChild(li);
-        }
+        if (faqLink) mainNavRoot.insertBefore(desktopLi, faqLink.closest('li'));
+        else mainNavRoot.appendChild(desktopLi);
+
+        var mobileFaqLi = Array.prototype.find.call(mobileNavRoot.querySelectorAll(':scope > li'), function (li) {
+          var a = li.querySelector(':scope > a');
+          return a && a.textContent.trim() === 'FAQ';
+        });
+        var mobileWrap = document.createElement('div');
+        mobileWrap.innerHTML = mobileHtml;
+        var mobileEl = mobileWrap.firstElementChild;
+        if (mobileFaqLi) mobileNavRoot.insertBefore(mobileEl, mobileFaqLi);
+        else mobileNavRoot.appendChild(mobileEl);
       });
-    })
-    .catch(function() {});
+    }).catch(function () {});
+  }
+
+  // WICHTIG: window.__navReady muss SOFORT (synchron) ein echtes Promise sein
+  // - sonst liest die "Verwandte Seiten"-Rechtsnavigation (weiter unten in
+  // dieser Datei, per Promise.resolve(window.__navReady).then(...)) noch
+  // "undefined" aus und wartet dadurch gar nicht wirklich.
+  window.__navReady = Promise.all([
+    fetchJsonSafe('/content/navigation.json'),
+    fetchJsonSafe('/content/seiten-kjs.json'),
+    fetchJsonSafe('/content/seiten-aufgaben.json'),
+    fetchJsonSafe('/content/seiten-verbraucher.json'),
+    fetchJsonSafe('/content/seiten.json')
+  ]).then(function (results) {
+    var merged = mergeDynamicSeiten(results[0] || FALLBACK_NAV, results);
+    renderDesktopNav(merged);
+    renderMobileNav(merged);
+    wireHoverFlyouts();
+    return insertNavigationExtra();
+  }).catch(function () {
+    // navigation.json nicht ladbar (oder unerwarteter Fehler beim Rendern):
+    // minimaler Not-Anker (siehe FALLBACK_NAV oben), damit die Seite nicht
+    // komplett ohne Hauptnavigation dasteht.
+    var merged = mergeDynamicSeiten(FALLBACK_NAV, []);
+    renderDesktopNav(merged);
+    renderMobileNav(merged);
+    wireHoverFlyouts();
+  });
 })();
 
 
@@ -1193,45 +1132,12 @@ if (contactForm) {
   }
 })();
 
-// ── Hauptmenü: Dropdowns schließen mit kurzer Verzögerung ────────────────
-// Frank hatte gemeldet, dass sich die Menüs (z.B. "KJS Segeberg" → Flyout
-// mit Landesjagdverband, Vorstand, ...) beim Rüberfahren mit der Maus sofort
-// schließen, sobald man nur minimal von der geraden Linie abweicht. Das
-// liegt daran, dass die Anzeige bisher rein per CSS ":hover" gesteuert war –
-// verlässt der Mauszeiger auch nur für einen Sekundenbruchteil den Menüpunkt
-// (z.B. beim diagonalen Rüberfahren zum Untermenü), klappt alles sofort zu.
-// Diese Funktion ergänzt eine kurze "Toleranzzeit": Beim Verlassen wird das
-// Menü nicht sofort geschlossen, sondern erst nach einer kurzen Verzögerung –
-// fährt man in der Zwischenzeit zurück oder ins Untermenü, bleibt es offen.
-(function () {
-  var CLOSE_DELAY = 350; // ms
-  var timers = new WeakMap();
-
-  function openNow(el) {
-    var t = timers.get(el);
-    if (t) { clearTimeout(t); timers.delete(el); }
-    el.classList.add('nav-open');
-  }
-  function closeDelayed(el) {
-    var t = timers.get(el);
-    if (t) clearTimeout(t);
-    t = setTimeout(function () {
-      el.classList.remove('nav-open');
-      timers.delete(el);
-    }, CLOSE_DELAY);
-    timers.set(el, t);
-  }
-
-  function wire(selector) {
-    document.querySelectorAll(selector).forEach(function (el) {
-      el.addEventListener('mouseenter', function () { openNow(el); });
-      el.addEventListener('mouseleave', function () { closeDelayed(el); });
-    });
-  }
-
-  wire('.main-nav > li');   // Hauptmenü-Dropdowns (Jäger, Verbraucher, ...)
-  wire('.has-sub');         // Verschachtelte Flyout-Untermenüs (KJS Segeberg, Aufgaben ...)
-})();
+// Hinweis: Das Öffnen/Schließen der Dropdowns mit kurzer Verzögerung beim
+// Rüberfahren mit der Maus (Frank-Bug-Report, "KJS Segeberg"-Flyout schloss
+// beim leicht diagonalen Rüberfahren sofort) läuft seit Architektur-Audit
+// Phase 2 (31.08.2026) als wireHoverFlyouts() im zentralen Navigations-Modul
+// weiter oben in dieser Datei - dort erst NACH dem Rendern von .main-nav aus
+// navigation.json aufgerufen, da diese Elemente vorher noch nicht existieren.
 
 // ── Bildergalerie-Lightbox (site-weit) ────────────────────────────────────
 // Frank-Wunsch: Klick auf ein Galerie-Bild soll es NICHT mehr als eigene

@@ -52,63 +52,7 @@
     </a>
 
     <nav aria-label="Hauptnavigation">
-      <ul class="main-nav">
-        <li class="active"><a href="index.html" data-navkey="startseite">Startseite</a></li>
-
-        <li>
-          <a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
-          <ul class="dropdown" id="jaeger-dropdown">
-          <li><a href="jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li class="has-sub"><a href="#">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="jaeger/vorstand.html">Vorstand</a></li>
-              <li><a href="jaeger/obleute.html">Obleute</a></li>
-              <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
-              <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
-              <li><a href="jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
-              <li><a href="jaeger/niederwild.html">Niederwild</a></li>
-              <li><a href="jaeger/hochwild.html">Hochwild</a></li>
-              <li><a href="jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
-              <li><a href="jaeger/satzung.html">Satzung</a></li>
-              <li><a href="jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-            </ul>
-          </li>
-          <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="aufgaben/schiessen.html">Schie&#223;wesen</a></li>
-              <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-              <li><a href="aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
-              <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
-              <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-              <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
-              <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-            </ul>
-          </li>
-          <li><a href="jaeger/infomobil.html">Infomobil</a></li>
-          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
-          </li>
-        </ul>
-        </li>
-
-        <li>
-          <a href="#" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
-          <ul class="dropdown">
-          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-          <li><a href="verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
-        </ul>
-        </li>
-
-        <li><a href="aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
-      <li><a href="hundeboerse/index.html" data-navkey="hundeboerse">Hundeb&#246;rse</a></li>
-          <li><a href="termine/index.html" data-navkey="termine">Termine</a></li>
-        <li><a href="faq/index.html" data-navkey="faq">FAQ</a></li>
-        <li><a href="service.html" data-navkey="service">Service</a></li>
-      <li><a href="kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-      </ul>
+      <ul class="main-nav" id="mainNav"></ul>
     </nav>
 
     <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen">
@@ -120,53 +64,7 @@
 <!-- ===== MOBILE NAV ===== -->
 <nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
   <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
-  <ul>
-    <li><a href="index.html">Startseite</a></li>
-    <li>
-      <details>
-        <summary>Jäger</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li><a href="jaeger/vorstand.html">Vorstand</a></li>
-          <li><a href="jaeger/obleute.html">Obleute</a></li>
-          <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
-          <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
-          <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <li><a href="jaeger/niederwild.html">Niederwild</a></li>
-          <li><a href="jaeger/hochwild.html">Hochwild</a></li>
-          <li><a href="jaeger/schiessobleute.html">Schießobleute</a></li>
-          <li><a href="jaeger/satzung.html">Satzung</a></li>
-          <li><a href="jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-          <li><a href="aufgaben/schiessen.html">Schießwesen</a></li>
-          <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-          <li><a href="aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
-          <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
-          <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-          <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
-          <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-          <li><a href="jaeger/infomobil.html">Infomobil</a></li>
-        </ul>
-      </details>
-    </li>
-    <li>
-      <details>
-        <summary>Verbraucher</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-          <li><a href="verbraucher/waidmannssprache.html">Waidmannssprache</a></li>
-        </ul>
-      </details>
-    </li>
-    <li><a href="aktuelles/index.html">Aktuelles</a></li>
-    <li><a href="hundeboerse/index.html">Hundeb&#246;rse</a></li>
-    <li><a href="termine/index.html">Termine</a></li>
-    <li><a href="faq/index.html">FAQ</a></li>
-    <li><a href="service.html">Service</a></li>
-    <li><a href="kontakt/index.html">Kontakt</a></li>
-  </ul>
+  <ul id="mobileNavList"></ul>
 </nav>
 
 <!-- ===== HERO ===== -->
