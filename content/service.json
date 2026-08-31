@@ -10,21 +10,5 @@
       "Test"
     ]
   },
-  "beitraege": [
-    {
-      "titel": "Jungwildrettung 2023 2026",
-      "datum": "2026-08-20",
-      "kategorie": "Test",
-      "text": "Test",
-      "video": "",
-      "downloads": [
-        {
-          "titel": "Jungwildrettung 2023 2026",
-          "datei": "/downloads/1786988504989-Jungwildrettung-2023-2026.pdf",
-          "vorschau": ""
-        }
-      ],
-      "archiviert": false
-    }
-  ]
+  "beitraege": []
 }
