@@ -57,7 +57,7 @@
       "id": "hb-1787928820753",
       "status": "published",
       "createdAt": "2026-08-28T14:53:40.753Z",
-      "updatedAt": "2026-08-28T16:43:46.915Z",
+      "updatedAt": "2026-08-31T13:38:17.585Z",
       "type": "litter",
       "title": "Deutsch Drahthaar – Wurf vom 12. Juni 2026",
       "breed": "Deutsch Drahthaar",
@@ -95,7 +95,11 @@
           "titel": ""
         }
       ],
-      "galerie_titel": "Bilder"
+      "galerie_titel": "Bilder",
+      "hasZuchtverband": false,
+      "zuchtverband": "",
+      "lat": 53.8371714,
+      "lng": 9.9614889
     }
   ],
   "zuchtverbaende": []
