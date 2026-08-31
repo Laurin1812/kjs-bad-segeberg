@@ -335,11 +335,16 @@
       // Sidebar: weitere Beiträge (außer dem aktuellen)
       var sidebar = document.getElementById('weitere-beitraege');
       // Nur Beiträge aus demselben Erscheinungsjahr wie der aktuelle Beitrag
-      // (Frank-Wunsch Punkt 7) – vorher wurden Jahre wild gemischt.
+      // (Frank-Wunsch Punkt 7) – vorher wurden Jahre wild gemischt. Seit dem
+      // Regressionstest Phase 0+1 (01.09.2026) außerdem: archivierte
+      // Beiträge dürfen hier nicht mehr vorgeschlagen werden, dieselbe
+      // Bedeutung von "archiviert" wie überall sonst - zentral über
+      // js/content.js statt eigener Kopie.
       var eigenesJahr = postYear(b);
-      var andere = beitraege
-        .filter(function(a, i) { return i !== idx && postYear(a) === eigenesJahr; })
-        .slice(0, 4);
+      var andere = (window.KJSContent
+        ? window.KJSContent.Aktuelles.weitereBeitraegeDesJahres(beitraege, idx, eigenesJahr)
+        : beitraege.filter(function(a, i) { return i !== idx && !a.archiviert && postYear(a) === eigenesJahr; })
+      ).slice(0, 4);
       if (andere.length) {
         sidebar.innerHTML = andere.map(function(a, j) {
           var realIdx = beitraege.indexOf(a);

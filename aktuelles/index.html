@@ -354,12 +354,24 @@
   function buildArchivSidebar() {
     var sidebar = document.getElementById('archiv-jahre');
     if (!sidebar) return;
-    var years = [];
-    _allBeitraege.forEach(function(b) {
-      var y = postYear(b);
-      if (y && years.indexOf(y) === -1) years.push(y);
-    });
-    years.sort(function(a,b){return b-a;}); // newest first
+    // Nur Jahre anbieten, in denen mindestens ein NICHT archivierter Beitrag
+    // existiert (Regressionstest-Fund 01.09.2026) - vorher konnte hier ein
+    // Jahr erscheinen, das ausschließlich archivierte Beiträge enthielt und
+    // beim Anklicken dann "Keine Beiträge für diese Auswahl" zeigte, obwohl
+    // jahresFilter() selbst schon korrekt archivierte Beiträge ausschloss.
+    // Zentrale Logik statt eigener Kopie - siehe js/content.js.
+    var years = window.KJSContent
+      ? window.KJSContent.Aktuelles.sichtbareJahre(_allBeitraege)
+      : (function() {
+          var ys = [];
+          _allBeitraege.forEach(function(b) {
+            if (b.archiviert) return;
+            var y = postYear(b);
+            if (y && ys.indexOf(y) === -1) ys.push(y);
+          });
+          ys.sort(function(a,b){return b-a;});
+          return ys;
+        })();
 
     if (!years.length) { sidebar.innerHTML = '<li><span style="color:var(--text-muted);font-size:.85rem">Keine Beiträge</span></li>'; return; }
 

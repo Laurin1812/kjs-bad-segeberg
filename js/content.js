@@ -156,6 +156,35 @@
       return sortiertNeuesteZuerst(nichtArchiviert(beitraege)).slice(0, anzahl);
     }
 
+    // Jahre für die Archiv-Sidebar: nur Jahre, in denen mindestens ein
+    // NICHT archivierter Beitrag existiert (01.09.2026, Regressionstest
+    // Phase 0+1 Punkt 1). Vorher wurden alle Jahre aus _allBeitraege
+    // gebildet, auch wenn ein Jahr ausschließlich archivierte Beiträge
+    // enthielt - so ein Jahr landete anklickbar in der Sidebar, zeigte dann
+    // aber "Keine Beiträge für diese Auswahl", weil jahresFilter() bereits
+    // korrekt filtert. Neueste zuerst.
+    function sichtbareJahre(beitraege) {
+      var jahre = [];
+      nichtArchiviert(beitraege).forEach(function (b) {
+        var y = postYear(b);
+        if (y && jahre.indexOf(y) === -1) jahre.push(y);
+      });
+      jahre.sort(function (a, b) { return b - a; });
+      return jahre;
+    }
+
+    // "Weitere Beiträge" auf der Detailseite (beitrag.html): sichtbare
+    // (nicht archivierte) Beiträge desselben Jahres, ohne den aktuell
+    // angezeigten Beitrag selbst. eigenerIndex ist der Index im
+    // UNGEFILTERTEN Original-Array (wie bei den anderen Seiten), damit
+    // "der aktuelle Beitrag" zuverlässig ausgeschlossen wird, auch wenn
+    // zwei Beiträge inhaltlich identisch wären.
+    function weitereBeitraegeDesJahres(beitraege, eigenerIndex, jahr) {
+      return (beitraege || []).filter(function (b, i) {
+        return i !== eigenerIndex && !b.archiviert && postYear(b) === jahr;
+      });
+    }
+
     function laden() {
       return fetch('/content/aktuelles.json?_=' + Date.now()).then(function (r) { return r.json(); });
     }
@@ -170,6 +199,8 @@
       jahresAuswahl: jahresAuswahl,
       standardAuswahl: standardAuswahl,
       neuesteNichtArchiviert: neuesteNichtArchiviert,
+      sichtbareJahre: sichtbareJahre,
+      weitereBeitraegeDesJahres: weitereBeitraegeDesJahres,
       laden: laden
     };
   })();
