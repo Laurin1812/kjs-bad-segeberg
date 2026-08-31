@@ -190,6 +190,9 @@
   </div>
 </div>
 
+<!-- Gemeinsame Datenschicht (Sichtbarkeit/Sortierung Termine & Aktuelles) -
+     muss vor dem folgenden Inline-Script geladen werden. -->
+<script src="../js/content.js"></script>
 <script>
 (function() {
   function formatDatum(raw) {
@@ -215,8 +218,11 @@
   // "Erscheinungsjahr" (b.jahr) hat Vorrang und bestimmt, in welchem Archiv-
   // Jahr der Beitrag einsortiert wird – unabhängig vom eigentlichen Datum.
   // Ist es leer (ältere Beiträge ohne dieses Feld), fällt es automatisch
-  // auf das Jahr aus dem Datum zurück (bisheriges Verhalten).
+  // auf das Jahr aus dem Datum zurück (bisheriges Verhalten). Jetzt zentral
+  // in js/content.js (KJSContent.Aktuelles.postYear) - dieselbe Regel gilt
+  // damit auch für Startseite und beitrag.html.
   function postYear(b) {
+    if (window.KJSContent) return window.KJSContent.Aktuelles.postYear(b);
     if (b && b.jahr) {
       var j = parseInt(b.jahr, 10);
       if (j) return j;
@@ -270,6 +276,7 @@
   // zuverlässig oben und ältere unten – unabhängig von der Reihenfolge, in
   // der sie ursprünglich in content/aktuelles.json angelegt wurden.
   function beitragSortKey(b) {
+    if (window.KJSContent) return window.KJSContent.Aktuelles.sortKey(b);
     var year = postYear(b) || 0;
     var monat = 0, tag = 0;
     var raw = (b && b.datum) || '';
@@ -290,16 +297,21 @@
     // erscheinen (31.08.2026, Architektur-Audit Punkt A3) - "alle Jahre" und
     // ein einzelnes gewähltes Jahr filterten archiviert bisher NICHT heraus,
     // obwohl "archiviert" laut Admin genau das bedeuten soll. Der Default-
-    // Zweig unten (kein Jahr gewählt) filterte bereits korrekt und bleibt
-    // unverändert - dieselbe Bedeutung von "archiviert" gilt jetzt überall.
-    if (yearFilter === 'alle') return _allBeitraege.filter(function(b) { return !b.archiviert; });
-    if (yearFilter > 0) return _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === yearFilter; });
+    // Zweig unten (kein Jahr gewählt) filterte bereits korrekt und blieb
+    // inhaltlich unverändert - "archiviert" wird jetzt überall über die
+    // zentrale KJSContent.Aktuelles.nichtArchiviert() geprüft, statt hier
+    // wiederholt "!b.archiviert" zu schreiben.
+    var nichtArchiviert = window.KJSContent
+      ? window.KJSContent.Aktuelles.nichtArchiviert(_allBeitraege)
+      : _allBeitraege.filter(function(b) { return !b.archiviert; });
+    if (yearFilter === 'alle') return nichtArchiviert;
+    if (yearFilter > 0) return nichtArchiviert.filter(function(b) { return postYear(b) === yearFilter; });
     // Default: aktuelles Jahr, nicht archiviert, oder letzte N
     var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
     var currentYear = new Date().getFullYear();
-    if (anzahl > 0) return _allBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, anzahl);
-    var thisYear = _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === currentYear; });
-    return thisYear.length > 0 ? thisYear : _allBeitraege.filter(function(b) { return !b.archiviert; });
+    if (anzahl > 0) return nichtArchiviert.slice(0, anzahl);
+    var thisYear = nichtArchiviert.filter(function(b) { return postYear(b) === currentYear; });
+    return thisYear.length > 0 ? thisYear : nichtArchiviert;
   }
 
   function jahresHeadline(yearFilter) {
@@ -329,9 +341,9 @@
     // auf einer KOPIE sortieren (nicht _allBeitraege selbst), damit origIdx
     // unten weiterhin die korrekte, unveränderte Position aus content/
     // aktuelles.json liefert (siehe Kommentar beim Laden weiter unten).
-    var sorted = filtered.slice().sort(function(a, b) {
-      return beitragSortKey(b) - beitragSortKey(a);
-    });
+    var sorted = window.KJSContent
+      ? window.KJSContent.Aktuelles.sortiertNeuesteZuerst(filtered)
+      : filtered.slice().sort(function(a, b) { return beitragSortKey(b) - beitragSortKey(a); });
     // Map back to original indices for beitrag.html?i=
     grid.innerHTML = sorted.map(function(b) {
       var origIdx = _allBeitraege.indexOf(b);

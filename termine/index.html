@@ -267,6 +267,9 @@
 </div></footer>
 
 <script src="../js/main.js"></script>
+<!-- Gemeinsame Datenschicht (Sichtbarkeit/Sortierung Termine & Aktuelles) -
+     muss vor dem folgenden Inline-Script geladen werden. -->
+<script src="../js/content.js"></script>
 <script>
 function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -294,30 +297,9 @@ function formatDatum(raw) {
   return raw;
 }
 
-// Termin-Datum als Date-Objekt (nur für den Auto-Ausblenden-Vergleich unten,
-// versteht dieselben Formate wie formatDatum).
-function parseDatum(raw) {
-  if (!raw) return null;
-  var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (m1) return new Date(+m1[3], +m1[2] - 1, +m1[1]);
-  var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m2) return new Date(+m2[1], +m2[2] - 1, +m2[3]);
-  return null;
-}
-
-// Termine sollen auf der Live-Seite verschwinden, wenn sie im Admin
-// archiviert wurden ODER ihr Datum mehr als 7 Tage zurückliegt (Frank-
-// Wunsch 20.08.2026). Bei unlesbarem Datum sicherheitshalber weiter
-// anzeigen, statt fälschlich auszublenden.
-function istSichtbar(t) {
-  if (t.archiviert) return false;
-  var d = parseDatum(t.datum);
-  if (!d) return true;
-  var grenze = new Date(d.getTime());
-  grenze.setDate(grenze.getDate() + 7);
-  grenze.setHours(23, 59, 59, 999);
-  return grenze >= new Date();
-}
+// Sichtbarkeit (archiviert / Datum + 7 Tage) und Sortierung kommen jetzt
+// zentral aus js/content.js (KJSContent.Termine), statt hier als eigene
+// Kopie zu stehen - siehe Kommentar bei fetch(...) weiter unten.
 
 // Straße/PLZ/Ort zusammengefasst (ohne Revier - das steht seit Frank-
 // Feedback 20.08.2026 in einer eigenen Tabellenspalte, damit es nicht mehr
@@ -405,7 +387,14 @@ fetch('../content/termine.json')
       if (p) p.textContent = einst.einleitung;
     }
     const alleTermine = data.termine || [];
-    const sichtbareTermine = alleTermine.filter(istSichtbar);
+    // Vorher: nur gefiltert, ohne eigene Sortierung - verließ sich darauf,
+    // dass der Admin die Termine beim Speichern schon sortiert abgelegt hat
+    // (admin.js: termineSave()). KJSContent.Termine.sichtbareSortiert() macht
+    // die Sortierung jetzt explizit auch hier, ohne das heutige (bereits
+    // korrekte) Anzeigeverhalten zu ändern.
+    const sichtbareTermine = window.KJSContent
+      ? window.KJSContent.Termine.sichtbareSortiert(alleTermine)
+      : alleTermine.filter(t => !t.archiviert);
     buildFilterBar(sichtbareTermine);
     renderTermine(sichtbareTermine);
   })

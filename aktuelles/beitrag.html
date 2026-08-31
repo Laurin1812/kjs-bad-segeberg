@@ -215,6 +215,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="../js/main.js"></script>
+<!-- Gemeinsame Datenschicht (Sichtbarkeit/Sortierung Termine & Aktuelles) -
+     muss vor dem folgenden Inline-Script geladen werden. -->
+<script src="../js/content.js"></script>
 <script>
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -234,11 +237,15 @@
   }
 
   // Erscheinungsjahr eines Beitrags – gleiche Logik wie postYear() auf der
-  // Aktuelles-Übersichtsseite (aktuelles/index.html): das Admin-Feld
+  // Aktuelles-Übersichtsseite (aktuelles/index.html), jetzt zentral in
+  // js/content.js (KJSContent.Aktuelles.postYear). Das Admin-Feld
   // "Erscheinungsjahr" (b.jahr, siehe Punkt 4) hat Vorrang, sonst Jahr aus
   // dem Datum. Wird hier für die Jahres-Trennung bei "Weitere Beiträge"
-  // gebraucht (Punkt 7).
+  // gebraucht (Punkt 7). Hinweis: die "Weitere Beiträge"-Liste filtert
+  // bewusst weiterhin NICHT nach archiviert (unverändert, außerhalb des
+  // aktuellen Auftragsumfangs für Startseite/"/aktuelles/").
   function postYear(b) {
+    if (window.KJSContent) return window.KJSContent.Aktuelles.postYear(b);
     if (b && b.jahr) {
       var j = parseInt(b.jahr, 10);
       if (j) return j;
