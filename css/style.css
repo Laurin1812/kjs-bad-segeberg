@@ -1449,7 +1449,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
 /* =========================================================
    FOOTER
    ========================================================= */
-.site-footer { background: #2e6b30; color: rgba(255,255,255,.92); padding-top: 4.5rem; }
+.site-footer { background: var(--green-main); color: rgba(255,255,255,.92); padding-top: 4.5rem; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,.2); }
 .footer-logo-emblem {
   width: 58px; height: 58px; background: var(--green-main); border-radius: 50%;

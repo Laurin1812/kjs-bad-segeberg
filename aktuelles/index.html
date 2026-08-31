@@ -286,8 +286,14 @@
   }
 
   function jahresFilter(yearFilter) {
-    if (yearFilter === 'alle') return _allBeitraege;
-    if (yearFilter > 0) return _allBeitraege.filter(function(b) { return postYear(b) === yearFilter; });
+    // Archivierte Beiträge dürfen in keiner der öffentlichen Standardansichten
+    // erscheinen (31.08.2026, Architektur-Audit Punkt A3) - "alle Jahre" und
+    // ein einzelnes gewähltes Jahr filterten archiviert bisher NICHT heraus,
+    // obwohl "archiviert" laut Admin genau das bedeuten soll. Der Default-
+    // Zweig unten (kein Jahr gewählt) filterte bereits korrekt und bleibt
+    // unverändert - dieselbe Bedeutung von "archiviert" gilt jetzt überall.
+    if (yearFilter === 'alle') return _allBeitraege.filter(function(b) { return !b.archiviert; });
+    if (yearFilter > 0) return _allBeitraege.filter(function(b) { return !b.archiviert && postYear(b) === yearFilter; });
     // Default: aktuelles Jahr, nicht archiviert, oder letzte N
     var anzahl = parseInt(_einst.hauptseite_anzahl, 10) || 0;
     var currentYear = new Date().getFullYear();
