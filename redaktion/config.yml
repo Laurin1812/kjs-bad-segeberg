@@ -24,6 +24,11 @@ collections:
             fields:
               - { label: "Titel",           name: "titel",     widget: "string" }
               - { label: "Datum",           name: "datum",     widget: "datetime", date_format: "DD.MM.YYYY", format: "DD.MM.YYYY", time_format: false, hint: "Datum aus Kalender wählen" }
+              - label: "Erscheinungsjahr (optional)"
+                name: "jahr"
+                widget: "string"
+                required: false
+                hint: "Nur ausfüllen, wenn der Beitrag in einem anderen Jahr als dem Datum einsortiert werden soll (Admin-Feld \"Erscheinungsjahr\"). Sonst leer lassen."
               - label: "Kategorie"
                 name: "kategorie"
                 widget: "select"
@@ -38,6 +43,36 @@ collections:
                   - "Jagdhornblasen"
                   - "Veranstaltung"
                   - "Pressemitteilung"
+                  - "Tierkrankheiten"
+                  - "Jagdausbildung"
+                  - "aus den Revieren"
               - { label: "Bild",            name: "bild",      widget: "image",    required: false }
               - { label: "Kurzbeschreibung",name: "text",      widget: "markdown" }
               - { label: "Link (optional)", name: "link",      widget: "string",   required: false }
+              - label: "Archiviert"
+                name: "archiviert"
+                widget: "boolean"
+                default: false
+                hint: "Erscheint dann nicht mehr in den öffentlichen Standardansichten (Startseite, „Alle Beiträge“, Jahresfilter), bleibt aber als Datensatz erhalten."
+              - label: "Bildergalerie (optional)"
+                name: "galerie"
+                widget: "list"
+                required: false
+                default: []
+                fields:
+                  - { label: "Bild",              name: "bild",  widget: "image" }
+                  - { label: "Bildunterschrift (optional)", name: "titel", widget: "string", required: false }
+              - label: "Überschrift der Bildergalerie"
+                name: "galerie_titel"
+                widget: "string"
+                required: false
+                default: "Bildergalerie"
+              - label: "Downloads (optional)"
+                name: "downloads"
+                widget: "list"
+                required: false
+                default: []
+                fields:
+                  - { label: "Titel",  name: "titel",    widget: "string" }
+                  - { label: "Datei",  name: "datei",    widget: "file" }
+                  - { label: "Vorschaubild (optional)", name: "vorschau", widget: "image", required: false }
