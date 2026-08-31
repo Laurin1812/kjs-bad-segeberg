@@ -164,15 +164,17 @@
 </div>
 
 <div class="page-content">
-  <div class="container">
-    <main class="main-content" id="hb-main">
+  <div class="container hb-overview-layout">
+    <div class="hb-overview-intro">
       <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:1.5rem;">
         Hier finden Sie aktuell angebotene Jagdhunde und Würfe. Entdecken Sie die aktuellen Angebote oder bieten Sie selbst einen Hund bzw. Wurf an.
       </p>
-      <p style="margin-bottom:2.5rem;">
+      <p style="margin-bottom:0;">
         <a href="anbieten.html" class="btn btn-primary">+ Hund / Wurf anbieten</a>
       </p>
+    </div>
 
+    <main class="main-content" id="hb-main">
       <h2 style="margin-bottom:1.5rem;">Aktuelle Hunde &amp; Würfe</h2>
       <div class="news__grid" id="hb-grid">
         <p style="color:var(--text-muted);">Anzeigen werden geladen …</p>
@@ -283,7 +285,7 @@
           '</div>' +
           '<h3 class="news-card__title">' + escHtml(a.title || '(Ohne Titel)') + '</h3>' +
           '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(a.breed || '') + '</p>' +
-          (standort ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">📍 ' + escHtml(standort) + '</p>' : '') +
+          (standort ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(standort) + '</p>' : '') +
           '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(typZeile(a)) + '</p>' +
           '<div class="hb-card-footer">' +
             '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .5rem;">' + escHtml(preisText(a)) + '</p>' +
@@ -314,7 +316,6 @@
       var grid = document.getElementById('hb-grid');
       if (!veroeffentlicht.length) {
         grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;background:var(--bg-light);border-radius:var(--radius-md);">' +
-          '<p style="font-size:2.5rem;margin-bottom:1rem;">🐕</p>' +
           '<h3 style="color:var(--green-dark);margin-bottom:.5rem;">Aktuell sind keine Anzeigen veröffentlicht.</h3>' +
           '<p style="color:var(--text-muted);">Schauen Sie gerne bald wieder vorbei.</p>' +
         '</div>';

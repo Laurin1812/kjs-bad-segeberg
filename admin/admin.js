@@ -2120,7 +2120,7 @@
       var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
       var thumb = bild
         ? '<img src="' + escAttr(bild) + '" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;">'
-        : '<div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🐕</div>';
+        : '<div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:var(--bg);"></div>';
       var metaParts = [];
       if (a.breed) metaParts.push(escHtml(a.breed));
       if (a.city || a.postalCode) metaParts.push(escHtml([a.postalCode, a.city].filter(Boolean).join(' ')));
@@ -2136,13 +2136,13 @@
           '<div class="item-meta">' + metaParts.join(' · ') + '</div>' +
         '</div>' +
         '<div class="item-actions">' +
-          '<button class="btn btn-sm btn-ghost" title="Vorschau" onclick="event.stopPropagation();hundeboerseVorschau(' + i + ')">👁️</button>' +
+          '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();hundeboerseVorschau(' + i + ')">Vorschau</button>' +
           '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();hundeboerseEdit(' + i + ')">Bearbeiten</button>' +
           (a.status === 'pending'
-            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();hundeboerseFreigeben(' + i + ')">✅ Freigeben</button>'
+            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();hundeboerseFreigeben(' + i + ')">Freigeben</button>'
             : '') +
           (a.status === 'published' || a.status === 'rejected'
-            ? '<button class="btn btn-sm btn-ghost" title="Archivieren" onclick="event.stopPropagation();hundeboerseArchivieren(' + i + ')">📦</button>'
+            ? '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();hundeboerseArchivieren(' + i + ')">Archivieren</button>'
             : '') +
           '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();hundeboerseDelete(' + i + ')">Löschen</button>' +
         '</div>' +
@@ -2205,9 +2205,9 @@
 
     var html = panelHeader(titel,
         '<button class="btn btn-outline" onclick="renderHundeboerse(S.section,S.data)">← Zurück zur Hundebörse</button>' +
-        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">👁️ Vorschau</button>' +
+        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">Vorschau</button>' +
         '<button class="btn btn-outline" onclick="hundeboerseSave(' + idx + ')">💾 Speichern</button>' +
-        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">✅ Speichern &amp; Freigeben</button>',
+        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">Speichern &amp; Freigeben</button>',
         true) +
       '<div class="panel-body">' +
 
@@ -2223,8 +2223,8 @@
         '<div class="field-row">' +
           '<label class="field-label">Art der Anzeige</label>' +
           '<div class="mdimg-size-row" id="hb-typ-group">' +
-            '<button type="button" class="mdimg-size-btn' + (!isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="single" onclick="hundeboerseTypSet(\'single\')">🐕 Einzelhund</button>' +
-            '<button type="button" class="mdimg-size-btn' + (isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="litter" onclick="hundeboerseTypSet(\'litter\')">🐕‍🦺 Wurf</button>' +
+            '<button type="button" class="mdimg-size-btn' + (!isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="single" onclick="hundeboerseTypSet(\'single\')">Einzelhund</button>' +
+            '<button type="button" class="mdimg-size-btn' + (isLitter ? ' mdimg-size-btn--active' : '') + '" data-val="litter" onclick="hundeboerseTypSet(\'litter\')">Wurf</button>' +
           '</div>' +
           '<input type="hidden" id="f-hb-type" value="' + escAttr(a.type || 'single') + '">' +
         '</div>' +
@@ -2299,9 +2299,9 @@
       '</div>' +
 
       '<div class="form-card" style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:flex-end;">' +
-        '<button class="btn btn-danger-outline" onclick="hundeboerseAblehnen(' + idx + ')">🚫 Anzeige ablehnen</button>' +
-        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">👁️ Vorschau der Anzeige</button>' +
-        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">✅ Anzeige freigeben</button>' +
+        '<button class="btn btn-danger-outline" onclick="hundeboerseAblehnen(' + idx + ')">Anzeige ablehnen</button>' +
+        '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">Vorschau der Anzeige</button>' +
+        '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">Anzeige freigeben</button>' +
       '</div>' +
       '</div>';
 
@@ -2499,8 +2499,8 @@
     var kontakt = [];
     if (a.providerName) kontakt.push(escHtml(a.providerName));
     if (a.contactPerson) kontakt.push('Ansprechpartner: ' + escHtml(a.contactPerson));
-    if (a.email) kontakt.push('✉️ ' + escHtml(a.email));
-    if (a.phone) kontakt.push('📞 ' + escHtml(a.phone));
+    if (a.email) kontakt.push(escHtml(a.email));
+    if (a.phone) kontakt.push(escHtml(a.phone));
 
     var body =
       '<p class="text-muted" style="font-size:.8rem;margin-top:-.5rem;">Interne Admin-Vorschau – so ist der aktuelle Datenstand, das endgültige öffentliche Layout entsteht erst in Phase 2.</p>' +

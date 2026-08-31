@@ -744,6 +744,32 @@ p  { margin-bottom: 1rem; }
 .page-content .container { display: grid; grid-template-columns: 1fr 290px; gap: 3rem; align-items: start; }
 .page-content.full .container { grid-template-columns: 1fr; max-width: 920px; }
 
+/* Hundebörse-Übersicht (hundeboerse/index.html) - eigenes Grid nur für diese
+   Seite (zusätzliche Klasse .hb-overview-layout auf demselben Element wie
+   .container, daher hier bewusst mit .container zusammen selektiert, um die
+   generische ".page-content .container"-Regel oben zuverlässig zu schlagen).
+   Ziel (Laurin/Frank-Feedback 31.08.2026): der grüne Geschäftsstelle-Kasten
+   rechts soll erst auf Höhe von "Aktuelle Hunde & Würfe" beginnen statt schon
+   auf Höhe des Einführungstextes. Über grid-template-areas statt festem
+   margin-top, damit es automatisch robust bleibt, egal wie lang der
+   Einführungstext ist: Zeile 1 (intro) nimmt volle Breite, Zeile 2 (main +
+   sidebar) beginnt für beide Spalten exakt an derselben Stelle. Andere Seiten
+   mit .page-content .container bleiben davon unberührt. */
+.page-content .container.hb-overview-layout {
+  grid-template-columns: 1fr 290px;
+  grid-template-areas: "intro intro" "main sidebar";
+  gap: 0 3rem;
+}
+.hb-overview-layout .hb-overview-intro { grid-area: intro; }
+.hb-overview-layout .main-content { grid-area: main; }
+.hb-overview-layout .sidebar { grid-area: sidebar; }
+@media (max-width: 900px) {
+  .page-content .container.hb-overview-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "intro" "main" "sidebar";
+  }
+}
+
 .main-content h2 { color: var(--green-dark); margin-bottom: 1rem; margin-top: 2rem; }
 .main-content h2:first-child { margin-top: 0; }
 .main-content h3 { color: var(--green-main); margin-bottom: .75rem; margin-top: 1.5rem; }

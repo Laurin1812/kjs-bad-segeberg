@@ -238,7 +238,6 @@
     document.getElementById('hb-detail-titel').textContent = 'Anzeige nicht gefunden';
     document.getElementById('hb-detail-inhalt').innerHTML =
       '<div style="text-align:center;padding:3rem 1rem;">' +
-      '<p style="font-size:3rem;margin-bottom:1rem;">🐕</p>' +
       '<h2 style="color:var(--green-dark);margin-bottom:.75rem;">Diese Anzeige wurde nicht gefunden.</h2>' +
       '<a href="index.html" class="btn btn-primary">Zurück zur Hundebörse</a>' +
       '</div>';
@@ -348,7 +347,7 @@
         '<span class="news-card__cat">' + typLabel(a.type) + '</span>' +
         '<h2 style="margin:.75rem 0 .25rem;">' + escHtml(a.title || '(Ohne Titel)') + '</h2>' +
         (a.breed ? '<p style="color:var(--text-muted);font-size:1rem;margin-bottom:.5rem;">' + escHtml(a.breed) + '</p>' : '') +
-        (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">📍 ' + escHtml(standort) + '</p>' : '') +
+        (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">' + escHtml(standort) + '</p>' : '') +
         (typZeileText ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:1rem;">' + escHtml(typZeileText) + '</p>' : '') +
         '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:1.5rem;">' + escHtml(preisText(a)) + '</p>' +
         (hatKontaktdaten ? '<a href="#hb-kontakt" class="btn btn-primary" id="hb-kontakt-btn">Anbieter kontaktieren</a>' : '') +
@@ -409,7 +408,7 @@
 
       // ── Standort ──────────────────────────────────────────────
       if (standort) {
-        html += '<h2>Standort</h2><p>📍 ' + escHtml(standort) +
+        html += '<h2>Standort</h2><p>' + escHtml(standort) +
           '<br><span style="font-size:.85rem;color:var(--text-muted);">Es wird nur der ungefähre Standort angezeigt, keine genaue Adresse. Eine Kartenansicht folgt zu einem späteren Zeitpunkt.</span></p>';
       }
 
