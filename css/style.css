@@ -767,6 +767,13 @@ p  { margin-bottom: 1rem; }
   .page-content .container.hb-overview-layout {
     grid-template-columns: 1fr;
     grid-template-areas: "intro" "main" "sidebar";
+    /* row-gap zurück auf den ursprünglichen Seitenabstand (3rem, wie die
+       generische .page-content .container-Regel ihn für alle Seiten im
+       gestapelten Mobil-Layout nutzt) - die 0 oben ist nur für den
+       zweispaltigen Desktop-Fall gedacht (intro-Zeile direkt über
+       main/sidebar), auf Mobil sollen intro/main/sidebar weiterhin normal
+       auf Abstand stehen. */
+    gap: 3rem;
   }
 }
 
