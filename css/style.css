@@ -453,7 +453,7 @@ p  { margin-bottom: 1rem; }
    .contact-box für den Seitenrahmen. Nur die Detailseiten-Kopfzeile
    (Bild links, Eckdaten rechts) und der Steckbrief-Kasten sind neu, beide
    ausschließlich mit vorhandenen CSS-Variablen (Farben/Radius/Schatten). */
-.hb-detail-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: start; margin-bottom: 2.5rem; }
+.hb-detail-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: stretch; margin-bottom: 2rem; }
 @media (max-width: 900px) {
   .hb-detail-top { grid-template-columns: 1fr; }
 }
@@ -461,6 +461,21 @@ p  { margin-bottom: 1rem; }
   display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover;
   border-radius: var(--radius-md); box-shadow: var(--shadow-md);
 }
+
+/* Eckdaten-Spalte rechts neben dem Bild (31.08.2026, Laurin-Wunsch "kompakter
+   Anzeigenkopf"): .hb-detail-top ist jetzt align-items:stretch, d.h. beide
+   Spalten sind so hoch wie die (i.d.R. höhere) Bild-Spalte. Damit dieser
+   zusätzliche Platz nicht einfach als Weißraum unter den kurzen Textzeilen
+   verpufft, ist .hb-eckdaten selbst eine Flex-Spalte mit space-between:
+   der Info-Block (__top) bleibt oben, der Kontakt-Button (__bottom) wird an
+   den unteren Rand der Bild-Spalte gezogen - beide Spalten wirken dadurch
+   wie ein gemeinsamer Anzeigenkopf, ganz ohne feste Höhen (funktioniert
+   unabhängig von Titellänge und Bildanzahl). Unter 900px greift die
+   .hb-detail-top-Regel oben (1 Spalte) - dort hat jede Zeile ohnehin ihre
+   eigene volle Höhe, sodass die Flex-Verteilung hier wirkungslos bleibt und
+   das bestehende, saubere Untereinander auf Mobil unverändert erhalten ist. */
+.hb-eckdaten { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+.hb-eckdaten__bottom { margin-top: 1rem; }
 
 /* Bildergalerie direkt am Hauptbild (29.08.2026, Laurin-Wunsch): Thumbnails
    gehören jetzt unmittelbar zum Hauptbild statt in einen eigenen Abschnitt
@@ -493,6 +508,20 @@ p  { margin-bottom: 1rem; }
 @media (max-width: 600px) {
   .steckbrief dl { grid-template-columns: 1fr; }
 }
+
+/* Standort-Karte (31.08.2026, Laurin-Wunsch "interaktive Karte", Leaflet/
+   OpenStreetMap, siehe detail.html). Eine feste Höhe ist hier normal und
+   nötig (jede Karte braucht eine konkrete Pixelhöhe) - das ist etwas
+   anderes als die vermiedenen festen Höhen im Anzeigenkopf weiter oben, wo
+   es um variable Textmengen ging. */
+.hb-map {
+  width: 100%; height: 300px; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md); margin-top: .75rem; background: var(--bg-light);
+}
+@media (max-width: 600px) {
+  .hb-map { height: 220px; }
+}
+.hb-map-link { margin-top: .5rem; font-size: .85rem; }
 
 /* Hundebörse-Detailseite: Kontaktbereich am Ende des Hauptinhalts
    (28.08.2026, Laurin/Frank-Feedback - ersetzt die vorherige doppelte

@@ -2357,8 +2357,49 @@
     }
   }
 
-  function hundeboerseCollect(idx) {
+  // Geokodierung für die Kartenansicht auf der öffentlichen Detailseite
+  // (31.08.2026, Laurin-Wunsch "interaktive Karte"). Bewusst NICHT bei jedem
+  // Seitenaufruf der Detailseite (das wäre ein Live-Request pro Website-
+  // Besucher an einen fremden Dienst und würde Nominatims Nutzungsrichtlinien
+  // widersprechen), sondern einmalig hier beim Admin-Speichern: PLZ+Ort
+  // werden über den öffentlichen OpenStreetMap-Dienst Nominatim in
+  // Koordinaten umgerechnet und zusammen mit der Anzeige abgelegt. Die
+  // Detailseite lädt dann nur noch Kartenkacheln, keinen Geokodierungs-
+  // Request. Datenschutz: es wird ausschließlich PLZ+Ort übertragen, nie
+  // eine genaue Adresse (die gibt es in den Anzeigedaten auch gar nicht).
+  // Schlägt die Geokodierung fehl (kein Treffer, Timeout, Netzwerkfehler),
+  // wird einfach nicht blockierend gespeichert wie bisher - nur eben ohne
+  // Koordinaten; die Detailseite zeigt dann den bisherigen Text ohne Karte.
+  async function hbGeocode(postalCode, city) {
+    postalCode = (postalCode || '').trim();
+    city = (city || '').trim();
+    if (!postalCode && !city) return null;
+    try {
+      var params = new URLSearchParams({ format: 'json', limit: '1', country: 'Deutschland' });
+      if (postalCode) params.set('postalcode', postalCode);
+      if (city) params.set('city', city);
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, 8000) : null;
+      var res = await fetch('https://nominatim.openstreetmap.org/search?' + params.toString(), {
+        signal: ctrl ? ctrl.signal : undefined
+      });
+      if (timer) clearTimeout(timer);
+      if (!res.ok) return null;
+      var arr = await res.json();
+      if (!arr || !arr.length) return null;
+      var lat = parseFloat(arr[0].lat);
+      var lng = parseFloat(arr[0].lon);
+      if (!isFinite(lat) || !isFinite(lng)) return null;
+      return { lat: lat, lng: lng };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function hundeboerseCollect(idx) {
     var a = S.data.anzeigen[idx];
+    var vorherigePLZ  = a.postalCode;
+    var vorherigerOrt = a.city;
     a.status        = gv('hb-status');
     a.type          = val('f-hb-type') || 'single';
     a.title         = gv('hb-title');
@@ -2391,19 +2432,38 @@
     a.phone         = gv('hb-phone');
     a.contactNotes  = gv('hb-contactNotes');
     a.galerie       = collectGalerieList();
+
+    // Koordinaten nur neu ermitteln, wenn nötig - nicht bei jedem Speichern
+    // erneut anfragen (siehe hbGeocode oben).
+    var hatOrt      = !!(a.postalCode || a.city);
+    var ortGeaendert = (a.postalCode !== vorherigePLZ) || (a.city !== vorherigerOrt);
+    if (!hatOrt) {
+      delete a.lat;
+      delete a.lng;
+    } else if (ortGeaendert || typeof a.lat !== 'number' || typeof a.lng !== 'number') {
+      var koord = await hbGeocode(a.postalCode, a.city);
+      if (koord) {
+        a.lat = koord.lat;
+        a.lng = koord.lng;
+      } else {
+        delete a.lat;
+        delete a.lng;
+      }
+    }
+
     a.updatedAt = new Date().toISOString();
     return a;
   }
 
   window.hundeboerseSave = async function(idx) {
-    hundeboerseCollect(idx);
+    await hundeboerseCollect(idx);
     await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
     toast('✅ Anzeige gespeichert!', 'ok');
     renderHundeboerse(S.section, S.data);
   };
 
-  window.hundeboerseFreigebenAusEdit = function(idx) {
-    hundeboerseCollect(idx);
+  window.hundeboerseFreigebenAusEdit = async function(idx) {
+    await hundeboerseCollect(idx);
     showConfirm('Anzeige freigeben', 'Diese Anzeige jetzt freigeben? Sie soll später auf der öffentlichen Hundebörse erscheinen.', async function() {
       var a = S.data.anzeigen[idx];
       a.status = 'published';
@@ -2427,7 +2487,7 @@
   };
 
   window.hundeboerseAblehnen = async function(idx) {
-    hundeboerseCollect(idx);
+    await hundeboerseCollect(idx);
     var a = S.data.anzeigen[idx];
     a.status = 'rejected';
     a.updatedAt = new Date().toISOString();

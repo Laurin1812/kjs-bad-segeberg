@@ -6,6 +6,10 @@
   <meta name="description" content="Hund- oder Wurf-Anzeige – Kreisjägerschaft Segeberg e.V.">
   <title>Hundebörse – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+  <!-- Leaflet/OpenStreetMap für die Standort-Karte weiter unten (31.08.2026,
+       Laurin-Wunsch). Etablierte Open-Source-Lösung ohne Tracking, per CDN
+       geladen wie das bereits vorhandene marked.js weiter unten im Body. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
@@ -186,6 +190,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -343,14 +348,16 @@
       // unten im Hauptinhalt (#hb-kontakt) statt zu einer separaten grünen
       // Sidebar-Box (28.08.2026, Laurin/Frank-Feedback "zu doppelt"). Der
       // Button erscheint nur, wenn es überhaupt Kontaktdaten gibt.
-      var rechtsHtml = '<div>' +
+      var rechtsHtml = '<div class="hb-eckdaten">' +
+        '<div class="hb-eckdaten__top">' +
         '<span class="news-card__cat">' + typLabel(a.type) + '</span>' +
         '<h2 style="margin:.75rem 0 .25rem;">' + escHtml(a.title || '(Ohne Titel)') + '</h2>' +
         (a.breed ? '<p style="color:var(--text-muted);font-size:1rem;margin-bottom:.5rem;">' + escHtml(a.breed) + '</p>' : '') +
         (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">' + escHtml(standort) + '</p>' : '') +
         (typZeileText ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:1rem;">' + escHtml(typZeileText) + '</p>' : '') +
-        '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:1.5rem;">' + escHtml(preisText(a)) + '</p>' +
-        (hatKontaktdaten ? '<a href="#hb-kontakt" class="btn btn-primary" id="hb-kontakt-btn">Anbieter kontaktieren</a>' : '') +
+        '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:.5rem;">' + escHtml(preisText(a)) + '</p>' +
+        '</div>' +
+        (hatKontaktdaten ? '<div class="hb-eckdaten__bottom"><a href="#hb-kontakt" class="btn btn-primary" id="hb-kontakt-btn">Anbieter kontaktieren</a></div>' : '') +
       '</div>';
 
       var html = '<a href="index.html" class="content-back-link">← Zurück zur Hundebörse</a>';
@@ -407,9 +414,21 @@
       }
 
       // ── Standort ──────────────────────────────────────────────
+      // Karte zeigt bewusst nur einen groben Bereich um PLZ+Ort (siehe
+      // hbGeocode() in admin.js) - nie eine genaue Adresse, die es in den
+      // Anzeigedaten ohnehin nicht gibt. Ohne Koordinaten (z.B. weil die
+      // Geokodierung beim Speichern nichts gefunden hat) bleibt es beim
+      // reinen Text, keine kaputte/leere Karte.
+      var hatKoordinaten = (typeof a.lat === 'number' && typeof a.lng === 'number');
       if (standort) {
         html += '<h2>Standort</h2><p>' + escHtml(standort) +
-          '<br><span style="font-size:.85rem;color:var(--text-muted);">Es wird nur der ungefähre Standort angezeigt, keine genaue Adresse. Eine Kartenansicht folgt zu einem späteren Zeitpunkt.</span></p>';
+          '<br><span style="font-size:.85rem;color:var(--text-muted);">Es wird nur der ungefähre Standort angezeigt, keine genaue Adresse.' +
+          (hatKoordinaten ? '' : ' Für diese Anzeige liegt aktuell keine Kartenansicht vor.') +
+          '</span></p>';
+        if (hatKoordinaten) {
+          html += '<div id="hb-map" class="hb-map" aria-label="Karte: ungefährer Standort ' + escHtml(standort) + '"></div>' +
+            '<p class="hb-map-link"><a href="https://www.openstreetmap.org/?mlat=' + encodeURIComponent(a.lat) + '&amp;mlon=' + encodeURIComponent(a.lng) + '#map=12/' + encodeURIComponent(a.lat) + '/' + encodeURIComponent(a.lng) + '" target="_blank" rel="noopener">In Karte öffnen ↗</a></p>';
+        }
       }
 
       // ── Kontaktbereich ("Anbieter kontaktieren") ─────────────
@@ -464,6 +483,41 @@
           thumbsWrap.querySelectorAll('.hb-thumb').forEach(function(t) { t.classList.remove('is-active'); });
           btn.classList.add('is-active');
         });
+      }
+
+      // ── Standort-Karte initialisieren ─────────────────────────
+      // Zeigt bewusst einen Kreis statt eines spitzen Pins - das macht
+      // optisch klar "ungefähre Gegend", nicht "genaue Adresse" (die haben
+      // wir auch gar nicht, siehe oben). scrollWheelZoom ist zunächst aus,
+      // damit die Karte beim Scrollen der Seite nicht versehentlich
+      // mitzoomt; ein Klick aktiviert es. Die Akzentfarbe wird zur Laufzeit
+      // aus --green-main gelesen, damit eine über das Admin-Design geänderte
+      // Vereinsfarbe (siehe Farb-Skript ganz oben im <head>) automatisch
+      // übernommen wird.
+      var mapEl = document.getElementById('hb-map');
+      if (mapEl && typeof L !== 'undefined' && hatKoordinaten) {
+        try {
+          var mapAccent = getComputedStyle(document.documentElement).getPropertyValue('--green-main').trim() || '#2e6b30';
+          var hbMap = L.map(mapEl, { scrollWheelZoom: false }).setView([a.lat, a.lng], 12);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende'
+          }).addTo(hbMap);
+          L.circle([a.lat, a.lng], {
+            radius: 2000,
+            color: mapAccent,
+            weight: 2,
+            fillColor: mapAccent,
+            fillOpacity: 0.18
+          }).addTo(hbMap);
+          mapEl.addEventListener('click', function aktivieren() {
+            hbMap.scrollWheelZoom.enable();
+            mapEl.removeEventListener('click', aktivieren);
+          });
+        } catch (e) {
+          // Karte konnte nicht aufgebaut werden (z.B. Leaflet nicht
+          // geladen) - der Standort-Text darüber bleibt trotzdem sichtbar.
+        }
       }
 
       // ── "Anbieter kontaktieren"-Button (oben) ─────────────────
