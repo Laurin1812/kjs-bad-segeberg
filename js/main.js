@@ -557,6 +557,7 @@ function splitPostadresse(raw) {
       verbraucher:/verbraucher\/(index(\.html)?)?$/,
       termine:    /termine\/(index(\.html)?)?$/,
       aktuelles:  /aktuelles\/(index(\.html)?)?$/,
+      hundeboerse:/hundeboerse\/(index(\.html)?)?$/,
       faq:        /faq\/(index(\.html)?)?$/,
       service:    /service(\.html)?$/,
       kontakt:    /kontakt\/(index(\.html)?)?$/
