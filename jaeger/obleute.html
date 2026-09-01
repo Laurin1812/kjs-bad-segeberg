@@ -108,50 +108,7 @@
     </aside>
   </div>
 </div>
-<footer class="site-footer"><div class="container">
-  <div class="footer-grid">
-    <div class="footer-about">
-      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
-      <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
-      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
-      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
-    </div>
-    <div class="footer-col"><h5>Über die KJS</h5><ul>
-      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
-    </ul></div>
-    <div class="footer-col"><h5>Schnellübersicht</h5><ul>
-      <li><a href="../index.html">Startseite</a></li>
-      <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
-      <li><a href="../downloads/index.html">Downloads</a></li>
-    </ul></div>
-    <div class="footer-col"><h5>Informationen</h5><ul>
-      <li><a href="../kontakt/index.html">Kontakt</a></li>
-      <li><a href="../termine/index.html">Termine</a></li>
-      <li><a href="../faq/index.html">FAQ</a></li>
-    </ul></div>
-  </div>
-  <div class="footer-bottom">
-    <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
-    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
-  </div>
-</div></footer>
+<footer class="site-footer" id="siteFooter"></footer>
 <script src="../js/main.js"></script>
-<script>
-  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
-    const ft = document.querySelector('.footer-about p');
-    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
-    const cp = document.querySelector('.footer-bottom span');
-    if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
-    const fbLinkTop = document.querySelector('.topbar__social a[aria-label="Facebook"]');
-    if(fbLinkTop && d.facebook_url) fbLinkTop.href = d.facebook_url;
-    const igLinkTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
-    if(igLinkTop && d.instagram_url) igLinkTop.href = d.instagram_url;
-  }).catch(()=>{});
-</script>
 </body>
 </html>

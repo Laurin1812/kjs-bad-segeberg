@@ -2,5 +2,26 @@
   "ueber_text": "Verantwortungsvolle Jagd, aktiver Naturschutz und regionales Engagement im Kreis Bad Segeberg seit 2000.",
   "facebook_url": "",
   "instagram_url": "",
-  "copyright": "Copyright 2026 © Kreisjägerschaft Segeberg e.V."
+  "copyright": "Copyright 2026 © Kreisjägerschaft Segeberg e.V.",
+  "spalte_ueber_kjs": [
+    { "label": "Vorstand", "href": "/jaeger/vorstand.html" },
+    { "label": "Obleute", "href": "/jaeger/obleute.html" },
+    { "label": "Hegeringe", "href": "/jaeger/hegeringe.html" },
+    { "label": "Jungwildrettung", "href": "/aufgaben/jungwildrettung.html" }
+  ],
+  "spalte_uebersicht": [
+    { "label": "Startseite", "href": "/index.html" },
+    { "label": "Wildfleisch", "href": "/verbraucher/wildfleisch.html" },
+    { "label": "Lernort Natur", "href": "/verbraucher/lernort-natur.html" },
+    { "label": "Naturschutz", "href": "/aufgaben/naturschutz.html" },
+    { "label": "Downloads", "href": "/downloads/index.html" }
+  ],
+  "spalte_informationen": [
+    { "label": "Kontakt", "href": "/kontakt/index.html" },
+    { "label": "Aktuelles", "href": "/aktuelles/index.html" },
+    { "label": "Termine", "href": "/termine/index.html" },
+    { "label": "Jäger/in werden", "href": "/jaeger/jaeger-werden.html" },
+    { "label": "Mitglied werden", "href": "/jaeger/mitglied-werden.html" },
+    { "label": "FAQ", "href": "/faq/index.html" }
+  ]
 }

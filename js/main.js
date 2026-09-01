@@ -745,6 +745,113 @@ function splitPostadresse(raw) {
   });
 })();
 
+/* =========================================================
+   ZENTRALER FOOTER (Architektur-Audit Phase 3A, 01.09.2026)
+
+   Vorher: pro HTML-Datei ein komplett ausgeschriebener
+   <footer class="site-footer">…</footer>-Block (~42 Dateien) mit
+   fachlich unterschiedlichem Spalteninhalt je nach Seite (eigene
+   "Aufgaben"-Spalte auf den 8 aufgaben/*.html-Seiten, eigene
+   "Verbraucher"-Spalte auf der Verbraucher-Seite, 2 Rechtsseiten
+   (impressum.html/datenschutz.html) sogar nur mit einer Mini-Fußzeile
+   ohne Logo/Spalten) - dazu ein eigenes <script> pro Seite, das
+   content/footer.json lud und nur Über-uns-Text/Copyright/Social-Links
+   nachträglich ins bereits vorhandene statische Markup schrieb (inkl.
+   Spiegelung der Social-Links in die Topbar).
+
+   Jetzt: content/footer.json ist die EINE Quelle für den gesamten
+   Footer-Inhalt - Über-uns-Text, Copyright, Social-Links UND (neu,
+   analog zu hauptmenu_meta/jaeger_dropdown_meta in navigation.json aus
+   Phase 2) die drei laut Laurin vereinheitlichten Spalten-Linklisten
+   (spalte_ueber_kjs/spalte_uebersicht/spalte_informationen). Jede Seite
+   bindet nur noch einen leeren Container ein
+   (<footer class="site-footer" id="siteFooter"></footer>), der hier
+   zentral befüllt wird - identisch auf jeder Seite, unabhängig von der
+   Verzeichnistiefe (root-relative Links + prettyHref(), gleiches
+   Prinzip wie im Navigations-Modul weiter oben).
+   ========================================================= */
+(function () {
+  var footerRoot = document.getElementById('siteFooter');
+  if (!footerRoot) return;
+
+  // Absichtlich KEIN zweiter vollständiger Footer als Fallback (Punkt 8
+  // der Phase-3A-Vorgabe - keine dauerhaft zweite, separat zu pflegende
+  // Footer-Struktur) - nur ein minimaler Not-Anker (Copyright +
+  // Impressum/Datenschutz/Login), falls footer.json ausnahmsweise nicht
+  // ladbar ist, damit die Seite nicht komplett ohne Fußzeile dasteht.
+  var FALLBACK_FOOTER = {
+    ueber_text: '', facebook_url: '', instagram_url: '',
+    copyright: 'Kreisjägerschaft Segeberg e.V.',
+    spalte_ueber_kjs: [], spalte_uebersicht: [], spalte_informationen: []
+  };
+
+  function prettyHref(href) {
+    if (!href || href === '#' || /^https?:\/\//i.test(href)) return href;
+    var h = href.replace(/(^|\/)index\.html?$/i, '$1');
+    if (h === '') h = '/';
+    h = h.replace(/\.html?$/i, '');
+    return h;
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function colHtml(title, items) {
+    if (!items || !items.length) return '';
+    var lis = items.map(function (it) {
+      return '<li><a href="' + escHtml(prettyHref(it.href)) + '">' + escHtml(it.label) + '</a></li>';
+    }).join('');
+    return '<div class="footer-col"><h5>' + escHtml(title) + '</h5><ul>' + lis + '</ul></div>';
+  }
+
+  function renderFooter(d) {
+    var html =
+      '<div class="container">' +
+        '<div class="footer-grid">' +
+          '<div class="footer-about">' +
+            '<img src="/images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
+            '<span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>' +
+            '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
+            (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +
+            '<div class="footer-social">' +
+              '<a href="' + escHtml(d.facebook_url || '#') + '" aria-label="Facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
+              '<a href="' + escHtml(d.instagram_url || '#') + '" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>' +
+            '</div>' +
+          '</div>' +
+          colHtml('Über die KJS', d.spalte_ueber_kjs) +
+          colHtml('Schnellübersicht', d.spalte_uebersicht) +
+          colHtml('Informationen', d.spalte_informationen) +
+        '</div>' +
+        '<div class="footer-bottom">' +
+          '<span>' + escHtml(d.copyright) + '</span>' +
+          '<div class="footer-bottom__links">' +
+            '<a href="/impressum.html">Impressum</a>' +
+            '<a href="/datenschutz.html">Datenschutz</a>' +
+            '<a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    footerRoot.innerHTML = html;
+
+    // Social-Links spiegeln sich zusätzlich in die Kopfzeile (Topbar) -
+    // gleiches Verhalten wie vorher im Pro-Seiten-Skript.
+    if (d.facebook_url) {
+      var fbTop = document.querySelector('.topbar__social a[aria-label="Facebook"]');
+      if (fbTop) fbTop.href = d.facebook_url;
+    }
+    if (d.instagram_url) {
+      var igTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
+      if (igTop) igTop.href = d.instagram_url;
+    }
+  }
+
+  fetchContent('/content/footer.json')
+    .then(function (r) { return r.json(); })
+    .then(renderFooter)
+    .catch(function () { renderFooter(FALLBACK_FOOTER); });
+})();
 
 // Contact form handler (Formsubmit.co)
 var contactForm = document.getElementById('contactForm');
