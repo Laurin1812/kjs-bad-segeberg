@@ -312,10 +312,23 @@
     });
     if (topMatch) return [START, { label: topMatch.label }];
 
-    // Letzter Fallback für Seiten außerhalb der Hauptnavigation (z.B.
-    // Datenschutz/Impressum/Downloads): Label vom sichtbaren <h1> bzw.
-    // <title> übernehmen, damit wenigstens ein sinnvoller, nicht-leerer
-    // Breadcrumb entsteht, statt gar keinen Eintrag zu zeigen.
+    // Seiten außerhalb der Hauptnavigation (kein Eintrag in navigation.json)
+    // - Label bewusst hier fest hinterlegt statt vom <h1> übernommen, weil
+    // die bisherigen Breadcrumb-Labels teils kürzer sind als die jeweilige
+    // <h1>-Überschrift (z.B. "Datenschutz" vs. "Datenschutzerklärung",
+    // "Downloads" vs. "Downloads & Dokumente") - unverändert übernommen,
+    // um an dieser Stelle keine Formulierung zu ändern.
+    var OFFNAV_LABELS = {
+      '/datenschutz': 'Datenschutz',
+      '/impressum': 'Impressum',
+      '/downloads': 'Downloads',
+      '/test/testseite': 'Testseite'
+    };
+    if (OFFNAV_LABELS[path]) return [START, { label: OFFNAV_LABELS[path] }];
+
+    // Letzter Fallback für sonstige, hier nicht bekannte Seiten: Label vom
+    // sichtbaren <h1> bzw. <title> übernehmen, damit wenigstens ein
+    // sinnvoller, nicht-leerer Breadcrumb entsteht statt gar keinem.
     var h1 = document.querySelector('h1');
     var fallbackLabel = (h1 && h1.textContent && h1.textContent.trim()) || (document.title || '').split(' – ')[0].trim();
     if (fallbackLabel) return [START, { label: fallbackLabel }];

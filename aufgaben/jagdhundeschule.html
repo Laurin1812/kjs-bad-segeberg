@@ -31,12 +31,7 @@
   <div class="page-hero__bg" id="page-hero-bg" style="background-image: url('../images/hundeausbildung.jpg')"></div>
   <div class="container">
     <h1 id="page-hero-h1">Jagdhundeschule</h1>
-    <nav class="breadcrumb" id="page-breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span>
-      <span>Jäger</span><span class="sep">/</span>
-      <a href="hundeausbildung.html">Hundeausbildung</a><span class="sep">/</span>
-      <span id="breadcrumb-current">Jagdhundeschule</span>
-    </nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
   </div>
 </div>
 
@@ -211,8 +206,7 @@
             document.title = titel + ' – Kreisjägerschaft Segeberg e.V.';
             var h1 = document.getElementById('page-hero-h1');
             if (h1) h1.textContent = titel;
-            var bc = document.getElementById('breadcrumb-current');
-            if (bc) bc.textContent = titel;
+            if (window.setBreadcrumbCurrentTitle) window.setBreadcrumbCurrentTitle(titel);
 
             var bildKlasse = (d.bild_groesse && d.bild_groesse.indexOf('img-') === 0) ? d.bild_groesse
               : (d.bild_groesse === 'klein' ? 'img-25' : d.bild_groesse === 'mittel' ? 'img-50' : 'img-100');
