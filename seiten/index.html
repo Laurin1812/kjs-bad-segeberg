@@ -30,9 +30,7 @@
   <div class="page-hero__bg"></div>
   <div class="container">
     <h1 id="seite-titel">Wird geladen …</h1>
-    <nav class="breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span><span id="breadcrumb-label">Seite</span>
-    </nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
   </div>
 </div>
 
@@ -65,9 +63,46 @@
   var params = new URLSearchParams(window.location.search);
   var slug = params.get('s');
 
+  // Zwischenebenen je Ordner für die zentrale Breadcrumb-Komponente
+  // (js/components.js, Phase 3C) - index-gleich zu ordnerPfade/ordnerLabels
+  // oben. Bewusst hier als eigene, kleine JS-Tabelle statt einer neuen
+  // Breadcrumb-JSON (Punkt 2 der Phase-3C-Vorgabe): dieselbe Zuordnung
+  // Ordner->Bereich existiert in dieser Datei durch ordnerLabels bereits,
+  // hier wird sie nur um Ziel-Links (wo vorhanden) und die inhaltlich
+  // korrekte Tiefe ergänzt (KJS Segeberg/Aufgaben der Kreisjägerschaft
+  // sind reine Dropdown-Gruppen ohne eigene Seite - siehe components.js).
+  var JAEGER = { label: 'Jäger', href: '/jaeger/index.html' };
+  var VERBRAUCHER = { label: 'Verbraucher', href: '/verbraucher/index.html' };
+  var KJS_GRUPPE = { label: 'KJS Segeberg' };
+  var AUFGABEN_GRUPPE = { label: 'Aufgaben der Kreisjägerschaft' };
+  var ordnerBreadcrumbs = [
+    [JAEGER, KJS_GRUPPE],                                                              // seiten-kjs
+    [JAEGER, AUFGABEN_GRUPPE],                                                          // seiten-aufgaben
+    [JAEGER],                                                                           // seiten-weitere
+    [VERBRAUCHER],                                                                      // seiten-verbraucher (Alt-Fallback)
+    [VERBRAUCHER, { label: 'Wildfleisch', href: '/verbraucher/wildfleisch.html' }],
+    [VERBRAUCHER, { label: 'Lernort Natur', href: '/verbraucher/lernort-natur.html' }],
+    [VERBRAUCHER, { label: 'Grünes Klassenzimmer', href: '/verbraucher/gruenes-klassenzimmer.html' }],
+    [VERBRAUCHER, { label: 'Waidmannssprache', href: '/verbraucher/waidmannssprache.html' }],
+    [JAEGER, { label: 'Über uns', href: '/jaeger/ueber-uns.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Mitglied werden', href: '/jaeger/mitglied-werden.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Jäger/in werden', href: '/jaeger/jaeger-werden.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Niederwild', href: '/jaeger/niederwild.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Hochwild', href: '/jaeger/hochwild.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Schießobleute', href: '/jaeger/schiessobleute.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Satzung', href: '/jaeger/satzung.html' }],
+    [JAEGER, KJS_GRUPPE, { label: 'Landesjagdverband', href: '/jaeger/landesjagdverband.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Schießwesen', href: '/aufgaben/schiessen.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Schweißhundeführer', href: '/aufgaben/schweisshunde.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Jugendarbeit', href: '/aufgaben/jugend.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Jagdhornblasen', href: '/aufgaben/jagdhorn.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Naturschutz', href: '/aufgaben/naturschutz.html' }],
+    [JAEGER, AUFGABEN_GRUPPE, { label: 'Jungwildrettung', href: '/aufgaben/jungwildrettung.html' }]
+  ];
+
   function zeigeFehlermeldung(msg) {
     document.getElementById('seite-titel').textContent = 'Seite nicht gefunden';
-    document.getElementById('breadcrumb-label').textContent = 'Nicht gefunden';
+    if (window.setBreadcrumbTrail) window.setBreadcrumbTrail([{ label: 'Startseite', href: '/' }, { label: 'Nicht gefunden' }]);
     document.title = 'Seite nicht gefunden – Kreisjägerschaft Segeberg e.V.';
     document.getElementById('seite-inhalt').innerHTML =
       '<div style="text-align:center;padding:3rem 1rem;">' +
@@ -316,7 +351,12 @@
   function renderSeite(seite, ordnerIndex) {
     var titel = seite.titel || 'Seite';
     document.getElementById('seite-titel').textContent = titel;
-    document.getElementById('breadcrumb-label').textContent = seite.nav_label || titel;
+    if (window.setBreadcrumbTrail) {
+      var zwischenebenen = (ordnerIndex != null && ordnerBreadcrumbs[ordnerIndex]) ? ordnerBreadcrumbs[ordnerIndex] : [JAEGER];
+      window.setBreadcrumbTrail(
+        [{ label: 'Startseite', href: '/' }].concat(zwischenebenen, [{ label: seite.nav_label || titel }])
+      );
+    }
     document.title = titel + ' – Kreisjägerschaft Segeberg e.V.';
 
     // Hero-Bild setzen falls vorhanden

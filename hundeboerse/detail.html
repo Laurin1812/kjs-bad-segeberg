@@ -34,11 +34,7 @@
   <div class="page-hero__bg" id="hb-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=50')"></div>
   <div class="container">
     <h1 id="hb-detail-titel">Wird geladen …</h1>
-    <nav class="breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span>
-      <a href="index.html">Hundebörse</a><span class="sep">/</span>
-      <span id="hb-detail-breadcrumb">Anzeige</span>
-    </nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
   </div>
 </div>
 
@@ -137,7 +133,7 @@
 
       document.title = (a.title || 'Anzeige') + ' – Kreisjägerschaft Segeberg e.V.';
       document.getElementById('hb-detail-titel').textContent = a.title || '(Ohne Titel)';
-      document.getElementById('hb-detail-breadcrumb').textContent = a.title || 'Anzeige';
+      if (window.setBreadcrumbCurrentTitle) window.setBreadcrumbCurrentTitle(a.title || 'Anzeige');
 
       // Hero-Bild-Reihenfolge (Phase 3, 28.08.2026): das im Admin unter
       // Hundebörse konfigurierte Hero-Bild ist die Basis (ersetzt das bisher
