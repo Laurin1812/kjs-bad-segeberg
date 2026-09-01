@@ -166,12 +166,22 @@
    Phase-3C-Vorgabe, schrittweiser Rollout).
    ========================================================= */
 (function () {
-  var mount = document.getElementById('siteBreadcrumb');
-  if (!mount) return;
-
+  // WICHTIG: diese Datei wird als ERSTES <script> direkt nach <body>
+  // geladen (siehe Kommentar zum Header-Modul oben) - der Breadcrumb-
+  // Container weiter unten im Dokument (in .page-hero) existiert zu
+  // diesem Zeitpunkt im DOM noch gar nicht. Der eigentliche Aufbau
+  // (mount-Suche, fetch, Rendern) läuft deshalb erst nach dem Parsen des
+  // restlichen Dokuments (siehe init()/DOMContentLoaded weiter unten) -
+  // die öffentliche API (setBreadcrumbCurrentTitle/setBreadcrumbTrail)
+  // wird davon UNABHÄNGIG schon jetzt, synchron, bereitgestellt, damit
+  // ein Aufruf durch eine dynamische Seite (siehe Kommentar oben) so oder
+  // so - egal ob vor oder nach dem eigentlichen Rendern - sicher
+  // ankommt (kein setTimeout()/Polling, reine Zwischenspeicherung).
+  var mount = null;
   var current = null;
   var pendingTitle = null;
   var pendingTrail = null;
+  var ready = false;
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -206,9 +216,11 @@
   }
 
   // Global verfügbar, damit dynamische Seiten (siehe Kommentar oben) sie
-  // direkt aus ihrem eigenen fetch(...).then(...) heraus aufrufen können.
+  // direkt aus ihrem eigenen fetch(...).then(...) heraus aufrufen können -
+  // unabhängig davon, ob der erste Render (siehe init() weiter unten)
+  // bereits stattgefunden hat oder nicht (dann wird nur zwischengespeichert).
   window.setBreadcrumbCurrentTitle = function (text) {
-    if (current && current.length) {
+    if (ready && current && current.length) {
       current[current.length - 1] = { label: text };
       render(current);
     } else {
@@ -217,7 +229,7 @@
   };
 
   window.setBreadcrumbTrail = function (items) {
-    if (current) render(items);
+    if (ready && current) render(items);
     else pendingTrail = items;
   };
 
@@ -311,12 +323,24 @@
     return null;
   }
 
-  fetch('/content/navigation.json')
-    .then(function (r) { return r.json(); })
-    .catch(function () { return {}; })
-    .then(function (nav) {
-      var items = buildFromNav(nav || {});
-      if (items) render(items);
-      applyPending();
-    });
+  function init() {
+    mount = document.getElementById('siteBreadcrumb');
+    if (!mount) { ready = true; return; } // Seite noch nicht auf Phase 3C umgestellt
+
+    fetch('/content/navigation.json')
+      .then(function (r) { return r.json(); })
+      .catch(function () { return {}; })
+      .then(function (nav) {
+        var items = buildFromNav(nav || {});
+        ready = true;
+        if (items) render(items);
+        applyPending();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
