@@ -1077,7 +1077,28 @@ p  { margin-bottom: 1rem; }
    Spalte dadurch selbst so nicht mehr rein, erkennt main.js
    (applyTableLayout) das über die Gesamtbreite der Tabelle und wechselt ins
    Karten-Layout (.is-stacked) statt einzelne Wörter zu zerreißen. */
-.main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; word-break: normal; overflow-wrap: normal; }
+.main-content th { background: var(--green-main); color: #fff; font-weight: 600; padding: .6rem 1rem; text-align: left; vertical-align: middle; word-break: normal; overflow-wrap: normal; }
+/* TipTap umschließt auch Tabellenkopf-Text mit einem <p> (<th><p>Mobil</p></th>).
+   Ohne diesen Reset gewinnt die generische Regel ".main-content p { color:
+   var(--text-body) }" weiter unten gegen die weiße Schrift oben, weil sie das
+   <p> direkt trifft statt nur zu erben - der Tabellenkopf-Text erschien dadurch
+   dunkel auf dunkelgrünem Grund und war kaum lesbar (Korrektur 02.09.2026).
+   "color: inherit" statt eines zweiten hartkodierten #fff, damit die
+   Kopfzeilen-Schriftfarbe automatisch der obigen th-Regel folgt. */
+.main-content th p { color: inherit; }
+/* Kurze Spaltenüberschriften wie "E-Mail" oder "Telefon" brechen sonst am
+   Bindestrich mitten im Wort um ("E-" / "Mail"), obwohl die Spalte gar nicht
+   zu schmal ist - Browser behandeln den Bindestrich als normale Umbruchstelle
+   (dasselbe Problem wie bei Rufnummern, siehe data-label-Regel weiter unten).
+   Zentral für alle normalen Content-Tabellen gelöst (über den von
+   wrapContentTables() gesetzten .content-table-wrap-Wrapper), nicht nur für
+   einzelne Spalten oder Seiten - gilt automatisch für jede aktuelle wie
+   künftige Tabelle. Die Termine-Tabelle nutzt bewusst einen eigenen Wrapper
+   (.termine-table-wrap) und ist hier absichtlich nicht betroffen. Kein
+   Freibrief gegen horizontales Überlaufen: applyTableLayout() misst die
+   tatsächliche (mit diesem nowrap bereits gerenderte) Breite und wechselt bei
+   Bedarf weiterhin automatisch ins Karten-Layout (.is-stacked). */
+.content-table-wrap th { white-space: nowrap; }
 .main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); word-break: normal; overflow-wrap: normal; }
 .main-content tr:nth-child(even) td { background: var(--bg-light); }
 /* Kontaktspalten (Telefon/Mobil): eine Rufnummer wie "0176-35496821" wird
