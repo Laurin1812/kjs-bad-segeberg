@@ -1116,6 +1116,39 @@ p  { margin-bottom: 1rem; }
    als letztes Sicherheitsnetz greift. */
 .main-content td[data-label="Telefon"],
 .main-content td[data-label="Mobil"] { white-space: nowrap; }
+
+/* ── Kontakt-Tabellen: ausgewogene Spaltenbreiten statt Auto-Layout ───────
+   Ohne table-layout (Standard: "auto") bemisst der Browser jede Spalte an
+   ihrem längsten Inhalt. Bei Tabellen wie Hochwild/Niederwild sprengt die
+   "Leiter"-Spalte (Name + Adresse, oft 40+ Zeichen) dadurch weit über das
+   nötige Maß hinaus, während die (aktuell noch leere) "E-Mail"-Spalte kaum
+   Platz braucht - in Summe rutschen E-Mail/Mobil weit nach rechts, mit viel
+   Leerraum dazwischen (Korrektur 02.09.2026, Nachjustierung von Phase 4A).
+   Erkennung ausschließlich über die vorhandene Spalten-KOMBINATION
+   "E-Mail" + "Mobil" (data-label auf den th-Zellen, siehe labelTableCells()
+   in main.js) - kein Sonderfall pro Seite: trifft automatisch jede aktuelle
+   wie künftige Tabelle mit dieser Kombination (aktuell Hochwild/Niederwild),
+   lässt Tabellen mit anderer Spalten-Kombination (z.B. die
+   Jagdhundeschule-Tabellen ohne E-Mail-Spalte) und die separat gestylte
+   Termine-Tabelle unangetastet.
+   table-layout:fixed macht die Spaltenbreiten unabhängig vom Zelleninhalt -
+   sie kommen stattdessen ausschließlich aus den <col>-Breiten unten.
+   !important ist nötig, weil jede TipTap-Tabelle ihr eigenes <colgroup> mit
+   fest im Content-JSON gespeicherten min-width-Werten aus dem
+   Admin-Tabelleneditor mitbringt, das sonst weiterhin gewinnen würde.
+   Werte anhand der echten Inhalte kalibriert (längste vorkommende Leiter-
+   und Mobil-Werte auf Hochwild/Niederwild durchgemessen): Mobil und E-Mail
+   bekommen genug Raum, um typische Rufnummern bzw. eine spätere
+   E-Mail-Adresse ohne unnötigen Umbruch/Leerraum darzustellen, die ersten
+   beiden (je nach Tabelle unterschiedlich benannten) Spalten teilen sich
+   den Rest über :nth-child, da ihr Name nicht generisch bekannt ist. */
+.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) {
+  table-layout: fixed;
+}
+.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(1) { width: 24% !important; }
+.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(2) { width: 32% !important; }
+.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="E-Mail"] { width: 24% !important; }
+.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="Mobil"] { width: 20% !important; }
 /* Blockquote */
 .main-content blockquote { border-left: 4px solid var(--green-main); margin: 1.5rem 0; padding: .75rem 1.25rem; background: var(--bg-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); font-style: italic; }
 

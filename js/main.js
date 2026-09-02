@@ -74,10 +74,28 @@ function labelTableCells(root) {
       bodyRows = Array.prototype.slice.call(allRows, 1);
     }
     if (!headRow) return;
-    var labels = Array.prototype.map.call(headRow.querySelectorAll('th,td'), function (c) {
+    var headCells = headRow.querySelectorAll('th,td');
+    var labels = Array.prototype.map.call(headCells, function (c) {
       return c.textContent.trim();
     });
     if (!labels.length) return;
+    // Kopfzeilen-Zellen bekommen ihr eigenes data-label ebenfalls (bisher
+    // nur die Datenzellen). Wirkt sich für sich genommen auf nichts aus
+    // (die Kopfzeile wird im Karten-Layout ohnehin ausgeblendet), macht
+    // aber Spalten wie "E-Mail"/"Mobil" für style.css gezielt ansprechbar -
+    // z.B. um Kontakt-Tabellen an ihrer Spalten-Kombination zu erkennen und
+    // ihre Spaltenbreiten zentral zu verteilen (siehe style.css).
+    Array.prototype.forEach.call(headCells, function (cell, i) {
+      if (labels[i]) cell.setAttribute('data-label', labels[i]);
+    });
+    // Falls TipTap ein <colgroup> erzeugt hat: dieselben Labels auch auf die
+    // <col>-Elemente übertragen. So kann eine CSS-Regel eine bestimmte
+    // Spalte (z.B. "col[data-label='E-Mail']") gezielt in der Breite
+    // steuern, unabhängig von ihrer Position oder der Gesamt-Spaltenzahl.
+    var cols = table.querySelectorAll(':scope > colgroup > col');
+    Array.prototype.forEach.call(cols, function (col, i) {
+      if (labels[i]) col.setAttribute('data-label', labels[i]);
+    });
     Array.prototype.forEach.call(bodyRows, function (row) {
       Array.prototype.forEach.call(row.querySelectorAll('td'), function (cell, i) {
         if (labels[i]) cell.setAttribute('data-label', labels[i]);
