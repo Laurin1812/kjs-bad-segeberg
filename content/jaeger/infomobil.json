@@ -20,5 +20,7 @@
       "vorschau": ""
     }
   ],
-  "bild_groesse": "img-100"
+  "bild_groesse": "img-100",
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }
