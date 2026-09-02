@@ -1141,14 +1141,22 @@ p  { margin-bottom: 1rem; }
    bekommen genug Raum, um typische Rufnummern bzw. eine spätere
    E-Mail-Adresse ohne unnötigen Umbruch/Leerraum darzustellen, die ersten
    beiden (je nach Tabelle unterschiedlich benannten) Spalten teilen sich
-   den Rest über :nth-child, da ihr Name nicht generisch bekannt ist. */
-.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) {
+   den Rest über :nth-child, da ihr Name nicht generisch bekannt ist.
+   Ausdrücklich nur ":not(.is-stacked)" - im Karten-Layout gibt es keine
+   Tabellenspalten mehr (jede Zelle wird zur eigenen Zeile), eine
+   Spaltenbreite ergäbe dort keinen Sinn und würde (wie beim ersten Versuch
+   dieser Korrektur festgestellt) sogar die per-Zelle verfügbare Breite auf
+   die schmale Desktop-Spaltenbreite zusammenquetschen, weil <col>-Breiten
+   vom Browser pro Spalte auf jede Zelle angewandt werden, unabhängig von
+   deren "display". Deshalb hier bewusst ausgeschlossen, statt es später per
+   Extra-Regel wieder zurücksetzen zu müssen. */
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) {
   table-layout: fixed;
 }
-.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(1) { width: 24% !important; }
-.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(2) { width: 32% !important; }
-.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="E-Mail"] { width: 24% !important; }
-.content-table-wrap table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="Mobil"] { width: 20% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(1) { width: 24% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(2) { width: 32% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="E-Mail"] { width: 24% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="Mobil"] { width: 20% !important; }
 /* Blockquote */
 .main-content blockquote { border-left: 4px solid var(--green-main); margin: 1.5rem 0; padding: .75rem 1.25rem; background: var(--bg-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); font-style: italic; }
 
