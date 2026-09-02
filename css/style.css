@@ -1592,6 +1592,25 @@ body.kjs-lightbox-lock { overflow: hidden; }
 /* =========================================================
    RESPONSIVE
    ========================================================= */
+
+/* Hauptmenü: durch den neuen Punkt "Waffenbörse" (02.09.2026, 10. statt
+   bisher 9. Hauptpunkt) reichte der bisherige Abstand auf kleineren
+   Desktop-/Laptop-Breiten (u.a. den weit verbreiteten 1280px/1366px-
+   Auflösungen) nicht mehr aus - "Kontakt" ragte rechts über den Viewport
+   hinaus, ohne umzubrechen (kein flex-wrap). Statt dafür einen Menüpunkt zu
+   entfernen (Laurin-Vorgabe), wird das Hauptmenü in diesem Zwischenbereich
+   (unterhalb 1400px, oberhalb der bestehenden 900px-Grenze zum Handy-Menü)
+   etwas kompakter dargestellt - Schriftgröße/Innenabstand pro Menüpunkt
+   minimal reduziert, sonst unverändert. Bei sehr kleinen Laptop-/Tablet-
+   Breiten (ca. 900-1200px) reicht auch das nicht ganz aus, dort überlappt
+   das Hauptmenü aber bereits VOR dieser Änderung mit rein rechnerisch zu
+   wenig Platz (bestehende, von Waffenbörse unabhängige Einschränkung) -
+   siehe Rückmeldung an Laurin, nicht Teil dieser Korrektur. */
+@media (max-width: 1400px) and (min-width: 901px) {
+  .main-nav { gap: .05rem; }
+  .main-nav > li > a { padding: .5rem .5rem; font-size: .88rem; }
+}
+
 @media (max-width: 1100px) {
   .services__grid { grid-template-columns: repeat(3,1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
