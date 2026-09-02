@@ -51,8 +51,17 @@
             ? `<img src="${bild}" alt="Foto ${name}" style="width:100%;border-radius:var(--radius-md);border:3px solid var(--green-main);object-fit:contain;padding:8px;">`
             : `<div style="width:100%;aspect-ratio:1;background:var(--green-light);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:5rem;border:3px solid var(--green-main);">👤</div>`;
 
+          // Ab Phase 5B.5 wird das Grußwort im Admin-Bereich über denselben
+          // TipTap-Editor wie das Aufgaben-Feld gepflegt und daher als HTML
+          // gespeichert. Damit frisches HTML nicht nochmal in <p>-Tags verpackt
+          // wird, dieselbe Erkennung wie beim Aufgaben-Feld weiter oben:
+          // bereits vorhandenes HTML wird unverändert übernommen, alter
+          // reiner Text (vor der Umstellung gespeichert) läuft weiterhin über
+          // die bisherige Zeilenumbruch-Logik.
           var grußwortHtml = grußwort
-            ? grußwort.split('\n').filter(function(l){ return l.trim(); }).map(function(l){ return `<p>${l}</p>`; }).join('')
+            ? (/<[a-z][\s\S]*>/i.test(grußwort)
+                ? grußwort
+                : grußwort.split('\n').filter(function(l){ return l.trim(); }).map(function(l){ return `<p>${l}</p>`; }).join(''))
             : '';
 
           // Hinweis: die Sidebar-Kontaktbox (#kjm-sidebar-contact) wird NICHT mehr

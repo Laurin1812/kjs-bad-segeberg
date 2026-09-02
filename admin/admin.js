@@ -4116,12 +4116,21 @@
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Grußwort</div>' +
-          fTextarea('kjm-grußwort', 'Grußwort', data.grußwort, 6) +
+          fTipTap('kjm-grußwort', 'Grußwort', true) +
         '</div>' +
         renderDownloadsCard(data) +
       '</div>' + saveBar();
     renderMain(html);
     initTiptap('kjm-aufgaben', data.aufgaben || '');
+    // Grußwort war bis Phase 5B.5 ein einfaches Textfeld (fTextarea). Umgestellt
+    // auf denselben TipTap-Editor wie das Aufgaben-Feld direkt daneben, damit
+    // beide Felder auf dieser Seite einheitlich bedienbar sind. Bestehender
+    // Alttext (reiner Text ohne HTML) wird von initTiptap/convertMarkdownToHtml
+    // automatisch und verlustfrei in Absätze umgewandelt - siehe dazu auch die
+    // an das Aufgaben-Feld angelehnte HTML-Erkennung in
+    // kreisjjaegermeister/index.html, die verhindert, dass die öffentliche
+    // Seite frisch gespeichertes HTML fälschlich nochmal in <p>-Tags verpackt.
+    initTiptap('kjm-grußwort', data.grußwort || '');
     initDownloadsSortable();
     bindSaveBtn();
   }
@@ -4132,7 +4141,7 @@
     data.email    = gv('kjm-email');
     data.telefon  = gv('kjm-telefon');
     data.aufgaben = getTiptapValue('kjm-aufgaben', data.aufgaben, 'Aufgaben');
-    data.grußwort = gv('kjm-grußwort');
+    data.grußwort = getTiptapValue('kjm-grußwort', data.grußwort, 'Grußwort');
     data.downloads = collectDownloadsList();
     data.galerie = collectGalerieList();
     data.galerie_titel = collectGalerieTitel();
