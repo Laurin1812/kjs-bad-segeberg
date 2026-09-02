@@ -858,6 +858,12 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 
 /* ── TIPTAP BILD-KONTEXTMENÜ ─────────────────────────────────── */
 #tt-img-menu { pointer-events: auto; }
+/* ── TIPTAP LINK-DIALOG ──────────────────────────────────────── */
+#tt-link-menu { pointer-events: auto; }
+.tt-linkmenu-inner { min-width: 280px; }
+.tt-linkmenu-inner .field-input { margin: .35rem 0 .55rem; }
+.tt-linkmenu-actions { display: flex; gap: .4rem; justify-content: flex-end; }
+.tt-linkmenu-actions .tt-imgmenu-btn--danger { margin-right: auto; }
 .tt-imgmenu-inner {
   display: flex;
   align-items: center;

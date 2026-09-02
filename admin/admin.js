@@ -2696,6 +2696,7 @@
           '<button type="button" class="tt-btn" data-cmd="italic"      onclick="ttCmd(\'' + fieldId + '\',\'italic\')"      title="Kursiv (Strg+I)"><i>I</i></button>' +
           '<button type="button" class="tt-btn" data-cmd="underline"   onclick="ttCmd(\'' + fieldId + '\',\'underline\')"   title="Unterstreichen (Strg+U)"><u>U</u></button>' +
           '<button type="button" class="tt-btn" data-cmd="strike"      onclick="ttCmd(\'' + fieldId + '\',\'strike\')"      title="Durchstreichen"><s>S</s></button>' +
+          '<button type="button" class="tt-btn" data-cmd="link"        onclick="ttLink(event,\'' + fieldId + '\')"          title="Link einfügen/bearbeiten">🔗 Link</button>' +
           '<span class="tt-sep"></span>' +
           '<button type="button" class="tt-btn" data-cmd="h2"          onclick="ttCmd(\'' + fieldId + '\',\'h2\')"          title="Überschrift H2">H2</button>' +
           '<button type="button" class="tt-btn" data-cmd="h3"          onclick="ttCmd(\'' + fieldId + '\',\'h3\')"          title="Überschrift H3">H3</button>' +
@@ -6563,6 +6564,41 @@
     return convertMarkdownTablesToHtml(input);
   }
 
+  /* ── TipTap-Link: Sicherheits-Filter für rohes HTML ─────────────
+     Neutralisiert gefährliche href-Ziele (javascript:/data:/vbscript:/file:)
+     in HTML, BEVOR es TipTap zur Anzeige übergeben wird – sowohl beim ersten
+     Laden eines Feldes (initTiptap) als auch beim Einfügen von HTML aus einer
+     fremden Quelle (Copy&Paste, editorProps.transformPastedHTML). Ersetzt nur
+     den href-Wert selbst durch "#", der restliche Inhalt (Text, umliegendes
+     HTML) bleibt unangetastet – keine vollständige HTML-Sanitisierung nötig,
+     da TipTap/ProseMirror ohnehin nur die im Editor-Schema bekannten Tags
+     (a/img/Formatierung/Tabellen/…) überhaupt übernimmt. */
+  function ttSanitizeHtml(html) {
+    if (!html) return html;
+    return html.replace(/(<a\b[^>]*\shref\s*=\s*)(["'])\s*(javascript|data|vbscript|file):[^"']*\2/gi,
+      function(m, prefix, quote) { return prefix + quote + '#' + quote; });
+  }
+
+  /* ── TipTap-Link: URL-Eingabe des Redakteurs normalisieren ──────
+     Erkennt/erlaubt: https://, http://, mailto:, tel:, interne Pfade (/…,
+     #…). "www.example.de" oder "example.de/pfad" ohne Protokoll bekommt
+     automatisch "https://" vorangestellt (Wunsch: Redakteure müssen das
+     Protokoll nicht kennen). Alles andere (kein erkennbares Muster, oder
+     ausdrücklich unsichere Protokolle wie javascript:) wird abgelehnt →
+     null, damit der Aufrufer eine verständliche Fehlermeldung zeigen kann,
+     statt eine kaputte oder unsichere URL zu speichern. */
+  function ttNormalizeLinkUrl(raw) {
+    var url = (raw || '').trim();
+    if (!url) return null;
+    if (/^(javascript|data|vbscript|file):/i.test(url)) return null;
+    if (/^(https?:|mailto:|tel:)/i.test(url)) return url;
+    if (/^[\/#]/.test(url)) return url; // interner Pfad (/jaeger/…) oder Anker (#…)
+    if (/^www\./i.test(url) || /^[a-z0-9.\-]+\.[a-z]{2,}(\/.*)?$/i.test(url)) {
+      return 'https://' + url;
+    }
+    return null;
+  }
+
   /* ── TipTap-Modul zuverlässig laden (aktiver Retry + Fallback-CDN) ──
      window.TipTap gilt nur als bereit, wenn ALLE benötigten Extensions da
      sind. Das Modul wird via dynamischem import() geladen; schlägt ein Versuch
@@ -6573,7 +6609,7 @@
     var T = window.TipTap;
     return !!(T && T.Editor && T.Extension && T.StarterKit && T.Underline && T.Image &&
               T.Table && T.TableRow && T.TableCell && T.TableHeader &&
-              T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube);
+              T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube && T.Link);
   }
   var _tiptapPromise = null;
   function ensureTiptap() {
@@ -6581,7 +6617,8 @@
     if (_tiptapPromise) return _tiptapPromise;
     var PKGS = ['core', 'starter-kit', 'extension-underline', 'extension-image',
                 'extension-table', 'extension-table-row', 'extension-table-cell', 'extension-table-header',
-                'extension-text-align', 'extension-text-style', 'extension-color', 'extension-highlight', 'extension-youtube'];
+                'extension-text-align', 'extension-text-style', 'extension-color', 'extension-highlight', 'extension-youtube',
+                'extension-link'];
     // Mehrere CDNs – bei Ausfall des einen wird das andere versucht.
     var CDN = [
       function(p) { return 'https://esm.sh/@tiptap/' + p + '@2'; },
@@ -6607,11 +6644,12 @@
             TextStyle:   m[9].default,
             Color:       m[10].default,
             Highlight:   m[11].default,
-            Youtube:     m[12].default
+            Youtube:     m[12].default,
+            Link:        m[13].default
           };
           if (!(T.Editor && T.Extension && T.StarterKit && T.Underline && T.Image &&
                 T.Table && T.TableRow && T.TableCell && T.TableHeader &&
-                T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube)) {
+                T.TextAlign && T.TextStyle && T.Color && T.Highlight && T.Youtube && T.Link)) {
             throw new Error('TipTap: Extensions unvollständig geladen');
           }
           window.TipTap = T; // atomar, erst wenn alles da ist
@@ -6676,6 +6714,10 @@
     // in gespeicherte Bilder geraten ist. Nur dieses eine Token wird gelöscht
     // (mit evtl. führendem Leerzeichen) – der restliche Inhalt bleibt intakt.
     html = html.replace(/\s*ProseMirror-selectednode/g, '');
+    // Gefährliche Link-Ziele (javascript:/data:/…) unschädlich machen, falls
+    // sie je auf anderem Weg (z.B. direkte JSON-Bearbeitung) in den Inhalt
+    // gelangt sind – siehe ttSanitizeHtml.
+    html = ttSanitizeHtml(html);
 
     // Image-Extension um ein CSS-Klassen-Attribut erweitern. Das Bild wird
     // als schlichtes <img class="..."> gerendert; Größe (img-25/50/75/100)
@@ -6733,6 +6775,18 @@
         TT.StarterKit.configure({ heading: { levels: [2, 3] } }),
         TT.Underline,
         ImageWithClass,
+        // Link-Marke: openOnClick aus (im Editor soll ein Klick den Cursor
+        // setzen, nicht die Seite verlassen – Bearbeiten läuft über den
+        // Toolbar-Button "🔗 Link", siehe ttLink). autolink/linkOnPaste aus,
+        // damit kein Text unerwartet "von selbst" zum Link wird – wer einen
+        // Link will, setzt ihn bewusst über den Button. Bereits vorhandene
+        // <a href>-HTML-Links (eingefügt oder importiert) werden davon nicht
+        // berührt: das Erkennen von echtem HTML beim Laden/Einfügen hängt
+        // nicht an autolink/linkOnPaste, sondern daran, dass die Link-
+        // Extension überhaupt geladen ist. HTMLAttributes bewusst leer, damit
+        // KEIN globales target/rel erzwungen wird – das entscheidet pro Link
+        // ttLinkApply() anhand intern/extern (siehe dort).
+        TT.Link.configure({ openOnClick: false, autolink: false, linkOnPaste: false, HTMLAttributes: {} }),
         TT.TextStyle,
         TT.Color,
         TT.Highlight.configure({ multicolor: false }),
@@ -6760,7 +6814,12 @@
             }
           } catch (e) {}
           return false;
-        }
+        },
+        // Eingefügtes HTML (z.B. aus Word/einer anderen Webseite kopiert) kann
+        // eigene <a href="javascript:…">-Links enthalten. Vor der Übernahme
+        // in den Editor genauso unschädlich machen wie beim ersten Laden
+        // (siehe ttSanitizeHtml) – gleicher Filter, gleiche Stelle im Ablauf.
+        transformPastedHTML: function(html) { return ttSanitizeHtml(html); }
       },
       onUpdate:         function() { updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
@@ -6940,6 +6999,7 @@
       italic:      editor.isActive('italic'),
       underline:   editor.isActive('underline'),
       strike:      editor.isActive('strike'),
+      link:        editor.isActive('link'),
       h2:          editor.isActive('heading', { level: 2 }),
       h3:          editor.isActive('heading', { level: 3 }),
       bulletList:  editor.isActive('bulletList'),
@@ -7027,6 +7087,103 @@
     editor.commands.setYoutubeVideo({ src: url });
   };
 
+  /* ── TipTap: Link setzen/bearbeiten/entfernen ───────────────────
+     Eigenes kleines Dropdown (#tt-link-menu in index.html) statt window.
+     prompt() – gleiches Muster wie das Tabellen-Dropdown (#tt-table-menu)
+     direkt darunter: unterhalb des Toolbar-Buttons positioniert, schließt
+     bei Klick außerhalb. So bleibt es beim bestehenden Admin-UI-Stil, ohne
+     eine neue, größere Modal-Infrastruktur nur für Links zu bauen.
+     Ablauf: Cursor/Selektion im Editor bleibt während des Dialogs unver-
+     ändert (nur der Fokus wandert kurz ins URL-Feld); "Abbrechen"/Klick
+     außerhalb ändert am Editor-Inhalt nichts. */
+  var _ttLinkField = null;
+
+  function ttHideLinkMenu() {
+    var menu = id('tt-link-menu');
+    if (menu) menu.style.display = 'none';
+    _ttLinkField = null;
+  }
+
+  // Toolbar-Button "🔗 Link": öffnet den Dialog. Ohne Textauswahl UND ohne
+  // dass der Cursor bereits in einem Link steht, gibt es nichts, das zu
+  // einem Link werden könnte – dann Hinweis statt leerem Dialog.
+  window.ttLink = function(evt, fieldId) {
+    var editor = S.tiptapEditors[fieldId];
+    if (!editor) return;
+    if (editor.state.selection.empty && !editor.isActive('link')) {
+      showAlert('Kein Text markiert', 'Bitte zuerst den Text markieren, der zu einem Link werden soll – oder mit dem Cursor in einen bestehenden Link klicken, um ihn zu bearbeiten.');
+      return;
+    }
+    _ttLinkField = fieldId;
+    var current   = editor.isActive('link') ? (editor.getAttributes('link').href || '') : '';
+    var menu      = id('tt-link-menu');
+    var input     = id('tt-link-input');
+    var removeBtn = id('tt-link-remove');
+    if (!menu || !input) return;
+    input.value = current;
+    if (removeBtn) removeBtn.style.display = current ? '' : 'none';
+    var btn = evt.currentTarget;
+    menu.style.visibility = 'hidden';
+    menu.style.display    = 'block';
+    var r = btn.getBoundingClientRect();
+    menu.style.top  = (r.bottom + 6) + 'px';
+    menu.style.left = r.left + 'px';
+    menu.style.visibility = '';
+    setTimeout(function() { input.focus(); input.select(); }, 0);
+  };
+
+  window.ttLinkCancel = function() { ttHideLinkMenu(); };
+
+  window.ttLinkRemove = function() {
+    var editor = S.tiptapEditors[_ttLinkField];
+    if (editor) editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    ttHideLinkMenu();
+  };
+
+  // "Übernehmen": leeres Feld bei bestehendem Link = wie Entfernen (bequemer
+  // Ausweg, falls jemand die URL komplett löscht statt den Entfernen-Button
+  // zu nutzen); leeres Feld ohne bestehenden Link = nichts tun. Bei einer
+  // nicht erkennbaren URL bleibt der Dialog offen und die Eingabe erhalten,
+  // statt sie stillschweigend zu verwerfen (siehe ttNormalizeLinkUrl).
+  window.ttLinkApply = function() {
+    var fieldId = _ttLinkField;
+    var editor  = S.tiptapEditors[fieldId];
+    if (!editor) { ttHideLinkMenu(); return; }
+    var input = id('tt-link-input');
+    var raw   = input ? input.value.trim() : '';
+    if (!raw) {
+      if (editor.isActive('link')) editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      ttHideLinkMenu();
+      return;
+    }
+    var url = ttNormalizeLinkUrl(raw);
+    if (!url) {
+      toast('❌ Diese Adresse wird nicht erkannt. Bitte mit https://, /pfad, mailto: oder tel: beginnen.', 'err');
+      return;
+    }
+    // Intern (Root-Pfad/Anker) und mailto:/tel: bleiben im selben Tab, ohne
+    // target/rel – entspricht der bestehenden Konvention auf der Website
+    // (siehe z.B. infomobil.html: interne/Kontakt-Links ohne target).
+    // Externe http(s)-Links öffnen in einem neuen Tab mit rel="noopener
+    // noreferrer" (bestehende Konvention, siehe seiten/index.html Galerie-
+    // Links und den Google-Kalender-Datenschutzhinweis).
+    var isInternal = /^[\/#]/.test(url) || /^(mailto:|tel:)/i.test(url);
+    var attrs = isInternal
+      ? { href: url, target: null, rel: null }
+      : { href: url, target: '_blank', rel: 'noopener noreferrer' };
+    editor.chain().focus().extendMarkRange('link').setLink(attrs).run();
+    ttHideLinkMenu();
+  };
+
+  (function() {
+    var input = id('tt-link-input');
+    if (!input) return;
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter')  { e.preventDefault(); window.ttLinkApply(); }
+      else if (e.key === 'Escape') { window.ttLinkCancel(); }
+    });
+  })();
+
   // Tabellen-Dropdown: öffnen/schließen unterhalb des "Tabelle"-Buttons
   var _ttTableField = null;
   window.ttToggleTableMenu = function(evt, fieldId) {
@@ -7068,10 +7225,16 @@
   // Tabellen-Dropdown ausblenden wenn außerhalb geklickt
   document.addEventListener('mousedown', function(e) {
     var menu = id('tt-table-menu');
-    if (!menu || menu.style.display === 'none') return;
-    if (!menu.contains(e.target) && !e.target.closest('.tt-btn')) {
+    if (menu && menu.style.display !== 'none' &&
+        !menu.contains(e.target) && !e.target.closest('.tt-btn')) {
       menu.style.display = 'none';
       _ttTableField = null;
+    }
+    var linkMenu = id('tt-link-menu');
+    if (linkMenu && linkMenu.style.display !== 'none' &&
+        !linkMenu.contains(e.target) && !e.target.closest('.tt-btn')) {
+      linkMenu.style.display = 'none';
+      _ttLinkField = null;
     }
   });
 

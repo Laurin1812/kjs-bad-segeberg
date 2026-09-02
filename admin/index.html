@@ -276,6 +276,19 @@
   </div>
 </div>
 
+<!-- ── TIPTAP LINK-DIALOG ────────────────────────────────────── -->
+<div id="tt-link-menu" style="display:none;position:fixed;z-index:9999;">
+  <div class="tt-imgmenu-inner tt-imgmenu-inner--col tt-linkmenu-inner">
+    <span class="tt-imgmenu-label">Link-Ziel</span>
+    <input type="text" id="tt-link-input" class="field-input" placeholder="https://… oder /kontakt.html">
+    <div class="tt-linkmenu-actions">
+      <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" id="tt-link-remove" onclick="ttLinkRemove()" style="display:none;">Entfernen</button>
+      <button type="button" class="tt-imgmenu-btn" onclick="ttLinkCancel()">Abbrechen</button>
+      <button type="button" class="tt-imgmenu-btn" onclick="ttLinkApply()">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TIPTAP TABELLEN-DROPDOWN ──────────────────────────────── -->
 <div id="tt-table-menu" style="display:none;position:fixed;z-index:9999;">
   <div class="tt-imgmenu-inner tt-imgmenu-inner--col">
