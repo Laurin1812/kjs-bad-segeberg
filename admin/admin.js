@@ -73,6 +73,7 @@
         sel.appendChild(opt);
       }
       sel.value = neu;
+      markDirty(); // Programmatische Auswahl im offenen Formular - kein natives change-Event
     }
   };
 
@@ -114,7 +115,7 @@
       if (sel) {
         var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
         if (opt) opt.remove();
-        if (sel.options.length) sel.value = sel.options[0].value;
+        if (sel.options.length) { sel.value = sel.options[0].value; markDirty(); }
       }
     });
   };
@@ -161,6 +162,7 @@
         sel.appendChild(opt);
       }
       sel.value = neu;
+      markDirty(); // Programmatische Auswahl im offenen Formular - kein natives change-Event
     }
   };
 
@@ -195,7 +197,7 @@
       if (sel) {
         var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
         if (opt) opt.remove();
-        if (sel.options.length) sel.value = sel.options[0].value;
+        if (sel.options.length) { sel.value = sel.options[0].value; markDirty(); }
       }
     });
   };
@@ -244,6 +246,7 @@
         sel.appendChild(opt);
       }
       sel.value = neu;
+      markDirty(); // Programmatische Auswahl im offenen Formular - kein natives change-Event
     }
   };
 
@@ -278,7 +281,7 @@
       if (sel) {
         var opt = sel.querySelector('option[value="' + val.replace(/"/g, '\\"') + '"]');
         if (opt) opt.remove();
-        if (sel.options.length) sel.value = sel.options[0].value;
+        if (sel.options.length) { sel.value = sel.options[0].value; markDirty(); }
       }
     });
   };
@@ -304,6 +307,100 @@
     tiptapEditors:     {},   // fieldId → TipTap Editor instance (Infomobil)
     _tiptapImageField: null, // fieldId des TipTap-Editors, der gerade ein Bild erwartet
   };
+
+  /* ────────────────────────────────────────────────────────────
+     UNGESPEICHERTE ÄNDERUNGEN – zentrale Erkennung & Navigationsschutz
+     (Phase 5B.4). Vorher setzte NUR eine Handvoll Einzelstellen S.dirty
+     (Downloads-/Galerie-/Hero-Slide-Zeile hinzufügen, Navigation &
+     Reihenfolge per Drag&Drop) und NUR selectSection() prüfte es (mit
+     einem nativen confirm()) - normales Tippen in einem Textfeld, TipTap-
+     Änderungen, EasyMDE-Änderungen und alle 9 internen "← Zurück"-Buttons
+     blieben komplett ungeprüft: ein Wechsel/Zurück konnte unbemerkt
+     Eingaben verwerfen.
+     Prinzip statt Einzellösung pro Seite: EIN delegierter 'input'/'change'-
+     Listener auf #admin-main fängt praktisch jedes native Formularfeld
+     (Text/Zahl/Datum/Textarea/Select/Checkbox/Color) automatisch ab, ohne
+     dass jede Seite eigenen Code braucht. Werte, die beim Rendern über
+     HTML-Attribute (value="…") gesetzt werden, lösen NIE ein input/change-
+     Event aus - daher entsteht beim bloßen Öffnen eines Formulars keine
+     Fehlwarnung. Nur wenige Bedienelemente feuern kein natives Event und
+     brauchen daher einen expliziten markDirty()-Aufruf an ihrer jeweiligen
+     Stelle: der eigene Ja/Nein-Umschalter (toggleBtn), die Bildauswahl
+     (pickImg), die Bildgrößen-Buttons (bildGroesseSet), Zeile-hinzufügen/
+     -entfernen-Buttons bei Downloads/Galerie/Hero-Slides/Testimonials/
+     Linkliste, TipTap (eigenes onUpdate, feuert nachweislich nicht beim
+     initialen Laden - siehe initTiptap) und EasyMDE/CodeMirror (eigenes
+     'change'-Event, siehe initMDE).
+  ──────────────────────────────────────────────────────────── */
+
+  // Zentrale Markierung "es gibt etwas Ungespeichertes im aktuell offenen
+  // Formular". Auch als window.markDirty, damit inline onclick-Attribute
+  // im gerenderten HTML sie direkt aufrufen können (z.B. Zeile-entfernen-
+  // Buttons, die nur als String zusammengebaut werden).
+  function markDirty() { S.dirty = true; }
+  window.markDirty = markDirty;
+
+  // Ersetzt id('admin-main').innerHTML = html im gesamten Datei: jede
+  // vollständig neu gerenderte Ansicht ist per Definition "frisch geladen"
+  // und enthält noch keine ungespeicherten Änderungen - EIN Ort für diesen
+  // Reset statt einer eigenen Zeile in jeder einzelnen render*()-Funktion
+  // (weniger Fehlerrisiko, siehe Anforderung "zentrale Dirty-State-Logik,
+  // nicht pro Seite").
+  function renderMain(html) {
+    id('admin-main').innerHTML = html;
+    S.dirty = false;
+  }
+
+  // Zentrale Navigationssperre: wird VOR jeder Aktion aufgerufen, die die
+  // aktuelle Ansicht verlässt (die 9 "← Zurück"-Buttons, Sidebar-/Bereichs-
+  // wechsel über selectSection(), sowie - wo eine Liste selbst editierbare
+  // Felder wie "Seiteneinstellungen"/"Hero-Bild" trägt, siehe Service/
+  // Termine/Hundebörse - Bearbeiten/Neu/Archiv-Ansicht/Schnellaktionen).
+  // Ohne ungespeicherte Änderungen läuft fn() sofort wie bisher; sonst
+  // Warnung mit "Zurück und verwerfen"/"Hier bleiben" - "Hier bleiben"
+  // bzw. Klick daneben ändert nichts (kein eigener Callback nötig, die
+  // bestehenden showConfirm-Cancel-Pfade tun ohnehin nichts).
+  function confirmNav(fn) {
+    if (!S.dirty) { fn(); return; }
+    showConfirm(
+      'Ungespeicherte Änderungen',
+      'Du hast ungespeicherte Änderungen. Wenn du fortfährst, gehen diese verloren.',
+      function() { S.dirty = false; fn(); },
+      'Verwerfen und fortfahren',
+      'btn-danger',
+      'Hier bleiben'
+    );
+  }
+  window.confirmNav = confirmNav;
+
+  // Delegierter Listener statt Einzelverkabelung pro Feld/Seite: fängt
+  // JEDES native Formularfeld innerhalb von #admin-main ab, unabhängig
+  // davon, welche render*()-Funktion es gerade erzeugt hat. 'input' deckt
+  // Text/Zahl/Textarea/Color während des Tippens ab, 'change' zusätzlich
+  // Checkbox/Select/Date, die teils kein 'input' feuern.
+  (function() {
+    var main = id('admin-main');
+    if (main) {
+      main.addEventListener('input',  markDirty);
+      main.addEventListener('change', markDirty);
+    }
+  })();
+
+  // beforeunload: Tab schließen, Seite neu laden oder die Adresse ändern
+  // mit ungespeicherten Änderungen löst die native Browser-Warnung aus
+  // (ein eigener Text ist aus Sicherheitsgründen in keinem aktuellen
+  // Browser mehr möglich - preventDefault()/return '' reicht, damit der
+  // Dialog überhaupt erscheint). Ohne ungespeicherte Änderungen passiert
+  // nichts. Da der Admin keine eigene Seiten-Historie führt (siehe
+  // Abschlussbericht Punkt 6), ist ein Browser-Zurück aus dem Admin
+  // technisch ebenfalls ein voller Seitenwechsel und damit über denselben
+  // Weg abgesichert.
+  window.addEventListener('beforeunload', function(e) {
+    if (!S.dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
 
   /* ────────────────────────────────────────────────────────────
      NAVIGATION TREE
@@ -703,7 +800,7 @@
     id('admin-app').style.display = 'none';
     id('admin-sidebar').innerHTML = '<div class="sidebar-loading">Wird geladen…</div>';
     id('admin-main').innerHTML = '';
-    S.section = null; S.data = null; S.sha = null;
+    S.section = null; S.data = null; S.sha = null; S.dirty = false;
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -1270,10 +1367,23 @@
   /* ────────────────────────────────────────────────────────────
      SECTION LOADING
   ──────────────────────────────────────────────────────────── */
-  async function selectSection(def) {
+  // selectSection ist der Wrapper: prüft zentral über confirmNav auf
+  // ungespeicherte Änderungen (Phase 5B.4) und delegiert dann an
+  // selectSectionImpl. Als Promise implementiert, damit bestehende
+  // Aufrufer weiterhin `selectSection(def).then(...)` nutzen können -
+  // löst bei "Hier bleiben" die Promise bewusst nicht auf, da niemand
+  // aktuell .catch() daran hängt und ein Then-Callback in diesem Fall
+  // ohnehin nicht laufen soll.
+  function selectSection(def) {
     if (S.dirty && S.section) {
-      if (!confirm('Es gibt ungespeicherte Änderungen. Trotzdem verlassen?')) return;
+      return new Promise(function(resolve) {
+        confirmNav(function() { selectSectionImpl(def).then(resolve); });
+      });
     }
+    return selectSectionImpl(def);
+  }
+
+  async function selectSectionImpl(def) {
     destroyMDE();
     S.section = def;
     S.dirty = false;
@@ -1720,7 +1830,7 @@
         : '') +
       '</div>' +
       saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initTiptap('untertitel', data.untertitel || '');
     initTiptap('intro',      data.intro      || '');
     initTiptap('inhalt',     data.inhalt     || '');
@@ -1839,8 +1949,8 @@
     }).join('');
 
     var html = panelHeader(def.label,
-      '<button type="button" class="btn btn-outline btn-sm" onclick="serviceArchivSeiteOeffnen()">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
-      '<button class="btn btn-primary" onclick="serviceNeu()">➕ Neuer Beitrag</button>') +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="confirmNav(serviceArchivSeiteOeffnen)">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
+      '<button class="btn btn-primary" onclick="confirmNav(serviceNeu)">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
 
       // ── Seiteneinstellungen (Titel/Hero-Bild/Kontakt) ───────
@@ -1870,7 +1980,7 @@
 
     gefiltert.forEach(function(entry) {
       var b = entry.b, i = entry.i;
-      html += '<div class="item-card" onclick="serviceEdit(' + i + ')">' +
+      html += '<div class="item-card" onclick="confirmNav(function(){serviceEdit(' + i + ')})">' +
         '<div class="item-body">' +
           '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
           '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
@@ -1878,9 +1988,9 @@
           '</div>' +
         '</div>' +
         '<div class="item-actions">' +
-          '<button class="btn btn-sm btn-ghost" title="Ins Archiv verschieben" onclick="event.stopPropagation();serviceArchivToggle(' + i + ')">📦 Archivieren</button>' +
-          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();serviceEdit(' + i + ')">Bearbeiten</button>' +
-          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();serviceDelete(' + i + ')">Löschen</button>' +
+          '<button class="btn btn-sm btn-ghost" title="Ins Archiv verschieben" onclick="event.stopPropagation();confirmNav(function(){serviceArchivToggle(' + i + ')})">📦 Archivieren</button>' +
+          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();confirmNav(function(){serviceEdit(' + i + ')})">Bearbeiten</button>' +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){serviceDelete(' + i + ')})">Löschen</button>' +
         '</div>' +
       '</div>';
     });
@@ -1890,7 +2000,7 @@
     }
 
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   }
 
   window.serviceFilterChange = function() {
@@ -1922,7 +2032,7 @@
     var html = '<div class="panel-header"><h2>📦 Archivierte Beiträge</h2></div>' +
       '<div class="panel-body">' +
         '<div class="form-card">' +
-          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderService(S.section,S.data)">← Zurück zu Service</button>' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="confirmNav(function(){renderService(S.section,S.data)})">← Zurück zu Service</button>' +
           '<p class="text-muted" style="margin-bottom:0;font-size:.85rem;">Archivierte Beiträge erscheinen nicht mehr auf der Service-Seite. Über „↩️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
         '</div>';
 
@@ -1931,7 +2041,7 @@
     } else {
       archiviert.forEach(function(entry) {
         var b = entry.b, i = entry.i;
-        html += '<div class="item-card" onclick="serviceEdit(' + i + ')">' +
+        html += '<div class="item-card" onclick="confirmNav(function(){serviceEdit(' + i + ')})">' +
           '<div class="item-body">' +
             '<div class="item-title">' + escHtml(b.titel || '(Kein Titel)') + '</div>' +
             '<div class="item-meta">📅 ' + escHtml(b.datum || '') +
@@ -1939,15 +2049,15 @@
             '</div>' +
           '</div>' +
           '<div class="item-actions">' +
-            '<button class="btn btn-sm btn-outline" title="Aus Archiv zurückholen" onclick="event.stopPropagation();serviceArchivToggle(' + i + ')">↩️ Wiederherstellen</button>' +
-            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();serviceEdit(' + i + ')">Bearbeiten</button>' +
-            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();serviceDelete(' + i + ')">Löschen</button>' +
+            '<button class="btn btn-sm btn-outline" title="Aus Archiv zurückholen" onclick="event.stopPropagation();confirmNav(function(){serviceArchivToggle(' + i + ')})">↩️ Wiederherstellen</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();confirmNav(function(){serviceEdit(' + i + ')})">Bearbeiten</button>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){serviceDelete(' + i + ')})">Löschen</button>' +
           '</div>' +
         '</div>';
       });
     }
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   };
 
   window.serviceEinstSave = async function() {
@@ -1958,6 +2068,7 @@
     try {
       await doSave(S.section.file, S.data, '⚙️ Service: Seiteneinstellungen gespeichert');
       toast('✅ Einstellungen gespeichert!', 'ok');
+      S.dirty = false;
     } catch (e) { await handleSaveError(e); }
   };
 
@@ -1974,7 +2085,7 @@
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     var html = panelHeader('🧰 Beitrag bearbeiten',
-        '<button class="btn btn-outline" onclick="serviceAktuelleAnsichtRendern()">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(serviceAktuelleAnsichtRendern)">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="serviceSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body">' +
@@ -1999,7 +2110,7 @@
         '</div>' +
         renderDownloadsCard(b) +
       '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initMDE('svb-text');
     initDownloadsSortable();
   };
@@ -2018,6 +2129,7 @@
     try {
       await doSave(S.section.file, S.data, '🧰 Service: Beitrag gespeichert');
       toast('✅ Beitrag gespeichert!', 'ok');
+      S.dirty = false;
       serviceAktuelleAnsichtRendern();
     } catch (e) { await handleSaveError(e); }
   };
@@ -2120,7 +2232,7 @@
     }
 
     var html = panelHeader(def.label,
-      '<button class="btn btn-primary" onclick="hundeboerseNeu()">➕ Neue Anzeige</button>') +
+      '<button class="btn btn-primary" onclick="confirmNav(hundeboerseNeu)">➕ Neue Anzeige</button>') +
       '<div class="panel-body">' +
       '<div class="form-card">' +
         '<div class="form-card-title">🖼️ Hero-Bild (Hundebörse-Übersicht &amp; Detailseiten)</div>' +
@@ -2151,7 +2263,7 @@
       if (a.city || a.postalCode) metaParts.push(escHtml([a.postalCode, a.city].filter(Boolean).join(' ')));
       if (a.createdAt) metaParts.push('📅 ' + escHtml(hbDatumAnzeige(a.createdAt)));
 
-      html += '<div class="item-card" onclick="hundeboerseEdit(' + i + ')">' +
+      html += '<div class="item-card" onclick="confirmNav(function(){hundeboerseEdit(' + i + ')})">' +
         thumb +
         '<div class="item-body">' +
           '<div class="item-title">' + escHtml(a.title || '(Kein Titel)') +
@@ -2162,14 +2274,14 @@
         '</div>' +
         '<div class="item-actions">' +
           '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();hundeboerseVorschau(' + i + ')">Vorschau</button>' +
-          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();hundeboerseEdit(' + i + ')">Bearbeiten</button>' +
+          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();confirmNav(function(){hundeboerseEdit(' + i + ')})">Bearbeiten</button>' +
           (a.status === 'pending'
-            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();hundeboerseFreigeben(' + i + ')">Freigeben</button>'
+            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();confirmNav(function(){hundeboerseFreigeben(' + i + ')})">Freigeben</button>'
             : '') +
           (a.status === 'published' || a.status === 'rejected'
-            ? '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();hundeboerseArchivieren(' + i + ')">Archivieren</button>'
+            ? '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();confirmNav(function(){hundeboerseArchivieren(' + i + ')})">Archivieren</button>'
             : '') +
-          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();hundeboerseDelete(' + i + ')">Löschen</button>' +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){hundeboerseDelete(' + i + ')})">Löschen</button>' +
         '</div>' +
       '</div>';
     });
@@ -2178,7 +2290,7 @@
       html += '<div class="form-card"><p class="text-muted">Keine Anzeigen in dieser Ansicht.</p></div>';
     }
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   }
 
   window.hundeboerseFilter = function(status) {
@@ -2231,7 +2343,7 @@
     var titel = a.title ? ('Anzeige bearbeiten: ' + a.title) : 'Neue Anzeige';
 
     var html = panelHeader(titel,
-        '<button class="btn btn-outline" onclick="renderHundeboerse(S.section,S.data)">← Zurück zur Hundebörse</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderHundeboerse(S.section,S.data)})">← Zurück zur Hundebörse</button>' +
         '<button class="btn btn-outline" onclick="hundeboerseVorschau(' + idx + ')">Vorschau</button>' +
         '<button class="btn btn-outline" onclick="hundeboerseSave(' + idx + ')">💾 Speichern</button>' +
         '<button class="btn btn-primary" onclick="hundeboerseFreigebenAusEdit(' + idx + ')">Speichern &amp; Freigeben</button>',
@@ -2332,7 +2444,7 @@
       '</div>' +
       '</div>';
 
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initMDE('hb-description');
     initGalerieSortable();
 
@@ -2487,6 +2599,7 @@
     try {
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
       toast('✅ Anzeige gespeichert!', 'ok');
+      S.dirty = false;
       renderHundeboerse(S.section, S.data);
     } catch (e) { await handleSaveError(e); }
   };
@@ -2500,6 +2613,7 @@
       try {
         await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
         toast('✅ Anzeige freigegeben!', 'ok');
+        S.dirty = false;
         renderHundeboerse(S.section, S.data);
       } catch (e) { await handleSaveError(e); }
     }, 'Freigeben', 'btn-primary');
@@ -2527,6 +2641,7 @@
     try {
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige abgelehnt');
       toast('🚫 Anzeige abgelehnt', 'info');
+      S.dirty = false;
       renderHundeboerse(S.section, S.data);
     } catch (e) { await handleSaveError(e); }
   };
@@ -2761,6 +2876,7 @@
     if (grp) grp.querySelectorAll('.mdimg-size-btn').forEach(function(b) {
       b.classList.toggle('mdimg-size-btn--active', b.getAttribute('data-val') === v);
     });
+    markDirty(); // Setzt .value programmatisch - löst kein natives input/change-Event aus
   };
 
   // Kurzer grauer Hilfetext – exakt dasselbe Markup wie der bestehende
@@ -2816,7 +2932,7 @@
         renderDownloadsCard(data) +
       '</div>' +
       saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     // TipTap-Instanzen initialisieren – vorhandener Inhalt kann noch
     // Markdown sein (Migration); initTiptap konvertiert das automatisch.
     initTiptap('untertitel', data.untertitel || '');
@@ -2867,7 +2983,7 @@
       '</div>' +
       '<input type="hidden" class="dl-datei" value="' + escAttr(datei) + '">' +
       '<div class="item-actions">' +
-        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.download-row\').remove()">🗑️</button>' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.download-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
     '</div>';
   }
@@ -2923,7 +3039,7 @@
         '<input class="field-input ln-url" type="text" value="' + escAttr(l.url || '') + '" placeholder="https://... oder /pfad">' +
       '</div>' +
       '<div class="item-actions">' +
-        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.linkliste-row\').remove()">🗑️</button>' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.linkliste-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
     '</div>';
   }
@@ -2962,6 +3078,7 @@
     list.appendChild(wrap.firstChild);
     var empty = id('linkliste-empty');
     if (empty) empty.style.display = 'none';
+    markDirty();
   };
 
   function collectLinklisteList() {
@@ -3001,7 +3118,7 @@
     var empty = id('downloads-empty');
     if (empty) empty.style.display = 'none';
     initDownloadsSortable();
-    S.dirty = true;
+    markDirty();
     toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
   }
 
@@ -3022,7 +3139,7 @@
         '<input class="field-input gal-titel" type="text" value="' + escAttr(g.titel || '') + '" placeholder="Beschriftung (z.B. Hegeringtag Mai 2026)" style="margin-top:.5rem;">' +
       '</div>' +
       '<div class="item-actions">' +
-        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.galerie-row\').remove()">🗑️</button>' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.galerie-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
     '</div>';
   }
@@ -3085,7 +3202,7 @@
     var empty = id('galerie-empty');
     if (empty) empty.style.display = 'none';
     initGalerieSortable();
-    S.dirty = true;
+    markDirty();
   };
 
   // Hängt die Bildergalerie-Karte ans Ende des aktuellen Formulars an,
@@ -3163,7 +3280,7 @@
         renderTestimonialsCard(data) +
       '</div>' +
       saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initTestimonialsSortable();
     initHeroSlidesSortable();
     bindSaveBtn();
@@ -3194,7 +3311,7 @@
         '</div>' +
       '</div>' +
       '<div class="item-actions">' +
-        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.hero-slide-row\').remove()">🗑️</button>' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.hero-slide-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
     '</div>';
   }
@@ -3236,7 +3353,7 @@
     var empty = id('hero-slides-empty');
     if (empty) empty.style.display = 'none';
     initHeroSlidesSortable();
-    S.dirty = true;
+    markDirty();
   };
 
   function collectHeroSlidesList() {
@@ -3273,7 +3390,7 @@
         '<input class="field-input ts-icon" type="text" value="' + escAttr(t.icon || '') + '" placeholder="Emoji (z.B. 🌿)" style="margin-top:.5rem;max-width:110px;">' +
       '</div>' +
       '<div class="item-actions">' +
-        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.testimonial-row\').remove()">🗑️</button>' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.testimonial-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
     '</div>';
   }
@@ -3310,6 +3427,7 @@
     list.appendChild(wrap.firstChild);
     var empty = id('testimonials-empty');
     if (empty) empty.style.display = 'none';
+    markDirty();
   };
 
   function collectTestimonialsList() {
@@ -3484,7 +3602,7 @@
     }
 
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   }
 
   window.aktuellesFilterChange = function() {
@@ -3517,7 +3635,7 @@
     var html = '<div class="panel-header"><h2>📦 Archivierte Beiträge</h2></div>' +
       '<div class="panel-body">' +
         '<div class="form-card">' +
-          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderAktuelles(S.section,S.data)">← Zurück zu Aktuelles</button>' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="confirmNav(function(){renderAktuelles(S.section,S.data)})">← Zurück zu Aktuelles</button>' +
           '<p class="text-muted" style="margin-bottom:0;font-size:.85rem;">Archivierte Beiträge erscheinen nicht mehr auf der Hauptseite. Über „↩️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
         '</div>';
 
@@ -3542,7 +3660,7 @@
       });
     }
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   };
 
   window.aktuellesNeu = function() {
@@ -3558,7 +3676,7 @@
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     var html = panelHeader('📰 Beitrag bearbeiten',
-        '<button class="btn btn-outline" onclick="aktuellesAktuelleAnsichtRendern()">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(aktuellesAktuelleAnsichtRendern)">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="aktuelleSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body">' +
@@ -3590,7 +3708,7 @@
         renderGalerieCard(b) +
         renderDownloadsCard(b) +
       '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initMDE('b-text');
     initGalerieSortable();
     initDownloadsSortable();
@@ -3613,6 +3731,7 @@
     try {
       await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
       toast('✅ Beitrag gespeichert!', 'ok');
+      S.dirty = false;
       aktuellesAktuelleAnsichtRendern();
     } catch (e) { await handleSaveError(e); }
   };
@@ -3668,7 +3787,7 @@
     var termine = data.termine || [];
     var einst = data.einstellungen || {};
     var html = panelHeader(def.label,
-      '<button class="btn btn-primary" onclick="termineNeu()">➕ Neuer Termin</button>') +
+      '<button class="btn btn-primary" onclick="confirmNav(termineNeu)">➕ Neuer Termin</button>') +
       '<div class="panel-body">' +
 
       // Überschrift & Einleitungstext der öffentlichen Termine-Seite waren bisher
@@ -3694,7 +3813,7 @@
           ? '<span class="item-badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;">📦 Archiv</span> '
           : '';
         var ortMeta = [t.ort, t.revier].filter(Boolean).join(' · ');
-        html += '<div class="item-card" onclick="termineEdit(' + i + ')">' +
+        html += '<div class="item-card" onclick="confirmNav(function(){termineEdit(' + i + ')})">' +
           '<div class="item-body">' +
             '<div class="item-title">' + archivBadge + escHtml(t.veranstaltung || '(Kein Titel)') + '</div>' +
             '<div class="item-meta">📅 ' + escHtml(t.datum || '') + (t.uhrzeit ? ' · ' + escHtml(t.uhrzeit) : '') +
@@ -3705,17 +3824,17 @@
           '<div class="item-actions">' +
             '<button class="btn btn-sm ' + (t.archiviert ? 'btn-outline' : 'btn-ghost') + '" ' +
               'title="' + (t.archiviert ? 'Aus Archiv zurückholen' : 'Ins Archiv verschieben') + '" ' +
-              'onclick="event.stopPropagation();termineArchivToggle(' + i + ')">' +
+              'onclick="event.stopPropagation();confirmNav(function(){termineArchivToggle(' + i + ')})">' +
               (t.archiviert ? '↩️ Wiederherstellen' : '📦 Archivieren') +
             '</button>' +
-            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();termineEdit(' + i + ')">Bearbeiten</button>' +
-            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();termineDelete(' + i + ')">Löschen</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();confirmNav(function(){termineEdit(' + i + ')})">Bearbeiten</button>' +
+            '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){termineDelete(' + i + ')})">Löschen</button>' +
           '</div>' +
         '</div>';
       });
     }
     html += '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   }
 
   window.termineNeu = function() {
@@ -3729,7 +3848,7 @@
     if (!t) return;
     var hegeringOptionen = await ladeHegeringOptionen();
     var html = panelHeader('📅 Termin bearbeiten',
-        '<button class="btn btn-outline" onclick="renderTermine(S.section,S.data)">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderTermine(S.section,S.data)})">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="termineSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body"><div class="form-card">' +
@@ -3753,7 +3872,7 @@
           '</label>' +
         '</div>' +
       '</div></div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   };
 
   window.termineSave = async function(idx) {
@@ -3775,6 +3894,7 @@
     try {
       await doSave(S.section.file, S.data, '📅 Termin gespeichert');
       toast('✅ Termin gespeichert!', 'ok');
+      S.dirty = false;
       renderTermine(S.section, S.data);
     } catch (e) { await handleSaveError(e); }
   };
@@ -3801,6 +3921,7 @@
     try {
       await doSave(S.section.file, S.data, '📅 Termine: Überschrift/Einleitung gespeichert');
       toast('✅ Gespeichert!', 'ok');
+      S.dirty = false;
     } catch (e) { await handleSaveError(e); }
   };
 
@@ -3844,7 +3965,7 @@
     });
 
     html += '</div></div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
 
     // Sortable
     var listEl = id('personen-list');
@@ -3875,7 +3996,7 @@
     var p = (S.data[def.dataKey] || [])[idx];
     if (!p) return;
     var html = panelHeader('👤 Person bearbeiten',
-        '<button class="btn btn-outline" onclick="renderPersonen(S.section,S.data)">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderPersonen(S.section,S.data)})">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="personSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body"><div class="form-card">' +
@@ -3885,7 +4006,7 @@
         fText('p-telefon', 'Telefon', p.telefon) +
         fImage('p-bild', 'Foto', p.bild) +
       '</div></div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   };
 
   window.personSave = async function(idx) {
@@ -3899,6 +4020,7 @@
     try {
       await doSave(def.file, S.data, '👤 Person gespeichert');
       toast('✅ Gespeichert!', 'ok');
+      S.dirty = false;
       renderPersonen(def, S.data);
     } catch (e) { await handleSaveError(e); }
   };
@@ -3948,7 +4070,7 @@
         '</div></div>';
     });
     html += '</div></div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
 
     if (window.Sortable) {
       Sortable.create(id('hegering-list'), {
@@ -3974,7 +4096,7 @@
     var h = (S.data.hegeringe || [])[idx];
     if (!h) return;
     var html = panelHeader('🗺️ Hegering bearbeiten',
-        '<button class="btn btn-outline" onclick="renderHegeringe(S.section,S.data)">← Zurück</button>' +
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderHegeringe(S.section,S.data)})">← Zurück</button>' +
         '<button class="btn btn-primary" onclick="hegeringSave(' + idx + ')">💾 Speichern</button>',
         true) +
       '<div class="panel-body"><div class="form-card">' +
@@ -3990,7 +4112,7 @@
         fText('h-email', 'E-Mail', h.email) +
         fText('h-telefon', 'Telefon', h.telefon) +
       '</div></div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
   };
 
   window.hegeringSave = async function(idx) {
@@ -4005,6 +4127,7 @@
     try {
       await doSave(S.section.file, S.data, '🗺️ Hegering gespeichert');
       toast('✅ Gespeichert!', 'ok');
+      S.dirty = false;
       renderHegeringe(S.section, S.data);
     } catch (e) { await handleSaveError(e); }
   };
@@ -4051,7 +4174,7 @@
         '</div>' +
         renderDownloadsCard(data) +
       '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initTiptap('kjm-aufgaben', data.aufgaben || '');
     initDownloadsSortable();
     bindSaveBtn();
@@ -4108,7 +4231,7 @@
     });
 
     html += '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4220,7 +4343,7 @@
           fText('ei-kal-titel', 'Kalender-Überschrift', data.google_kalender_titel, 'z.B. Terminbuchung') +
         '</div>' +
       '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4266,7 +4389,7 @@
         fText('ft-fb', 'Facebook URL', data.facebook_url) +
         fText('ft-ig', 'Instagram URL', data.instagram_url) +
       '</div></div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4308,7 +4431,7 @@
           fText('schriftgroesse_text', 'Fließtext', data.schriftgroesse_text, '1rem') +
         '</div>' +
       '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4335,7 +4458,7 @@
         fText('imp-registernummer', 'Registernummer', data.registernummer) +
         fTextarea('imp-verantwortlich', 'Verantwortlich (§18)', data.verantwortlich, 2) +
       '</div></div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4386,7 +4509,7 @@
     });
 
     html += '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4471,7 +4594,7 @@
           '<div class="img-gallery" id="medien-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
         '</div>' +
       '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     loadMedianGallery();
 
     id('medien-upload-input').addEventListener('change', async function() {
@@ -4496,12 +4619,12 @@
     var html = '<div class="panel-header"><h2>📦 Archivierte Bilder</h2></div>' +
       '<div class="panel-body panel-body--wide">' +
         '<div class="form-card">' +
-          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="renderMedian()">← Zurück zu Medien &amp; Bilder</button>' +
+          '<button type="button" class="btn btn-outline btn-sm" style="margin-bottom:1rem;" onclick="confirmNav(renderMedian)">← Zurück zu Medien &amp; Bilder</button>' +
           '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Archivierte Bilder bleiben auf der Website ganz normal bestehen und tauchen nur hier nicht mehr in der normalen Übersicht oder bei der Bildauswahl auf. Über „♻️ Wiederherstellen" lassen sie sich jederzeit zurückholen.</p>' +
           '<div class="img-gallery" id="medien-archiv-gallery"><div class="gallery-loading">Wird geladen…</div></div>' +
         '</div>' +
       '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     try {
       if (!medienFiles) medienFiles = await apiGetDir('images');
       await loadMedienArchivListe();
@@ -4696,7 +4819,7 @@
     }
 
     html += '</div>' + saveBar();
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
   }
 
@@ -4841,7 +4964,7 @@
 
       '</div>' + saveBar();
 
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     bindSaveBtn();
 
     // Initialize Sortable.js on each list
@@ -4852,7 +4975,7 @@
         Sortable.create(el, {
           handle: '.navreo-handle',
           animation: 150,
-          onEnd: function() { S.dirty = true; }
+          onEnd: function() { markDirty(); }
         });
       }
     });
@@ -5108,7 +5231,7 @@
           '<button class="btn btn-primary btn-lg" onclick="neueSeiteSpeedSave()">💾 Seite erstellen & speichern</button>' +
         '</div>' +
       '</div>';
-    id('admin-main').innerHTML = html;
+    renderMain(html);
     initTiptap('ns-inhalt', '');
 
     // Auto-generate slug from title
@@ -5491,6 +5614,7 @@
       prev.classList.remove('empty');
       prev.innerHTML = '<img src="' + escAttr(url) + '" alt="">';
     }
+    if (el) markDirty(); // Setzt .value programmatisch - löst kein natives input/change-Event aus
     closeImgModal();
   };
 
@@ -6273,13 +6397,17 @@
   // sonst zeigt der wiederverwendete Dialog fälschlich "Löschen" in Rot an,
   // obwohl die dahinterliegende Aktion korrekt ist (Laurin-Bug-Report,
   // Hundebörse "Speichern & Freigeben", 2026-08-28).
-  function showConfirm(title, msg, cb, okLabel, okClass) {
+  function showConfirm(title, msg, cb, okLabel, okClass, cancelLabel) {
     _confirmCallback = cb;
     id('confirm-title').textContent = title;
     id('confirm-msg').textContent   = msg;
     var okBtn = id('confirm-ok');
     okBtn.textContent = okLabel || 'Löschen';
     okBtn.className = 'btn ' + (okClass || 'btn-danger');
+    // cancelLabel optional (Standard weiterhin "Abbrechen") - genutzt vom
+    // Navigationsschutz (confirmNav, Phase 5B.4) für "Hier bleiben", das an
+    // dieser Stelle verständlicher ist als das generische "Abbrechen".
+    id('confirm-cancel').textContent = cancelLabel || 'Abbrechen';
     id('confirm-modal').style.display = 'flex';
   }
 
@@ -6386,6 +6514,13 @@
       },
     });
     setupLiveImagePreview(S.mde.codemirror);
+    // EasyMDE/CodeMirror feuert eigene 'change'-Events statt nativer
+    // input/change-DOM-Events auf dem darunterliegenden Textfeld - der
+    // delegierte #admin-main-Listener fängt das nicht ab, daher hier
+    // explizit. Der initiale Wert wird beim Erzeugen des Editors direkt aus
+    // dem <textarea> gelesen (nicht per späterem .setValue() gesetzt), es
+    // feuert also kein Fehlalarm beim bloßen Öffnen des Formulars.
+    S.mde.codemirror.on('change', markDirty);
   }
 
   function destroyMDE() {
@@ -6821,7 +6956,7 @@
         // (siehe ttSanitizeHtml) – gleicher Filter, gleiche Stelle im Ablauf.
         transformPastedHTML: function(html) { return ttSanitizeHtml(html); }
       },
-      onUpdate:         function() { updateTiptapToolbar(fieldId); },
+      onUpdate:         function() { markDirty(); updateTiptapToolbar(fieldId); },
       onSelectionUpdate: function() { updateTiptapToolbar(fieldId); }
     });
     S.tiptapEditors[fieldId] = editor;
@@ -7576,6 +7711,7 @@
     btn.setAttribute('aria-pressed', newOn ? 'true' : 'false');
     var labelEl = id('tl-' + btn.id.replace('f-', ''));
     if (labelEl) labelEl.textContent = newOn ? 'Ja' : 'Nein';
+    markDirty(); // Eigener Umschalter, kein natives Checkbox-Element - löst kein input/change-Event aus
   };
 
   function toggleVal(fieldId) {
