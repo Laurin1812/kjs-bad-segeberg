@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Anzeige der Waffenbörse – Kreisjägerschaft Segeberg e.V.">
+  <title>Waffenbörse – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero" id="wb-hero">
+  <div class="page-hero__bg" id="wb-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1584285405429-136bf988bb0b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1 id="wb-detail-titel">Wird geladen …</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+    <main class="main-content" id="wb-detail-inhalt">
+      <p style="color:var(--text-muted);">Wird geladen …</p>
+    </main>
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Waffenbörse</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">Weitere aktuelle Angebote finden Sie in der Übersicht.</p>
+        <p style="margin-top:.75rem;"><a href="index.html" class="btn btn-outline-green btn-sm">Alle Anzeigen ansehen</a></p>
+      </div>
+      <div class="contact-box">
+        <h4>Kontakt KJS</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var wbId = params.get('id');
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  var ZUSTAND_LABEL = { neu: 'Neu', gebraucht: 'Gebraucht', vorfuehrwaffe: 'Vorführwaffe' };
+  function zustandText(z) { return ZUSTAND_LABEL[z] || z || ''; }
+
+  function preisText(a) {
+    if (a.preis_typ === 'festpreis') return a.preis ? (a.preis + ' €') : 'Festpreis';
+    if (a.preis_typ === 'vb') return a.preis ? (a.preis + ' € VB') : 'VB';
+    if (a.preis_typ === 'auf_anfrage') return 'Preis auf Anfrage';
+    return a.preis ? (a.preis + ' €') : 'Keine Preisangabe';
+  }
+
+  function kaliberText(a) { return (a.kaliber || []).filter(Boolean).join(' · '); }
+
+  function zeigeFehlermeldung() {
+    document.getElementById('wb-detail-titel').textContent = 'Anzeige nicht gefunden';
+    document.getElementById('wb-detail-inhalt').innerHTML =
+      '<div style="text-align:center;padding:3rem 1rem;">' +
+      '<h2 style="color:var(--green-dark);margin-bottom:.75rem;">Diese Anzeige wurde nicht gefunden.</h2>' +
+      '<a href="index.html" class="btn btn-primary">Zurück zur Waffenbörse</a>' +
+      '</div>';
+  }
+
+  function zeile(label, wert) {
+    if (wert == null || wert === '') return '';
+    return '<dt>' + escHtml(label) + '</dt><dd>' + escHtml(wert) + '</dd>';
+  }
+
+  if (!wbId) { zeigeFehlermeldung(); return; }
+
+  fetch('../content/waffenboerse.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var anzeigen = data.anzeigen || [];
+      var a = anzeigen.find(function(x) { return x.id === wbId; });
+      if (!a || a.status !== 'published') { zeigeFehlermeldung(); return; }
+
+      document.title = (a.titel || 'Anzeige') + ' – Kreisjägerschaft Segeberg e.V.';
+      document.getElementById('wb-detail-titel').textContent = a.titel || '(Ohne Titel)';
+      if (window.setBreadcrumbCurrentTitle) window.setBreadcrumbCurrentTitle(a.titel || 'Anzeige');
+
+      var galerie = (a.bilder || []).filter(function(g) { return g && g.bild; });
+      var hauptbild = galerie[0] ? toSrc(galerie[0].bild) : '';
+      if (hauptbild) document.getElementById('wb-hero-bg').style.backgroundImage = "url('" + hauptbild + "')";
+
+      var standort = [a.plz, a.ort].filter(Boolean).join(' ');
+      var herstellerModell = [a.hersteller, a.modell].filter(Boolean).join(' ');
+
+      var providerName = (a.anbieter_name || '').trim();
+      var telefonHref = a.anbieter_telefon ? escHtml('tel:' + a.anbieter_telefon.replace(/\s|-|\//g, '')) : '';
+      var betreff = encodeURIComponent('Anfrage zu: ' + (a.titel || 'Ihrer Waffenbörse-Anzeige'));
+      var mailtoHref = a.anbieter_email ? escHtml('mailto:' + a.anbieter_email + '?subject=' + betreff) : '';
+      var hatKontaktdaten = !!(a.anbieter_email || a.anbieter_telefon);
+
+      // ── Oberer Bereich: Galerie links, Eckdaten rechts (gleiches Prinzip
+      // wie die Hundebörsen-Detailseite: Thumbnail-Reihe unter dem Hauptbild,
+      // Klick tauscht nur das große Bild aus) ──────────────────────────────
+      var linksHtml;
+      if (galerie.length) {
+        var thumbsHtml = '';
+        if (galerie.length > 1) {
+          thumbsHtml = '<div class="hb-thumbs" id="wb-thumbs">' +
+            galerie.map(function(g, gi) {
+              var gSrc = toSrc(g.bild);
+              var gAlt = escHtml(g.titel || a.titel || '');
+              return '<button type="button" class="hb-thumb' + (gi === 0 ? ' is-active' : '') + '" data-src="' + gSrc + '" data-alt="' + gAlt + '" aria-label="Bild ' + (gi + 1) + ' von ' + galerie.length + ' anzeigen">' +
+                '<img src="' + gSrc + '" alt="' + gAlt + '" loading="lazy">' +
+              '</button>';
+            }).join('') +
+          '</div>';
+        }
+        linksHtml = '<div class="hb-gallery">' +
+          '<img src="' + hauptbild + '" alt="' + escHtml(a.titel || '') + '" class="hb-main-image" id="wb-main-image">' +
+          thumbsHtml +
+        '</div>';
+      } else {
+        linksHtml = '<div class="hb-gallery"><div style="background:var(--green-light);border-radius:var(--radius-md);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;"><img src="../images/logo.png" alt="KJS" style="height:80px;opacity:.3;"></div></div>';
+      }
+
+      var rechtsHtml = '<div class="hb-eckdaten">' +
+        '<div class="hb-eckdaten__top">' +
+        '<span class="news-card__cat">' + escHtml(a.kategorie || '') + '</span>' +
+        '<h2 style="margin:.75rem 0 .25rem;">' + escHtml(a.titel || '(Ohne Titel)') + '</h2>' +
+        (herstellerModell ? '<p style="color:var(--text-muted);font-size:1rem;margin-bottom:.5rem;">' + escHtml(herstellerModell) + '</p>' : '') +
+        (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">📍 ' + escHtml(standort) + '</p>' : '') +
+        '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:.75rem;">' + escHtml(preisText(a)) + '</p>' +
+        (a.erwerbsberechtigung_erforderlich
+          ? '<div class="wb-erwerb-badge">🔒 Erwerbsberechtigung erforderlich</div>'
+          : '') +
+        '</div>' +
+        (hatKontaktdaten ? '<div class="hb-eckdaten__bottom"><a href="#wb-kontakt" class="btn btn-primary" id="wb-kontakt-btn">Anbieter kontaktieren</a></div>' : '') +
+      '</div>';
+
+      var html = '<a href="index.html" class="content-back-link">← Zurück zur Waffenbörse</a>';
+      html += '<div class="hb-detail-top">' + linksHtml + rechtsHtml + '</div>';
+
+      // ── Kerndaten ─────────────────────────────────────────────
+      var kerndaten = '';
+      kerndaten += zeile('Kategorie', a.kategorie);
+      kerndaten += zeile('Hersteller', a.hersteller);
+      kerndaten += zeile('Modell', a.modell);
+      kerndaten += zeile('Kaliber', kaliberText(a));
+      kerndaten += zeile('Zustand', zustandText(a.zustand));
+      kerndaten += zeile('Erwerbsberechtigung', a.erwerbsberechtigung_erforderlich ? 'Erforderlich' : 'Nicht erforderlich');
+      kerndaten += zeile('Versand', a.versand_moeglich ? 'Möglich' : 'Nur Abholung');
+      if (a.versand_moeglich && a.versandkosten) kerndaten += zeile('Versandkosten', a.versandkosten);
+      if (kerndaten) {
+        html += '<h2>Kerndaten</h2><div class="steckbrief"><dl>' + kerndaten + '</dl></div>';
+      }
+
+      // ── Beschreibung (HTML aus dem TipTap-Editor im Admin) ────
+      if (a.beschreibung) {
+        html += '<h2>Beschreibung</h2>' + a.beschreibung;
+      }
+
+      // ── Allgemeiner Rechtshinweis (immer sichtbar, unabhängig vom
+      // Erwerbsberechtigungs-Status der jeweiligen Anzeige) ────────
+      html += '<div class="wb-rechtshinweis">' +
+        '<p>Der Erwerb erlaubnispflichtiger Waffen und Munition setzt die jeweils gesetzlich erforderliche Erwerbsberechtigung voraus. ' +
+        'Anbieter und Interessenten sind selbst für die Einhaltung der gesetzlichen Vorgaben verantwortlich.</p>' +
+      '</div>';
+
+      // ── Kontaktbereich ("Anbieter kontaktieren") ─────────────
+      if (hatKontaktdaten) {
+        var kontaktInfoZeilen = '';
+        if (providerName) kontaktInfoZeilen += '<p><strong>Anbieter:</strong> ' + escHtml(providerName) + '</p>';
+        if (a.anbieter_telefon) kontaktInfoZeilen += '<p><strong>Telefon:</strong> <a href="' + telefonHref + '">' + escHtml(a.anbieter_telefon) + '</a></p>';
+        if (a.anbieter_email) kontaktInfoZeilen += '<p><strong>E-Mail:</strong> <a href="' + mailtoHref + '">' + escHtml(a.anbieter_email) + '</a></p>';
+
+        var kontaktAktionen = '';
+        if (a.anbieter_email) kontaktAktionen += '<a href="' + mailtoHref + '" class="btn btn-primary">📧 E-Mail schreiben</a>';
+        if (a.anbieter_telefon) kontaktAktionen += '<a href="' + telefonHref + '" class="btn btn-outline-green">📞 Anrufen</a>';
+
+        html += '<div class="hb-kontaktbereich" id="wb-kontakt">' +
+          '<h2>Anbieter kontaktieren</h2>' +
+          '<div class="hb-kontaktbereich__info">' + kontaktInfoZeilen + '</div>' +
+          '<div class="hb-kontaktbereich__actions">' + kontaktAktionen + '</div>' +
+        '</div>';
+      }
+
+      document.getElementById('wb-detail-inhalt').innerHTML = html;
+
+      // ── Bildergalerie: Klick auf Thumbnail tauscht das Hauptbild ──
+      var thumbsWrap = document.getElementById('wb-thumbs');
+      if (thumbsWrap) {
+        var mainImgEl = document.getElementById('wb-main-image');
+        thumbsWrap.addEventListener('click', function(e) {
+          var btn = e.target.closest('.hb-thumb');
+          if (!btn || !mainImgEl) return;
+          mainImgEl.src = btn.getAttribute('data-src');
+          mainImgEl.alt = btn.getAttribute('data-alt') || mainImgEl.alt;
+          thumbsWrap.querySelectorAll('.hb-thumb').forEach(function(t) { t.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+        });
+      }
+
+      // ── "Anbieter kontaktieren"-Button (oben) ─────────────────
+      var kontaktBtn = document.getElementById('wb-kontakt-btn');
+      if (kontaktBtn) {
+        kontaktBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var ziel = document.getElementById('wb-kontakt');
+          if (!ziel) return;
+          ziel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          ziel.classList.add('hb-kontakt-highlight');
+          setTimeout(function() { ziel.classList.remove('hb-kontakt-highlight'); }, 2000);
+        });
+      }
+    })
+    .catch(zeigeFehlermeldung);
+})();
+</script>
+
+<footer class="site-footer" id="siteFooter"></footer>
+<script src="/js/main.js"></script>
+</body>
+</html>

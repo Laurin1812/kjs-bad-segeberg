@@ -1,0 +1,84 @@
+{
+  "kategorien": ["Büchsen", "Flinten", "Kombinierte Waffen", "Kurzwaffen", "Optik", "Zubehör", "Sonstiges"],
+  "anzeigen": [
+    {
+      "id": "wb-1788440000001",
+      "status": "published",
+      "erstellt_am": "2026-08-30T09:15:00.000Z",
+      "aktualisiert_am": "2026-08-30T09:15:00.000Z",
+      "titel": "Blaser BBF 95 mit Zeiss Optik",
+      "kategorie": "Kombinierte Waffen",
+      "hersteller": "Blaser",
+      "modell": "BBF 95",
+      "kaliber": ["7x65R", "12/70"],
+      "zustand": "gebraucht",
+      "preis": "2.500",
+      "preis_typ": "festpreis",
+      "erwerbsberechtigung_erforderlich": true,
+      "beschreibung": "<p>Gepflegte Bock-Büchsflinte aus erster Hand, regelmäßig gewartet und stets trocken gelagert. Der Kugellauf ist in 7x65R ausgeführt, der Schrotlauf in 12/70.</p><p>Die aufmontierte Zeiss-Optik ist im Kaufpreis enthalten und passgenau eingeschossen. Die Waffe eignet sich sowohl für die Ansitz- als auch für die Drückjagd.</p><ul><li><p>Lauflänge: 60 cm</p></li><li><p>Schaft: Nussbaum, sehr guter Originalzustand</p></li><li><p>Mit Original-Waffenkoffer</p></li></ul><p>Besichtigung und Anprobe nach Vereinbarung möglich.</p>",
+      "bilder": [
+        { "bild": "/images/wb-test-kombiwaffe-1.jpg", "titel": "Gesamtansicht" },
+        { "bild": "/images/wb-test-kombiwaffe-2.jpg", "titel": "Optik" }
+      ],
+      "plz": "24629",
+      "ort": "Kisdorf",
+      "versand_moeglich": false,
+      "versandkosten": "",
+      "anbieter_name": "Peter Beispiel",
+      "anbieter_email": "peter.beispiel@example.de",
+      "anbieter_telefon": "0171 2345678"
+    },
+    {
+      "id": "wb-1788440000002",
+      "status": "published",
+      "erstellt_am": "2026-08-31T14:40:00.000Z",
+      "aktualisiert_am": "2026-08-31T14:40:00.000Z",
+      "titel": "Sauer 202 Repetierbüchse",
+      "kategorie": "Büchsen",
+      "hersteller": "Sauer",
+      "modell": "202",
+      "kaliber": [".308 Winchester"],
+      "zustand": "gebraucht",
+      "preis": "1.650",
+      "preis_typ": "vb",
+      "erwerbsberechtigung_erforderlich": true,
+      "beschreibung": "<p>Solide Repetierbüchse mit Wechsellaufsystem, aus gepflegtem Privatbesitz. Der Verschluss läuft geschmeidig, das Abzugssystem ist unverändert im Originalzustand.</p><p>Wird ohne Optik angeboten, eine passende Montage ist vorhanden.</p><p>Verkauf aus Bestandsverkleinerung, daher Verhandlungsbasis.</p>",
+      "bilder": [
+        { "bild": "/images/wb-test-buechse-1.jpg", "titel": "Gesamtansicht" }
+      ],
+      "plz": "23795",
+      "ort": "Bad Segeberg",
+      "versand_moeglich": false,
+      "versandkosten": "",
+      "anbieter_name": "Jan Beispielmann",
+      "anbieter_email": "jan.beispielmann@example.de",
+      "anbieter_telefon": ""
+    },
+    {
+      "id": "wb-1788440000003",
+      "status": "published",
+      "erstellt_am": "2026-09-01T08:05:00.000Z",
+      "aktualisiert_am": "2026-09-01T08:05:00.000Z",
+      "titel": "Zielfernrohr Swarovski Z6i 2,5-15x56",
+      "kategorie": "Optik",
+      "hersteller": "Swarovski",
+      "modell": "Z6i 2,5-15x56",
+      "kaliber": [],
+      "zustand": "neu",
+      "preis": "950",
+      "preis_typ": "festpreis",
+      "erwerbsberechtigung_erforderlich": false,
+      "beschreibung": "<p>Neuwertiges Zielfernrohr, originalverpackt, nie montiert. Leuchtabsehen mit Fernbedienung, ballistische Verstellung im Turm.</p><p>Abgabe da doppelt vorhanden.</p>",
+      "bilder": [
+        { "bild": "/images/wb-test-optik-1.jpg", "titel": "Gesamtansicht" }
+      ],
+      "plz": "24568",
+      "ort": "Kaltenkirchen",
+      "versand_moeglich": true,
+      "versandkosten": "8,90 €",
+      "anbieter_name": "Anna Beispiel",
+      "anbieter_email": "anna.beispiel@example.de",
+      "anbieter_telefon": "0172 3456789"
+    }
+  ]
+}

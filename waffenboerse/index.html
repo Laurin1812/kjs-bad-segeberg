@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Waffenbörse der Kreisjägerschaft Segeberg e.V. – Waffen, Optik und Zubehör von Mitgliedern für Mitglieder.">
+  <title>Waffenbörse – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1584285405429-136bf988bb0b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Waffenbörse</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container hb-overview-layout">
+    <div class="hb-overview-intro">
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:0;">
+        Hier finden Mitglieder der Kreisjägerschaft Segeberg aktuell angebotene Waffen, Optik und Zubehör aus privater Hand.
+        Der Erwerb erlaubnispflichtiger Waffen und Munition setzt die jeweils gesetzlich erforderliche Erwerbsberechtigung voraus – Anbieter und Interessenten sind selbst für die Einhaltung der gesetzlichen Vorgaben verantwortlich.
+      </p>
+    </div>
+
+    <main class="main-content" id="wb-main">
+      <h2 style="margin-bottom:1.5rem;">Aktuelle Angebote</h2>
+
+      <div class="wb-filter-bar" id="wb-filter-bar">
+        <div class="wb-filter-field">
+          <label for="wb-f-kategorie">Kategorie</label>
+          <select id="wb-f-kategorie"><option value="">Alle</option></select>
+        </div>
+        <div class="wb-filter-field">
+          <label for="wb-f-hersteller">Hersteller</label>
+          <select id="wb-f-hersteller"><option value="">Alle</option></select>
+        </div>
+        <div class="wb-filter-field">
+          <label for="wb-f-kaliber">Kaliber</label>
+          <select id="wb-f-kaliber"><option value="">Alle</option></select>
+        </div>
+        <div class="wb-filter-field">
+          <label for="wb-f-zustand">Zustand</label>
+          <select id="wb-f-zustand"><option value="">Alle</option></select>
+        </div>
+        <div class="wb-filter-field">
+          <label for="wb-f-sort">Sortierung</label>
+          <select id="wb-f-sort">
+            <option value="neu">Neueste zuerst</option>
+            <option value="preis_auf">Preis aufsteigend</option>
+            <option value="preis_ab">Preis absteigend</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-outline-green btn-sm" id="wb-filter-reset">Filter zurücksetzen</button>
+      </div>
+
+      <p class="text-muted" id="wb-result-count" style="margin-bottom:1rem;font-size:.88rem;"></p>
+
+      <div class="news__grid" id="wb-grid">
+        <p style="color:var(--text-muted);">Anzeigen werden geladen …</p>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="contact-box">
+        <h4>Kontakt</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  var ZUSTAND_LABEL = { neu: 'Neu', gebraucht: 'Gebraucht', vorfuehrwaffe: 'Vorführwaffe' };
+  function zustandText(z) { return ZUSTAND_LABEL[z] || z || ''; }
+
+  function preisText(a) {
+    if (a.preis_typ === 'festpreis') return a.preis ? (a.preis + ' €') : 'Festpreis';
+    if (a.preis_typ === 'vb') return a.preis ? (a.preis + ' € VB') : 'VB';
+    if (a.preis_typ === 'auf_anfrage') return 'Preis auf Anfrage';
+    return a.preis ? (a.preis + ' €') : 'Keine Preisangabe';
+  }
+
+  // Für die Preis-Sortierung: reine Ziffern aus dem Preis-Text extrahieren
+  // (deutsches Tausendertrennzeichen "." wird entfernt), "auf Anfrage"/leere
+  // Preise fallen ans Ende der jeweiligen Sortierrichtung.
+  function preisZahl(a) {
+    var n = parseFloat(String(a.preis || '').replace(/\./g, '').replace(',', '.'));
+    return isFinite(n) ? n : null;
+  }
+
+  function kaliberText(a) {
+    return (a.kaliber || []).filter(Boolean).join(' · ');
+  }
+
+  function renderKarte(a) {
+    var bild = (a.bilder && a.bilder[0] && a.bilder[0].bild) || '';
+    var imgSrc = toSrc(bild);
+    var standort = [a.plz, a.ort].filter(Boolean).join(' ');
+    var herstellerModell = [a.hersteller, a.modell].filter(Boolean).join(' ');
+    return '<article class="news-card">' +
+      '<a href="detail.html?id=' + encodeURIComponent(a.id) + '" style="text-decoration:none;color:inherit;">' +
+        '<div class="news-card__img-wrap">' +
+          (imgSrc
+            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.titel || '') + '" loading="lazy">'
+            : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
+        '</div>' +
+        '<div class="news-card__body">' +
+          '<div class="news-card__meta">' +
+            '<span class="news-card__cat">' + escHtml(a.kategorie || '') + '</span>' +
+          '</div>' +
+          '<h3 class="news-card__title">' + escHtml(a.titel || '(Ohne Titel)') + '</h3>' +
+          (herstellerModell ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(herstellerModell) + '</p>' : '') +
+          (kaliberText(a) ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(kaliberText(a)) + '</p>' : '') +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(zustandText(a.zustand)) + (standort ? ' · 📍 ' + escHtml(standort) : '') + '</p>' +
+          '<div class="wb-card-footer">' +
+            '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .5rem;">' + escHtml(preisText(a)) + '</p>' +
+            '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Anzeige ansehen →</span>' +
+          '</div>' +
+        '</div>' +
+      '</a>' +
+    '</article>';
+  }
+
+  function fillSelect(sel, values, current) {
+    var html = '<option value="">Alle</option>' + values.map(function(v) {
+      return '<option value="' + escAttr(v) + '"' + (v === current ? ' selected' : '') + '>' + escHtml(v) + '</option>';
+    }).join('');
+    sel.innerHTML = html;
+  }
+  function escAttr(s) { return escHtml(s).replace(/'/g, '&#39;'); }
+
+  var alle = [];
+
+  function applyFilters() {
+    var kat = document.getElementById('wb-f-kategorie').value;
+    var her = document.getElementById('wb-f-hersteller').value;
+    var kal = document.getElementById('wb-f-kaliber').value;
+    var zus = document.getElementById('wb-f-zustand').value;
+    var sort = document.getElementById('wb-f-sort').value;
+
+    var gefiltert = alle.filter(function(a) {
+      if (kat && a.kategorie !== kat) return false;
+      if (her && a.hersteller !== her) return false;
+      if (kal && (a.kaliber || []).indexOf(kal) === -1) return false;
+      if (zus && a.zustand !== zus) return false;
+      return true;
+    });
+
+    if (sort === 'preis_auf' || sort === 'preis_ab') {
+      var dir = sort === 'preis_auf' ? 1 : -1;
+      gefiltert.sort(function(x, y) {
+        var px = preisZahl(x), py = preisZahl(y);
+        if (px === null && py === null) return 0;
+        if (px === null) return 1;
+        if (py === null) return -1;
+        return (px - py) * dir;
+      });
+    } else {
+      gefiltert.sort(function(x, y) {
+        var dx = x.erstellt_am || '', dy = y.erstellt_am || '';
+        return dy.localeCompare(dx);
+      });
+    }
+
+    var grid = document.getElementById('wb-grid');
+    var countEl = document.getElementById('wb-result-count');
+    if (!gefiltert.length) {
+      countEl.textContent = '';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;background:var(--bg-light);border-radius:var(--radius-md);">' +
+        '<h3 style="color:var(--green-dark);margin-bottom:.5rem;">Keine Anzeigen für diese Auswahl.</h3>' +
+        '<p style="color:var(--text-muted);">Bitte die Filter anpassen oder zurücksetzen.</p>' +
+      '</div>';
+      return;
+    }
+    countEl.textContent = gefiltert.length + ' von ' + alle.length + ' Anzeigen';
+    grid.innerHTML = gefiltert.map(renderKarte).join('');
+  }
+
+  fetch('../content/waffenboerse.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var anzeigen = data.anzeigen || [];
+      alle = anzeigen.filter(function(a) { return a.status === 'published'; });
+
+      var kategorien = data.kategorien || [];
+      var hersteller = [], kaliber = [], zustaende = [];
+      var seenH = {}, seenK = {}, seenZ = {};
+      alle.forEach(function(a) {
+        if (a.hersteller && !seenH[a.hersteller]) { seenH[a.hersteller] = true; hersteller.push(a.hersteller); }
+        (a.kaliber || []).forEach(function(k) {
+          if (k && !seenK[k]) { seenK[k] = true; kaliber.push(k); }
+        });
+        if (a.zustand && !seenZ[a.zustand]) { seenZ[a.zustand] = true; zustaende.push(a.zustand); }
+      });
+      hersteller.sort(function(a,b){ return a.localeCompare(b,'de'); });
+      kaliber.sort(function(a,b){ return a.localeCompare(b,'de'); });
+
+      fillSelect(document.getElementById('wb-f-kategorie'), kategorien, '');
+      fillSelect(document.getElementById('wb-f-hersteller'), hersteller, '');
+      fillSelect(document.getElementById('wb-f-kaliber'), kaliber, '');
+      // Zustand-Options mit lesbarem Label, aber Wert bleibt der interne Schlüssel
+      var zSel = document.getElementById('wb-f-zustand');
+      zSel.innerHTML = '<option value="">Alle</option>' + zustaende.map(function(z) {
+        return '<option value="' + escAttr(z) + '">' + escHtml(zustandText(z)) + '</option>';
+      }).join('');
+
+      ['wb-f-kategorie','wb-f-hersteller','wb-f-kaliber','wb-f-zustand','wb-f-sort'].forEach(function(id) {
+        document.getElementById(id).addEventListener('change', applyFilters);
+      });
+      document.getElementById('wb-filter-reset').addEventListener('click', function() {
+        ['wb-f-kategorie','wb-f-hersteller','wb-f-kaliber','wb-f-zustand'].forEach(function(id) {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('wb-f-sort').value = 'neu';
+        applyFilters();
+      });
+
+      applyFilters();
+    })
+    .catch(function() {
+      document.getElementById('wb-grid').innerHTML = '<p style="color:var(--text-muted);">Anzeigen konnten nicht geladen werden.</p>';
+    });
+})();
+</script>
+
+<footer class="site-footer" id="siteFooter"></footer>
+<script src="/js/main.js"></script>
+</body>
+</html>

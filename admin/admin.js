@@ -559,6 +559,13 @@
     { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
     { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
     { key:'hundeboerse', label:'🐕 Hundebörse', file:'content/hundeboerse.json', form:'hundeboerse' },
+    // Waffenbörse (Phase 1 Prototyp, 02.09.2026): eigenständiges Modul,
+    // eigene JSON-Datei (content/waffenboerse.json) - bewusst NICHT in
+    // hundeboerse.json integriert (andere Fachlogik/Felder). Noch kein
+    // Eintrag in der öffentlichen Hauptnavigation (siehe js/components.js /
+    // js/main.js) - Seiten sind bewusst nur über direkte URL erreichbar,
+    // bis nach Sichtprüfung entschieden ist, ob/wie ein Nav-Punkt ergänzt wird.
+    { key:'waffenboerse', label:'🔫 Waffenbörse', file:'content/waffenboerse.json', form:'waffenboerse' },
     // "Kontakt & Stammdaten" und FAQ bewusst in "Einstellungen" verschoben
     // (nicht mehr zwischen Service und Verbraucher-Themen als eigene
     // Top-Level-Punkte) - beides sind Rahmendaten/Konfiguration, keine
@@ -1528,6 +1535,7 @@
       case 'benutzer':        renderBenutzer();                  break;
       case 'service':          renderService(def, data);          break;
       case 'hundeboerse':      renderHundeboerse(def, data);       break;
+      case 'waffenboerse':     renderWaffenboerse(def, data);      break;
       default:                renderStandard(def, data);
     }
     // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
@@ -1543,7 +1551,7 @@
     // Löschen, Sortieren – speichert einzeln direkt per doSave()). Eine hier
     // injizierte Downloads-Karte hätte daher gar keinen Weg, tatsächlich
     // gespeichert zu werden (Nebenfund aus Phase 5B.5, bereinigt).
-    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse','personen','hegeringe'];
+    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse','personen','hegeringe','waffenboerse'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
@@ -2800,6 +2808,529 @@
     var count = list ? list.querySelectorAll('.galerie-row').length : 0;
     if (count >= HB_MAX_BILDER) {
       toast('Maximal ' + HB_MAX_BILDER + ' Bilder pro Anzeige.', 'info');
+      return;
+    }
+    window.addGalerieRow();
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     WAFFENBÖRSE (Phase 1 Prototyp, 02.09.2026)
+     Eigenständiges Modul, eigene Datei content/waffenboerse.json
+     ({ kategorien:[...], anzeigen:[...] }) - bewusst NICHT in
+     hundeboerse.json integriert (andere Fachlogik/Felder, siehe
+     Laurin-Brief "Waffenbörse Phase 1"). Struktur/Bausteine sind
+     größtenteils 1:1 vom Hundebörse-Modul übernommen (Status-Workflow,
+     doSave/confirmNav/markDirty/renderMain, generische Bildergalerie
+     #galerie-list), bewusst OHNE die hundeboerse-spezifische Einzelhund-
+     /Wurf-Logik, Zuchtverband-Vorschlagsliste und Geokodierung - dafür
+     gibt es bei Waffen keine fachliche Entsprechung.
+     Kaliber ist im Datenmodell ein Array (Kombiwaffen können mehrere
+     Kaliber haben), wird im Admin aber bewusst als ein einzelnes
+     Textfeld mit Komma-Trennung bedient (kein neuer Zeilen-Editor nötig
+     für Phase 1, siehe Laurin-Vorgabe "relativ schnell").
+     Beschreibung nutzt fTipTap (nicht fMarkdown wie Hundebörse) - für
+     Hundebörse war Markdown eine bewusste Bestandsschutz-Entscheidung
+     aus Phase 5B.5, hier gibt es keine Altdaten, TipTap ist der
+     aktuelle Standard-Editor der Seite.
+  ──────────────────────────────────────────────────────────── */
+  var WB_STATUS = [
+    { value:'pending',   label:'Wartet auf Freigabe' },
+    { value:'published', label:'Veröffentlicht' },
+    { value:'rejected',  label:'Abgelehnt' },
+    { value:'archived',  label:'Archiviert' }
+  ];
+  var WB_KATEGORIEN_DEFAULT = ['Büchsen', 'Flinten', 'Kombinierte Waffen', 'Kurzwaffen', 'Optik', 'Zubehör', 'Sonstiges'];
+  var WB_ZUSTAND = [
+    { value:'neu',       label:'Neu' },
+    { value:'gebraucht', label:'Gebraucht' }
+  ];
+  var WB_PREIS_TYP = [
+    { value:'',         label:'Keine Angabe' },
+    { value:'festpreis', label:'Festpreis' },
+    { value:'vb',        label:'Verhandlungsbasis (VB)' }
+  ];
+  function wbStatusLabel(s) {
+    var m = WB_STATUS.filter(function(x) { return x.value === s; })[0];
+    return m ? m.label : (s || 'Entwurf');
+  }
+  function wbZustandLabel(z) {
+    var m = WB_ZUSTAND.filter(function(x) { return x.value === z; })[0];
+    return m ? m.label : (z || '');
+  }
+  function wbPreisText(a) {
+    var p = a.preis ? (('' + a.preis).trim() + ' €') : '';
+    if (a.preis_typ === 'vb') return p ? (p + ' VB') : 'VB';
+    return p;
+  }
+  function wbKaliberText(a) {
+    return (a.kaliber || []).join(' · ');
+  }
+
+  // Kategorien erweiterbar (Punkt 3 des Laurin-Briefs: "Struktur so, dass
+  // Kategorien im Admin später relativ leicht angepasst werden können") -
+  // gleiches, bereits bewährtes Prinzip wie bei Aktuelles/Termine/Service
+  // (fKategorieDropdown & Co., siehe oben), nur dass die Liste hier auf
+  // oberster Ebene unter data.kategorien liegt (nicht unter
+  // data.einstellungen.kategorien) - Waffenbörse hat kein "einstellungen"-
+  // Objekt und braucht auch keines.
+  function alleWaffenboerseKategorien() {
+    var kats = (S.data && S.data.kategorien) || WB_KATEGORIEN_DEFAULT;
+    var used = ((S.data && S.data.anzeigen) || []).map(function(a) {
+      return (a.kategorie || '').trim();
+    }).filter(Boolean);
+    var seen = {};
+    var out = [];
+    kats.concat(used).forEach(function(k) {
+      if (!seen[k]) { seen[k] = true; out.push(k); }
+    });
+    return out;
+  }
+
+  function fWaffenboerseKategorieDropdown(val) {
+    var options = alleWaffenboerseKategorien();
+    if (val && options.indexOf(val) === -1) options = options.concat([val]);
+    var opts = options.map(function(o) {
+      return '<option value="' + escAttr(o) + '"' + (o === val ? ' selected' : '') + '>' + escHtml(o) + '</option>';
+    }).join('');
+    return '<div class="field-row">' +
+      '<label class="field-label" for="f-wb-kategorie">Kategorie</label>' +
+      '<div style="display:flex;gap:.5rem;align-items:center;">' +
+        '<select class="field-input" id="f-wb-kategorie" style="flex:1;">' + opts + '</select>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="waffenboerseKategorieAdd()" style="white-space:nowrap;">+ Neu</button>' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="waffenboerseKategorieDelete()" title="Ausgewählte Kategorie löschen" style="white-space:nowrap;">🗑</button>' +
+      '</div>' +
+      '<p class="field-hint">Neue Kategorie über „+ Neu" anlegen, ausgewählte über 🗑 löschen (nur möglich, wenn keine Anzeige sie mehr verwendet).</p>' +
+    '</div>';
+  }
+
+  window.waffenboerseKategorieAdd = async function() {
+    var neu = await showPrompt('Neue Kategorie', 'Name der neuen Kategorie:');
+    if (!neu) return;
+    neu = neu.trim();
+    if (!neu) return;
+    var kats = (S.data.kategorien || WB_KATEGORIEN_DEFAULT).slice();
+    if (kats.indexOf(neu) === -1) kats.push(neu);
+    S.data.kategorien = kats;
+    try {
+      await doSave(S.section.file, S.data, '🔫 Waffenbörse: Kategorie "' + neu + '" hinzugefügt');
+      toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
+    } catch (e) {
+      await handleSaveError(e);
+      return;
+    }
+    var sel = id('f-wb-kategorie');
+    if (sel) {
+      if (!sel.querySelector('option[value="' + neu.replace(/"/g, '\\"') + '"]')) {
+        var opt = document.createElement('option');
+        opt.value = neu;
+        opt.textContent = neu;
+        sel.appendChild(opt);
+      }
+      sel.value = neu;
+      markDirty();
+    }
+  };
+
+  window.waffenboerseKategorieDelete = async function() {
+    var sel = id('f-wb-kategorie');
+    var wert = sel ? sel.value : '';
+    if (!wert) return;
+    var usedBy = ((S.data && S.data.anzeigen) || []).filter(function(a) {
+      return (a.kategorie || '').trim() === wert;
+    });
+    if (usedBy.length) {
+      await showAlert('Kann nicht gelöscht werden',
+        '„' + wert + '" wird noch von ' + usedBy.length +
+        ' Anzeige' + (usedBy.length === 1 ? '' : 'n') + ' verwendet:\n\n' +
+        usedBy.map(function(a) { return '• ' + (a.titel || '(ohne Titel)'); }).join('\n') +
+        '\n\nBitte dort erst eine andere Kategorie wählen.');
+      return;
+    }
+    showConfirm('Kategorie löschen', 'Kategorie „' + wert + '" wirklich löschen?', async function() {
+      var kats = (S.data.kategorien || WB_KATEGORIEN_DEFAULT).slice();
+      var idx = kats.indexOf(wert);
+      if (idx !== -1) kats.splice(idx, 1);
+      S.data.kategorien = kats;
+      try {
+        await doSave(S.section.file, S.data, '🔫 Waffenbörse: Kategorie "' + wert + '" gelöscht');
+        toast('✅ Kategorie „' + wert + '" gelöscht', 'ok');
+      } catch (e) {
+        await handleSaveError(e);
+        return;
+      }
+      if (sel) {
+        var opt = sel.querySelector('option[value="' + wert.replace(/"/g, '\\"') + '"]');
+        if (opt) opt.remove();
+        if (sel.options.length) { sel.value = sel.options[0].value; markDirty(); }
+      }
+    });
+  };
+
+  function renderWaffenboerse(def, data) {
+    var anzeigen = data.anzeigen || [];
+    S.wbFilterStatus = S.wbFilterStatus || '';
+
+    var indexed = anzeigen.map(function(a, i) { return { a: a, i: i }; });
+    var counts = { alle: indexed.length, pending: 0, published: 0, rejected: 0, archived: 0 };
+    indexed.forEach(function(e) {
+      if (counts[e.a.status] !== undefined) counts[e.a.status]++;
+    });
+
+    var gefiltert = S.wbFilterStatus
+      ? indexed.filter(function(e) { return e.a.status === S.wbFilterStatus; })
+      : indexed;
+    gefiltert.sort(function(x, y) {
+      var dx = x.a.erstellt_am || '', dy = y.a.erstellt_am || '';
+      if (dx && dy) return dy.localeCompare(dx);
+      if (dx) return -1;
+      if (dy) return 1;
+      return y.i - x.i;
+    });
+
+    function tab(value, label, count) {
+      var active = S.wbFilterStatus === value;
+      return '<button type="button" class="btn btn-sm ' + (active ? 'btn-primary' : 'btn-outline') +
+        '" onclick="waffenboerseFilter(\'' + value + '\')" style="margin:0 .4rem .4rem 0;">' +
+        escHtml(label) + ' (' + count + ')</button>';
+    }
+
+    var html = panelHeader(def.label,
+      '<button class="btn btn-primary" onclick="confirmNav(waffenboerseNeu)">➕ Neue Anzeige</button>') +
+      '<div class="panel-body">' +
+      '<div class="form-card">' +
+        '<div class="form-card-title">🔍 Status</div>' +
+        '<div style="display:flex;flex-wrap:wrap;">' +
+          tab('', 'Alle', counts.alle) +
+          tab('pending', 'Wartet auf Freigabe', counts.pending) +
+          tab('published', 'Veröffentlicht', counts.published) +
+          tab('rejected', 'Abgelehnt', counts.rejected) +
+          tab('archived', 'Archiviert', counts.archived) +
+        '</div>' +
+      '</div>' +
+      '<p class="text-muted" style="margin-bottom:1rem;">' + gefiltert.length + ' von ' + counts.alle + ' Anzeigen. Klicken zum Bearbeiten.</p>';
+
+    gefiltert.forEach(function(entry) {
+      var a = entry.a, i = entry.i;
+      var bild = (a.bilder && a.bilder[0] && a.bilder[0].bild) || '';
+      var thumb = bild
+        ? '<img src="' + escAttr(bild) + '" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;">'
+        : '<div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:var(--bg);"></div>';
+      var metaParts = [];
+      if (a.kategorie) metaParts.push(escHtml(a.kategorie));
+      if (a.hersteller || a.modell) metaParts.push(escHtml([a.hersteller, a.modell].filter(Boolean).join(' ')));
+      if (wbKaliberText(a)) metaParts.push(escHtml(wbKaliberText(a)));
+      if (wbPreisText(a)) metaParts.push(escHtml(wbPreisText(a)));
+      if (a.ort || a.plz) metaParts.push('📍 ' + escHtml([a.plz, a.ort].filter(Boolean).join(' ')));
+
+      html += '<div class="item-card" onclick="confirmNav(function(){waffenboerseEdit(' + i + ')})">' +
+        thumb +
+        '<div class="item-body">' +
+          '<div class="item-title">' + escHtml(a.titel || '(Kein Titel)') +
+            '<span class="item-badge">' + wbStatusLabel(a.status) + '</span>' +
+            (a.erwerbsberechtigung_erforderlich ? '<span class="item-badge">Erwerbsberechtigung erforderlich</span>' : '') +
+          '</div>' +
+          '<div class="item-meta">' + metaParts.join(' · ') + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();waffenboerseVorschau(' + i + ')">Vorschau</button>' +
+          '<button class="btn btn-sm btn-outline" onclick="event.stopPropagation();confirmNav(function(){waffenboerseEdit(' + i + ')})">Bearbeiten</button>' +
+          (a.status === 'pending'
+            ? '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();confirmNav(function(){waffenboerseFreigeben(' + i + ')})">Freigeben</button>'
+            : '') +
+          (a.status === 'published' || a.status === 'rejected'
+            ? '<button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();confirmNav(function(){waffenboerseArchivieren(' + i + ')})">Archivieren</button>'
+            : '') +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){waffenboerseDelete(' + i + ')})">Löschen</button>' +
+        '</div>' +
+      '</div>';
+    });
+
+    if (!gefiltert.length) {
+      html += '<div class="form-card"><p class="text-muted">Keine Anzeigen in dieser Ansicht.</p></div>';
+    }
+    html += '</div>';
+    renderMain(html);
+  }
+
+  window.waffenboerseFilter = function(status) {
+    S.wbFilterStatus = status;
+    renderWaffenboerse(S.section, S.data);
+  };
+
+  window.waffenboerseNeu = function() {
+    var data = S.data;
+    data.anzeigen = data.anzeigen || [];
+    var now = new Date().toISOString();
+    var neu = {
+      id: 'wb-' + Date.now(),
+      status: 'pending',
+      erstellt_am: now, aktualisiert_am: now,
+      titel: '', kategorie: '', hersteller: '', modell: '', kaliber: [],
+      zustand: 'gebraucht', preis: '', preis_typ: '',
+      erwerbsberechtigung_erforderlich: false,
+      beschreibung: '', bilder: [],
+      plz: '', ort: '', versand_moeglich: false, versandkosten: '',
+      anbieter_name: '', anbieter_email: '', anbieter_telefon: ''
+    };
+    data.anzeigen.unshift(neu);
+    waffenboerseEdit(0);
+  };
+
+  window.waffenboerseEdit = function(idx) {
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    var titel = a.titel ? ('Anzeige bearbeiten: ' + a.titel) : 'Neue Anzeige';
+
+    var html = panelHeader(titel,
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderWaffenboerse(S.section,S.data)})">← Zurück zur Waffenbörse</button>' +
+        '<button class="btn btn-outline" onclick="waffenboerseVorschau(' + idx + ')">Vorschau</button>' +
+        '<button class="btn btn-outline" onclick="waffenboerseSave(' + idx + ')">💾 Speichern</button>' +
+        '<button class="btn btn-primary" onclick="waffenboerseFreigebenAusEdit(' + idx + ')">Speichern &amp; Freigeben</button>',
+        true) +
+      '<div class="panel-body">' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📌 Status</div>' +
+        fSelect('wb-status', 'Aktueller Status', a.status || 'pending', WB_STATUS) +
+        '<p class="field-hint">Eingegangen am ' + escHtml(hbDatumAnzeige(a.erstellt_am)) +
+          (a.aktualisiert_am ? (' · zuletzt geändert am ' + escHtml(hbDatumAnzeige(a.aktualisiert_am))) : '') + '</p>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">🔫 Grunddaten</div>' +
+        fText('wb-titel', 'Titel', a.titel) +
+        fWaffenboerseKategorieDropdown(a.kategorie) +
+        '<div class="field-row-2">' +
+          fText('wb-hersteller', 'Hersteller', a.hersteller) +
+          fText('wb-modell', 'Modell', a.modell) +
+        '</div>' +
+        fText('wb-kaliber', 'Kaliber', (a.kaliber || []).join(', '), 'z.B. 7x65R, 12/70 (mehrere durch Komma trennen)') +
+        fSelect('wb-zustand', 'Zustand', a.zustand || 'gebraucht', WB_ZUSTAND) +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">💶 Preis &amp; Versand</div>' +
+        fSelect('wb-preis_typ', 'Preisart', a.preis_typ || '', WB_PREIS_TYP) +
+        fText('wb-preis', 'Preis (€)', a.preis) +
+        fToggle('wb-versand_moeglich', 'Versand möglich?', a.versand_moeglich === true) +
+        '<div id="wb-versandkosten-wrap" style="display:' + (a.versand_moeglich === true ? 'block' : 'none') + '">' +
+          fText('wb-versandkosten', 'Versandkosten', a.versandkosten) +
+        '</div>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📍 Standort</div>' +
+        '<div class="field-row-2">' +
+          fText('wb-plz', 'PLZ', a.plz) +
+          fText('wb-ort', 'Ort', a.ort) +
+        '</div>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">⚠️ Erwerbsberechtigung</div>' +
+        fToggle('wb-erwerb', 'Erwerbsberechtigung erforderlich?', a.erwerbsberechtigung_erforderlich === true) +
+        '<p class="field-hint">Wird bei „Ja" auf der öffentlichen Detailseite deutlich sichtbar angezeigt.</p>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📝 Beschreibung</div>' +
+        fTipTap('wb-beschreibung', 'Freitext-Beschreibung', false) +
+      '</div>' +
+
+      renderWaffenboerseGalerieCard(a) +
+
+      '<div class="form-card">' +
+        '<div class="form-card-title">📞 Anbieter / Kontaktdaten</div>' +
+        fText('wb-anbieter_name', 'Name des Anbieters', a.anbieter_name) +
+        fText('wb-anbieter_email', 'E-Mail', a.anbieter_email) +
+        fText('wb-anbieter_telefon', 'Telefon/Mobil (optional)', a.anbieter_telefon) +
+      '</div>' +
+
+      '<div class="form-card" style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:flex-end;">' +
+        '<button class="btn btn-danger-outline" onclick="waffenboerseAblehnen(' + idx + ')">Anzeige ablehnen</button>' +
+        '<button class="btn btn-outline" onclick="waffenboerseVorschau(' + idx + ')">Vorschau der Anzeige</button>' +
+        '<button class="btn btn-primary" onclick="waffenboerseFreigebenAusEdit(' + idx + ')">Anzeige freigeben</button>' +
+      '</div>' +
+      '</div>';
+
+    renderMain(html);
+    initTiptap('wb-beschreibung', a.beschreibung || '');
+    initGalerieSortable();
+
+    var vmBtn = id('f-wb-versand_moeglich');
+    if (vmBtn) vmBtn.addEventListener('click', function() {
+      var wrap = id('wb-versandkosten-wrap');
+      if (wrap) wrap.style.display = (this.getAttribute('data-val') === '1') ? 'block' : 'none';
+    });
+  };
+
+  async function waffenboerseCollect(idx) {
+    var a = S.data.anzeigen[idx];
+    a.status        = gv('wb-status');
+    a.titel         = gv('wb-titel');
+    a.kategorie     = gv('wb-kategorie');
+    a.hersteller    = gv('wb-hersteller');
+    a.modell        = gv('wb-modell');
+    a.kaliber       = gv('wb-kaliber').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    a.zustand       = gv('wb-zustand');
+    a.preis_typ     = gv('wb-preis_typ');
+    a.preis         = gv('wb-preis');
+    a.versand_moeglich = toggleVal('wb-versand_moeglich');
+    a.versandkosten = a.versand_moeglich ? gv('wb-versandkosten') : '';
+    a.plz           = gv('wb-plz');
+    a.ort           = gv('wb-ort');
+    a.erwerbsberechtigung_erforderlich = toggleVal('wb-erwerb');
+    a.beschreibung  = getTiptapValue('wb-beschreibung', a.beschreibung, 'Beschreibung');
+    a.bilder        = collectGalerieList();
+    a.anbieter_name  = gv('wb-anbieter_name');
+    a.anbieter_email = gv('wb-anbieter_email');
+    a.anbieter_telefon = gv('wb-anbieter_telefon');
+    a.aktualisiert_am = new Date().toISOString();
+    return a;
+  }
+
+  window.waffenboerseSave = async function(idx) {
+    await waffenboerseCollect(idx);
+    try {
+      await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige gespeichert');
+      toast('✅ Anzeige gespeichert!', 'ok');
+      S.dirty = false;
+      renderWaffenboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.waffenboerseFreigebenAusEdit = async function(idx) {
+    await waffenboerseCollect(idx);
+    showConfirm('Anzeige freigeben', 'Diese Anzeige jetzt freigeben? Sie erscheint dann auf der öffentlichen Waffenbörse.', async function() {
+      var a = S.data.anzeigen[idx];
+      a.status = 'published';
+      a.aktualisiert_am = new Date().toISOString();
+      try {
+        await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige freigegeben');
+        toast('✅ Anzeige freigegeben!', 'ok');
+        S.dirty = false;
+        renderWaffenboerse(S.section, S.data);
+      } catch (e) { await handleSaveError(e); }
+    }, 'Freigeben', 'btn-primary');
+  };
+
+  window.waffenboerseFreigeben = function(idx) {
+    showConfirm('Anzeige freigeben', 'Diese Anzeige jetzt freigeben? Sie erscheint dann auf der öffentlichen Waffenbörse.', async function() {
+      var a = (S.data.anzeigen || [])[idx];
+      if (!a) return;
+      a.status = 'published';
+      a.aktualisiert_am = new Date().toISOString();
+      try {
+        await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige freigegeben');
+        toast('✅ Anzeige freigegeben!', 'ok');
+        renderWaffenboerse(S.section, S.data);
+      } catch (e) { await handleSaveError(e); }
+    }, 'Freigeben', 'btn-primary');
+  };
+
+  window.waffenboerseAblehnen = async function(idx) {
+    await waffenboerseCollect(idx);
+    var a = S.data.anzeigen[idx];
+    a.status = 'rejected';
+    a.aktualisiert_am = new Date().toISOString();
+    try {
+      await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige abgelehnt');
+      toast('🚫 Anzeige abgelehnt', 'info');
+      S.dirty = false;
+      renderWaffenboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.waffenboerseArchivieren = async function(idx) {
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    a.status = 'archived';
+    a.aktualisiert_am = new Date().toISOString();
+    try {
+      await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige archiviert');
+      toast('📦 Anzeige archiviert', 'ok');
+      renderWaffenboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.waffenboerseDelete = function(idx) {
+    showConfirm('Anzeige löschen', 'Diese Anzeige wirklich unwiderruflich löschen?', async function() {
+      var entfernt = S.data.anzeigen.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige gelöscht');
+        toast('🗑️ Anzeige gelöscht', 'info');
+        renderWaffenboerse(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.anzeigen.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
+    });
+  };
+
+  window.waffenboerseVorschau = function(idx) {
+    var a = (S.data.anzeigen || [])[idx];
+    if (!a) return;
+    var bilder = a.bilder || [];
+    var haupt = bilder[0] ? bilder[0].bild : '';
+    var thumbs = bilder.slice(1).map(function(g) {
+      return '<img src="' + escAttr(g.bild) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:6px;">';
+    }).join('');
+
+    var eckdaten = [];
+    if (a.hersteller || a.modell) eckdaten.push('<strong>Hersteller/Modell:</strong> ' + escHtml([a.hersteller, a.modell].filter(Boolean).join(' ')));
+    if (wbKaliberText(a)) eckdaten.push('<strong>Kaliber:</strong> ' + escHtml(wbKaliberText(a)));
+    if (a.zustand) eckdaten.push('<strong>Zustand:</strong> ' + escHtml(wbZustandLabel(a.zustand)));
+    var preisText = wbPreisText(a);
+    if (preisText) eckdaten.push('<strong>Preis:</strong> ' + escHtml(preisText));
+    if (a.ort || a.plz) eckdaten.push('<strong>Standort:</strong> ' + escHtml([a.plz, a.ort].filter(Boolean).join(' ')));
+    eckdaten.push('<strong>Versand:</strong> ' + (a.versand_moeglich ? ('möglich' + (a.versandkosten ? (' (' + escHtml(a.versandkosten) + ')') : '')) : 'nur Abholung'));
+    eckdaten.push('<strong>Erwerbsberechtigung:</strong> ' + (a.erwerbsberechtigung_erforderlich ? 'erforderlich' : 'nicht erforderlich'));
+
+    var kontakt = [];
+    if (a.anbieter_name) kontakt.push(escHtml(a.anbieter_name));
+    if (a.anbieter_email) kontakt.push(escHtml(a.anbieter_email));
+    if (a.anbieter_telefon) kontakt.push(escHtml(a.anbieter_telefon));
+
+    var body =
+      '<p class="text-muted" style="font-size:.8rem;margin-top:-.5rem;">Interne Admin-Vorschau – so ist der aktuelle Datenstand.</p>' +
+      (haupt ? '<img src="' + escAttr(haupt) + '" alt="" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:.75rem;">' : '') +
+      (thumbs ? '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">' + thumbs + '</div>' : '') +
+      '<h3 style="margin-bottom:.25rem;">' + escHtml(a.titel || '(Kein Titel)') +
+        ' <span class="item-badge">' + wbStatusLabel(a.status) + '</span></h3>' +
+      (a.kategorie ? '<p class="item-badge" style="display:inline-block;margin-bottom:.5rem;">' + escHtml(a.kategorie) + '</p>' : '') +
+      (eckdaten.length ? '<p style="line-height:1.8;">' + eckdaten.join('<br>') + '</p>' : '') +
+      (a.beschreibung ? '<div style="margin:1rem 0;">' + a.beschreibung + '</div>' : '') +
+      (kontakt.length ? '<p style="margin-top:1rem;"><strong>Anbieter</strong><br>' + kontakt.join('<br>') + '</p>' : '');
+
+    hbShowModal('Vorschau: ' + (a.titel || 'Anzeige'), body);
+  };
+
+  // Waffenbörse-eigene Bildergalerie-Karte: technisch dieselbe Basis wie die
+  // generische renderGalerieCard() (gleiche #galerie-list-Struktur, gleiche
+  // renderGalerieRow()/collectGalerieList()) - siehe auch
+  // renderHundeboerseGalerieCard() oben, gleiches Prinzip. Ohne das
+  // allgemeine "Überschrift der Galerie"-Feld, mit eigenem Hinweistext und
+  // Obergrenze.
+  var WB_MAX_BILDER = 10;
+  function renderWaffenboerseGalerieCard(data) {
+    var list = data.bilder || [];
+    var rows = list.map(renderGalerieRow).join('');
+    return '<div class="form-card">' +
+      '<div class="form-card-title">🖼️ Bilder</div>' +
+      '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
+        'Laden Sie bis zu 10 Bilder hoch. Das erste Bild wird als Hauptbild der Anzeige verwendet. ' +
+        'Die Reihenfolge kann per Drag &amp; Drop geändert werden.' +
+      '</p>' +
+      '<div id="galerie-list">' + rows + '</div>' +
+      '<p class="text-muted" id="galerie-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Bilder hinzugefügt.</p>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="waffenboerseGalerieAdd()">🖼️ Bild hinzufügen</button>' +
+    '</div>';
+  }
+  window.waffenboerseGalerieAdd = function() {
+    var list = id('galerie-list');
+    var count = list ? list.querySelectorAll('.galerie-row').length : 0;
+    if (count >= WB_MAX_BILDER) {
+      toast('Maximal ' + WB_MAX_BILDER + ' Bilder pro Anzeige.', 'info');
       return;
     }
     window.addGalerieRow();

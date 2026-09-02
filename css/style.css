@@ -1905,3 +1905,67 @@ body.kjs-lightbox-lock { overflow: hidden; }
   width: 100%; height: 100%; object-fit: cover; display: block;
   margin: 0; border-radius: 0; box-shadow: none; max-width: none;
 }
+
+/* =========================================================
+   WAFFENBÖRSE (Phase 1 Prototyp, 02.09.2026)
+   Übersicht/Detailseite bauen bewusst auf den bestehenden, bereits
+   ausgereiften Hundebörse-Bausteinen auf statt eigene Duplikate zu erzeugen:
+   .news__grid/.news-card (Kachelraster), .hb-overview-layout (Intro/Haupt-
+   inhalt/Sidebar-Grid), .hb-gallery/.hb-thumbs/.hb-thumb (Bildergalerie mit
+   Thumbnail-Umschaltung), .steckbrief (Kerndaten-Tabelle), .hb-eckdaten,
+   .hb-kontaktbereich/.hb-kontakt-highlight (Anbieter-kontaktieren-Bereich) -
+   siehe waffenboerse/index.html und detail.html. Nur die dort unten
+   aufgeführten, wirklich waffenbörsenspezifischen Teile (Filterleiste,
+   Kachel-Höhenausgleich unter #wb-grid, Erwerbsberechtigungs-Hinweis) sind
+   neu und eigens "wb-" präfigiert, damit sie klar von der Hundebörse
+   abgegrenzt bleiben und diese unangetastet lässt. */
+
+/* Kachel-Höhenausgleich, exakt dasselbe Muster wie #hb-grid oben (siehe
+   Kommentar dort) - bewusst separat unter #wb-grid skopiert statt die
+   bestehende #hb-grid-Regel zu erweitern, damit beide Börsen unabhängig
+   voneinander angepasst werden können. */
+#wb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#wb-grid .wb-card-footer { margin-top: auto; }
+
+/* Filterleiste auf der Übersicht: eigene, öffentliche Feld-Optik (die
+   admin-eigenen .field-input/.field-select-Klassen leben nur in admin.css
+   und stehen hier nicht zur Verfügung), angelehnt an die bestehende
+   .form-group-Optik von Kontakt-/Hundebörse-Anbieten-Formularen (gleiche
+   Border-/Radius-/Fokus-Werte), nur als kompakte horizontale Leiste statt
+   gestapelter Formularfelder. */
+.wb-filter-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem;
+  background: var(--bg-light); border-radius: var(--radius-md);
+  padding: 1.25rem; margin-bottom: 1.5rem;
+}
+.wb-filter-field { display: flex; flex-direction: column; gap: .35rem; min-width: 160px; }
+.wb-filter-field label { font-size: .78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.wb-filter-field select {
+  padding: .6rem .8rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font-sans); font-size: .88rem; color: var(--text-dark); background: #fff;
+}
+.wb-filter-field select:focus { outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--focus-ring); }
+#wb-filter-bar .btn { align-self: flex-end; }
+@media (max-width: 600px) {
+  .wb-filter-bar { flex-direction: column; align-items: stretch; }
+  .wb-filter-field { min-width: 0; }
+}
+
+/* Erwerbsberechtigungs-Hinweis auf der Detailseite: auffällig genug, um
+   sicher wahrgenommen zu werden, aber bewusst in der Gold-Akzentfarbe der
+   Seite statt in aggressivem Rot (Laurin-Vorgabe Phase 1: "auffällig, aber
+   nicht aggressiv"). */
+.wb-erwerb-badge {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
+  border-radius: var(--radius-sm); padding: .55rem .9rem;
+  font-size: .88rem; font-weight: 700;
+}
+/* Allgemeiner Rechtshinweis: immer sichtbar (unabhängig vom Erwerbsberechtigungs-
+   Status der einzelnen Anzeige), daher bewusst neutraler/zurückhaltender als
+   der Badge oben - reine Hintergrundfläche statt Rahmenfarbe. */
+.wb-rechtshinweis {
+  background: var(--bg-light); border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem; margin: 1.5rem 0; font-size: .85rem; color: var(--text-muted);
+}
+.wb-rechtshinweis p { margin: 0; line-height: 1.7; }
