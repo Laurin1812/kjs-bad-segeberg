@@ -1537,16 +1537,22 @@
     // aktuellesEdit/serviceEdit) – injectDownloadsCard() erkennt das (early
     // return bei bereits vorhandener Liste) und hängt dort nichts doppelt an,
     // müssen also hier nicht extra ausgenommen werden.
-    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse'];
+    // "personen"/"hegeringe" (Vorstand, Obleute, Hegeringe) sind reine
+    // Listenseiten ohne eigenes "downloads"-Feld im Datenschema und ohne
+    // zentrale Speicherfunktion für diese Ansicht (jede Aktion – Bearbeiten,
+    // Löschen, Sortieren – speichert einzeln direkt per doSave()). Eine hier
+    // injizierte Downloads-Karte hätte daher gar keinen Weg, tatsächlich
+    // gespeichert zu werden (Nebenfund aus Phase 5B.5, bereinigt).
+    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse','personen','hegeringe'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
-    // Bildergalerie: gleiche Seiten wie Downloads, zusätzlich ohne reine
-    // Personen-Listen (Vorstand, Obleute, Hegeringe) – dort macht eine
-    // Bildergalerie inhaltlich keinen Sinn (Frank-Wunsch, siehe Punkt 2) –
-    // und ohne "service": Service-Beiträge sind rein dokumentenorientiert,
-    // eine Bildergalerie pro Beitrag ist (Stand 21.08.2026) nicht gewünscht.
-    var NO_GALERIE_FORMS = NO_DOWNLOADS_FORMS.concat(['personen','hegeringe','service']);
+    // Bildergalerie: gleiche Seiten wie Downloads (Personen-Listen sind seit
+    // der Bereinigung oben bereits in NO_DOWNLOADS_FORMS enthalten und damit
+    // hier automatisch mit ausgenommen), zusätzlich ohne "service": Service-
+    // Beiträge sind rein dokumentenorientiert, eine Bildergalerie pro Beitrag
+    // ist (Stand 21.08.2026) nicht gewünscht.
+    var NO_GALERIE_FORMS = NO_DOWNLOADS_FORMS.concat(['service']);
     if (NO_GALERIE_FORMS.indexOf(def.form) === -1) {
       injectGalerieCard(data);
     }
@@ -3890,8 +3896,14 @@
   ──────────────────────────────────────────────────────────── */
   function renderPersonen(def, data) {
     var liste = data[def.dataKey] || [];
+    // hideDefaultSave=true: diese Listenansicht hat kein eigenes Speichern -
+    // jede Aktion (Bearbeiten, Löschen, Sortieren) speichert einzeln direkt
+    // per doSave(). Der generische "💾 Speichern"-Button aus panelHeader()
+    // wäre hier nie mit einer Funktion verbunden gewesen (Nebenfund aus
+    // Phase 5B.5, bereinigt statt einer neuen Speicherfunktion nur für ihn).
     var html = panelHeader(def.label,
-      '<button class="btn btn-primary" onclick="personAdd()">➕ Person hinzufügen</button>') +
+      '<button class="btn btn-primary" onclick="personAdd()">➕ Person hinzufügen</button>',
+      true) +
       '<div class="panel-body">' +
         '<p class="text-muted" style="margin-bottom:1rem;">Klicken zum Bearbeiten. Reihenfolge per Drag &amp; Drop.</p>' +
         '<div id="personen-list">';
@@ -3998,8 +4010,11 @@
   ──────────────────────────────────────────────────────────── */
   function renderHegeringe(def, data) {
     var liste = data.hegeringe || [];
+    // hideDefaultSave=true: siehe renderPersonen oben - gleiche Begründung,
+    // gleicher Nebenfund aus Phase 5B.5.
     var html = panelHeader(def.label,
-      '<button class="btn btn-primary" onclick="hegeringAdd()">➕ Hegering hinzufügen</button>') +
+      '<button class="btn btn-primary" onclick="hegeringAdd()">➕ Hegering hinzufügen</button>',
+      true) +
       '<div class="panel-body"><p class="text-muted" style="margin-bottom:1rem;">' + liste.length + ' Hegeringe</p>' +
       '<div id="hegering-list">';
 
