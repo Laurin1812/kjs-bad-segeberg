@@ -1598,17 +1598,35 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Desktop-/Laptop-Breiten (u.a. den weit verbreiteten 1280px/1366px-
    Auflösungen) nicht mehr aus - "Kontakt" ragte rechts über den Viewport
    hinaus, ohne umzubrechen (kein flex-wrap). Statt dafür einen Menüpunkt zu
-   entfernen (Laurin-Vorgabe), wird das Hauptmenü in diesem Zwischenbereich
-   (unterhalb 1400px, oberhalb der bestehenden 900px-Grenze zum Handy-Menü)
-   etwas kompakter dargestellt - Schriftgröße/Innenabstand pro Menüpunkt
-   minimal reduziert, sonst unverändert. Bei sehr kleinen Laptop-/Tablet-
-   Breiten (ca. 900-1200px) reicht auch das nicht ganz aus, dort überlappt
-   das Hauptmenü aber bereits VOR dieser Änderung mit rein rechnerisch zu
-   wenig Platz (bestehende, von Waffenbörse unabhängige Einschränkung) -
-   siehe Rückmeldung an Laurin, nicht Teil dieser Korrektur. */
-@media (max-width: 1400px) and (min-width: 901px) {
+   entfernen (Laurin-Vorgabe), wird das Hauptmenü in diesem Bereich (oberhalb
+   der 1200px-Grenze zum Handy-Menü, siehe Nachbesserung unten) etwas
+   kompakter dargestellt - Schriftgröße/Innenabstand pro Menüpunkt minimal
+   reduziert, sonst unverändert. */
+@media (max-width: 1400px) and (min-width: 1201px) {
   .main-nav { gap: .05rem; }
   .main-nav > li > a { padding: .5rem .5rem; font-size: .88rem; }
+}
+
+/* Nachbesserung 02.09.2026: Auch mit obiger Verdichtung reichte der Platz
+   im Bereich ca. 900-1200px (kleine Laptops/Tablets quer, u.a. 1024px/
+   1100px) nicht sicher aus - "Kontakt" wäre dort weiterhin abgeschnitten
+   gewesen bzw. hätte nur mit unleserlich kleiner Schrift gepasst. Das war
+   schon vor "Waffenbörse" grenzwertig und ist mit dem 10. Menüpunkt
+   endgültig zu eng geworden (gemessen: ab ca. 1140px beginnt echter,
+   unsichtbarer horizontaler Overflow, kein Umbruch, da .main-nav ohne
+   flex-wrap). Lösung nach Rücksprache: Statt die Schrift noch weiter zu
+   stauchen, greift das Hamburger-Menü ab hier bereits ab 1200px statt wie
+   bisher erst ab 900px - mit spürbarem Sicherheitsabstand zur gemessenen
+   1140px-Kippgrenze (Puffer für Schriftrendering-Unterschiede zwischen
+   Browsern/Systemen). Bewusst NUR .main-nav/.nav-toggle in einem eigenen
+   Breakpoint verschoben, nicht der gesamte 900px-Block darunter: Header-
+   Höhe, Hero, Grids etc. sind reine Telefon-/Schmalbildschirm-Anpassungen
+   und sollen im 901-1200px-Bereich (Tablet/kleiner Laptop, reichlich
+   Platz) unverändert im "Desktop-Layout" bleiben - nur die horizontale
+   Menüleiste wird dort durch den Hamburger-Button ersetzt. */
+@media (max-width: 1200px) {
+  .main-nav { display: none; }
+  .nav-toggle { display: flex; }
 }
 
 @media (max-width: 1100px) {
@@ -1620,8 +1638,6 @@ body.kjs-lightbox-lock { overflow: hidden; }
 
 @media (max-width: 900px) {
   :root { --header-h: 70px; }
-  .main-nav { display: none; }
-  .nav-toggle { display: flex; }
   .hero { min-height: 72vh; }
   .quicklinks__grid { grid-template-columns: repeat(2,1fr); }
   .quicklinks__item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.12); }
