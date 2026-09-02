@@ -61,7 +61,7 @@
       await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + neu + '" hinzugefügt');
       toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
     } catch (e) {
-      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      await handleSaveError(e);
       return;
     }
     var sel = id('f-b-kategorie');
@@ -108,7 +108,7 @@
         await doSave(S.section.file, S.data, '🏷️ Aktuelles: Kategorie "' + val + '" gelöscht');
         toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
       } catch (e) {
-        toast('❌ Fehler beim Speichern: ' + e.message, true);
+        await handleSaveError(e);
         return;
       }
       if (sel) {
@@ -149,7 +149,7 @@
       await doSave(S.section.file, S.data, '🏷️ Termine: Kategorie "' + neu + '" hinzugefügt');
       toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
     } catch (e) {
-      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      await handleSaveError(e);
       return;
     }
     var sel = id('f-t-kategorie');
@@ -189,7 +189,7 @@
         await doSave(S.section.file, S.data, '🏷️ Termine: Kategorie "' + val + '" gelöscht');
         toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
       } catch (e) {
-        toast('❌ Fehler beim Speichern: ' + e.message, true);
+        await handleSaveError(e);
         return;
       }
       if (sel) {
@@ -232,7 +232,7 @@
       await doSave(S.section.file, S.data, '🏷️ Service: Kategorie "' + neu + '" hinzugefügt');
       toast('✅ Kategorie „' + neu + '" hinzugefügt', 'ok');
     } catch (e) {
-      toast('❌ Fehler beim Speichern: ' + e.message, true);
+      await handleSaveError(e);
       return;
     }
     var sel = id('f-svb-kategorie');
@@ -272,7 +272,7 @@
         await doSave(S.section.file, S.data, '🏷️ Service: Kategorie "' + val + '" gelöscht');
         toast('✅ Kategorie „' + val + '" gelöscht', 'ok');
       } catch (e) {
-        toast('❌ Fehler beim Speichern: ' + e.message, true);
+        await handleSaveError(e);
         return;
       }
       if (sel) {
@@ -289,7 +289,11 @@
   var S = {
     section: null,   // current nav def object
     data:    null,   // loaded JSON
-    sha:     null,   // current SHA
+    sha:     null,   // current SHA (des aktuell offenen S.section.file, siehe trackSha())
+    shaMap:  {},     // filePath → zuletzt bekannte SHA "zum Zeitpunkt des Ladens" für JEDE
+                      // Datei, die in dieser Sitzung geladen/gespeichert wurde (nicht nur
+                      // die gerade offene Sektion) – Grundlage der Konflikterkennung in
+                      // doSave(). Siehe trackSha() weiter unten.
     mde:     null,   // EasyMDE instance
     dirty:   false,
     imgTarget:   null, // field id receiving chosen image
@@ -768,10 +772,11 @@
       var data = JSON.parse(fromBase64(fresh.content));
       data.sektionsnamen = data.sektionsnamen || {};
       data.sektionsnamen[k] = newName;
-      await apiPut('content/navigation.json', data, fresh.sha, '✏️ Sektionsname: ' + newName);
+      var svNameResult = await apiPut('content/navigation.json', data, fresh.sha, '✏️ Sektionsname: ' + newName);
+      trackSha('content/navigation.json', svNameResult && svNameResult.content && svNameResult.content.sha);
       toast('✅ Name gespeichert');
     } catch(e) {
-      toast('❌ Fehler: ' + e.message, true);
+      toast('❌ Fehler: ' + e.message, 'err');
     }
   }
 
@@ -1198,6 +1203,7 @@
       if (opts.arrayKey && domOrder.length) {
         jobs.push((async function() {
           var resp = await apiGet('content/navigation.json');
+          trackSha('content/navigation.json', resp.sha);
           var navData = JSON.parse(fromBase64(resp.content));
           var newArr = (opts.fixed || []).slice();
           domOrder.forEach(function(entry) {
@@ -1232,6 +1238,7 @@
       if (opts.dynamicNavFile && dynamicOrder.length) {
         jobs.push((async function() {
           var resp = await apiGet(opts.dynamicNavFile);
+          trackSha(opts.dynamicNavFile, resp.sha);
           var data = JSON.parse(fromBase64(resp.content));
           var navKey = opts.dynamicNavKey || 'seiten';
           var seiten = data[navKey] || [];
@@ -1252,7 +1259,11 @@
       await Promise.all(jobs);
       toast('✅ Reihenfolge gespeichert', 'ok');
     } catch(e) {
-      toast('❌ Fehler beim Speichern der Reihenfolge: ' + e.message, true);
+      if (e && e.isSaveConflict) {
+        await handleSaveError(e);
+      } else {
+        toast('❌ Fehler beim Speichern der Reihenfolge: ' + e.message, 'err');
+      }
     }
   }
 
@@ -1289,7 +1300,7 @@
 
     try {
       var resp = await apiGet(def.file);
-      S.sha  = resp.sha;
+      trackSha(def.file, resp.sha); // merkt sich den Lade-Stand als Basis für die Konflikterkennung beim Speichern
       S.data = JSON.parse(fromBase64(resp.content));
       renderForm(def, S.data);
     } catch(e) {
@@ -1944,8 +1955,10 @@
     S.data.hero_bild      = gv('sv-hero_bild');
     S.data.kontakt_name   = gv('sv-kontakt_name');
     S.data.kontakt_email  = gv('sv-kontakt_email');
-    await doSave(S.section.file, S.data, '⚙️ Service: Seiteneinstellungen gespeichert');
-    toast('✅ Einstellungen gespeichert!', 'ok');
+    try {
+      await doSave(S.section.file, S.data, '⚙️ Service: Seiteneinstellungen gespeichert');
+      toast('✅ Einstellungen gespeichert!', 'ok');
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.serviceNeu = function() {
@@ -2002,26 +2015,38 @@
     var archCheck = id('svb-archiviert');
     b.archiviert = archCheck ? archCheck.checked : (b.archiviert || false);
     b.downloads  = collectDownloadsList();
-    await doSave(S.section.file, S.data, '🧰 Service: Beitrag gespeichert');
-    toast('✅ Beitrag gespeichert!', 'ok');
-    serviceAktuelleAnsichtRendern();
+    try {
+      await doSave(S.section.file, S.data, '🧰 Service: Beitrag gespeichert');
+      toast('✅ Beitrag gespeichert!', 'ok');
+      serviceAktuelleAnsichtRendern();
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.serviceArchivToggle = async function(idx) {
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     b.archiviert = !b.archiviert;
-    await doSave(S.section.file, S.data, '🧰 Service: Archivstatus geändert');
-    toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
-    serviceAktuelleAnsichtRendern();
+    try {
+      await doSave(S.section.file, S.data, '🧰 Service: Archivstatus geändert');
+      toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
+      serviceAktuelleAnsichtRendern();
+    } catch (e) {
+      b.archiviert = !b.archiviert; // lokale, optimistische Änderung zurücknehmen - nicht gespeichert
+      await handleSaveError(e);
+    }
   };
 
   window.serviceDelete = function(idx) {
     showConfirm('Beitrag löschen', 'Diesen Beitrag wirklich löschen?', async function() {
-      S.data.beitraege.splice(idx, 1);
-      await doSave(S.section.file, S.data, '🧰 Service: Beitrag gelöscht');
-      toast('🗑️ Beitrag gelöscht', 'info');
-      serviceAktuelleAnsichtRendern();
+      var entfernt = S.data.beitraege.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '🧰 Service: Beitrag gelöscht');
+        toast('🗑️ Beitrag gelöscht', 'info');
+        serviceAktuelleAnsichtRendern();
+      } catch (e) {
+        if (entfernt.length) S.data.beitraege.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -2169,8 +2194,10 @@
   // Mediensystem (Laurin-Vorgabe, Phase 3, 28.08.2026).
   window.hundeboerseHeroSave = async function() {
     S.data.hero_bild = gv('hb-hero_bild');
-    await doSave(S.section.file, S.data, '🐕 Hundebörse: Hero-Bild aktualisiert');
-    renderHundeboerse(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Hero-Bild aktualisiert');
+      renderHundeboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.hundeboerseNeu = function() {
@@ -2457,9 +2484,11 @@
 
   window.hundeboerseSave = async function(idx) {
     await hundeboerseCollect(idx);
-    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
-    toast('✅ Anzeige gespeichert!', 'ok');
-    renderHundeboerse(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
+      toast('✅ Anzeige gespeichert!', 'ok');
+      renderHundeboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.hundeboerseFreigebenAusEdit = async function(idx) {
@@ -2468,9 +2497,11 @@
       var a = S.data.anzeigen[idx];
       a.status = 'published';
       a.updatedAt = new Date().toISOString();
-      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
-      toast('✅ Anzeige freigegeben!', 'ok');
-      renderHundeboerse(S.section, S.data);
+      try {
+        await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
+        toast('✅ Anzeige freigegeben!', 'ok');
+        renderHundeboerse(S.section, S.data);
+      } catch (e) { await handleSaveError(e); }
     }, 'Freigeben', 'btn-primary');
   };
 
@@ -2480,9 +2511,11 @@
       if (!a) return;
       a.status = 'published';
       a.updatedAt = new Date().toISOString();
-      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
-      toast('✅ Anzeige freigegeben!', 'ok');
-      renderHundeboerse(S.section, S.data);
+      try {
+        await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige freigegeben');
+        toast('✅ Anzeige freigegeben!', 'ok');
+        renderHundeboerse(S.section, S.data);
+      } catch (e) { await handleSaveError(e); }
     }, 'Freigeben', 'btn-primary');
   };
 
@@ -2491,9 +2524,11 @@
     var a = S.data.anzeigen[idx];
     a.status = 'rejected';
     a.updatedAt = new Date().toISOString();
-    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige abgelehnt');
-    toast('🚫 Anzeige abgelehnt', 'info');
-    renderHundeboerse(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige abgelehnt');
+      toast('🚫 Anzeige abgelehnt', 'info');
+      renderHundeboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.hundeboerseArchivieren = async function(idx) {
@@ -2501,17 +2536,24 @@
     if (!a) return;
     a.status = 'archived';
     a.updatedAt = new Date().toISOString();
-    await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige archiviert');
-    toast('📦 Anzeige archiviert', 'ok');
-    renderHundeboerse(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige archiviert');
+      toast('📦 Anzeige archiviert', 'ok');
+      renderHundeboerse(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.hundeboerseDelete = function(idx) {
     showConfirm('Anzeige löschen', 'Diese Anzeige wirklich unwiderruflich löschen?', async function() {
-      S.data.anzeigen.splice(idx, 1);
-      await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gelöscht');
-      toast('🗑️ Anzeige gelöscht', 'info');
-      renderHundeboerse(S.section, S.data);
+      var entfernt = S.data.anzeigen.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gelöscht');
+        toast('🗑️ Anzeige gelöscht', 'info');
+        renderHundeboerse(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.anzeigen.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -3567,26 +3609,38 @@
     b.galerie = collectGalerieList();
     b.galerie_titel = collectGalerieTitel();
     b.downloads = collectDownloadsList();
-    await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
-    toast('✅ Beitrag gespeichert!', 'ok');
-    aktuellesAktuelleAnsichtRendern();
+    try {
+      await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gespeichert');
+      toast('✅ Beitrag gespeichert!', 'ok');
+      aktuellesAktuelleAnsichtRendern();
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.aktuellesArchivToggle = async function(idx) {
     var b = (S.data.beitraege || [])[idx];
     if (!b) return;
     b.archiviert = !b.archiviert;
-    await doSave(S.section.file, S.data, '📰 Aktuelles: Archivstatus geändert');
-    toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
-    aktuellesAktuelleAnsichtRendern();
+    try {
+      await doSave(S.section.file, S.data, '📰 Aktuelles: Archivstatus geändert');
+      toast(b.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
+      aktuellesAktuelleAnsichtRendern();
+    } catch (e) {
+      b.archiviert = !b.archiviert; // lokale, optimistische Änderung zurücknehmen - nicht gespeichert
+      await handleSaveError(e);
+    }
   };
 
   window.aktuellesDelete = function(idx) {
     showConfirm('Beitrag löschen', 'Diesen Beitrag wirklich löschen?', async function() {
-      S.data.beitraege.splice(idx, 1);
-      await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gelöscht');
-      toast('🗑️ Beitrag gelöscht', 'info');
-      aktuellesAktuelleAnsichtRendern();
+      var entfernt = S.data.beitraege.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '📰 Aktuelles: Beitrag gelöscht');
+        toast('🗑️ Beitrag gelöscht', 'info');
+        aktuellesAktuelleAnsichtRendern();
+      } catch (e) {
+        if (entfernt.length) S.data.beitraege.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -3717,18 +3771,25 @@
     S.data.termine.sort(function(a, b) {
       return datumToIso(a.datum).localeCompare(datumToIso(b.datum));
     });
-    await doSave(S.section.file, S.data, '📅 Termin gespeichert');
-    toast('✅ Termin gespeichert!', 'ok');
-    renderTermine(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '📅 Termin gespeichert');
+      toast('✅ Termin gespeichert!', 'ok');
+      renderTermine(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.termineArchivToggle = async function(idx) {
     var t = (S.data.termine || [])[idx];
     if (!t) return;
     t.archiviert = !t.archiviert;
-    await doSave(S.section.file, S.data, '📅 Termine: Archivstatus geändert');
-    toast(t.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
-    renderTermine(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '📅 Termine: Archivstatus geändert');
+      toast(t.archiviert ? '📦 Ins Archiv verschoben' : '↩️ Aus Archiv zurückgeholt', 'ok');
+      renderTermine(S.section, S.data);
+    } catch (e) {
+      t.archiviert = !t.archiviert; // lokale, optimistische Änderung zurücknehmen - nicht gespeichert
+      await handleSaveError(e);
+    }
   };
 
   window.termineEinstSave = async function() {
@@ -3736,16 +3797,23 @@
     S.data.einstellungen.ueberschrift = gv('t-ueberschrift');
     var einlEl = id('f-t-einleitung');
     S.data.einstellungen.einleitung = einlEl ? einlEl.value : '';
-    await doSave(S.section.file, S.data, '📅 Termine: Überschrift/Einleitung gespeichert');
-    toast('✅ Gespeichert!', 'ok');
+    try {
+      await doSave(S.section.file, S.data, '📅 Termine: Überschrift/Einleitung gespeichert');
+      toast('✅ Gespeichert!', 'ok');
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.termineDelete = function(idx) {
     showConfirm('Termin löschen', 'Diesen Termin wirklich löschen?', async function() {
-      S.data.termine.splice(idx, 1);
-      await doSave(S.section.file, S.data, '📅 Termin gelöscht');
-      toast('🗑️ Termin gelöscht', 'info');
-      renderTermine(S.section, S.data);
+      var entfernt = S.data.termine.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '📅 Termin gelöscht');
+        toast('🗑️ Termin gelöscht', 'info');
+        renderTermine(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.termine.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -3787,8 +3855,15 @@
           var arr = data[def.dataKey];
           var moved = arr.splice(evt.oldIndex, 1)[0];
           arr.splice(evt.newIndex, 0, moved);
-          await doSave(def.file, data, '👤 Reihenfolge geändert');
-          toast('✅ Reihenfolge gespeichert', 'ok');
+          try {
+            await doSave(def.file, data, '👤 Reihenfolge geändert');
+            toast('✅ Reihenfolge gespeichert', 'ok');
+          } catch (e) {
+            arr.splice(evt.newIndex, 1); // Verschiebung zurücknehmen - nicht gespeichert
+            arr.splice(evt.oldIndex, 0, moved);
+            renderPersonen(def, data);
+            await handleSaveError(e);
+          }
         }
       });
     }
@@ -3820,9 +3895,11 @@
     p.email   = gv('p-email');
     p.telefon = gv('p-telefon');
     p.bild    = gv('p-bild');
-    await doSave(def.file, S.data, '👤 Person gespeichert');
-    toast('✅ Gespeichert!', 'ok');
-    renderPersonen(def, S.data);
+    try {
+      await doSave(def.file, S.data, '👤 Person gespeichert');
+      toast('✅ Gespeichert!', 'ok');
+      renderPersonen(def, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.personAdd = function() {
@@ -3835,10 +3912,15 @@
   window.personDelete = function(idx) {
     var def = S.section;
     showConfirm('Person löschen', 'Diese Person wirklich löschen?', async function() {
-      S.data[def.dataKey].splice(idx, 1);
-      await doSave(def.file, S.data, '👤 Person gelöscht');
-      toast('🗑️ Gelöscht', 'info');
-      renderPersonen(def, S.data);
+      var entfernt = S.data[def.dataKey].splice(idx, 1);
+      try {
+        await doSave(def.file, S.data, '👤 Person gelöscht');
+        toast('🗑️ Gelöscht', 'info');
+        renderPersonen(def, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data[def.dataKey].splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -3873,8 +3955,15 @@
         onEnd: async function(e) {
           var a = S.data.hegeringe;
           var m = a.splice(e.oldIndex,1)[0]; a.splice(e.newIndex,0,m);
-          await doSave(def.file, S.data, '🗺️ Hegering-Reihenfolge geändert');
-          toast('✅ Reihenfolge gespeichert', 'ok');
+          try {
+            await doSave(def.file, S.data, '🗺️ Hegering-Reihenfolge geändert');
+            toast('✅ Reihenfolge gespeichert', 'ok');
+          } catch (err) {
+            a.splice(e.newIndex, 1); // Verschiebung zurücknehmen - nicht gespeichert
+            a.splice(e.oldIndex, 0, m);
+            renderHegeringe(def, S.data);
+            await handleSaveError(err);
+          }
         }
       });
     }
@@ -3912,9 +4001,11 @@
     h.gemeinden = gv('h-gemeinden');
     h.email     = gv('h-email');
     h.telefon   = gv('h-telefon');
-    await doSave(S.section.file, S.data, '🗺️ Hegering gespeichert');
-    toast('✅ Gespeichert!', 'ok');
-    renderHegeringe(S.section, S.data);
+    try {
+      await doSave(S.section.file, S.data, '🗺️ Hegering gespeichert');
+      toast('✅ Gespeichert!', 'ok');
+      renderHegeringe(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
   };
 
   window.hegeringAdd = function() {
@@ -3925,10 +4016,15 @@
 
   window.hegeringDelete = function(idx) {
     showConfirm('Hegering löschen', 'Diesen Hegering wirklich löschen?', async function() {
-      S.data.hegeringe.splice(idx, 1);
-      await doSave(S.section.file, S.data, '🗺️ Hegering gelöscht');
-      toast('🗑️ Gelöscht', 'info');
-      renderHegeringe(S.section, S.data);
+      var entfernt = S.data.hegeringe.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '🗺️ Hegering gelöscht');
+        toast('🗑️ Gelöscht', 'info');
+        renderHegeringe(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.hegeringe.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
     });
   };
 
@@ -4419,6 +4515,7 @@
     try {
       var resp = await apiGet('content/medien-archiv.json');
       medienArchivSha = resp.sha;
+      trackSha('content/medien-archiv.json', resp.sha);
       var data = JSON.parse(fromBase64(resp.content));
       medienArchivListe = Array.isArray(data.archiviert) ? data.archiviert : [];
     } catch(e) {
@@ -4427,6 +4524,7 @@
       // ohne sha = neue Datei).
       medienArchivListe = [];
       medienArchivSha = null;
+      if (S.shaMap) delete S.shaMap['content/medien-archiv.json'];
     }
   }
 
@@ -4510,7 +4608,7 @@
       if (wirdArchiviert) { if (idx2 !== -1) medienArchivListe.splice(idx2, 1); }
       else medienArchivListe.push(name);
       medienAktuelleAnsichtNeuRendern();
-      toast('❌ Fehler: ' + e.message, 'err');
+      await handleSaveError(e);
     }
   };
 
@@ -4535,7 +4633,14 @@
           var idx = medienArchivListe.indexOf(name);
           if (idx !== -1) {
             medienArchivListe.splice(idx, 1);
-            doSave('content/medien-archiv.json', { archiviert: medienArchivListe }, '📦 Archiv-Eintrag bereinigt (Bild gelöscht): ' + name).catch(function(){});
+            // Bild ist bereits unwiderruflich gelöscht - dieser Speichervorgang räumt
+            // nur die Archiv-Liste auf. Ein Konflikt hier ist nicht kritisch, soll
+            // aber nicht mehr wie bisher lautlos verschluckt werden (Phase 5B.1).
+            doSave('content/medien-archiv.json', { archiviert: medienArchivListe }, '📦 Archiv-Eintrag bereinigt (Bild gelöscht): ' + name)
+              .catch(function(cleanupErr) {
+                console.warn('Archiv-Liste konnte nach Bild-Löschung nicht bereinigt werden:', cleanupErr);
+                toast('⚠️ Bild gelöscht, aber Archiv-Liste konnte nicht aktualisiert werden. Bitte Seite neu laden.', 'err');
+              });
           }
           medienAktuelleAnsichtNeuRendern();
         } catch(e) {
@@ -5155,7 +5260,13 @@
             }
           }
         } catch(syncErr) {
+          // War früher ein reines console.warn (für den Redakteur unsichtbar).
+          // Der eigentliche Seiteninhalt wurde bereits erfolgreich gespeichert
+          // (siehe oben) - nur dieser sekundäre Menü-Abgleich ist fehlgeschlagen,
+          // daher kein Speicherkonflikt-Dialog, aber ein sichtbarer Hinweis,
+          // damit das nicht unbemerkt bleibt.
           console.warn('Manifest-Sync fehlgeschlagen:', syncErr);
+          toast('⚠️ Seite gespeichert, aber Menü-Abgleich fehlgeschlagen: ' + syncErr.message, 'err');
         }
       }
 
@@ -5164,12 +5275,63 @@
       setStatus('✅ Gespeichert');
       S.dirty = false;
     } catch(e) {
-      setSaving(false);
-      toast('❌ ' + e.message, 'err');
-      setStatus('❌ Fehler: ' + e.message);
+      await handleSaveError(e);
     }
   };
 
+  // Merkt sich für eine Datei die zuletzt bekannte SHA – sowohl beim Laden
+  // (Basis der Bearbeitung) als auch nach erfolgreichem Speichern (neue
+  // Basis für die nächste Speicherung derselben Sitzung). Wird NUR anhand
+  // des Dateipfads indiziert, nicht global auf S.sha gemappt – so kann z.B.
+  // ein Speichern von content/medien-archiv.json nicht versehentlich die
+  // SHA-Basis einer ganz anderen, gerade im Admin geöffneten Sektion
+  // verfälschen (das war vor dieser Absicherung ein latenter Fehler: doSave
+  // schrieb früher bedingungslos in S.sha, unabhängig davon, welche Datei
+  // gerade tatsächlich gespeichert wurde).
+  function trackSha(filePath, sha) {
+    if (!sha) return;
+    if (!S.shaMap) S.shaMap = {};
+    S.shaMap[filePath] = sha;
+    if (S.section && S.section.file === filePath) S.sha = sha;
+  }
+
+  function saveConflictError(filePath) {
+    var err = new Error(
+      'Diese Inhalte wurden zwischenzeitlich an anderer Stelle geändert (z. B. in einem ' +
+      'anderen Browser-Tab oder von einer anderen Person). Deine Änderungen wurden NICHT ' +
+      'überschrieben und NICHT gespeichert.'
+    );
+    err.isSaveConflict = true;
+    err.filePath = filePath;
+    return err;
+  }
+
+  // Zentraler, gegen veraltete Zwischenstände abgesicherter Speicherweg. ALLE
+  // Admin-Speicherfunktionen (normale Inhaltsseiten, Aktuelles, Termine,
+  // Service, Hundebörse, Personen, Hegeringe, Medien-Archiv, Reihenfolgen
+  // usw.) laufen über diese eine Funktion.
+  //
+  // Funktionsweise der Konflikterkennung (Phase 5B.1):
+  // Vorher wurde hier zwar auch schon eine "frische" SHA direkt vor dem
+  // Schreiben nachgeladen (fetchFreshSha) – aber ausschließlich verwendet, um
+  // damit zu schreiben, NIE verglichen mit der SHA, auf deren Basis die
+  // Bearbeitung im Browser überhaupt begonnen hatte. Dadurch wurde jede
+  // Speicherung technisch "erfolgreich", auch wenn zwischenzeitlich jemand
+  // anderes dieselbe Datei bereits verändert hatte – die neuere fremde
+  // Änderung wurde dabei stillschweigend überschrieben (klassisches
+  // "Last-Write-Wins" ohne Warnung).
+  //
+  // Jetzt wird vor jedem Schreiben verglichen:
+  //   erwarteteSha (S.shaMap[filePath], gesetzt beim Laden dieser Datei)
+  //   vs.
+  //   freshSha (der tatsächlich aktuelle Stand im Repository, gerade eben geladen)
+  // Sind beide bekannt und unterscheiden sie sich, hat sich die Datei seit dem
+  // Laden verändert → doSave bricht ab, OHNE zu schreiben, und wirft einen
+  // Fehler mit e.isSaveConflict = true. Der Aufrufer zeigt daraufhin eine
+  // Konfliktmeldung (siehe handleSaveError) statt die Änderung zu verlieren.
+  // Ist keine Basis-SHA bekannt (z.B. eine bisher nie geladene/neue Datei),
+  // wird - wie bisher - ohne Konfliktprüfung gespeichert; das entspricht dem
+  // bestehenden Verhalten beim Neuanlegen von Dateien.
   async function doSave(filePath, data, message) {
     // Fetch SHA with cache-busting to avoid git-gateway stale-cache 409s
     async function fetchFreshSha() {
@@ -5186,26 +5348,63 @@
       return d.sha || null;
     }
 
-    var sha = await fetchFreshSha().catch(function() { return S.sha || null; });
+    var expectedSha = (S.shaMap && S.shaMap[filePath]) || null;
+    var freshSha = await fetchFreshSha().catch(function() { return null; });
+
+    // Echte Konflikterkennung: Stand, auf dessen Basis bearbeitet wurde, vs.
+    // tatsächlicher aktueller Stand im Repository.
+    if (expectedSha && freshSha && freshSha !== expectedSha) {
+      throw saveConflictError(filePath);
+    }
+
+    var sha = freshSha || expectedSha || null;
     try {
       var result = await apiPut(filePath, data, sha, message);
-      if (result && result.content && result.content.sha) {
-        S.sha = result.content.sha;
-      }
+      trackSha(filePath, result && result.content && result.content.sha);
       return result;
     } catch(e) {
-      // 409 = SHA still stale; wait briefly, re-fetch, retry once
+      // 409 = GitHub selbst lehnt die SHA ab. Das kann entweder eine durch
+      // Git-Gateway-Cache-Verzögerung noch veraltete "frische" SHA sein
+      // (transient, kein echter Konflikt) oder eine echte Änderung zwischen
+      // unserem Fresh-Fetch oben und dem Schreiben gerade eben. Deshalb: SHA
+      // einmal erneut frisch laden UND erneut gegen die erwartete Basis
+      // prüfen, bevor überhaupt erneut versucht wird zu schreiben.
       if (e.message && e.message.indexOf('409') !== -1) {
         await new Promise(function(res) { setTimeout(res, 600); });
         var retrySha = await fetchFreshSha().catch(function() { return null; });
+        if (expectedSha && retrySha && retrySha !== expectedSha) {
+          throw saveConflictError(filePath);
+        }
         if (!retrySha) throw e;
         var result2 = await apiPut(filePath, data, retrySha, message);
-        if (result2 && result2.content && result2.content.sha) {
-          S.sha = result2.content.sha;
-        }
+        trackSha(filePath, result2 && result2.content && result2.content.sha);
         return result2;
       }
       throw e;
+    }
+  }
+
+  // Einheitliche Fehlerbehandlung für alle Speicherwege: unterscheidet einen
+  // erkannten Speicherkonflikt (doSave hat NICHT geschrieben, Eingaben bleiben
+  // im Formular erhalten) von einem sonstigen Fehler (Netzwerk, Server,
+  // Berechtigung usw.) und macht in beiden Fällen sichtbar, dass NICHT
+  // gespeichert wurde. Ersetzt die bisherigen, uneinheitlichen (teils
+  // fehlenden) catch-Blöcke der einzelnen Speicherfunktionen.
+  async function handleSaveError(e) {
+    setSaving(false);
+    if (e && e.isSaveConflict) {
+      setStatus('⛔ Nicht gespeichert – Konflikt mit einer neueren Änderung');
+      await showAlert('Speichern nicht möglich – Konflikt',
+        'Diese Inhalte wurden zwischenzeitlich an anderer Stelle geändert – zum Beispiel in ' +
+        'einem anderen Browser-Tab oder von einer anderen Person.\n\n' +
+        'Deine Änderungen wurden NICHT gespeichert und NICHT überschrieben. Sie stehen ' +
+        'weiterhin hier im Formular – bitte notiere oder kopiere sie dir sicherheitshalber.\n\n' +
+        'Bitte lade diesen Bereich anschließend neu (links im Menü erneut anklicken) und ' +
+        'übertrage deine Änderungen dann auf den aktuellen Stand.');
+    } else {
+      var msg = (e && e.message) ? e.message : 'Unbekannter Fehler beim Speichern.';
+      toast('❌ ' + msg, 'err');
+      setStatus('❌ Fehler: ' + msg);
     }
   }
 
