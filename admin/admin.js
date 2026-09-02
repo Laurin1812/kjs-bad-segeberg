@@ -502,7 +502,7 @@
         { key:'new-aufgaben', label:'➕ Neue Aufgaben-Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
-      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'tiptap' },
+      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'standard' },
       // "Weitere Themen" (dynamicChildren, content/seiten-weitere.json) am
       // 22.08.2026 auf Laurin-Wunsch entfernt ("brauchen wir eigentlich
       // nicht, verwirrt nur") - loadDynamicChildren() hat einen Guard
@@ -587,11 +587,19 @@
     { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
     // "🧪 Testseite" (content/test/testseite.json) 22.08.2026 aus dem Menü
     // entfernt (Laurin-Wunsch, Aufräumen) - war ursprünglich das Sandbox-
-    // Fundament, auf dem das TipTap-Formular (form:'tiptap', renderInfomobil)
-    // entwickelt wurde; die Datei content/test/testseite.json bleibt
-    // unangetastet im Repo, nur der Menüpunkt ist weg. renderInfomobil/
-    // collectInfomobil werden weiterhin von "Infomobil" oben verwendet,
-    // nicht mit anfassen.
+    // Fundament, auf dem das TipTap-Formular entwickelt wurde. Phase 5B.5
+    // (Admin-Vereinheitlichung normaler Inhaltsseiten): "Infomobil" lief bis
+    // dahin noch über das separate, historische form:'tiptap'/renderInfomobil
+    // (inhaltlich fast identisch zu form:'standard'/renderStandard, nur ohne
+    // die Zusatzfelder, die Infomobils NAV-Eintrag ohnehin nie gesetzt hat -
+    // nav_label/Unterseiten-System/mitglied-werden/Hundebörse-CTA/Jagdhund-
+    // schule-Felder sind alle an def-Eigenschaften geknüpft, die Infomobil
+    // nicht besitzt). Jetzt auf form:'standard' umgestellt, renderInfomobil/
+    // collectInfomobil entfernt - ein einziger Editor-Pfad für alle normalen
+    // Inhaltsseiten. content/test/testseite.json und /test/testseite.html
+    // bleiben als inertes, nicht mehr verlinktes Altlast-Duo bestehen (siehe
+    // Abschlussbericht Phase 5B.5) - keine Navigation/kein Code hängt mehr
+    // daran.
   ];
 
   /* ────────────────────────────────────────────────────────────
@@ -1503,7 +1511,6 @@
     destroyAllTiptaps();
     switch(def.form) {
       case 'standard':     renderStandard(def, data);     break;
-      case 'tiptap':       renderInfomobil(def, data);    break;
       case 'startseite':   renderStartseite(def, data);   break;
       case 'aktuelles':    renderAktuelles(def, data);     break;
       case 'termine':      renderTermine(def, data);       break;
@@ -2844,7 +2851,7 @@
 
   // Bildgröße-Auswahl als Button-Gruppe (gleiche Konvention wie Inline-Bilder:
   // img-25/50/75/100). Gespeichert wird der Klassenname im versteckten Feld
-  // f-bild_groesse, das collectInfomobil über gv('bild_groesse') ausliest.
+  // f-bild_groesse, das collectStandard über gv('bild_groesse') ausliest.
   function fBildGroesse(val) {
     var cur = (val && val.indexOf('img-') === 0) ? val
             : val === 'klein'  ? 'img-25'
@@ -2893,73 +2900,12 @@
     return fieldHtml.replace('</label>', '</label>' + hintHtml);
   }
 
-  function renderInfomobil(def, data) {
-    // Hilfetexte jetzt einheitlich auf allen Seiten mit diesem Formular
-    // (Infomobil + Testseite) sichtbar – nicht mehr auf die Testseite
-    // beschränkt, siehe renderStandard für dieselbe fH()-Konvention.
-    var fH = function(fieldHtml, hintText) { return insertHintAfterLabel(fieldHtml, ttFieldHint(hintText)); };
-    var html = panelHeader(def.label, '') +
-      '<div class="panel-body">' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Seiteninhalt</div>' +
-          fH(fText('titel', 'Seitentitel', data.titel),
-            'Die große Überschrift ganz oben auf der Seite. Kurz und klar halten.') +
-          fH(fTipTap('untertitel', 'Untertitel', false),
-            'Kurzer Text direkt unter dem Titel, als Einstieg in die Seite. Optional.') +
-          fH(fTipTap('intro',      'Einleitungstext', true),
-            'Der erste Textblock der Seite, oberhalb des Hauptinhalts. Formatierung, Listen und Tabellen sind möglich.') +
-          fH(fTipTap('inhalt',     'Textinhalt', true),
-            'Der Haupttext der Seite. Hier kommt der eigentliche Inhalt rein – mit Formatierung, Listen, Tabellen und Bildern.') +
-        '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Bilder</div>' +
-          fH(fImage('hero_bild', 'Hero-Hintergrundbild', data.hero_bild),
-            'Das große Bild im Kopfbereich, hinter dem Titel. Quer-Format wirkt am besten.') +
-          fH(fImage('bild',      'Inhaltsbild',          data.bild),
-            'Ein zusätzliches Bild, das im Textbereich erscheint. Optional.') +
-          fH(fBildGroesse(data.bild_groesse),
-            'Legt fest, wie groß das Inhaltsbild dargestellt wird (25 % = klein, 100 % = volle Breite).') +
-          fH(fText('bild_alt',   'Bild-Beschreibung',    data.bild_alt),
-            'Kurze Beschreibung des Bildes. Hilft Suchmaschinen und wird angezeigt, falls das Bild mal nicht lädt.') +
-        '</div>' +
-        '<div class="form-card">' +
-          '<div class="form-card-title">Kontakt (optional)</div>' +
-          fH(fText('kontakt_name',  'Kontaktname',   data.kontakt_name),
-            'Name der Ansprechperson, die unten auf der Seite angezeigt wird. Optional.') +
-          fH(fText('kontakt_email', 'Kontakt E-Mail', data.kontakt_email),
-            'E-Mail der Ansprechperson, wird als anklickbarer Link angezeigt. Optional.') +
-        '</div>' +
-        renderDownloadsCard(data) +
-      '</div>' +
-      saveBar();
-    renderMain(html);
-    // TipTap-Instanzen initialisieren – vorhandener Inhalt kann noch
-    // Markdown sein (Migration); initTiptap konvertiert das automatisch.
-    initTiptap('untertitel', data.untertitel || '');
-    initTiptap('intro',      data.intro      || '');
-    initTiptap('inhalt',     data.inhalt     || '');
-    initDownloadsSortable();
-    bindSaveBtn();
-  }
-
-  function collectInfomobil(data) {
-    data.titel         = gv('titel');
-    // data ist eine Tiefkopie von S.data → data.X hält hier noch den ALTEN
-    // gespeicherten Wert und dient als Rückfall-Anker (Schutz vor Datenverlust).
-    data.untertitel    = getTiptapValue('untertitel', data.untertitel, 'Untertitel');
-    data.intro         = getTiptapValue('intro',      data.intro,      'Einleitungstext');
-    data.inhalt        = getTiptapValue('inhalt',     data.inhalt,     'Textinhalt');
-    data.hero_bild     = gv('hero_bild');
-    data.bild          = gv('bild');
-    data.bild_groesse  = gv('bild_groesse');
-    data.bild_alt      = gv('bild_alt');
-    data.kontakt_name  = gv('kontakt_name');
-    data.kontakt_email = gv('kontakt_email');
-    data.downloads     = collectDownloadsList();
-    data.galerie = collectGalerieList();
-    data.galerie_titel = collectGalerieTitel();
-    return data;
-  }
+  // renderInfomobil/collectInfomobil (das historische form:'tiptap', aus dem
+  // renderStandard/collectStandard einst hervorgegangen sind) wurden in
+  // Phase 5B.5 entfernt: Infomobil läuft jetzt über form:'standard' wie alle
+  // anderen normalen Inhaltsseiten (siehe NAVIGATION TREE oben) - inhaltlich
+  // deckungsgleich, da Infomobils NAV-Eintrag keine der Zusatzfelder von
+  // renderStandard auslöst (kein isDynamic/children/slug/jagdhundeschule-Key).
 
   /* ────────────────────────────────────────────────────────────
      DOKUMENTE & DOWNLOADS (pro Seite, separat vom Markdown-Text)
@@ -5319,7 +5265,6 @@
     var data = JSON.parse(JSON.stringify(S.data)); // deep copy
     switch(def.form) {
       case 'standard':      data = collectStandard(data);   break;
-      case 'tiptap':        data = collectInfomobil(data);  break;
       case 'startseite':    data = collectStartseite(data); break;
       case 'kjm':           data = collectKJM(data); break;
       case 'faq':           data = collectFAQ(data); break;
@@ -5892,7 +5837,8 @@
     if (vposCls !== 'img-pos-oben') classes.push(vposCls);
     classes.push(flowCls);
 
-    // TipTap-Bild einfügen (form:'tiptap', z.B. Testseite/Infomobil).
+    // TipTap-Bild einfügen (form:'standard', also auf allen normalen
+    // Inhaltsseiten inkl. Infomobil - siehe renderStandard).
     // Größe/Position des Modals werden auf das neue, schlanke Klassenschema
     // gemappt (img-25/50/75/100 + img-links/img-rechts/img-zentriert).
     // Feinjustierung danach per Klick-Menü direkt am Bild.
@@ -6807,9 +6753,12 @@
   }
 
   // Manueller Neuversuch über den „Erneut versuchen"-Button bei CDN-Ausfall.
+  // Generisch über renderForm() statt eine bestimmte render*()-Funktion fest
+  // zu verdrahten - deckt damit jede aktuelle und künftige TipTap-nutzende
+  // Formularart ab (aktuell 'standard' und 'kjm'), nicht nur eine einzelne.
   window.retryTiptapLoad = function() {
     _tiptapPromise = null;
-    if (S.section && S.section.form === 'tiptap') renderInfomobil(S.section, S.data);
+    if (S.section && S.data) renderForm(S.section, S.data);
   };
 
   // Eager: TipTap-Modul schon beim Laden des Admin starten (nicht erst bei
