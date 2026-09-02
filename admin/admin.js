@@ -5372,14 +5372,14 @@
   ──────────────────────────────────────────────────────────── */
   function renderNavReihenfolge(def, data) {
     var sn  = data.sektionsnamen || {};
-    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','aktuelles','hundeboerse','termine','faq','service','kontakt'];
+    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','aktuelles','hundeboerse','waffenboerse','termine','faq','service','kontakt'];
     var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil','weitere-themen'];
     var kjs = data.kjs          || [];
     var auf = data.aufgaben     || [];
     var vbr = data.verbraucher  || [];
 
     var HM_LABELS = { startseite:'Startseite', jaeger:'Jäger', verbraucher:'Verbraucher', aktuelles:'Aktuelles',
-                      hundeboerse:'Hundebörse', termine:'Termine', faq:'FAQ', service:'Service', kontakt:'Kontakt' };
+                      hundeboerse:'Hundebörse', waffenboerse:'Waffenbörse', termine:'Termine', faq:'FAQ', service:'Service', kontakt:'Kontakt' };
     var JD_LABELS = {
       'ueber-uns':           'Über uns',
       'kreisjjaegermeister': 'Kreisjägermeister',

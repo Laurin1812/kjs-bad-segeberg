@@ -454,13 +454,14 @@ function splitPostadresse(raw) {
   // komplett ohne Hauptnavigation dasteht.
   var FALLBACK_NAV = {
     sektionsnamen: {},
-    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'hundeboerse', 'termine', 'faq', 'service', 'kontakt'],
+    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'hundeboerse', 'waffenboerse', 'termine', 'faq', 'service', 'kontakt'],
     hauptmenu_meta: {
       startseite:  { label: 'Startseite',  href: '/',                        navkey: 'startseite' },
       jaeger:      { href: '#', navkey: 'jaeger' },
       verbraucher: { href: '#', navkey: 'verbraucher' },
       aktuelles:   { label: 'Aktuelles',   href: '/aktuelles/index.html',    navkey: 'aktuelles' },
       hundeboerse: { label: 'Hundebörse',  href: '/hundeboerse/index.html',  navkey: 'hundeboerse' },
+      waffenboerse: { label: 'Waffenbörse', href: '/waffenboerse/index.html', navkey: 'waffenboerse' },
       termine:     { label: 'Termine',     href: '/termine/index.html',      navkey: 'termine' },
       faq:         { label: 'FAQ',         href: '/faq/index.html',          navkey: 'faq' },
       service:     { label: 'Service',     href: '/service.html',            navkey: 'service' },
@@ -508,6 +509,7 @@ function splitPostadresse(raw) {
     verbraucher: ['/verbraucher/'],
     aktuelles: ['/aktuelles/'],
     hundeboerse: ['/hundeboerse/'],
+    waffenboerse: ['/waffenboerse/'],
     termine: ['/termine/'],
     faq: ['/faq/'],
     kontakt: ['/kontakt/']

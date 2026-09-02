@@ -291,12 +291,11 @@
     if (path === '/verbraucher') return [START, { label: sn.verbraucher || 'Verbraucher' }];
     if (path === '/hundeboerse') return [START, { label: (hm.hundeboerse && hm.hundeboerse.label) || 'Hundebörse' }];
     if (path === '/aktuelles') return [START, { label: (hm.aktuelles && hm.aktuelles.label) || 'Aktuelles' }];
-    // Waffenbörse (Phase 1 Prototyp, 02.09.2026): noch kein eigener
-    // Hauptnavigations-Eintrag (hm.waffenboerse existiert bewusst noch nicht,
-    // siehe Laurin-Vorgabe "noch keinen finalen Hauptnavigationseintrag
-    // ungefähst live setzen") - degradiert daher wie hier vorbereitet einfach
-    // auf das feste Label "Waffenbörse", sobald ein Eintrag ergänzt wird,
-    // greift automatisch dessen Label wie bei Hundebörse/Aktuelles oben.
+    // Waffenbörse: seit 02.09.2026 (Korrektur zu Phase 1) eigener
+    // Hauptnavigations-Eintrag in navigation.json (hauptmenu_meta.waffenboerse) -
+    // Label kommt daher wie bei Hundebörse/Aktuelles direkt von dort, der
+    // feste Text bleibt nur als Absicherung, falls navigation.json einmal
+    // nicht ladbar ist.
     if (path === '/waffenboerse') return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse' }];
 
     if (path === '/hundeboerse/anbieten') {
