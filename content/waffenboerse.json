@@ -80,7 +80,7 @@
       "id": "wb-1788440000003",
       "status": "published",
       "erstellt_am": "2026-09-01T08:05:00.000Z",
-      "aktualisiert_am": "2026-09-03T07:19:21.316Z",
+      "aktualisiert_am": "2026-09-03T07:20:51.522Z",
       "titel": "Blaser Bockbüchsflinte BBF 95 mit hochwertigem Zeiss / Linksschütze",
       "kategorie": "Kombinierte Waffen",
       "hersteller": "Blaser",
@@ -97,6 +97,26 @@
         {
           "bild": "/images/1788419948061-b2.jpg",
           "titel": "Gesamtansicht"
+        },
+        {
+          "bild": "/images/1788419980032-b1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788419995425-b3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788420013269-b5.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788420033542-b6.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788420045502-b7.jpg",
+          "titel": ""
         }
       ],
       "plz": "24629",
