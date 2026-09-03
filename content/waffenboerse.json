@@ -10,42 +10,6 @@
   ],
   "anzeigen": [
     {
-      "id": "wb-1788440000001",
-      "status": "published",
-      "erstellt_am": "2026-08-30T09:15:00.000Z",
-      "aktualisiert_am": "2026-09-02T15:17:43.097Z",
-      "titel": "Blaser BBF 95 mit Zeiss Optik",
-      "kategorie": "Kombinierte Waffen",
-      "hersteller": "Blaser",
-      "modell": "BBF 95",
-      "kaliber": [
-        "7x65R",
-        "12/70"
-      ],
-      "zustand": "gebraucht",
-      "preis": "2.500",
-      "preis_typ": "festpreis",
-      "erwerbsberechtigung_erforderlich": true,
-      "beschreibung": "<p>Gepflegte Bock-Büchsflinte aus erster Hand, regelmäßig gewartet und stets trocken gelagert. Der Kugellauf ist in 7x65R ausgeführt, der Schrotlauf in 12/70.</p><p>Die aufmontierte Zeiss-Optik ist im Kaufpreis enthalten und passgenau eingeschossen. Die Waffe eignet sich sowohl für die Ansitz- als auch für die Drückjagd.</p><ul><li><p>Lauflänge: 60 cm</p></li><li><p>Schaft: Nussbaum, sehr guter Originalzustand</p></li><li><p>Mit Original-Waffenkoffer</p></li></ul><p>Besichtigung und Anprobe nach Vereinbarung möglich.</p>",
-      "bilder": [
-        {
-          "bild": "/images/wb-test-kombiwaffe-1.jpg",
-          "titel": "Gesamtansicht"
-        },
-        {
-          "bild": "/images/wb-test-kombiwaffe-2.jpg",
-          "titel": "Optik"
-        }
-      ],
-      "plz": "24629",
-      "ort": "Kisdorf",
-      "versand_moeglich": false,
-      "versandkosten": "",
-      "anbieter_name": "Peter Beispiel",
-      "anbieter_email": "peter.beispiel@example.de",
-      "anbieter_telefon": "0171 2345678"
-    },
-    {
       "id": "wb-1788440000002",
       "status": "published",
       "erstellt_am": "2026-08-31T14:40:00.000Z",
