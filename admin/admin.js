@@ -3312,9 +3312,53 @@
   // allgemeine "Überschrift der Galerie"-Feld, mit eigenem Hinweistext und
   // Obergrenze.
   var WB_MAX_BILDER = 10;
+
+  // Nachbesserung 03.09.2026 (Laurin-Feedback): In der Waffenbörsen-
+  // Bilderverwaltung gab es pro Bild zwei Löschwege - das "✕ Entfernen" aus
+  // dem generischen fImage()-Baustein (leert nur das Bildfeld dieser Zeile,
+  // die Zeile bleibt als leerer Slot stehen) UND den roten Papierkorb der
+  // Zeile selbst (entfernt die ganze Zeile). Für eine Galerie-Zeile führte
+  // das faktisch zum selben sichtbaren Ergebnis (Bild verschwindet aus der
+  // Galerie) und war verwirrend doppelt. fImage()/renderGalerieRow() selbst
+  // bleiben bewusst UNANGETASTET (beide sind gemeinsam mit Hundebörse und
+  // allen anderen Bildfeldern im Admin genutzt - eine Änderung dort hätte
+  // sitebreite Nebenwirkungen). Stattdessen nur für die Waffenbörse ein
+  // eigener, dünner Zeilen-Renderer: identisch zu renderGalerieRow(), nur
+  // dass der "✕ Entfernen"-Button aus der von fImage() gelieferten HTML
+  // herausgeschnitten wird, bevor die Zeile zusammengebaut wird. Bild
+  // wählen/Vorschau/Beschriftung/Drag & Drop/Reihenfolge/Hauptbild-Regel/
+  // 10-Bilder-Obergrenze bleiben alle unverändert - übrig bleibt genau ein
+  // Löschmechanismus pro Zeile, der rote Papierkorb (passt zum bestehenden
+  // Muster bei Downloads/Linkliste/generischer Galerie).
+  function renderWaffenboerseGalerieRow(g) {
+    var imgId = 'gal-bild-' + (galRowSeq++);
+    var bildFeld = fImage(imgId, 'Bild', g.bild)
+      .replace(/<button type="button" class="btn btn-ghost btn-sm" onclick="clearImg\([^)]*\)">✕ Entfernen<\/button>/, '');
+    return '<div class="item-card galerie-row" data-img-id="' + imgId + '">' +
+      '<div class="item-drag">⠿</div>' +
+      '<div class="item-body">' +
+        bildFeld +
+        '<input class="field-input gal-titel" type="text" value="' + escAttr(g.titel || '') + '" placeholder="Beschriftung (z.B. Frontansicht)" style="margin-top:.5rem;">' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.galerie-row\').remove();markDirty()">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }
+  window.addWaffenboerseGalerieRow = function() {
+    var list = id('galerie-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderWaffenboerseGalerieRow({});
+    list.appendChild(wrap.firstChild);
+    var empty = id('galerie-empty');
+    if (empty) empty.style.display = 'none';
+    initGalerieSortable();
+    markDirty();
+  };
   function renderWaffenboerseGalerieCard(data) {
     var list = data.bilder || [];
-    var rows = list.map(renderGalerieRow).join('');
+    var rows = list.map(renderWaffenboerseGalerieRow).join('');
     return '<div class="form-card">' +
       '<div class="form-card-title">🖼️ Bilder</div>' +
       '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
@@ -3333,7 +3377,7 @@
       toast('Maximal ' + WB_MAX_BILDER + ' Bilder pro Anzeige.', 'info');
       return;
     }
-    window.addGalerieRow();
+    window.addWaffenboerseGalerieRow();
   };
 
   /* ────────────────────────────────────────────────────────────

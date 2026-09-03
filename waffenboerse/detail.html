@@ -95,6 +95,20 @@
     return '<dt>' + escHtml(label) + '</dt><dd>' + escHtml(wert) + '</dd>';
   }
 
+  // Versandkosten sind ein freies Textfeld im Admin (z.B. "15,80"). Für die
+  // öffentliche Anzeige rein kosmetisch als Geldbetrag formatiert (03.09.2026,
+  // Laurin-Wunsch), ohne das Datenmodell/Admin-Feld anzufassen: eine reine
+  // Zahl (Komma oder Punkt als Dezimaltrennzeichen) bekommt ein "€" angehängt,
+  // ein Wert mit bereits vorhandenem €/EUR oder freier Text (z.B. "nach
+  // Absprache") bleibt unverändert.
+  function versandkostenText(v) {
+    if (v == null || v === '') return v;
+    var s = String(v).trim();
+    if (/€|EUR/i.test(s)) return s;
+    if (/^\d+([.,]\d+)?$/.test(s)) return s + ' €';
+    return s;
+  }
+
   if (!wbId) { zeigeFehlermeldung(); return; }
 
   fetch('../content/waffenboerse.json')
@@ -121,47 +135,56 @@
       var mailtoHref = a.anbieter_email ? escHtml('mailto:' + a.anbieter_email + '?subject=' + betreff) : '';
       var hatKontaktdaten = !!(a.anbieter_email || a.anbieter_telefon);
 
-      // ── Oberer Bereich: Galerie links, Eckdaten rechts (gleiches Prinzip
-      // wie die Hundebörsen-Detailseite: Thumbnail-Reihe unter dem Hauptbild,
-      // Klick tauscht nur das große Bild aus) ──────────────────────────────
+      // ── Oberer Anzeigenkopf: Galerie links, Eckdaten rechts ───────────────
+      // Kompakter Anzeigenkopf (03.09.2026, Laurin-Wunsch): eigene "wb-"
+      // Bausteine statt der von der Hundebörse genutzten "hb-"-Klassen
+      // (hb-detail-top/hb-gallery/hb-thumbs/hb-thumb/hb-eckdaten), damit
+      // dieses Layout unabhängig von der Hundebörse verfeinert werden kann,
+      // ohne deren Detailseite zu berühren. Funktional identisch zum bisherigen
+      // Prinzip: Thumbnail-Reihe unter dem Hauptbild, Klick tauscht nur das
+      // große Bild aus (siehe Event-Listener weiter unten, unverändert).
       var linksHtml;
       if (galerie.length) {
         var thumbsHtml = '';
         if (galerie.length > 1) {
-          thumbsHtml = '<div class="hb-thumbs" id="wb-thumbs">' +
+          thumbsHtml = '<div class="wb-thumbs" id="wb-thumbs">' +
             galerie.map(function(g, gi) {
               var gSrc = toSrc(g.bild);
               var gAlt = escHtml(g.titel || a.titel || '');
-              return '<button type="button" class="hb-thumb' + (gi === 0 ? ' is-active' : '') + '" data-src="' + gSrc + '" data-alt="' + gAlt + '" aria-label="Bild ' + (gi + 1) + ' von ' + galerie.length + ' anzeigen">' +
+              return '<button type="button" class="wb-thumb' + (gi === 0 ? ' is-active' : '') + '" data-src="' + gSrc + '" data-alt="' + gAlt + '" aria-label="Bild ' + (gi + 1) + ' von ' + galerie.length + ' anzeigen">' +
                 '<img src="' + gSrc + '" alt="' + gAlt + '" loading="lazy">' +
               '</button>';
             }).join('') +
           '</div>';
         }
-        linksHtml = '<div class="hb-gallery">' +
-          '<img src="' + hauptbild + '" alt="' + escHtml(a.titel || '') + '" class="hb-main-image" id="wb-main-image">' +
+        linksHtml = '<div class="wb-gallery">' +
+          '<img src="' + hauptbild + '" alt="' + escHtml(a.titel || '') + '" class="wb-main-image" id="wb-main-image">' +
           thumbsHtml +
         '</div>';
       } else {
-        linksHtml = '<div class="hb-gallery"><div style="background:var(--green-light);border-radius:var(--radius-md);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;"><img src="../images/logo.png" alt="KJS" style="height:80px;opacity:.3;"></div></div>';
+        linksHtml = '<div class="wb-gallery"><div class="wb-main-image wb-main-image--empty"><img src="../images/logo.png" alt="KJS" style="height:80px;opacity:.3;"></div></div>';
       }
 
-      var rechtsHtml = '<div class="hb-eckdaten">' +
-        '<div class="hb-eckdaten__top">' +
-        '<span class="news-card__cat">' + escHtml(a.kategorie || '') + '</span>' +
-        '<h2 style="margin:.75rem 0 .25rem;">' + escHtml(a.titel || '(Ohne Titel)') + '</h2>' +
-        (herstellerModell ? '<p style="color:var(--text-muted);font-size:1rem;margin-bottom:.5rem;">' + escHtml(herstellerModell) + '</p>' : '') +
-        (standort ? '<p style="color:var(--text-muted);font-size:.92rem;margin-bottom:.25rem;">📍 ' + escHtml(standort) + '</p>' : '') +
-        '<p style="font-size:1.3rem;font-weight:800;color:var(--green-dark);margin-bottom:.75rem;">' + escHtml(preisText(a)) + '</p>' +
+      // Kompakte Eckdaten-Spalte: jedes Element eine eigene Zeile ohne
+      // individuelle Inline-Abstände - der vertikale Rhythmus kommt
+      // ausschließlich vom "gap" auf .wb-head (siehe CSS), damit Preis und
+      // Kontaktbutton nah an Titel/Kategorie stehen statt wie bisher über
+      // "justify-content:space-between" an den unteren Rand des Bildes
+      // gezogen zu werden (Ursache der bisherigen großen Leerflächen).
+      var rechtsHtml = '<div class="wb-head">' +
+        '<span class="news-card__cat wb-head__cat">' + escHtml(a.kategorie || '') + '</span>' +
+        '<h2 class="wb-head__title">' + escHtml(a.titel || '(Ohne Titel)') + '</h2>' +
+        (herstellerModell ? '<p class="wb-head__meta">' + escHtml(herstellerModell) + '</p>' : '') +
+        (standort ? '<p class="wb-head__meta">📍 ' + escHtml(standort) + '</p>' : '') +
+        '<p class="wb-head__price">' + escHtml(preisText(a)) + '</p>' +
         (a.erwerbsberechtigung_erforderlich
-          ? '<div class="wb-erwerb-badge">🔒 Erwerbsberechtigung erforderlich</div>'
+          ? '<div class="wb-erwerb-badge">Erwerbsberechtigung erforderlich</div>'
           : '') +
-        '</div>' +
-        (hatKontaktdaten ? '<div class="hb-eckdaten__bottom"><a href="#wb-kontakt" class="btn btn-primary" id="wb-kontakt-btn">Anbieter kontaktieren</a></div>' : '') +
+        (hatKontaktdaten ? '<div class="wb-head__cta"><a href="#wb-kontakt" class="btn btn-primary" id="wb-kontakt-btn">Anbieter kontaktieren</a></div>' : '') +
       '</div>';
 
       var html = '<a href="index.html" class="content-back-link">← Zurück zur Waffenbörse</a>';
-      html += '<div class="hb-detail-top">' + linksHtml + rechtsHtml + '</div>';
+      html += '<div class="wb-detail-top">' + linksHtml + rechtsHtml + '</div>';
 
       // ── Kerndaten ─────────────────────────────────────────────
       var kerndaten = '';
@@ -172,7 +195,7 @@
       kerndaten += zeile('Zustand', zustandText(a.zustand));
       kerndaten += zeile('Erwerbsberechtigung', a.erwerbsberechtigung_erforderlich ? 'Erforderlich' : 'Nicht erforderlich');
       kerndaten += zeile('Versand', a.versand_moeglich ? 'Möglich' : 'Nur Abholung');
-      if (a.versand_moeglich && a.versandkosten) kerndaten += zeile('Versandkosten', a.versandkosten);
+      if (a.versand_moeglich && a.versandkosten) kerndaten += zeile('Versandkosten', versandkostenText(a.versandkosten));
       if (kerndaten) {
         html += '<h2>Kerndaten</h2><div class="steckbrief"><dl>' + kerndaten + '</dl></div>';
       }
@@ -214,11 +237,11 @@
       if (thumbsWrap) {
         var mainImgEl = document.getElementById('wb-main-image');
         thumbsWrap.addEventListener('click', function(e) {
-          var btn = e.target.closest('.hb-thumb');
+          var btn = e.target.closest('.wb-thumb');
           if (!btn || !mainImgEl) return;
           mainImgEl.src = btn.getAttribute('data-src');
           mainImgEl.alt = btn.getAttribute('data-alt') || mainImgEl.alt;
-          thumbsWrap.querySelectorAll('.hb-thumb').forEach(function(t) { t.classList.remove('is-active'); });
+          thumbsWrap.querySelectorAll('.wb-thumb').forEach(function(t) { t.classList.remove('is-active'); });
           btn.classList.add('is-active');
         });
       }

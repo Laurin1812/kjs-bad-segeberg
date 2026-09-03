@@ -1942,18 +1942,114 @@ body.kjs-lightbox-lock { overflow: hidden; }
 }
 
 /* =========================================================
-   WAFFENBÖRSE (Phase 1 Prototyp, 02.09.2026)
+   WAFFENBÖRSE (Phase 1 Prototyp, 02.09.2026; Anzeigenkopf-Feinschliff
+   03.09.2026)
    Übersicht/Detailseite bauen bewusst auf den bestehenden, bereits
    ausgereiften Hundebörse-Bausteinen auf statt eigene Duplikate zu erzeugen:
    .news__grid/.news-card (Kachelraster), .hb-overview-layout (Intro/Haupt-
-   inhalt/Sidebar-Grid), .hb-gallery/.hb-thumbs/.hb-thumb (Bildergalerie mit
-   Thumbnail-Umschaltung), .steckbrief (Kerndaten-Tabelle), .hb-eckdaten,
+   inhalt/Sidebar-Grid), .steckbrief (Kerndaten-Tabelle),
    .hb-kontaktbereich/.hb-kontakt-highlight (Anbieter-kontaktieren-Bereich) -
-   siehe waffenboerse/index.html und detail.html. Nur die dort unten
-   aufgeführten, wirklich waffenbörsenspezifischen Teile (Filterleiste,
-   Kachel-Höhenausgleich unter #wb-grid, Erwerbsberechtigungs-Hinweis) sind
-   neu und eigens "wb-" präfigiert, damit sie klar von der Hundebörse
-   abgegrenzt bleiben und diese unangetastet lässt. */
+   siehe waffenboerse/index.html und detail.html.
+   Der obere Anzeigenkopf der Detailseite (Bild links, Eckdaten rechts)
+   nutzte anfangs ebenfalls die Hundebörse-Klassen (.hb-detail-top/
+   .hb-gallery/.hb-thumbs/.hb-thumb/.hb-eckdaten). Seit dem Feinschliff vom
+   03.09.2026 hat er stattdessen eigene ".wb-detail-top/.wb-gallery/
+   .wb-thumbs/.wb-thumb/.wb-head"-Bausteine (weiter unten in diesem
+   Abschnitt) - Laurin wollte dort ein deutlich kompakteres, breiteres
+   Layout, das unabhängig von der Hundebörsen-Detailseite weiterentwickelt
+   werden kann, ohne diese zu berühren. Alle sonstigen, wirklich
+   waffenbörsenspezifischen Teile (Filterleiste, Kachel-Höhenausgleich unter
+   #wb-grid, Erwerbsberechtigungs-Hinweis) sind ebenfalls eigens "wb-"
+   präfigiert, damit sie klar von der Hundebörse abgegrenzt bleiben und
+   diese unangetastet lässt. */
+
+/* ── Anzeigenkopf Detailseite (03.09.2026, Laurin-Wunsch "kompakter
+   Anzeigenkopf"): Galerie links (~58%) + Eckdaten rechts (~42%) als ein
+   zusammengehöriger Block. Bewusst align-items:start statt (wie bei der
+   Hundebörse) stretch+space-between - genau dieses Stretchen war die
+   Ursache der bisherigen großen Leerflächen (die kurze Textspalte wurde
+   künstlich auf die Höhe des Bildes gezogen, der Kontaktbutton dadurch an
+   den unteren Bildrand statt direkt unter den Preis geschoben). Mit
+   align-items:start behält die Eckdaten-Spalte ihre natürliche, kompakte
+   Höhe. Bricht bereits bei 1024px auf eine Spalte um (früher als die
+   Hundebörse mit 900px) - siehe Kommentar an der main-image-Regel unten:
+   die rechte Spalte braucht neben der 290px-Sidebar spürbar mehr Breite als
+   bei der Hundebörse, damit Titel/Button auf typischen kleinen Laptop-
+   breiten (1024-1200px) nicht gequetscht wirken. */
+.wb-detail-top {
+  display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;
+  align-items: start; margin-bottom: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .wb-detail-top { grid-template-columns: 1fr; }
+}
+
+.wb-gallery { display: flex; flex-direction: column; gap: .6rem; }
+
+/* Hauptbild: bewusst object-fit:contain statt cover (Laurin-Vorgabe "keine
+   Bilder beschneiden, wenn dadurch wichtige Bildbereiche verloren gehen").
+   Waffen sind auf Fotos oft lang/querformatig, Anbieter fotografieren aber
+   auch hochkant - ein festes Seitenverhältnis mit "cover" hätte in beiden
+   Fällen zuverlässig Bildinhalt abgeschnitten. Mit "contain" auf einer
+   breiten 3:2-Fläche und neutralem Hintergrund (füllt bei abweichendem
+   Bildformat die Restfläche statt zu verzerren oder zu beschneiden) wirkt
+   das Bild trotzdem größer/breiter als vorher (die Spalte selbst ist durch
+   .wb-detail-top oben bereits breiter als die bisherige Hundebörse-Spalte),
+   ohne dass Hoch- oder Querformat-Anzeigenfotos leiden. Dünner Rahmen statt
+   nur Schatten, damit die Fläche bei hellen/freigestellten Fotos nicht mit
+   dem Seitenhintergrund verschwimmt. */
+/* ".wb-gallery "-Präfix (statt nur ".wb-main-image") nötig: die generische
+   Bild-Regel ".main-content img" weiter unten in dieser Datei hat dieselbe
+   Selektor-Spezifität wie ein einzelner Klassenname auf einem <img> und
+   setzt u.a. margin:1.5rem 0 und border:none - ohne den zusätzlichen
+   Klassen-Präfix hier würden diese beiden Eigenschaften das Hauptbild-Layout
+   durcheinanderbringen (entdeckt beim Nachbau: derselbe Effekt betrifft
+   bereits heute .hb-thumb img auf der Hundebörse, dort aber unangetastet
+   gelassen, siehe Abschlussbericht). */
+.wb-gallery .wb-main-image {
+  display: block; width: 100%; aspect-ratio: 3/2; object-fit: contain;
+  background: var(--bg-light); border: 1px solid var(--border); margin: 0;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+.wb-main-image--empty { display: flex; align-items: center; justify-content: center; }
+.wb-main-image--empty img { margin: 0; box-shadow: none; border-radius: 0; }
+.wb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.wb-thumb {
+  flex: 0 0 auto; width: 72px; height: 72px; padding: 0; overflow: hidden;
+  border: 2px solid transparent; border-radius: var(--radius-sm); background: none;
+  cursor: pointer; line-height: 0; transition: border-color .15s ease;
+}
+/* Alle vier Eigenschaften bewusst explizit gesetzt (nicht nur width/height/
+   object-fit/display): siehe Kommentar bei .wb-gallery .wb-main-image oben -
+   dieselbe generische ".main-content img"-Regel würde sonst margin/
+   border-radius/box-shadow in dieses 72px-Thumbnail hineinmischen. */
+.wb-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none;
+}
+.wb-thumb:hover { border-color: var(--green-main); }
+.wb-thumb.is-active { border-color: var(--green-dark); box-shadow: 0 0 0 2px var(--green-light); }
+@media (max-width: 600px) {
+  .wb-thumb { width: 58px; height: 58px; }
+}
+
+/* Eckdaten-Spalte: eine einzige Flex-Spalte mit "gap" statt einzeln
+   austarierter Margins pro Element (Titel/Hersteller/Standort/Preis/Badge/
+   Button kommen aus detail.html jetzt ohne eigene Inline-Abstände) - dadurch
+   entsteht der kompakte, gleichmäßige Rhythmus, den Laurin wollte, an genau
+   einer Stelle einstellbar. */
+.wb-head { display: flex; flex-direction: column; gap: .45rem; }
+.wb-head__cat { align-self: flex-start; }
+/* #wb-detail-inhalt-Präfix nötig, um die generischen ".main-content h2"/
+   ".main-content p"-Regeln (Farbe/margin-top/line-height weiter unten in
+   dieser Datei) zuverlässig zu schlagen - sonst gewinnen deren höhere
+   Selektor-Spezifität (Klasse+Element) gegen einen einzelnen Klassennamen
+   trotz späterer Reihenfolge im Stylesheet. */
+#wb-detail-inhalt .wb-head__title { margin: 0; }
+#wb-detail-inhalt .wb-head__meta { margin: 0; color: var(--text-muted); font-size: .95rem; }
+#wb-detail-inhalt .wb-head__price { margin: .15rem 0 0; font-size: 1.4rem; font-weight: 800; color: var(--green-dark); }
+.wb-head .wb-erwerb-badge { align-self: flex-start; margin-top: .1rem; }
+.wb-head__cta { margin-top: .6rem; }
 
 /* Kachel-Höhenausgleich, exakt dasselbe Muster wie #hb-grid oben (siehe
    Kommentar dort) - bewusst separat unter #wb-grid skopiert statt die
@@ -1989,12 +2085,14 @@ body.kjs-lightbox-lock { overflow: hidden; }
 /* Erwerbsberechtigungs-Hinweis auf der Detailseite: auffällig genug, um
    sicher wahrgenommen zu werden, aber bewusst in der Gold-Akzentfarbe der
    Seite statt in aggressivem Rot (Laurin-Vorgabe Phase 1: "auffällig, aber
-   nicht aggressiv"). */
+   nicht aggressiv"). Seit 03.09.2026 ohne 🔒-Emoji (Laurin-Wunsch), daher
+   kein "gap" für Icon+Text mehr nötig; Bedingung, wann der Badge erscheint,
+   unverändert (a.erwerbsberechtigung_erforderlich in detail.html). */
 .wb-erwerb-badge {
-  display: inline-flex; align-items: center; gap: .5rem;
+  display: inline-block;
   background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
-  border-radius: var(--radius-sm); padding: .55rem .9rem;
-  font-size: .88rem; font-weight: 700;
+  border-radius: var(--radius-sm); padding: .5rem .9rem;
+  font-size: .86rem; font-weight: 700;
 }
 /* Allgemeiner Rechtshinweis: immer sichtbar (unabhängig vom Erwerbsberechtigungs-
    Status der einzelnen Anzeige), daher bewusst neutraler/zurückhaltender als
