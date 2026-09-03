@@ -49,29 +49,41 @@
       "id": "wb-1788440000002",
       "status": "published",
       "erstellt_am": "2026-08-31T14:40:00.000Z",
-      "aktualisiert_am": "2026-08-31T14:40:00.000Z",
-      "titel": "Sauer 202 Repetierbüchse",
-      "kategorie": "Büchsen",
-      "hersteller": "Sauer",
-      "modell": "202",
+      "aktualisiert_am": "2026-09-03T07:30:11.261Z",
+      "titel": "Mauser 90 DA - 9mm Luger",
+      "kategorie": "Kurzwaffen",
+      "hersteller": "Mauser",
+      "modell": "Luger",
       "kaliber": [
-        ".308 Winchester"
+        "9 mm"
       ],
       "zustand": "gebraucht",
-      "preis": "1.650",
+      "preis": "380,00",
       "preis_typ": "vb",
       "erwerbsberechtigung_erforderlich": true,
-      "beschreibung": "<p>Solide Repetierbüchse mit Wechsellaufsystem, aus gepflegtem Privatbesitz. Der Verschluss läuft geschmeidig, das Abzugssystem ist unverändert im Originalzustand.</p><p>Wird ohne Optik angeboten, eine passende Montage ist vorhanden.</p><p>Verkauf aus Bestandsverkleinerung, daher Verhandlungsbasis.</p>",
+      "beschreibung": "<p>Halbautomatische Pistole Mauser Oberndorf GmbH Mauser 90 DA im Kaliber 9mm Luger<br>&nbsp;<br>Technische Daten:<br>Lauflänge: ca. 120mm<br>Gewicht: ca. 900g<br>Kapazität: 14 Schuss im Magazin.<br>Visierung: Klassische Visierug, Kimme und Korn.<br><br>Zustand:&nbsp;<br>wenig Gebrauchsspuren; leichte Gebrauchsspuren.<br>guter Zustand.<br>&nbsp;Erwerb möglich, mit entsprechender Erlaubnis :<br><br>Jäger ( Jagdschein WBK Grün mit Voreintrag ), Sportschützen ( WBK Grün mit Voreintrag ), Sammler ( Rote Sammler WBK ) und Waffenhandelserlaubnis ( Waffenhändler ).<br><br><strong>Abgabe nur an Inhaber einer Erwerbserlaubnis.<br>Produktsicherheitshinweise:Dieses Produkt wurde vor dem 13.12.2024 auf dem Marktplatz bereitgestellt. Für Hersteller- und Sicherheitsinformationen wenden Sie sich an den anbietenden Händler.<br>ACHTUNG: Zum Kauf dieses Produkts ist die Vorlage der Erwerbsberechtigung erforderlich</strong> !!!</p>",
       "bilder": [
         {
-          "bild": "/images/wb-test-buechse-1.jpg",
+          "bild": "/images/1788420558900-2.jpg",
           "titel": "Gesamtansicht"
+        },
+        {
+          "bild": "/images/1788420574985-1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788420589228-3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1788420603751-4.jpg",
+          "titel": ""
         }
       ],
-      "plz": "23795",
-      "ort": "Bad Segeberg",
-      "versand_moeglich": false,
-      "versandkosten": "",
+      "plz": "24629",
+      "ort": "Kisdorf",
+      "versand_moeglich": true,
+      "versandkosten": "15,80",
       "anbieter_name": "Jan Beispielmann",
       "anbieter_email": "jan.beispielmann@example.de",
       "anbieter_telefon": ""
