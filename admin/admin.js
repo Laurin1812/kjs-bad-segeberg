@@ -3104,7 +3104,19 @@
           fText('wb-hersteller', 'Hersteller', a.hersteller) +
           fText('wb-modell', 'Modell', a.modell) +
         '</div>' +
-        fText('wb-kaliber', 'Kaliber', (a.kaliber || []).join(', '), 'z.B. 7x65R, 12/70 (mehrere durch Komma trennen)') +
+        // Eine Eingabezeile pro Kaliber statt Komma-Trennfeld (Phase 2.1,
+        // Punkt 2, 03.09.2026): Komma war als Trennzeichen ungeeignet, weil
+        // Kaliber selbst Kommas enthalten können (z.B. "5,6x52R") - wurde
+        // dadurch fälschlich in zwei Einträge zerlegt. Zeilen werden nach
+        // renderMain() unten über renderWaffenboerseKaliberRows(a.kaliber)
+        // befüllt (auch bestehende, evtl. schon "verunglückte" Kaliber-
+        // Arrays aus der alten Eingabe werden dabei unverändert als je eine
+        // Zeile angezeigt - keine automatische Korrektur bestehender Daten).
+        '<div class="field-row">' +
+          '<label class="field-label">Kaliber</label>' +
+          '<div class="wb-kaliber-list" id="wb-kaliber-list"></div>' +
+          '<button type="button" class="btn btn-outline btn-sm" onclick="waffenboerseKaliberAdd()">+ Weiteres Kaliber</button>' +
+        '</div>' +
         fSelect('wb-zustand', 'Zustand', a.zustand || 'gebraucht', WB_ZUSTAND) +
       '</div>' +
 
@@ -3156,6 +3168,7 @@
     renderMain(html);
     initTiptap('wb-beschreibung', a.beschreibung || '');
     initGalerieSortable();
+    renderWaffenboerseKaliberRows(a.kaliber || []);
 
     var vmBtn = id('f-wb-versand_moeglich');
     if (vmBtn) vmBtn.addEventListener('click', function() {
@@ -3164,6 +3177,38 @@
     });
   };
 
+  // Kaliber-Zeilen (Phase 2.1, Punkt 2): analog zum öffentlichen Formular
+  // (waffenboerse/anbieten.html) - eine Zeile pro Kaliber, kein Komma-Split
+  // mehr. Bewusst eigenständig statt renderGalerieRow() o.ä. zu
+  // verwenden, da hier reine Strings statt {bild,titel}-Objekte verwaltet
+  // werden.
+  function renderWaffenboerseKaliberRow(wert) {
+    return '<div class="wb-kaliber-row">' +
+      '<input class="field-input wb-kaliber-input" type="text" value="' + escAttr(wert || '') + '" placeholder="z.B. 7x65R">' +
+      '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.wb-kaliber-row\').remove();markDirty()">🗑️</button>' +
+    '</div>';
+  }
+  function renderWaffenboerseKaliberRows(kaliberArr) {
+    var list = id('wb-kaliber-list');
+    if (!list) return;
+    list.innerHTML = (kaliberArr && kaliberArr.length ? kaliberArr : ['']).map(renderWaffenboerseKaliberRow).join('');
+  }
+  window.waffenboerseKaliberAdd = function() {
+    var list = id('wb-kaliber-list');
+    if (!list) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = renderWaffenboerseKaliberRow('');
+    list.appendChild(wrap.firstChild);
+    markDirty();
+  };
+  function waffenboerseKaliberCollect() {
+    var list = id('wb-kaliber-list');
+    if (!list) return [];
+    return Array.prototype.slice.call(list.querySelectorAll('.wb-kaliber-input'))
+      .map(function(inp) { return inp.value.trim(); })
+      .filter(Boolean);
+  }
+
   async function waffenboerseCollect(idx) {
     var a = S.data.anzeigen[idx];
     a.status        = gv('wb-status');
@@ -3171,7 +3216,7 @@
     a.kategorie     = gv('wb-kategorie');
     a.hersteller    = gv('wb-hersteller');
     a.modell        = gv('wb-modell');
-    a.kaliber       = gv('wb-kaliber').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    a.kaliber       = waffenboerseKaliberCollect();
     a.zustand       = gv('wb-zustand');
     a.preis_typ     = gv('wb-preis_typ');
     a.preis         = gv('wb-preis');

@@ -309,6 +309,11 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   .field-row-2 { grid-template-columns: 1fr; }
 }
 
+/* Kaliber: one row per entry, no comma-splitting (see waffenboerseKaliberCollect) */
+.wb-kaliber-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .5rem; }
+.wb-kaliber-row { display: flex; align-items: center; gap: .5rem; }
+.wb-kaliber-row .wb-kaliber-input { flex: 1 1 auto; }
+
 /* Image field */
 .image-field { }
 .image-preview-wrap {

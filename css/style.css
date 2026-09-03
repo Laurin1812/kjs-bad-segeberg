@@ -2125,6 +2125,27 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .wba-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
 .wba-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
 
+/* Kaliber: eine Zeile pro Kaliber statt Komma-Trennfeld (Phase 2.1, Punkt 2,
+   03.09.2026) - Komma war als Trennzeichen ungeeignet, weil Kaliber selbst
+   Kommas enthalten können (z.B. "5,6x52R"). Bewusst einfache Zeilen statt
+   einer Tag-/Chip-Komponente. */
+.wba-kaliber-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .6rem; }
+.wba-kaliber-row { display: flex; gap: .6rem; align-items: center; }
+.wba-kaliber-row .wba-kaliber-input { flex: 1 1 auto; }
+.wba-kaliber-remove {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-light); border: 1px solid var(--border); color: var(--text-muted);
+  cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.wba-kaliber-remove:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+.wba-kaliber-add {
+  display: inline-block; padding: .55rem 1.1rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .85rem; font-weight: 600;
+  cursor: pointer; background: none; transition: all var(--transition);
+}
+.wba-kaliber-add:hover { border-color: var(--green-main); background: var(--green-light); }
+
 /* Ja/Nein-Auswahl (Erwerbsberechtigung, Versand möglich) als zwei
    gleichwertige Buttons statt eines Toggle-Schalters: ein Toggle hat
    immer einen sichtbaren Ausgangszustand (an/aus) - hier soll aber laut
@@ -2217,6 +2238,17 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .wba-success h2 { color: var(--green-dark); margin-bottom: .75rem; }
 .wba-success p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
 .wba-success__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* Entwicklungs-/Testmeldung (Phase 2.1, Punkt 1, 03.09.2026): erscheint
+   anstelle von .wba-success, solange submitWaffenboerseAnzeige() nur
+   simuliert (siehe JS-Kommentar in anbieten.html). Bewusst NICHT in der
+   grünen "Vielen Dank"-Optik von .wba-success, sondern neutral/gedeckt mit
+   deutlichem Rahmen-Akzent, damit auf keinen Fall der Eindruck einer
+   echten Bestätigung entsteht. */
+.wba-devnote { display: none; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-light); border-radius: var(--radius-md); border-left: 4px solid var(--text-muted); }
+.wba-devnote.is-visible { display: block; }
+.wba-devnote h2 { color: var(--text-dark); margin-bottom: .75rem; }
+.wba-devnote p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
 
 /* "+ Anzeige aufgeben"-Button im Intro-Bereich der Übersicht sowie
    Sidebar-Boxen: reine Flex-Anordnung, keine neue Button-Optik (nutzt

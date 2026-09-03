@@ -79,9 +79,10 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="wba-kaliber">Kaliber</label>
-            <input type="text" id="wba-kaliber" placeholder="z. B. 7x65R, 12/70, 5,6x52R">
-            <p class="wba-section-hint" style="margin-top:.35rem;margin-bottom:0;">Mehrere Kaliber bitte durch Komma trennen, z. B. 7x65R, 12/70, 5,6x52R</p>
+            <label>Kaliber</label>
+            <div class="wba-kaliber-list" id="wbaKaliberList"></div>
+            <button type="button" class="wba-kaliber-add" id="wbaKaliberAdd">+ Weiteres Kaliber</button>
+            <p class="wba-section-hint" style="margin-top:.5rem;margin-bottom:0;">Bitte je Kaliber ein eigenes Feld verwenden, z. B. „7x65R“, „12/70“, „5,6x52R“ (nicht durch Komma trennen, da Kaliber selbst Kommas enthalten können).</p>
           </div>
           <div class="form-group" id="wbaGroup-zustand">
             <label for="wba-zustand">Zustand *</label>
@@ -237,13 +238,35 @@
         </button>
       </form>
 
+      <!-- Echte Erfolgsansicht - erscheint erst, sobald submitWaffenboerseAnzeige()
+           eine echte (nicht simulierte) Server-Antwort mit ok:true liefert
+           (siehe JS weiter unten: result.mocked ist dann falsy). Bis dahin
+           bleibt dieser Block ungenutzt, aber vollständig fertig gebaut, damit
+           bei der Backend-Anbindung außer submitWaffenboerseAnzeige() selbst
+           nichts mehr geändert werden muss (Phase 2.1, Punkt 1). -->
       <div class="wba-success" id="wbaSuccess">
         <h2>Vielen Dank!</h2>
         <p>Ihre Anzeige wurde erfolgreich zur Prüfung eingereicht.<br>
         Die Anzeige ist noch nicht öffentlich sichtbar. Nach Prüfung durch die Kreisjägerschaft wird sie freigegeben oder bei Rückfragen entsprechend bearbeitet.</p>
         <div class="wba-success__actions">
           <a href="index.html" class="btn btn-outline-green">Zur Waffenbörse</a>
-          <button type="button" class="btn btn-primary" id="wbaNeueAnzeigeBtn">Weitere Anzeige aufgeben</button>
+          <button type="button" class="btn btn-primary wba-reset-btn">Weitere Anzeige aufgeben</button>
+        </div>
+      </div>
+
+      <!-- Entwicklungs-/Testmeldung (Phase 2.1, Punkt 1): erscheint aktuell
+           nach jeder erfolgreichen Frontend-Validierung, weil es noch keinen
+           echten Server-Endpunkt gibt - siehe submitWaffenboerseAnzeige()
+           weiter unten. Bewusst NICHT in Grün/"Vielen Dank"-Optik, damit sie
+           unter keinen Umständen mit einer echten Bestätigung verwechselt
+           werden kann. -->
+      <div class="wba-devnote" id="wbaDevNote">
+        <h2>Formular bereit</h2>
+        <p>Das Formular ist vollständig und technisch vorbereitet. Die tatsächliche Übermittlung wird mit der Server-Anbindung aktiviert.<br>
+        Es wurden noch keine Daten an die Kreisjägerschaft übermittelt.</p>
+        <div class="wba-success__actions">
+          <a href="index.html" class="btn btn-outline-green">Zur Waffenbörse</a>
+          <button type="button" class="btn btn-primary wba-reset-btn">Weitere Anzeige aufgeben</button>
         </div>
       </div>
 
@@ -318,10 +341,27 @@
                 am bestehenden Admin-Workflow (prüfen/ändern/freigeben/
                 ablehnen) ändert sich nichts.
 
+   RÜCKGABE-VERTRAG (Phase 2.1, 03.09.2026 - wichtig für den späteren
+   Austausch): diese Funktion liefert ein Promise, das mit GENAU einer der
+   folgenden Formen auflöst - das aufrufende Formular (zweiter <script>-
+   Block unten) entscheidet allein anhand von "mocked", ob die echte
+   "Vielen Dank"-Erfolgsansicht (#wbaSuccess) oder die Entwicklungs-/
+   Testmeldung (#wbaDevNote, "Es wurden noch keine Daten übermittelt")
+   angezeigt wird:
+     - { ok: true,  mocked: true,  id: null }   → aktueller Simulations-
+       zustand: zeigt IMMER die Testmeldung, NIE die Erfolgsmeldung -
+       Punkt 1 des Phase-2.1-Auftrags verbietet ausdrücklich eine
+       vorgetäuschte Erfolgsmeldung, solange kein echter Endpunkt existiert.
+     - { ok: true,  id: "wb-…" }                → künftige echte,
+       erfolgreiche Server-Antwort (KEIN "mocked"-Feld, oder explizit
+       mocked:false) → zeigt die echte "Vielen Dank"-Erfolgsansicht.
+     - { ok: false, error: "…" }                → Server hat abgelehnt
+       (z.B. serverseitige Validierung fehlgeschlagen) → Formular bleibt
+       sichtbar, Fehlermeldung erscheint in der Zusammenfassung oben.
    Austausch später: sobald der Endpoint existiert, muss ausschließlich
    der Rumpf dieser einen Funktion ersetzt werden (echter fetch(...) statt
-   der Simulation unten) - das aufrufende Formular (siehe zweiter
-   <script>-Block) bleibt unverändert. */
+   der Simulation unten, der die obige Rückgabeform exakt einhält) - das
+   aufrufende Formular selbst bleibt unverändert. */
 function submitWaffenboerseAnzeige(payload) {
   console.info('[Waffenbörse-Formular] Simulierte Einreichung (noch kein Server-Backend vorhanden) – Payload:', payload);
   return new Promise(function (resolve) {
@@ -494,11 +534,63 @@ function submitWaffenboerseAnzeige(payload) {
 
   renderImages();
 
+  // ── Kaliber: eine Eingabezeile pro Kaliber statt Komma-Trennung
+  // (Phase 2.1, Punkt 2) - die alte Komma-Trennung war fehleranfällig, weil
+  // Kaliber selbst Kommas enthalten können (Dezimaltrennzeichen, z.B.
+  // "5,6x52R"), was fälschlich in zwei Einträge zerlegt wurde. Intern
+  // bleibt es bei kaliber:[] (siehe kaliberArray() unten) - nur die
+  // Eingabe-UI ändert sich. Bewusst keine Tag-/Chip-Komponente, sondern
+  // einfache wiederholbare Textzeilen mit "+ Weiteres Kaliber". ─────────
+  var kaliberList = document.getElementById('wbaKaliberList');
+
+  function addKaliberRow(value) {
+    var row = document.createElement('div');
+    row.className = 'wba-kaliber-row';
+    row.innerHTML =
+      '<input type="text" class="wba-kaliber-input" placeholder="z. B. 7x65R" value="' + escHtml(value || '') + '">' +
+      '<button type="button" class="wba-kaliber-remove" aria-label="Kaliber entfernen">✕</button>';
+    kaliberList.appendChild(row);
+  }
+
+  kaliberList.addEventListener('click', function(e) {
+    var btn = e.target.closest('.wba-kaliber-remove');
+    if (!btn) return;
+    var rows = kaliberList.querySelectorAll('.wba-kaliber-row');
+    if (rows.length <= 1) {
+      // Mindestens eine Zeile bleibt sichtbar - beim letzten Eintrag wird
+      // nur der Inhalt geleert statt die Zeile zu entfernen.
+      btn.closest('.wba-kaliber-row').querySelector('.wba-kaliber-input').value = '';
+      return;
+    }
+    btn.closest('.wba-kaliber-row').remove();
+  });
+
+  document.getElementById('wbaKaliberAdd').addEventListener('click', function() { addKaliberRow(''); });
+
+  function resetKaliberRows() {
+    kaliberList.innerHTML = '';
+    addKaliberRow('');
+  }
+  resetKaliberRows();
+
+  // Exakt dasselbe Prinzip in der Waffenbörse-Admin-UI umgesetzt (admin.js,
+  // renderWaffenboerseKaliberRows/waffenboerseKaliberCollect) - bestehende
+  // Anzeigen mit bereits vorhandenen Kaliber-Arrays (auch aus der alten,
+  // fehleranfälligen Komma-Eingabe) werden beim Bearbeiten unverändert als
+  // je eine Zeile pro vorhandenem Array-Eintrag angezeigt, siehe Punkt 4
+  // des Abschlussberichts.
+  function kaliberArray() {
+    return Array.prototype.slice.call(kaliberList.querySelectorAll('.wba-kaliber-input'))
+      .map(function(inp) { return inp.value.trim(); })
+      .filter(Boolean);
+  }
+
   // ── Validierung (Punkt 16) ──────────────────────────────────────────
   var form = document.getElementById('wbaAngebotForm');
   var errorSummary = document.getElementById('wbaErrorSummary');
   var errorList = document.getElementById('wbaErrorList');
   var successView = document.getElementById('wbaSuccess');
+  var devNoteView = document.getElementById('wbaDevNote');
 
   function clearErrors() {
     document.querySelectorAll('.wba-field-error').forEach(function(el) { el.classList.remove('wba-field-error'); });
@@ -597,12 +689,6 @@ function submitWaffenboerseAnzeige(payload) {
     return null;
   }
 
-  // ── Kaliber: Komma-getrennte Eingabe sauber in Array umwandeln (Punkt
-  // 8) - exakt dieselbe Logik wie admin.js waffenboerseCollect(). ──────
-  function kaliberArray() {
-    return document.getElementById('wba-kaliber').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-  }
-
   var submitBtn = form.querySelector('button[type="submit"]');
 
   form.addEventListener('submit', function(e) {
@@ -664,11 +750,29 @@ function submitWaffenboerseAnzeige(payload) {
 
     submitBtn.disabled = true;
 
-    submitWaffenboerseAnzeige(payload).then(function() {
-      form.style.display = 'none';
-      errorSummary.classList.remove('is-visible');
-      successView.classList.add('is-visible');
-      successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Verzweigung nach dem oben bei submitWaffenboerseAnzeige()
+    // dokumentierten Rückgabe-Vertrag (Phase 2.1, Punkt 1): NUR eine echte,
+    // nicht simulierte Erfolgsantwort (ok:true ohne mocked:true) zeigt die
+    // "Vielen Dank"-Ansicht. Aktuell (mocked:true) erscheint stattdessen
+    // immer die Testmeldung - es wird nie eine erfolgreiche Übermittlung
+    // vorgetäuscht, solange kein echter Server-Endpunkt existiert.
+    submitWaffenboerseAnzeige(payload).then(function(result) {
+      if (result && result.ok && !result.mocked) {
+        form.style.display = 'none';
+        errorSummary.classList.remove('is-visible');
+        successView.classList.add('is-visible');
+        successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (result && result.ok && result.mocked) {
+        form.style.display = 'none';
+        errorSummary.classList.remove('is-visible');
+        devNoteView.classList.add('is-visible');
+        devNoteView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        submitBtn.disabled = false;
+        errorList.innerHTML = '<li>' + escHtml((result && result.error) || 'Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.') + '</li>';
+        errorSummary.classList.add('is-visible');
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }).catch(function() {
       submitBtn.disabled = false;
       errorList.innerHTML = '<li>Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.</li>';
@@ -677,18 +781,23 @@ function submitWaffenboerseAnzeige(payload) {
     });
   });
 
-  document.getElementById('wbaNeueAnzeigeBtn').addEventListener('click', function() {
+  function resetForm() {
     form.reset();
     images.forEach(function(img) { URL.revokeObjectURL(img.url); });
     images = [];
     renderImages();
+    resetKaliberRows();
     updateVersandUI();
     updateErwerbUI();
     clearErrors();
     submitBtn.disabled = false;
     successView.classList.remove('is-visible');
+    devNoteView.classList.remove('is-visible');
     form.style.display = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  document.querySelectorAll('.wba-reset-btn').forEach(function(btn) {
+    btn.addEventListener('click', resetForm);
   });
 })();
 </script>
