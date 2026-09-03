@@ -1,7 +1,7 @@
 {
   "titel": "Mitglied werden",
   "untertitel": "<p>Werden Sie Teil unserer Jagdlichen Gemeinschaft</p>",
-  "intro": "<img src=\"/images/hundeausbildung.jpg\" alt=\"hundeausbildung\" class=\"img-25 img-rechts\"><p>Als Mitglied deiner Kreisjägerschaft und deines Hegerings wirst du Teil einer starken, lebendigen und</p><p>traditionsreichen Gemeinschaft. Hier triffst du Menschen, die deine Leidenschaft für Natur, Wildtiere und verantwortungsvolle Jagd teilen. Die Mitgliedschaft eröffnet dir zahlreiche Möglichkeiten, dich einzubringen, weiterzubilden und gemeinsam mit anderen etwas zu bewegen.</p><img src=\"/images/download-1-.jpg\" alt=\"hundeausbildung\" class=\"img-25 img-rechts\"><p>Vor Ort erwarten dich vielfältige Aktivitäten: Besuche jagdliche Veranstaltungen, nimm an Vorträgen und Weiterbildungen teil, bilde deinen Hund im Rahmen der Hundeführergruppen aus oder entdecke das Jagdhornblasen als faszinierendes Kulturgut. Auch die Teilnahme an Vergleichsschießen oder gemeinsamen Übungsterminen stärkt nicht nur deine Fertigkeiten, sondern auch das Miteinander.</p><p>Die Jägerschaft bietet dir ein einzigartiges Netzwerk, das weit über die Grenzen Schleswig-Holsteins hinausreicht. Ob Erfahrungsaustausch, Unterstützung im Revier, gemeinsame Aktionen oder kameradschaftliche Treffen – du profitierst von einer Gemeinschaft, die zusammenhält, Wissen teilt und Verantwortung übernimmt.</p><p>So wächst du nicht nur jagdlich, sondern wirst</p><p>Teil eines starken Verbunds, der Natur- und Artenschutz aktiv lebt und fördert.</p>",
+  "intro": "<p>Als Mitglied deiner Kreisjägerschaft und deines Hegerings wirst du Teil einer starken, lebendigen und</p><p>traditionsreichen Gemeinschaft. Hier triffst du Menschen, die deine Leidenschaft für Natur, Wildtiere und verantwortungsvolle Jagd teilen. Die Mitgliedschaft eröffnet dir zahlreiche Möglichkeiten, dich einzubringen, weiterzubilden und gemeinsam mit anderen etwas zu bewegen.</p><p>Vor Ort erwarten dich vielfältige Aktivitäten: Besuche jagdliche Veranstaltungen, nimm an Vorträgen und Weiterbildungen teil, bilde deinen Hund im Rahmen der Hundeführergruppen aus oder entdecke das Jagdhornblasen als faszinierendes Kulturgut. Auch die Teilnahme an Vergleichsschießen oder gemeinsamen Übungsterminen stärkt nicht nur deine Fertigkeiten, sondern auch das Miteinander.</p><p>Die Jägerschaft bietet dir ein einzigartiges Netzwerk, das weit über die Grenzen Schleswig-Holsteins hinausreicht. Ob Erfahrungsaustausch, Unterstützung im Revier, gemeinsame Aktionen oder kameradschaftliche Treffen – du profitierst von einer Gemeinschaft, die zusammenhält, Wissen teilt und Verantwortung übernimmt.</p><p>So wächst du nicht nur jagdlich, sondern wirst</p><p>Teil eines starken Verbunds, der Natur- und Artenschutz aktiv lebt und fördert.</p>",
   "bild": "",
   "bild_alt": "",
   "inhalt": "<h2>Vorteile der Mitgliedschaft</h2><ul><li><p>Als Mitglied im Landesjagdverband Schleswig‑Holstein profitieren Sie von zahlreichen Vorteilen, die Ihren jagdlichen Alltag bereichern und erleichtern. Freuen Sie sich zehnmal im Jahr auf unsere Mitgliedszeitschrift „Jäger in Schleswig-Holstein“, die Sie mit aktuellen Informationen, Fachartikeln und spannenden Einblicken in das jagdliche Geschehen im Land versorgt.</p></li><li><p>Darüber hinaus nutzen Sie vergünstigte Konditionen auf unseren Schießständen und profitieren von attraktiven Rabattaktionen exklusiv für Mitglieder – beispielsweise beim Autokauf oder bei Mobilfunkverträgen.</p></li><li><p>Ein besonderes Plus sind unsere vielfältigen Weiterbildungsangebote: Vom Ansprechseminar über Motorsägenkurse bis hin zu praxisnahen Zerwirk- und Wildbrethygienekursen ist für jede Jägerin und jeden Jäger etwas dabei.</p></li><li><p>Weitere Vorteile und aktuelle Aktionen finden Sie jederzeit auf unserer Website. Über Veranstaltungen und Aktivitäten vor Ort informiert Sie Ihre Kreisjägerschaft oder der Hegering in Ihrer Nähe – von Übungsschießen über Hundearbeit bis hin zu Vorträgen und Exkursionen.</p></li><li><p>In unseren Umweltbildungseinrichtungen, wie dem Hegelehrrevier Grönwohld, beraten wir Sie umfassend zu Themen rund um Jagd, Wildbiologie und Naturschutz.</p></li><li><p>Ihr Mitgliedsbeitrag ist zudem steuerlich absetzbar, und die Mitgliedschaft bleibt flexibel, da sie jährlich kündbar ist.</p></li><li><p>Für Kinder und Jugendliche bis zum 16. Lebensjahr ist die Mitgliedschaft im LJV kostenlos. Jagdscheinanwärter profitieren zusätzlich von einer einjährigen kostenlosen Schnuppermitgliedschaft, die ihnen den Einstieg in die Jägerschaft erleichtert.</p></li></ul><h2>So werden Sie Mitglied</h2><ul><li><p>Aufnahmeantrag online ausfüllen</p></li><li><p>Bestätigung durch den Vorstand erhalten</p></li></ul><p>Für Rückfragen steht Ihnen Herr Hülser zur Verfügung</p>",
@@ -11,31 +11,9 @@
   "antrag_url": "https://memberline.de/ljv-sh/mg_anmeldunglj.php?jv=10114",
   "downloads": [],
   "bild_groesse": "img-100",
-  "galerie": [
-    {
-      "bild": "/images/download-1-.jpg",
-      "titel": "test"
-    },
-    {
-      "bild": "/images/hundeausbildung.jpg",
-      "titel": "test"
-    },
-    {
-      "bild": "/images/hero.jpg",
-      "titel": "test"
-    },
-    {
-      "bild": "/images/hero.jpg",
-      "titel": "test"
-    },
-    {
-      "bild": "/images/img_6713.jpeg",
-      "titel": "test"
-    },
-    {
-      "bild": "/images/jungwildrettung.jpg",
-      "titel": "test"
-    }
-  ],
-  "galerie_titel": "Test"
+  "galerie": [],
+  "galerie_titel": "Test",
+  "unterseiten_titel": "",
+  "linkliste": [],
+  "linkliste_titel": "Weiterführende Links"
 }
