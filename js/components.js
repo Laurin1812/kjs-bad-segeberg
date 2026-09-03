@@ -307,6 +307,11 @@
     if (path === '/waffenboerse/detail') {
       return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Wird geladen …' }];
     }
+    // Waffenbörse Phase 2 (03.09.2026): eigene öffentliche Einreichungsseite,
+    // analog zu /hundeboerse/anbieten oben.
+    if (path === '/waffenboerse/anbieten') {
+      return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Anzeige aufgeben' }];
+    }
     if (path === '/aktuelles/beitrag') {
       return [START, { label: (hm.aktuelles && hm.aktuelles.label) || 'Aktuelles', href: '/aktuelles/index.html' }, { label: 'Wird geladen …' }];
     }

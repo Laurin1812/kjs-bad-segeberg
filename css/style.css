@@ -2102,3 +2102,131 @@ body.kjs-lightbox-lock { overflow: hidden; }
   padding: 1.1rem 1.4rem; margin: 1.5rem 0; font-size: .85rem; color: var(--text-muted);
 }
 .wb-rechtshinweis p { margin: 0; line-height: 1.7; }
+
+/* =========================================================
+   WAFFENBÖRSE – ANZEIGE AUFGEBEN (Phase 2, 03.09.2026)
+   Öffentliches Einreichungsformular unter waffenboerse/anbieten.html.
+
+   Bewusst mit eigenem Präfix "wba-" (Waffenbörse-Anbieten) statt die
+   bestehenden "hb-"-Formular-Klassen von hundeboerse/anbieten.html
+   wiederzuverwenden (hb-form-section, hb-error-*, hb-typ-toggle,
+   hb-img-*, hb-success-box, …) - exakt dasselbe Entkopplungsprinzip wie
+   bei der Waffenbörse-Detailseite in Phase 1 (dort "wb-*" statt "hb-*"
+   für Galerie/Kopf): die Hundebörse darf laut Auftrag nicht angefasst
+   werden, und beide Formulare sollen sich unabhängig voneinander
+   weiterentwickeln lassen, ohne dass eine Änderung am einen Formular
+   Risiko für das andere birgt. Generische, seitenunabhängige Bausteine
+   (.kontakt-form/.form-group/.form-grid-2/.btn/.page-content.full/
+   .wb-rechtshinweis) werden dagegen ganz bewusst weiterverwendet - das
+   sind bereits mehrfach geteilte Layout-Grundbausteine, keine
+   Detailseiten-spezifische Optik. */
+.wba-form-section { margin-bottom: 1.5rem; }
+.wba-form-section h3 { margin-bottom: .4rem; color: var(--green-dark); }
+.wba-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.wba-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+
+/* Ja/Nein-Auswahl (Erwerbsberechtigung, Versand möglich) als zwei
+   gleichwertige Buttons statt eines Toggle-Schalters: ein Toggle hat
+   immer einen sichtbaren Ausgangszustand (an/aus) - hier soll aber laut
+   Auftrag ("Erwerbsberechtigung muss bewusst ausgewählt werden") ganz
+   bewusst KEINE Option vorausgewählt sein, bis der Anbieter aktiv klickt.
+   Zwei separate Buttons können, anders als ein Toggle, sauber "weder
+   noch" als Ausgangszustand darstellen. */
+.wba-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.wba-toggle-option {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; font-size: .92rem; color: var(--text-dark); transition: all var(--transition);
+}
+.wba-toggle-option input { width: auto; margin: 0; accent-color: var(--green-main); }
+.wba-toggle-option:has(input:checked) { border-color: var(--green-main); background: var(--green-light); }
+.wba-toggle-option.is-active { border-color: var(--green-main); background: var(--green-light); }
+@media (max-width: 600px) { .wba-toggle { grid-template-columns: 1fr; } }
+
+/* Zusätzlicher Warnhinweis (Punkt 9 des Laurin-Briefs, 03.09.2026): wenn
+   eine "klassische Waffen-Kategorie" gewählt UND Erwerbsberechtigung =
+   Nein gesetzt wird - bewusst in derselben zurückhaltenden Gold-Optik
+   wie .wb-erwerb-badge auf der Detailseite (auffällig, aber nicht
+   aggressiv/rot), da es nur zum Prüfen auffordert, nicht rechtlich
+   entscheidet. */
+.wba-warn-hint {
+  display: none;
+  background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
+  border-radius: var(--radius-sm); padding: .75rem 1rem; margin-top: .75rem;
+  font-size: .85rem; line-height: 1.5;
+}
+.wba-warn-hint.is-visible { display: block; }
+
+/* Fehlerdarstellung: identisches Prinzip zu hundeboerse/anbieten.html
+   (roter Rahmen am betroffenen Feld + zusammenfassende Liste oben), aber
+   eigenständige Klassen (siehe Kommentar oben). */
+.wba-field-error input, .wba-field-error select, .wba-field-error textarea {
+  border-color: #c0392b !important;
+}
+.wba-error-text { color: #c0392b; font-size: .8rem; margin-top: .35rem; display: none; }
+.wba-field-error .wba-error-text { display: block; }
+.wba-error-summary {
+  display: none; background: #fdecea; border: 1px solid #c0392b; color: #7a2418;
+  border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.wba-error-summary.is-visible { display: block; }
+.wba-error-summary strong { display: block; margin-bottom: .5rem; }
+.wba-error-summary ul { margin: 0; padding-left: 1.2rem; }
+.wba-error-summary li { margin-bottom: .2rem; font-size: .88rem; }
+
+/* Bilder-Upload: Vorschau-Raster mit Entfernen-Button + Drag&Drop-
+   Reihenfolge, gleiche UX wie bei der Hundebörse, eigenständig gebaut. */
+.wba-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem;
+  margin-bottom: 1rem;
+}
+.wba-img-item {
+  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+  border: 2px solid var(--border); background: var(--bg-light); cursor: grab;
+}
+.wba-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wba-img-item.wba-img-dragging { opacity: .4; }
+.wba-img-item.wba-img-dragover { border-color: var(--green-main); }
+.wba-img-item__main {
+  position: absolute; top: 0; left: 0; background: var(--green-main); color: #fff;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  padding: .2rem .5rem; border-radius: 0 0 var(--radius-sm) 0; z-index: 1;
+}
+.wba-img-item__remove {
+  position: absolute; top: .3rem; right: .3rem; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; line-height: 1;
+  font-size: .9rem; display: flex; align-items: center; justify-content: center; z-index: 1;
+}
+.wba-img-item__remove:hover { background: #c0392b; }
+.wba-img-add-label {
+  display: inline-block; padding: .6rem 1.2rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+}
+.wba-img-add-label:hover { border-color: var(--green-main); background: var(--green-light); }
+.wba-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.wba-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+.wba-img-limit-note { font-size: .8rem; color: #c0392b; margin-top: .5rem; display: none; }
+.wba-img-limit-note.is-visible { display: block; }
+
+/* Erfolgsansicht nach (simulierter) Einreichung - ersetzt das Formular
+   komplett (siehe JS), daher deutlich prominenter als eine reine Inline-
+   Box. */
+.wba-success { display: none; text-align: center; padding: 2.5rem 1.5rem; }
+.wba-success.is-visible { display: block; }
+.wba-success h2 { color: var(--green-dark); margin-bottom: .75rem; }
+.wba-success p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
+.wba-success__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* "+ Anzeige aufgeben"-Button im Intro-Bereich der Übersicht sowie
+   Sidebar-Boxen: reine Flex-Anordnung, keine neue Button-Optik (nutzt
+   .btn/.btn-outline-green unverändert, damit die Waffenbörse nicht wie
+   ein Onlineshop mit auffälligen Kauf-Buttons wirkt). */
+.wb-intro-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+}
+.wb-intro-row .btn { flex-shrink: 0; }
+@media (max-width: 700px) {
+  .wb-intro-row { flex-direction: column; }
+  .wb-intro-row .btn { align-self: flex-start; }
+}

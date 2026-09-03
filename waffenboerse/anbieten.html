@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Anzeige für die Waffenbörse der Kreisjägerschaft Segeberg e.V. einreichen.">
+  <title>Anzeige aufgeben – Waffenbörse – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1584285405429-136bf988bb0b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Anzeige aufgeben</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content full">
+  <div class="container">
+    <main class="main-content">
+
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;">
+        Hier können Sie eine Anzeige für die Waffenbörse der Kreisjägerschaft Segeberg einreichen. Die Anzeige wird vor der Veröffentlichung geprüft und ist erst nach Freigabe öffentlich sichtbar.
+      </p>
+      <div class="wb-rechtshinweis" style="margin-top:0;">
+        <p>Bitte beachten Sie die gesetzlichen Vorgaben für den Erwerb und die Veräußerung von Waffen, Munition und erlaubnispflichtigen Gegenständen.</p>
+      </div>
+
+      <div class="wba-error-summary" id="wbaErrorSummary">
+        <strong>Bitte prüfen Sie folgende Angaben:</strong>
+        <ul id="wbaErrorList"></ul>
+      </div>
+
+      <form id="wbaAngebotForm" novalidate>
+
+        <!-- 1. Grunddaten -->
+        <div class="kontakt-form wba-form-section">
+          <h3>1. Grunddaten</h3>
+          <div class="form-group" id="wbaGroup-titel">
+            <label for="wba-titel">Titel *</label>
+            <input type="text" id="wba-titel" placeholder="z. B. Blaser Bockbüchsflinte BBF 95">
+            <p class="wba-error-text">Bitte geben Sie einen Titel für die Anzeige an.</p>
+          </div>
+          <div class="form-group" id="wbaGroup-kategorie">
+            <label for="wba-kategorie">Kategorie *</label>
+            <select id="wba-kategorie">
+              <option value="">Bitte wählen …</option>
+            </select>
+            <p class="wba-error-text">Bitte wählen Sie eine Kategorie aus.</p>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group" id="wbaGroup-hersteller">
+              <label for="wba-hersteller">Hersteller *</label>
+              <input type="text" id="wba-hersteller" placeholder="z. B. Blaser">
+              <p class="wba-error-text">Bitte geben Sie den Hersteller an.</p>
+            </div>
+            <div class="form-group">
+              <label for="wba-modell">Modell</label>
+              <input type="text" id="wba-modell" placeholder="z. B. BBF 95">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="wba-kaliber">Kaliber</label>
+            <input type="text" id="wba-kaliber" placeholder="z. B. 7x65R, 12/70, 5,6x52R">
+            <p class="wba-section-hint" style="margin-top:.35rem;margin-bottom:0;">Mehrere Kaliber bitte durch Komma trennen, z. B. 7x65R, 12/70, 5,6x52R</p>
+          </div>
+          <div class="form-group" id="wbaGroup-zustand">
+            <label for="wba-zustand">Zustand *</label>
+            <select id="wba-zustand">
+              <option value="">Bitte wählen …</option>
+              <option value="neu">Neu</option>
+              <option value="gebraucht">Gebraucht</option>
+            </select>
+            <p class="wba-error-text">Bitte wählen Sie den Zustand aus.</p>
+          </div>
+        </div>
+
+        <!-- 2. Preis & Versand -->
+        <div class="kontakt-form wba-form-section">
+          <h3>2. Preis &amp; Versand</h3>
+          <div class="form-group" id="wbaGroup-preis_typ">
+            <label for="wba-preis_typ">Preisart *</label>
+            <select id="wba-preis_typ">
+              <option value="">Bitte wählen …</option>
+              <option value="festpreis">Festpreis</option>
+              <option value="vb">Verhandlungsbasis (VB)</option>
+            </select>
+            <p class="wba-error-text">Bitte wählen Sie eine Preisart aus.</p>
+          </div>
+          <div class="form-group" id="wbaGroup-preis">
+            <label for="wba-preis">Preis (€) *</label>
+            <input type="text" id="wba-preis" inputmode="decimal" placeholder="z. B. 2.500,00">
+            <p class="wba-error-text">Bitte geben Sie einen gültigen Preis an.</p>
+          </div>
+          <div class="form-group">
+            <label>Versand möglich? *</label>
+            <div class="wba-toggle" id="wbaVersandToggle">
+              <label class="wba-toggle-option" id="wbaVersandOptionJa">
+                <input type="radio" name="wbaVersand" value="ja" id="wba-versand-ja">
+                Ja
+              </label>
+              <label class="wba-toggle-option" id="wbaVersandOptionNein">
+                <input type="radio" name="wbaVersand" value="nein" id="wba-versand-nein">
+                Nein
+              </label>
+            </div>
+            <p class="wba-error-text" id="wbaVersandError">Bitte geben Sie an, ob Versand möglich ist.</p>
+          </div>
+          <div class="form-group" id="wba-versandkosten-wrap" style="display:none;">
+            <label for="wba-versandkosten">Versandkosten</label>
+            <input type="text" id="wba-versandkosten" placeholder="z. B. 15,80">
+          </div>
+        </div>
+
+        <!-- 3. Standort -->
+        <div class="kontakt-form wba-form-section">
+          <h3>3. Standort</h3>
+          <div class="form-grid-2">
+            <div class="form-group" id="wbaGroup-plz">
+              <label for="wba-plz">PLZ *</label>
+              <input type="text" id="wba-plz" inputmode="numeric" placeholder="z. B. 24629">
+              <p class="wba-error-text">Bitte geben Sie eine gültige 5-stellige PLZ an.</p>
+            </div>
+            <div class="form-group" id="wbaGroup-ort">
+              <label for="wba-ort">Ort *</label>
+              <input type="text" id="wba-ort" placeholder="z. B. Kisdorf">
+              <p class="wba-error-text">Bitte geben Sie den Ort an.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Erwerbsberechtigung -->
+        <div class="kontakt-form wba-form-section">
+          <h3>4. Erwerbsberechtigung</h3>
+          <div class="form-group" id="wbaGroup-erwerb">
+            <label>Erwerbsberechtigung erforderlich? *</label>
+            <div class="wba-toggle" id="wbaErwerbToggle">
+              <label class="wba-toggle-option" id="wbaErwerbOptionJa">
+                <input type="radio" name="wbaErwerb" value="ja" id="wba-erwerb-ja">
+                Ja
+              </label>
+              <label class="wba-toggle-option" id="wbaErwerbOptionNein">
+                <input type="radio" name="wbaErwerb" value="nein" id="wba-erwerb-nein">
+                Nein
+              </label>
+            </div>
+            <p class="wba-section-hint" style="margin-top:.5rem;margin-bottom:0;">Bitte wählen Sie „Ja“, wenn für den angebotenen Gegenstand eine gesetzliche Erwerbsberechtigung erforderlich ist.</p>
+            <p class="wba-error-text">Bitte wählen Sie eine Option aus.</p>
+            <p class="wba-warn-hint" id="wbaErwerbWarnHint">Bitte prüfen Sie, ob für diesen Gegenstand tatsächlich keine Erwerbsberechtigung erforderlich ist.</p>
+          </div>
+        </div>
+
+        <!-- 5. Beschreibung -->
+        <div class="kontakt-form wba-form-section">
+          <h3>5. Beschreibung *</h3>
+          <div class="form-group" id="wbaGroup-beschreibung">
+            <label for="wba-beschreibung">Beschreibungstext</label>
+            <textarea id="wba-beschreibung" style="min-height:180px;" placeholder="Beschreiben Sie den Zustand, Ausstattung, Zubehör, Grund des Verkaufs …"></textarea>
+            <p class="wba-error-text">Bitte geben Sie eine Beschreibung an.</p>
+          </div>
+        </div>
+
+        <!-- 6. Bilder -->
+        <div class="kontakt-form wba-form-section" id="wbaGroup-bilder">
+          <h3>6. Bilder *</h3>
+          <p class="wba-section-hint">Mindestens 1, maximal 10 Bilder. Mehrere Bilder können gleichzeitig ausgewählt werden. Das erste Bild ist das Hauptbild – per Ziehen (Drag &amp; Drop) können Sie die Reihenfolge ändern. Erlaubte Formate: JPG, PNG, WebP, max. 8 MB pro Bild.</p>
+          <div class="wba-img-grid" id="wbaImgGrid"></div>
+          <label class="wba-img-add-label" id="wbaImgAddLabel" for="wbaImagesInput">Bilder auswählen</label>
+          <input type="file" id="wbaImagesInput" accept="image/png,image/jpeg,image/webp" multiple style="display:none;">
+          <p class="wba-img-count" id="wbaImgCount">0 / 10 Bilder ausgewählt</p>
+          <p class="wba-img-limit-note" id="wbaImgLimitNote">Es können maximal 10 Bilder hochgeladen werden. Überzählige Bilder wurden nicht hinzugefügt.</p>
+          <p class="wba-error-text" id="wbaImagesError">Bitte laden Sie mindestens ein Bild hoch.</p>
+        </div>
+
+        <!-- 7. Kontaktdaten -->
+        <div class="kontakt-form wba-form-section">
+          <h3>7. Kontaktdaten</h3>
+          <div class="form-group" id="wbaGroup-anbieter_name">
+            <label for="wba-anbieter_name">Name *</label>
+            <input type="text" id="wba-anbieter_name" placeholder="Vor- und Nachname">
+            <p class="wba-error-text">Bitte geben Sie Ihren Namen an.</p>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group" id="wbaGroup-anbieter_email">
+              <label for="wba-anbieter_email">E-Mail *</label>
+              <input type="email" id="wba-anbieter_email" placeholder="max@beispiel.de">
+              <p class="wba-error-text">Bitte geben Sie eine gültige E-Mail-Adresse an.</p>
+            </div>
+            <div class="form-group">
+              <label for="wba-anbieter_telefon">Telefon/Mobil <span class="wba-optional-tag">(optional)</span></label>
+              <input type="tel" id="wba-anbieter_telefon" placeholder="z. B. 0172 1234567">
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Zustimmung / Absenden -->
+        <div class="kontakt-form wba-form-section">
+          <h3>8. Zustimmung &amp; Absenden</h3>
+          <div class="form-group" id="wbaGroup-confirmCorrect" style="display:flex; align-items:flex-start; gap:.75rem;">
+            <input type="checkbox" id="wba-confirmCorrect" style="width:auto; margin-top:.2rem;">
+            <label for="wba-confirmCorrect" style="font-size:.88rem; font-weight:400; color:var(--text-dark);">
+              Ich bestätige, dass meine Angaben vollständig und wahrheitsgemäß sind und ich für die Einhaltung der gesetzlichen Vorgaben im Zusammenhang mit dem angebotenen Gegenstand verantwortlich bin. *
+            </label>
+          </div>
+          <p class="wba-error-text" id="wbaConfirmCorrectError">Bitte bestätigen Sie diese Angabe.</p>
+          <div class="form-group" id="wbaGroup-confirmContact" style="display:flex; align-items:flex-start; gap:.75rem;">
+            <input type="checkbox" id="wba-confirmContact" style="width:auto; margin-top:.2rem;">
+            <label for="wba-confirmContact" style="font-size:.88rem; font-weight:400; color:var(--text-dark);">
+              Ich stimme zu, dass meine angegebenen Kontaktdaten zur Bearbeitung und Vermittlung dieser Anzeige verwendet werden. Weitere Hinweise in der <a href="../datenschutz.html">Datenschutzerklärung</a>. *
+            </label>
+          </div>
+          <p class="wba-error-text" id="wbaConfirmContactError">Bitte stimmen Sie der Verwendung Ihrer Kontaktdaten zu.</p>
+          <p class="wba-section-hint" style="margin-top:1rem;margin-bottom:0;">Ihre Anzeige wird erst nach Prüfung durch die Kreisjägerschaft veröffentlicht.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+          Anzeige zur Prüfung einreichen
+        </button>
+      </form>
+
+      <div class="wba-success" id="wbaSuccess">
+        <h2>Vielen Dank!</h2>
+        <p>Ihre Anzeige wurde erfolgreich zur Prüfung eingereicht.<br>
+        Die Anzeige ist noch nicht öffentlich sichtbar. Nach Prüfung durch die Kreisjägerschaft wird sie freigegeben oder bei Rückfragen entsprechend bearbeitet.</p>
+        <div class="wba-success__actions">
+          <a href="index.html" class="btn btn-outline-green">Zur Waffenbörse</a>
+          <button type="button" class="btn btn-primary" id="wbaNeueAnzeigeBtn">Weitere Anzeige aufgeben</button>
+        </div>
+      </div>
+
+      <p style="margin-top:2rem;">
+        <a href="index.html" class="btn btn-outline-green">&larr; Zur&uuml;ck zur Waffenb&ouml;rse</a>
+      </p>
+    </main>
+  </div>
+</div>
+
+<footer class="site-footer" id="siteFooter"></footer>
+<script src="/js/main.js"></script>
+
+<script>
+/* =========================================================
+   submitWaffenboerseAnzeige(payload) – zentraler Übergabepunkt für das
+   spätere Server-Backend (Punkt 14 des Laurin-Briefs, 03.09.2026).
+
+   IST-ZUSTAND / WARUM NOCH KEINE ECHTE PERSISTENZ:
+   Diese Website hat aktuell keinerlei Server-Backend - Inhalte liegen in
+   content/*.json-Dateien im Git-Repository, und die einzige Schreibroute
+   dorthin ist die Netlify-git-gateway-API (/.netlify/git/github/contents),
+   die einen gültigen Netlify-Identity-Bearer-Token voraussetzt (siehe
+   admin/admin.js, getToken()/netlifyIdentity). Dieser Token gehört zu
+   einem eingeloggten Admin-Konto. Ein anonymer Website-Besucher hat
+   diesen Token nicht und darf ihn aus Sicherheitsgründen auch niemals
+   bekommen - jeder Versuch, öffentliche Einreichungen direkt über diese
+   API zu speichern, würde bedeuten, entweder Admin-Zugangsdaten im
+   Browser offenzulegen oder Schreibzugriff auf das gesamte Repository für
+   jeden Besucher zu öffnen (Punkt 15 des Auftrags schließt genau das
+   ausdrücklich aus). Es existiert außerdem keine Netlify Function/kein
+   sonstiger serverseitiger Endpunkt in diesem Projekt (geprüft: kein
+   netlify/functions-Verzeichnis, keine Function-Konfiguration in
+   netlify.toml).
+
+   Diese Funktion ist deshalb bewusst als klar markierter, nicht
+   dauerhaft speichernder Platzhalter gebaut: sie validiert/protokolliert
+   den fertigen Payload (siehe console.info unten, zur Kontrolle durch
+   Entwickler/QA) und simuliert eine erfolgreiche Antwort, schreibt aber
+   NICHTS in content/waffenboerse.json und lädt keine Bilder hoch.
+
+   ERWARTETE SPÄTERE BACKEND-SCHNITTSTELLE (Vorschlag):
+     Endpoint:  POST /api/waffenboerse/anzeigen
+     Auth:      keine (öffentlicher Endpunkt, serverseitig gerate-limited)
+     Request:   multipart/form-data (wegen Bild-Uploads), Felder:
+                  - "daten": JSON-String mit exakt dem unten gebauten
+                    Payload (alle Felder aus content/waffenboerse.json,
+                    ohne id/status/erstellt_am/aktualisiert_am - diese
+                    setzt der Server)
+                  - "bilder": bis zu 10 Bilddateien (jpg/png/webp, ≤8 MB)
+     Serverseitige Aufgabe:
+                  - Payload serverseitig nachvalidieren (niemals nur der
+                    Client-Validierung vertrauen)
+                  - Bilder gegen Typ/Größe/Malware prüfen, in einen
+                    Bildspeicher legen (z.B. denselben, den admin.js
+                    heute per Git-Gateway-Upload nutzt, oder einen neuen
+                    MySQL-/Objektspeicher-gestützten Ablauf)
+                  - Neuen Eintrag mit id (Format wie admin.js: "wb-" +
+                    Date.now() oder DB-eigene ID), status:"pending",
+                    erstellt_am/aktualisiert_am (ISO-Datum) erzeugen und
+                    in content/waffenboerse.json (bzw. später die
+                    entsprechende MySQL-Tabelle) einfügen - Statuswerte
+                    sind bereits exakt durch admin.js festgelegt
+                    (pending/published/rejected/archived), keine neue
+                    Statuslogik nötig.
+     Response:  { "ok": true, "id": "wb-…" }  bzw.
+                { "ok": false, "error": "Für Menschen lesbare Meldung" }
+     Admin:     Ein so erzeugter Eintrag erscheint automatisch unter
+                Waffenbörse → "Wartet auf Freigabe" im bestehenden
+                Admin-Modul (admin.js liest weiterhin dieselbe
+                content/waffenboerse.json bzw. später dieselbe Tabelle) -
+                am bestehenden Admin-Workflow (prüfen/ändern/freigeben/
+                ablehnen) ändert sich nichts.
+
+   Austausch später: sobald der Endpoint existiert, muss ausschließlich
+   der Rumpf dieser einen Funktion ersetzt werden (echter fetch(...) statt
+   der Simulation unten) - das aufrufende Formular (siehe zweiter
+   <script>-Block) bleibt unverändert. */
+function submitWaffenboerseAnzeige(payload) {
+  console.info('[Waffenbörse-Formular] Simulierte Einreichung (noch kein Server-Backend vorhanden) – Payload:', payload);
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      resolve({ ok: true, mocked: true, id: null });
+    }, 400);
+  });
+}
+</script>
+
+<script>
+(function() {
+  'use strict';
+
+  var MAX_IMAGES = 10;
+  var MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+  var ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+  // Kategorien aus derselben zentralen Quelle wie Admin und Übersicht
+  // (content/waffenboerse.json -> "kategorien", Top-Level-Array, siehe
+  // admin.js WB_KATEGORIEN_DEFAULT als Fallback) - keine zweite,
+  // hartcodierte Liste (Punkt 7 des Auftrags).
+  var WB_KATEGORIEN_DEFAULT = ['Büchsen', 'Flinten', 'Kombinierte Waffen', 'Kurzwaffen', 'Optik', 'Zubehör', 'Sonstiges'];
+  // "Klassische" Waffen-Kategorien für den optionalen Zusatz-Warnhinweis
+  // (Punkt 9) - Optik/Zubehör/Sonstiges lösen den Hinweis bewusst nicht
+  // aus, da dort i.d.R. keine Erwerbsberechtigung nötig ist.
+  var WAFFEN_KATEGORIEN = ['Büchsen', 'Flinten', 'Kombinierte Waffen', 'Kurzwaffen'];
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  fetch('../content/waffenboerse.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var kategorien = (data && data.kategorien) || WB_KATEGORIEN_DEFAULT;
+      var sel = document.getElementById('wba-kategorie');
+      kategorien.forEach(function(k) {
+        var opt = document.createElement('option');
+        opt.value = k; opt.textContent = k;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(function() {
+      var sel = document.getElementById('wba-kategorie');
+      WB_KATEGORIEN_DEFAULT.forEach(function(k) {
+        var opt = document.createElement('option');
+        opt.value = k; opt.textContent = k;
+        sel.appendChild(opt);
+      });
+    });
+
+  // ── Preisart: Preisfeld bleibt sichtbar (immer Pflicht), nur die
+  // Versandkosten hängen von "Versand möglich?" ab (siehe unten). ──────
+
+  // ── Versand möglich?: Versandkosten-Feld nur bei "Ja" einblenden
+  // (Punkt 11) ─────────────────────────────────────────────────────────
+  var versandRadios = document.querySelectorAll('input[name="wbaVersand"]');
+  var versandkostenWrap = document.getElementById('wba-versandkosten-wrap');
+  var versandkostenInput = document.getElementById('wba-versandkosten');
+  var optVersandJa = document.getElementById('wbaVersandOptionJa');
+  var optVersandNein = document.getElementById('wbaVersandOptionNein');
+  function updateVersandUI() {
+    var jaChecked = document.getElementById('wba-versand-ja').checked;
+    var neinChecked = document.getElementById('wba-versand-nein').checked;
+    versandkostenWrap.style.display = jaChecked ? '' : 'none';
+    if (!jaChecked) versandkostenInput.value = '';
+    optVersandJa.classList.toggle('is-active', jaChecked);
+    optVersandNein.classList.toggle('is-active', neinChecked);
+  }
+  versandRadios.forEach(function(r) { r.addEventListener('change', updateVersandUI); });
+  updateVersandUI();
+
+  // ── Erwerbsberechtigung: Hilfetext ist statisch sichtbar; Warnhinweis
+  // nur bei Kategorie=klassische Waffe UND Nein (Punkt 9) ─────────────
+  var erwerbRadios = document.querySelectorAll('input[name="wbaErwerb"]');
+  var optErwerbJa = document.getElementById('wbaErwerbOptionJa');
+  var optErwerbNein = document.getElementById('wbaErwerbOptionNein');
+  var erwerbWarnHint = document.getElementById('wbaErwerbWarnHint');
+  var kategorieSelect = document.getElementById('wba-kategorie');
+  function updateErwerbUI() {
+    var jaChecked = document.getElementById('wba-erwerb-ja').checked;
+    var neinChecked = document.getElementById('wba-erwerb-nein').checked;
+    optErwerbJa.classList.toggle('is-active', jaChecked);
+    optErwerbNein.classList.toggle('is-active', neinChecked);
+    var istWaffenKategorie = WAFFEN_KATEGORIEN.indexOf(kategorieSelect.value) !== -1;
+    erwerbWarnHint.classList.toggle('is-visible', neinChecked && istWaffenKategorie);
+  }
+  erwerbRadios.forEach(function(r) { r.addEventListener('change', updateErwerbUI); });
+  kategorieSelect.addEventListener('change', updateErwerbUI);
+  updateErwerbUI();
+
+  // ── Bilder: Auswahl, Vorschau, Entfernen, Drag&Drop-Reihenfolge,
+  // Format-/Größenprüfung (Punkt 13) ──────────────────────────────────
+  var images = []; // { file, url, titel }
+  var dragSrcIndex = null;
+  var imgGrid = document.getElementById('wbaImgGrid');
+  var imgInput = document.getElementById('wbaImagesInput');
+  var imgAddLabel = document.getElementById('wbaImgAddLabel');
+  var imgCount = document.getElementById('wbaImgCount');
+  var imgLimitNote = document.getElementById('wbaImgLimitNote');
+
+  function renderImages() {
+    imgGrid.innerHTML = '';
+    images.forEach(function(img, idx) {
+      var item = document.createElement('div');
+      item.className = 'wba-img-item';
+      item.draggable = true;
+      item.innerHTML = (idx === 0 ? '<span class="wba-img-item__main">Hauptbild</span>' : '') +
+        '<img src="' + img.url + '" alt="">' +
+        '<button type="button" class="wba-img-item__remove" aria-label="Bild entfernen" data-idx="' + idx + '">✕</button>';
+      item.addEventListener('dragstart', function() {
+        dragSrcIndex = idx;
+        item.classList.add('wba-img-dragging');
+      });
+      item.addEventListener('dragend', function() { item.classList.remove('wba-img-dragging'); });
+      item.addEventListener('dragover', function(e) { e.preventDefault(); item.classList.add('wba-img-dragover'); });
+      item.addEventListener('dragleave', function() { item.classList.remove('wba-img-dragover'); });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('wba-img-dragover');
+        if (dragSrcIndex === null || dragSrcIndex === idx) return;
+        var moved = images.splice(dragSrcIndex, 1)[0];
+        images.splice(idx, 0, moved);
+        dragSrcIndex = null;
+        renderImages();
+      });
+      imgGrid.appendChild(item);
+    });
+    imgGrid.querySelectorAll('.wba-img-item__remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var i = parseInt(btn.getAttribute('data-idx'), 10);
+        images.splice(i, 1);
+        renderImages();
+      });
+    });
+    imgCount.textContent = images.length + ' / ' + MAX_IMAGES + ' Bilder ausgewählt';
+    var atLimit = images.length >= MAX_IMAGES;
+    imgAddLabel.classList.toggle('is-disabled', atLimit);
+    imgInput.disabled = atLimit;
+    if (images.length > 0) {
+      document.getElementById('wbaGroup-bilder').classList.remove('wba-field-error');
+      document.getElementById('wbaImagesError').style.display = 'none';
+    }
+  }
+
+  imgInput.addEventListener('change', function() {
+    var files = Array.prototype.slice.call(imgInput.files || []);
+    var freeSlots = MAX_IMAGES - images.length;
+    var kandidaten = files.slice(0, freeSlots);
+    var overflow = files.length > freeSlots;
+
+    var abgelehnt = [];
+    kandidaten.forEach(function(file) {
+      if (ALLOWED_IMAGE_TYPES.indexOf(file.type) === -1) { abgelehnt.push(file.name + ' (Format nicht unterstützt)'); return; }
+      if (file.size > MAX_IMAGE_BYTES) { abgelehnt.push(file.name + ' (Datei zu groß, max. 8 MB)'); return; }
+      images.push({ file: file, url: URL.createObjectURL(file), titel: '' });
+    });
+
+    imgLimitNote.classList.toggle('is-visible', overflow || abgelehnt.length > 0);
+    if (abgelehnt.length) {
+      imgLimitNote.textContent = 'Nicht hinzugefügt: ' + abgelehnt.join(', ') + '.';
+    } else if (overflow) {
+      imgLimitNote.textContent = 'Es können maximal 10 Bilder hochgeladen werden. Überzählige Bilder wurden nicht hinzugefügt.';
+    }
+    renderImages();
+    imgInput.value = '';
+  });
+
+  renderImages();
+
+  // ── Validierung (Punkt 16) ──────────────────────────────────────────
+  var form = document.getElementById('wbaAngebotForm');
+  var errorSummary = document.getElementById('wbaErrorSummary');
+  var errorList = document.getElementById('wbaErrorList');
+  var successView = document.getElementById('wbaSuccess');
+
+  function clearErrors() {
+    document.querySelectorAll('.wba-field-error').forEach(function(el) { el.classList.remove('wba-field-error'); });
+    errorSummary.classList.remove('is-visible');
+    errorList.innerHTML = '';
+    document.getElementById('wbaImagesError').style.display = 'none';
+    document.getElementById('wbaVersandError').style.display = 'none';
+    document.getElementById('wbaConfirmCorrectError').style.display = 'none';
+    document.getElementById('wbaConfirmContactError').style.display = 'none';
+  }
+
+  function markError(groupId, message, firstInvalidRef) {
+    var group = document.getElementById(groupId);
+    if (group) group.classList.add('wba-field-error');
+    errorList.innerHTML += '<li>' + message + '</li>';
+    if (!firstInvalidRef.el && group) firstInvalidRef.el = group;
+  }
+
+  function isEmpty(id) {
+    var el = document.getElementById(id);
+    return !el || !el.value || !el.value.trim();
+  }
+
+  function validate() {
+    clearErrors();
+    var firstInvalid = { el: null };
+
+    if (isEmpty('wba-titel')) markError('wbaGroup-titel', 'Titel fehlt.', firstInvalid);
+    if (isEmpty('wba-kategorie')) markError('wbaGroup-kategorie', 'Kategorie fehlt.', firstInvalid);
+    if (isEmpty('wba-hersteller')) markError('wbaGroup-hersteller', 'Hersteller fehlt.', firstInvalid);
+    if (isEmpty('wba-zustand')) markError('wbaGroup-zustand', 'Zustand fehlt.', firstInvalid);
+
+    if (isEmpty('wba-preis_typ')) markError('wbaGroup-preis_typ', 'Preisart fehlt.', firstInvalid);
+    var preis = document.getElementById('wba-preis').value.trim();
+    if (!preis) {
+      markError('wbaGroup-preis', 'Preis fehlt.', firstInvalid);
+    } else if (!/^\d{1,3}(\.\d{3})*(,\d{1,2})?$|^\d+([.,]\d{1,2})?$/.test(preis)) {
+      markError('wbaGroup-preis', 'Preis ist keine gültige Zahl.', firstInvalid);
+    }
+
+    var versandGewaehlt = document.getElementById('wba-versand-ja').checked || document.getElementById('wba-versand-nein').checked;
+    if (!versandGewaehlt) {
+      document.getElementById('wbaVersandError').style.display = 'block';
+      errorList.innerHTML += '<li>Angabe zu Versand fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = document.getElementById('wbaVersandToggle');
+    }
+
+    var plz = document.getElementById('wba-plz').value.trim();
+    if (!plz) {
+      markError('wbaGroup-plz', 'PLZ fehlt.', firstInvalid);
+    } else if (!/^\d{5}$/.test(plz)) {
+      markError('wbaGroup-plz', 'PLZ muss aus 5 Ziffern bestehen.', firstInvalid);
+    }
+    if (isEmpty('wba-ort')) markError('wbaGroup-ort', 'Ort fehlt.', firstInvalid);
+
+    var erwerbGewaehlt = document.getElementById('wba-erwerb-ja').checked || document.getElementById('wba-erwerb-nein').checked;
+    if (!erwerbGewaehlt) {
+      markError('wbaGroup-erwerb', 'Angabe zur Erwerbsberechtigung fehlt.', firstInvalid);
+    }
+
+    if (isEmpty('wba-beschreibung')) markError('wbaGroup-beschreibung', 'Beschreibung fehlt.', firstInvalid);
+
+    if (isEmpty('wba-anbieter_name')) markError('wbaGroup-anbieter_name', 'Name fehlt.', firstInvalid);
+    var email = document.getElementById('wba-anbieter_email').value.trim();
+    if (!email) {
+      markError('wbaGroup-anbieter_email', 'E-Mail fehlt.', firstInvalid);
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      markError('wbaGroup-anbieter_email', 'E-Mail-Adresse ist ungültig.', firstInvalid);
+    }
+
+    if (images.length < 1) {
+      var imgGroup = document.getElementById('wbaGroup-bilder');
+      imgGroup.classList.add('wba-field-error');
+      document.getElementById('wbaImagesError').style.display = 'block';
+      errorList.innerHTML += '<li>Mindestens ein Bild fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = imgGroup;
+    }
+
+    if (!document.getElementById('wba-confirmCorrect').checked) {
+      document.getElementById('wbaGroup-confirmCorrect').classList.add('wba-field-error');
+      document.getElementById('wbaConfirmCorrectError').style.display = 'block';
+      errorList.innerHTML += '<li>Bestätigung der Angaben fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = document.getElementById('wbaGroup-confirmCorrect');
+    }
+    if (!document.getElementById('wba-confirmContact').checked) {
+      document.getElementById('wbaGroup-confirmContact').classList.add('wba-field-error');
+      document.getElementById('wbaConfirmContactError').style.display = 'block';
+      errorList.innerHTML += '<li>Zustimmung zur Verwendung der Kontaktdaten fehlt.</li>';
+      if (!firstInvalid.el) firstInvalid.el = document.getElementById('wbaGroup-confirmContact');
+    }
+
+    if (firstInvalid.el) {
+      errorSummary.classList.add('is-visible');
+      return firstInvalid.el;
+    }
+    return null;
+  }
+
+  // ── Kaliber: Komma-getrennte Eingabe sauber in Array umwandeln (Punkt
+  // 8) - exakt dieselbe Logik wie admin.js waffenboerseCollect(). ──────
+  function kaliberArray() {
+    return document.getElementById('wba-kaliber').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  }
+
+  var submitBtn = form.querySelector('button[type="submit"]');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var firstInvalidEl = validate();
+    if (firstInvalidEl) {
+      errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function() {
+        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var focusable = firstInvalidEl.querySelector('input, select, textarea');
+        if (focusable) focusable.focus();
+      }, 400);
+      return;
+    }
+
+    // ── Payload exakt nach dem bestehenden Datenmodell (Punkt 6) -
+    // id/status/erstellt_am/aktualisiert_am werden technisch automatisch
+    // gesetzt (status hier bereits fest "pending" = derselbe interne
+    // Statuswert wie im Admin für "Wartet auf Freigabe", siehe admin.js
+    // WB_STATUS - keine zweite Statuslogik). Beschreibung: aus dem
+    // einfachen Textfeld heraus als sichere, minimale HTML-Struktur
+    // aufgebaut (Absätze), NICHT als rohes innerHTML des Nutzertexts -
+    // damit sind beliebige HTML-/Script-Eingaben ausgeschlossen (Punkt 12
+    // + Punkt 15), obwohl das gespeicherte Feld wie gewohnt HTML enthält
+    // und von detail.html unverändert dargestellt werden kann. ─────────
+    function alsSicheresHtml(text) {
+      return text.split(/\n{2,}/).map(function(absatz) {
+        return '<p>' + escHtml(absatz.trim()).replace(/\n/g, '<br>') + '</p>';
+      }).join('');
+    }
+
+    var versandMoeglich = document.getElementById('wba-versand-ja').checked;
+
+    var payload = {
+      titel: document.getElementById('wba-titel').value.trim(),
+      kategorie: document.getElementById('wba-kategorie').value,
+      hersteller: document.getElementById('wba-hersteller').value.trim(),
+      modell: document.getElementById('wba-modell').value.trim(),
+      kaliber: kaliberArray(),
+      zustand: document.getElementById('wba-zustand').value,
+      preis_typ: document.getElementById('wba-preis_typ').value,
+      preis: document.getElementById('wba-preis').value.trim(),
+      versand_moeglich: versandMoeglich,
+      versandkosten: versandMoeglich ? document.getElementById('wba-versandkosten').value.trim() : '',
+      plz: document.getElementById('wba-plz').value.trim(),
+      ort: document.getElementById('wba-ort').value.trim(),
+      erwerbsberechtigung_erforderlich: document.getElementById('wba-erwerb-ja').checked,
+      beschreibung: alsSicheresHtml(document.getElementById('wba-beschreibung').value.trim()),
+      // Bilddateien selbst sind Teil des noch fehlenden Server-Uploads
+      // (siehe Kommentar bei submitWaffenboerseAnzeige) - hier bereits im
+      // Zielformat {bild, titel} vorbereitet, "bild" ist bis zur echten
+      // Anbindung nur ein Platzhalter.
+      bilder: images.map(function(img) { return { bild: '(noch nicht hochgeladen – ' + img.file.name + ')', titel: img.titel || '' }; }),
+      anbieter_name: document.getElementById('wba-anbieter_name').value.trim(),
+      anbieter_email: document.getElementById('wba-anbieter_email').value.trim(),
+      anbieter_telefon: document.getElementById('wba-anbieter_telefon').value.trim()
+    };
+
+    submitBtn.disabled = true;
+
+    submitWaffenboerseAnzeige(payload).then(function() {
+      form.style.display = 'none';
+      errorSummary.classList.remove('is-visible');
+      successView.classList.add('is-visible');
+      successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function() {
+      submitBtn.disabled = false;
+      errorList.innerHTML = '<li>Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.</li>';
+      errorSummary.classList.add('is-visible');
+      errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.getElementById('wbaNeueAnzeigeBtn').addEventListener('click', function() {
+    form.reset();
+    images.forEach(function(img) { URL.revokeObjectURL(img.url); });
+    images = [];
+    renderImages();
+    updateVersandUI();
+    updateErwerbUI();
+    clearErrors();
+    submitBtn.disabled = false;
+    successView.classList.remove('is-visible');
+    form.style.display = '';
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>
