@@ -13,7 +13,7 @@
       "id": "wb-1788440000002",
       "status": "published",
       "erstellt_am": "2026-08-31T14:40:00.000Z",
-      "aktualisiert_am": "2026-09-03T07:30:11.261Z",
+      "aktualisiert_am": "2026-09-03T07:31:57.056Z",
       "titel": "Mauser 90 DA - 9mm Luger",
       "kategorie": "Kurzwaffen",
       "hersteller": "Mauser",
@@ -48,9 +48,9 @@
       "ort": "Kisdorf",
       "versand_moeglich": true,
       "versandkosten": "15,80",
-      "anbieter_name": "Jan Beispielmann",
-      "anbieter_email": "jan.beispielmann@example.de",
-      "anbieter_telefon": ""
+      "anbieter_name": "",
+      "anbieter_email": "frank.huelser@kjs-segeberg.de",
+      "anbieter_telefon": "0152-21591669"
     },
     {
       "id": "wb-1788440000003",
