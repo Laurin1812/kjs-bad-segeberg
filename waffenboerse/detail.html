@@ -127,7 +127,10 @@
       if (hauptbild) document.getElementById('wb-hero-bg').style.backgroundImage = "url('" + hauptbild + "')";
 
       var standort = [a.plz, a.ort].filter(Boolean).join(' ');
-      var herstellerModell = [a.hersteller, a.modell].filter(Boolean).join(' ');
+      // " · "-Trennzeichen zwischen Hersteller und Modell (03.09.2026,
+      // passend zum Beispiel in Laurins Anzeigenkopf-Hierarchie "Blaser ·
+      // BBF 95") statt einem einfachen Leerzeichen.
+      var herstellerModell = [a.hersteller, a.modell].filter(Boolean).join(' · ');
 
       var providerName = (a.anbieter_name || '').trim();
       var telefonHref = a.anbieter_telefon ? escHtml('tel:' + a.anbieter_telefon.replace(/\s|-|\//g, '')) : '';
