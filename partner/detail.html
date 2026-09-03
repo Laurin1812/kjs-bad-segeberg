@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Partner der Kreisjägerschaft Segeberg e.V.">
+  <title>Partner – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1 id="pn-detail-titel">Wird geladen …</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+    <main class="main-content" id="pn-detail-inhalt">
+      <p style="color:var(--text-muted);">Wird geladen …</p>
+    </main>
+    <aside class="sidebar">
+      <div class="sidebar-widget">
+        <h4>Partner</h4>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">Einen Überblick über alle Partner der Kreisjägerschaft finden Sie in der Übersicht.</p>
+        <p style="margin-top:.75rem;"><a href="index.html" class="btn btn-outline-green btn-sm">Alle Partner ansehen</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="site-footer" id="siteFooter"></footer>
+
+<script src="/js/main.js"></script>
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var pnId = params.get('id');
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  function zeigeFehlermeldung() {
+    document.getElementById('pn-detail-titel').textContent = 'Partner nicht gefunden';
+    document.getElementById('pn-detail-inhalt').innerHTML =
+      '<div style="text-align:center;padding:3rem 1rem;">' +
+      '<h2 style="color:var(--green-dark);margin-bottom:.75rem;">Dieser Partner wurde nicht gefunden.</h2>' +
+      '<a href="index.html" class="btn btn-primary">Zurück zur Partnerübersicht</a>' +
+      '</div>';
+  }
+
+  function zeile(label, wert) {
+    if (wert == null || wert === '') return '';
+    return '<dt>' + escHtml(label) + '</dt><dd>' + escHtml(wert) + '</dd>';
+  }
+
+  if (!pnId) { zeigeFehlermeldung(); return; }
+
+  fetch('../content/partner.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var liste = data.partner || [];
+      var p = liste.find(function(x) { return x.id === pnId; });
+      if (!p || p.aktiv === false) { zeigeFehlermeldung(); return; }
+
+      document.title = (p.name || 'Partner') + ' – Kreisjägerschaft Segeberg e.V.';
+      document.getElementById('pn-detail-titel').textContent = p.name || '(Ohne Namen)';
+      if (window.setBreadcrumbCurrentTitle) window.setBreadcrumbCurrentTitle(p.name || 'Partner');
+
+      var logoSrc = toSrc(p.logo);
+      var logoHtml = logoSrc
+        ? '<img src="' + logoSrc + '" alt="' + escHtml(p.name || '') + '">'
+        : '<img src="../images/logo.png" alt="KJS">';
+
+      var html = '<a href="index.html" class="content-back-link">← Zurück zu allen Partnern</a>';
+
+      html += '<div class="pn-detail-head">' +
+        '<div class="pn-detail-head__logo' + (logoSrc ? '' : ' pn-logo-placeholder') + '">' + logoHtml + '</div>' +
+        '<div class="pn-detail-head__body">' +
+          '<h2>' + escHtml(p.name || '(Ohne Namen)') + '</h2>' +
+          (p.kurzbeschreibung ? '<p style="color:var(--text-muted);margin-bottom:1rem;">' + escHtml(p.kurzbeschreibung) + '</p>' : '') +
+          (p.website ? '<a href="' + escHtml(p.website) + '" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Zur Website ↗</a>' : '') +
+        '</div>' +
+      '</div>';
+
+      if (p.beschreibung) {
+        html += '<h2>Über ' + escHtml(p.name || 'diesen Partner') + '</h2><p>' + escHtml(p.beschreibung) + '</p>';
+      }
+
+      var kontaktdaten = '';
+      kontaktdaten += zeile('Ansprechpartner', p.ansprechpartner);
+      kontaktdaten += zeile('Telefon', p.telefon);
+      kontaktdaten += zeile('E-Mail', p.email);
+      if (kontaktdaten) {
+        html += '<h2>Kontakt</h2><div class="steckbrief"><dl>' + kontaktdaten + '</dl></div>';
+      }
+
+      var weitere = '';
+      weitere += zeile('Rahmenvertrag', p.rahmenvertrag);
+      weitere += zeile('Vorteile / Leistungen', p.vorteile);
+      weitere += zeile('Weitere Hinweise', p.weitere_infos);
+      if (weitere) {
+        html += '<h2>Weitere Informationen</h2><div class="steckbrief"><dl>' + weitere + '</dl></div>';
+      }
+
+      document.getElementById('pn-detail-inhalt').innerHTML = html;
+    })
+    .catch(zeigeFehlermeldung);
+})();
+</script>
+
+</body>
+</html>

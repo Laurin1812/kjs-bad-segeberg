@@ -467,13 +467,14 @@ function splitPostadresse(raw) {
       service:     { label: 'Service',     href: '/service.html',            navkey: 'service' },
       kontakt:     { label: 'Kontakt',     href: '/kontakt/index.html',      navkey: 'kontakt' }
     },
-    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil'],
+    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil', 'partner'],
     jaeger_dropdown_meta: {
       'kreisjjaegermeister': { label: 'Kreisjägermeister', href: '/kreisjjaegermeister/index.html' },
       'ueber-uns':           { label: 'Über uns',          href: '/jaeger/ueber-uns.html' },
       'kjs-segeberg':        { dropdown: true },
       'aufgaben':            { dropdown: true },
-      'infomobil':           { label: 'Infomobil', href: '/jaeger/infomobil.html' }
+      'infomobil':           { label: 'Infomobil', href: '/jaeger/infomobil.html' },
+      'partner':             { label: 'Partner', href: '/partner/index.html' }
     },
     kjs: [], aufgaben: [], verbraucher: []
   };
@@ -505,7 +506,7 @@ function splitPostadresse(raw) {
   // weiter oben in dieser Datei) durch eine einzige, aus dem aktuellen
   // URL-Pfad berechnete Regel (Punkt 4 der Phase-2-Vorgabe).
   var SECTION_PREFIXES = {
-    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/'],
+    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/', '/partner/'],
     verbraucher: ['/verbraucher/'],
     aktuelles: ['/aktuelles/'],
     hundeboerse: ['/hundeboerse/'],

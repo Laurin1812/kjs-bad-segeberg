@@ -35,6 +35,7 @@
         "kjs-segeberg",
         "aufgaben",
         "infomobil",
+        "partner",
         "weitere-themen"
     ],
     "jaeger_dropdown_meta": {
@@ -43,6 +44,7 @@
         "kjs-segeberg":        { "dropdown": true },
         "aufgaben":            { "dropdown": true },
         "infomobil":           { "label": "Infomobil", "href": "/jaeger/infomobil.html" },
+        "partner":             { "label": "Partner", "href": "/partner/index.html" },
         "weitere-themen":      { "hidden": true }
     },
     "kjs": [

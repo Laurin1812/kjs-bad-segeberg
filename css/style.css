@@ -2262,3 +2262,52 @@ body.kjs-lightbox-lock { overflow: hidden; }
   .wb-intro-row { flex-direction: column; }
   .wb-intro-row .btn { align-self: flex-start; }
 }
+
+/* =========================================================
+   PARTNER (03.09.2026): Übersicht + Detailseite.
+   Kachel-Raster nutzt bewusst die bestehenden .news__grid/.news-card-
+   Bausteine (bereits von Aktuelles, Hundebörse UND Waffenbörse geteilt,
+   siehe dortige Kommentare) statt eines neuen Kachel-Systems - nur die
+   Bild-Darstellung wird über die #partner-grid-Scope-ID angepasst (Logos
+   statt Fotos: object-fit:contain auf hellem Grund statt object-fit:cover,
+   analog zum bereits bestehenden Muster #wb-grid/#hb-grid weiter oben in
+   dieser Datei für andere kleine, seiteneigene Abweichungen vom
+   gemeinsamen Grundmuster). Eigene "pn-"-Klassen nur dort, wo es wirklich
+   Partner-spezifisches Layout ist (Übersicht-Containerbreite, Detail-Kopf,
+   Logo-Platzhalter) - konsistent mit der wb-/hb-Namenstrennung. */
+.page-content.full.pn-overview-layout .container { max-width: 1200px; }
+
+#partner-grid .news-card__img-wrap { background: var(--bg-light); }
+#partner-grid .news-card__img { object-fit: contain; padding: 1.25rem; }
+#partner-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#partner-grid .news-card__title { text-align: center; }
+#partner-grid .news-card__meta { align-items: center; }
+
+/* Neutraler Platzhalter für Partner ohne hinterlegtes Logo (Punkt 7 des
+   Auftrags: kein Download/Nachbau fremder Logos, stattdessen KJS-eigenes
+   Logo stark abgeblendet - identisches Muster zum bestehenden Leerbild-
+   Fallback in waffenboerse/index.html renderKarte()/hundeboerse). */
+.pn-logo-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 160px; background: var(--bg-light);
+}
+.pn-logo-placeholder img { height: 56px; opacity: .3; }
+
+/* Detail-Kopf: Logo links (fest, quadratisch), Name/Website rechts -
+   eigenständig statt .wb-head/.wb-detail-top wiederzuverwenden, da Partner
+   keine Galerie/Eckdaten-Liste hat, sondern nur ein einzelnes Logo. */
+.pn-detail-head {
+  display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap;
+}
+.pn-detail-head__logo {
+  width: 160px; height: 160px; flex-shrink: 0; border-radius: var(--radius-md);
+  background: var(--bg-light); display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.pn-detail-head__logo img { max-width: 80%; max-height: 80%; object-fit: contain; }
+.pn-detail-head__logo.pn-logo-placeholder img { max-width: none; height: 56px; }
+.pn-detail-head__body { flex: 1; min-width: 220px; }
+.pn-detail-head__body h2 { color: var(--green-dark); margin-bottom: .5rem; }
+@media (max-width: 560px) {
+  .pn-detail-head { flex-direction: column; align-items: center; text-align: center; }
+  .pn-detail-head__body { min-width: 0; }
+}

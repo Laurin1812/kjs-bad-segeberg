@@ -307,6 +307,17 @@
     if (path === '/waffenboerse/detail') {
       return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Wird geladen …' }];
     }
+    // Partner (03.09.2026): kein eigener Hauptnavigations-Eintrag, sondern
+    // ein Leaf-Eintrag im Jäger-Dropdown (jaeger_dropdown_meta.partner) -
+    // die Übersichtsseite selbst wird deshalb schon vom generischen
+    // "jaegerLeaf"-Zweig weiter unten korrekt behandelt (liefert
+    // "Startseite > Jäger > Partner"); nur die Detailseite braucht hier
+    // einen eigenen Fall, analog zu /hundeboerse/detail und
+    // /waffenboerse/detail oben, weil ihr Pfad selbst nicht in
+    // jaeger_dropdown_meta auftaucht.
+    if (path === '/partner/detail') {
+      return [START, JAEGER_IDX, { label: (jd.partner && jd.partner.label) || 'Partner', href: '/partner/index.html' }, { label: 'Wird geladen …' }];
+    }
     // Waffenbörse Phase 2 (03.09.2026): eigene öffentliche Einreichungsseite,
     // analog zu /hundeboerse/anbieten oben.
     if (path === '/waffenboerse/anbieten') {

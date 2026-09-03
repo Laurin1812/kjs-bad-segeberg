@@ -503,6 +503,10 @@
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
       { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'standard' },
+      // Partner (03.09.2026): an derselben Stelle einsortiert wie in der
+      // öffentlichen Navigation (content/navigation.json: jaeger_dropdown
+      // direkt nach "infomobil") - Laurin-Wunsch, kein neuer Hauptmenüpunkt.
+      { key:'partner', label:'🤝 Partner', file:'content/partner.json', form:'partner', dataKey:'partner', drag:true },
       // "Weitere Themen" (dynamicChildren, content/seiten-weitere.json) am
       // 22.08.2026 auf Laurin-Wunsch entfernt ("brauchen wir eigentlich
       // nicht, verwirrt nur") - loadDynamicChildren() hat einen Guard
@@ -1536,6 +1540,7 @@
       case 'service':          renderService(def, data);          break;
       case 'hundeboerse':      renderHundeboerse(def, data);       break;
       case 'waffenboerse':     renderWaffenboerse(def, data);      break;
+      case 'partner':          renderPartner(def, data);           break;
       default:                renderStandard(def, data);
     }
     // Universeller "Dokumente & Downloads"-Bereich am Ende jeder Inhaltsseite
@@ -1551,7 +1556,7 @@
     // Löschen, Sortieren – speichert einzeln direkt per doSave()). Eine hier
     // injizierte Downloads-Karte hätte daher gar keinen Weg, tatsächlich
     // gespeichert zu werden (Nebenfund aus Phase 5B.5, bereinigt).
-    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse','personen','hegeringe','waffenboerse'];
+    var NO_DOWNLOADS_FORMS = ['kontaktStammdaten','footer','design','impressum','downloads','navExtra','navReihenfolge','benutzer','hundeboerse','personen','hegeringe','waffenboerse','partner'];
     if (NO_DOWNLOADS_FORMS.indexOf(def.form) === -1) {
       injectDownloadsCard(data);
     }
@@ -4620,6 +4625,148 @@
         renderPersonen(def, S.data);
       } catch (e) {
         if (entfernt.length) S.data[def.dataKey].splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
+    });
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     PARTNER (03.09.2026 - Partnerbereich neu aufgebaut, Laurin-Auftrag)
+     Bewusst nach exakt demselben Muster wie PERSONEN oben gebaut (Liste +
+     Drag&Drop + Bearbeiten + Löschen, jede Aktion speichert einzeln direkt
+     per doSave() statt über einen zentralen Speichern-Button) - kein neues
+     paralleles Admin-System, nur ein weiteres Modul nach bestehender
+     Konvention. Einziger Unterschied zu Personen: "aktiv"-Umschalter statt
+     nur Löschen (Auftrags-Punkt 6 "Partner löschen/deaktivieren") - ein
+     deaktivierter Partner bleibt im Admin bearbeitbar, verschwindet aber
+     aus der öffentlichen Übersicht (siehe partner/index.html: Filter
+     "aktiv !== false"). Reihenfolge bewusst NICHT über ein eigenes
+     "sortierung"-Feld, sondern wie bei Personen/Hegeringe über die reine
+     Array-Position (persistiert beim Drag&Drop) - im Projekt gibt es an
+     keiner Stelle ein separates sortierung-Feld, ein neues nur für Partner
+     wäre eine zweite, inkonsistente Sortier-Logik gewesen.
+  ──────────────────────────────────────────────────────────── */
+  function renderPartner(def, data) {
+    var liste = data[def.dataKey] || [];
+    var html = panelHeader(def.label,
+      '<button class="btn btn-primary" onclick="partnerAdd()">➕ Partner hinzufügen</button>',
+      true) +
+      '<div class="panel-body">' +
+        '<p class="text-muted" style="margin-bottom:1rem;">Klicken zum Bearbeiten. Reihenfolge per Drag &amp; Drop.</p>' +
+        '<div id="partner-list">';
+
+    liste.forEach(function(p, i) {
+      html += '<div class="item-card" data-idx="' + i + '">' +
+        '<div class="item-drag">⠿</div>' +
+        '<div class="item-body">' +
+          '<div class="item-title">' + escHtml(p.name || '(Kein Name)') + (p.aktiv === false ? ' <span class="item-badge">Inaktiv</span>' : '') + '</div>' +
+          '<div class="item-meta">' + escHtml(p.website || '') + '</div>' +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-sm btn-outline" onclick="partnerEdit(' + i + ')">Bearbeiten</button>' +
+          '<button class="btn btn-sm btn-danger-outline" onclick="partnerDelete(' + i + ')">Löschen</button>' +
+        '</div></div>';
+    });
+
+    html += '</div></div>';
+    renderMain(html);
+
+    var listEl = id('partner-list');
+    if (listEl && window.Sortable) {
+      Sortable.create(listEl, {
+        handle: '.item-drag',
+        animation: 150,
+        onEnd: async function(evt) {
+          var arr = data[def.dataKey];
+          var moved = arr.splice(evt.oldIndex, 1)[0];
+          arr.splice(evt.newIndex, 0, moved);
+          try {
+            await doSave(def.file, data, '🤝 Partner-Reihenfolge geändert');
+            toast('✅ Reihenfolge gespeichert', 'ok');
+          } catch (e) {
+            arr.splice(evt.newIndex, 1);
+            arr.splice(evt.oldIndex, 0, moved);
+            renderPartner(def, data);
+            await handleSaveError(e);
+          }
+        }
+      });
+    }
+  }
+
+  window.partnerEdit = function(idx) {
+    var def = S.section;
+    var p = (S.data[def.dataKey] || [])[idx];
+    if (!p) return;
+    var html = panelHeader('🤝 Partner bearbeiten',
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderPartner(S.section,S.data)})">← Zurück</button>' +
+        '<button class="btn btn-primary" onclick="partnerSave(' + idx + ')">💾 Speichern</button>',
+        true) +
+      '<div class="panel-body"><div class="form-card">' +
+        fText('pn-name', 'Name', p.name) +
+        fImage('pn-logo', 'Logo', p.logo) +
+        fToggle('pn-aktiv', 'Aktiv (in der öffentlichen Übersicht sichtbar)', p.aktiv !== false) +
+        fText('pn-kurzbeschreibung', 'Kurzbeschreibung / Kategorie', p.kurzbeschreibung, 'z.B. "Optik & Zubehör" (erscheint auf der Kachel)') +
+        fTextarea('pn-beschreibung', 'Ausführliche Beschreibung', p.beschreibung, 6) +
+      '</div><div class="form-card">' +
+        '<div class="form-card-title">📞 Kontakt (optional)</div>' +
+        fText('pn-ansprechpartner', 'Ansprechpartner', p.ansprechpartner) +
+        fText('pn-telefon', 'Telefonnummer', p.telefon) +
+        fText('pn-email', 'E-Mail', p.email) +
+        fText('pn-website', 'Website', p.website, 'https://...') +
+      '</div><div class="form-card">' +
+        '<div class="form-card-title">📄 Weitere Angaben (optional)</div>' +
+        fTextarea('pn-rahmenvertrag', 'Rahmenvertrag', p.rahmenvertrag, 3) +
+        fTextarea('pn-vorteile', 'Vorteile / Leistungen', p.vorteile, 3) +
+        fTextarea('pn-weitere_infos', 'Weitere Hinweise', p.weitere_infos, 3) +
+      '</div></div>';
+    renderMain(html);
+  };
+
+  window.partnerSave = async function(idx) {
+    var def = S.section;
+    var p = S.data[def.dataKey][idx];
+    p.name             = gv('pn-name');
+    p.logo             = gv('pn-logo');
+    p.aktiv            = toggleVal('pn-aktiv');
+    p.kurzbeschreibung = gv('pn-kurzbeschreibung');
+    p.beschreibung     = gv('pn-beschreibung');
+    p.ansprechpartner  = gv('pn-ansprechpartner');
+    p.telefon          = gv('pn-telefon');
+    p.email            = gv('pn-email');
+    p.website          = gv('pn-website');
+    p.rahmenvertrag    = gv('pn-rahmenvertrag');
+    p.vorteile         = gv('pn-vorteile');
+    p.weitere_infos    = gv('pn-weitere_infos');
+    try {
+      await doSave(def.file, S.data, '🤝 Partner gespeichert');
+      toast('✅ Gespeichert!', 'ok');
+      S.dirty = false;
+      renderPartner(def, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.partnerAdd = function() {
+    var def = S.section;
+    S.data[def.dataKey] = S.data[def.dataKey] || [];
+    S.data[def.dataKey].push({
+      id: 'pn-' + Date.now(), name: '', logo: '', kurzbeschreibung: '', beschreibung: '',
+      ansprechpartner: '', telefon: '', email: '', website: '',
+      rahmenvertrag: '', vorteile: '', weitere_infos: '', aktiv: true
+    });
+    partnerEdit(S.data[def.dataKey].length - 1);
+  };
+
+  window.partnerDelete = function(idx) {
+    var def = S.section;
+    showConfirm('Partner löschen', 'Diesen Partner wirklich löschen? Alternativ kann er über "Bearbeiten" auch nur deaktiviert werden.', async function() {
+      var entfernt = S.data[def.dataKey].splice(idx, 1);
+      try {
+        await doSave(def.file, S.data, '🤝 Partner gelöscht');
+        toast('🗑️ Gelöscht', 'info');
+        renderPartner(def, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data[def.dataKey].splice(idx, 0, entfernt[0]);
         await handleSaveError(e);
       }
     });
