@@ -16,21 +16,6 @@
       "aktiv": true
     },
     {
-      "id": "pn-1788451279454",
-      "name": "Wolfsinformationszentrum Schleswig-Holstein",
-      "logo": "/images/1788500673924-04-09-_2026_07-43-51.jpg",
-      "kurzbeschreibung": "",
-      "beschreibung": "",
-      "ansprechpartner": "",
-      "telefon": "",
-      "email": "",
-      "website": "http://www.wolfsinfozentrum.de/",
-      "rahmenvertrag": "",
-      "vorteile": "",
-      "weitere_infos": "",
-      "aktiv": true
-    },
-    {
       "id": "pn-1788451279455",
       "name": "Deutscher Jagdverband",
       "logo": "",
@@ -40,6 +25,21 @@
       "telefon": "",
       "email": "",
       "website": "http://www.jagdverband.de/",
+      "rahmenvertrag": "",
+      "vorteile": "",
+      "weitere_infos": "",
+      "aktiv": true
+    },
+    {
+      "id": "pn-1788451279454",
+      "name": "Wolfsinformationszentrum Schleswig-Holstein",
+      "logo": "/images/1788500673924-04-09-_2026_07-43-51.jpg",
+      "kurzbeschreibung": "",
+      "beschreibung": "",
+      "ansprechpartner": "",
+      "telefon": "",
+      "email": "",
+      "website": "http://www.wolfsinfozentrum.de/",
       "rahmenvertrag": "",
       "vorteile": "",
       "weitere_infos": "",
