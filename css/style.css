@@ -361,14 +361,21 @@ p  { margin-bottom: 1rem; }
 .quicklinks__item:last-child { border-right: none; }
 .quicklinks__item:hover { background: var(--green-dark); }
 .quicklinks__icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-.quicklinks__icon img {
-  width: 52px; height: 52px; object-fit: contain;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,.4)) drop-shadow(0 2px 6px rgba(0,0,0,.35));
-  transition: filter var(--transition);
-}
-.quicklinks__item:hover .quicklinks__icon img {
-  filter: drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 2px 8px rgba(0,0,0,.4));
-}
+/* Logo auf dunklem Grün (04.09.2026, Laurin-Feedback): frühere Versuche haben
+   hier mit CSS-Filtern gearbeitet (invert, dann ein weißes drop-shadow-Glühen,
+   zuletzt sogar zwei gestapelte drop-shadows) - das erzeugte genau den
+   unerwünschten dicken weißen Außenrand, den Frank zu Recht bemängelt hat,
+   ohne das eigentliche Problem zu lösen: die Geweih-Spitzen ragen im Original-
+   PNG über den Wappenschild hinaus in den transparenten Bereich und liegen
+   dort direkt auf dem sehr dunklen Grün (--green-main, via design.json auf
+   #024511 gesetzt) - schwarz auf fast-schwarz, dadurch "verschluckt". Deshalb
+   jetzt kein CSS-Filter mehr, sondern eine eigene, sehr dezent nachbearbeitete
+   Bilddatei (images/logo-dunkel.png, siehe dort): nur die Geweih-Spitzen
+   außerhalb des Schilds sind minimal aufgehellt (dunkles Grau statt reinem
+   Schwarz), alles andere (Wappen, Schild-Grün, Rand, Schrift, Schädel) ist
+   Pixel für Pixel identisch zum Original-Logo. Das Header-Logo bleibt
+   unverändert images/logo.png. */
+.quicklinks__icon img { width: 52px; height: 52px; object-fit: contain; }
 .quicklinks__logo { width: 40px; height: 40px; object-fit: contain; mix-blend-mode: screen; }
 .quicklinks__label { font-size: .78rem; color: rgba(255,255,255,.65); margin-bottom: .2rem; }
 .quicklinks__title { font-weight: 700; font-size: .92rem; line-height: 1.2; color: #fff; }
