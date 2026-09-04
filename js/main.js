@@ -325,9 +325,29 @@ window.addEventListener('pageshow', function (e) {
 // aus navigation.json) ersetzt, die zuverlässig für alle Seitentiefen gilt.
 
 // Smooth scroll for anchor links
+//
+// Hinweis (04.09.2026, Social-Media-Icon-Verknüpfung): Die Topbar-Social-
+// Icons (Facebook/Instagram) starten im statischen Markup aus components.js
+// bewusst mit href="#" (Platzhalter, siehe dortiger Kommentar) und werden
+// erst asynchron weiter unten in main.js auf die echte URL umgehängt,
+// sobald content/footer.json geladen ist. Da dieses querySelectorAll hier
+// synchron beim Seitenaufbau läuft, bekommen diese Icons denselben Klick-
+// Handler wie echte Sprungmarken-Links - liest zum Klickzeitpunkt aber via
+// getAttribute('href') den dann bereits echten externen URL-Wert aus, was
+// document.querySelector() mit einem SyntaxError abbrechen ließe (kein
+// gültiger CSS-Selektor). Der externe Link funktioniert davon unberührt
+// (kein preventDefault), aber der Fehler landet unnötig in der Konsole.
+// Deshalb hier robust gegen jeden nicht-fragment-artigen href absichern.
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    let target;
+    try {
+      target = document.querySelector(href);
+    } catch (err) {
+      return;
+    }
     if (target) {
       e.preventDefault();
       const offset = 100;
