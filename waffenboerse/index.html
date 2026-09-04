@@ -42,7 +42,7 @@
           Hier finden Mitglieder der Kreisjägerschaft Segeberg aktuell angebotene Waffen, Optik und Zubehör aus privater Hand.
           Der Erwerb erlaubnispflichtiger Waffen und Munition setzt die jeweils gesetzlich erforderliche Erwerbsberechtigung voraus – Anbieter und Interessenten sind selbst für die Einhaltung der gesetzlichen Vorgaben verantwortlich.
         </p>
-        <a href="anbieten.html" class="btn btn-outline-green">+ Anzeige aufgeben</a>
+        <a href="anbieten.html" class="btn wb-cta-btn">+ Waffe anbieten</a>
       </div>
     </div>
 
@@ -85,11 +85,12 @@
     </main>
 
     <aside class="sidebar">
-      <div class="sidebar-widget">
-        <h4>Waffenbörse</h4>
-        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">Sie möchten selbst eine Waffe, Optik oder Zubehör anbieten?</p>
-        <p style="margin-top:.75rem;"><a href="anbieten.html" class="btn btn-outline-green btn-sm">Anzeige aufgeben</a></p>
-      </div>
+      <!-- Die frühere zweite "Anzeige aufgeben"-Box hier in der Sidebar wurde
+           entfernt (Frank-Feedback 04.09.2026): sie duplizierte den bereits
+           oben im Intro-Bereich vorhandenen CTA-Button und sorgte für einen
+           unnötig vollen/redundanten oberen Bereich. Jetzt nur noch EIN
+           klarer, primärer CTA (".wb-cta-btn" oben). Analog zur Hundebörse,
+           wo dieselbe Dopplung bereits am 29.08.2026 entfernt wurde. -->
       <div class="contact-box">
         <h4>Kontakt</h4>
         <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
@@ -224,14 +225,13 @@
       alle = anzeigen.filter(function(a) { return a.status === 'published'; });
 
       var kategorien = data.kategorien || [];
-      var hersteller = [], kaliber = [], zustaende = [];
-      var seenH = {}, seenK = {}, seenZ = {};
+      var hersteller = [], kaliber = [];
+      var seenH = {}, seenK = {};
       alle.forEach(function(a) {
         if (a.hersteller && !seenH[a.hersteller]) { seenH[a.hersteller] = true; hersteller.push(a.hersteller); }
         (a.kaliber || []).forEach(function(k) {
           if (k && !seenK[k]) { seenK[k] = true; kaliber.push(k); }
         });
-        if (a.zustand && !seenZ[a.zustand]) { seenZ[a.zustand] = true; zustaende.push(a.zustand); }
       });
       hersteller.sort(function(a,b){ return a.localeCompare(b,'de'); });
       kaliber.sort(function(a,b){ return a.localeCompare(b,'de'); });
@@ -239,9 +239,19 @@
       fillSelect(document.getElementById('wb-f-kategorie'), kategorien, '');
       fillSelect(document.getElementById('wb-f-hersteller'), hersteller, '');
       fillSelect(document.getElementById('wb-f-kaliber'), kaliber, '');
-      // Zustand-Options mit lesbarem Label, aber Wert bleibt der interne Schlüssel
+      // Zustand-Options (Frank-Feedback 04.09.2026): früher wurden die Optionen
+      // nur aus den GERADE VERÖFFENTLICHTEN Anzeigen abgeleitet (wie bei
+      // Hersteller/Kaliber oben) - dadurch fehlte z.B. "Neu" im Filter, sobald
+      // zufällig kein aktuell veröffentlichtes Angebot diesen Zustand hatte,
+      // obwohl "neu" ein regulärer, im Admin wählbarer Zustand ist (siehe
+      // WB_ZUSTAND in admin.js). Zustand ist - anders als Hersteller/Kaliber -
+      // ein fester, bekannter Wertebereich, daher hier bewusst über die schon
+      // vorhandene ZUSTAND_LABEL-Zuordnung oben im Skript aufgebaut (keine neue/
+      // zweite Datenquelle) statt aus den aktuellen Anzeigen abgeleitet - so
+      // sind Alle/Neu/Gebraucht (und ein eventuelles drittes Label) immer
+      // wählbar, unabhängig vom aktuellen Anzeigenbestand.
       var zSel = document.getElementById('wb-f-zustand');
-      zSel.innerHTML = '<option value="">Alle</option>' + zustaende.map(function(z) {
+      zSel.innerHTML = '<option value="">Alle</option>' + Object.keys(ZUSTAND_LABEL).map(function(z) {
         return '<option value="' + escAttr(z) + '">' + escHtml(zustandText(z)) + '</option>';
       }).join('');
 

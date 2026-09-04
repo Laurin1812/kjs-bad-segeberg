@@ -180,6 +180,33 @@ if (mobileNavClose) mobileNavClose.addEventListener('click', closeMobileNav);
 // Close mobile nav on ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
 
+// Bugfix (Frank-Report, 04.09.2026): "Jäger"-Dropdown blieb nach Browser-
+// Zurück offen (z.B. Startseite → Jäger-Dropdown → Hundebörse → Zurück).
+// Ursache: bfcache (Back/Forward Cache) - der Browser friert die Seite beim
+// Verlassen exakt so ein, wie sie im DOM stand, und zeigt beim Zurück-
+// Navigieren dieses eingefrorene Abbild wieder an, statt die Seite neu zu
+// laden. Klickt man einen Link INNERHALB eines offenen Dropdowns (Maus
+// bewegt sich vom Hauptpunkt in das Untermenü, nie ein "mouseleave" auf dem
+// äußeren <li>), bleibt die von wireHoverFlyouts gesetzte Klasse ".nav-open"
+// im eingefrorenen DOM-Stand erhalten - das eingefrorene Bild zeigt das
+// Dropdown deshalb weiterhin als geöffnet an. Genau dasselbe Prinzip betrifft
+// auf dem Handy das Slide-in-Menü (#mobileNav.open) und die aufgeklappten
+// <details>-Akkordeons im Jäger-Bereich des Mobile-Menüs.
+// Zentrale, seitenunabhängige Lösung statt Einzellösung pro Seite/Hundebörse:
+// beim "pageshow"-Event mit persisted=true (= aus dem bfcache wiederhergestellt)
+// werden alle offenen Menüzustände zurückgesetzt - unabhängig davon, welche
+// Seite das gerade ist oder welcher Menüpunkt betroffen war.
+window.addEventListener('pageshow', function (e) {
+  if (!e.persisted) return; // normaler Seitenaufbau: nichts zu tun
+  document.querySelectorAll('.main-nav .nav-open').forEach(function (el) {
+    el.classList.remove('nav-open');
+  });
+  closeMobileNav();
+  document.querySelectorAll('#mobileNavList details[open]').forEach(function (d) {
+    d.removeAttribute('open');
+  });
+});
+
 // Markdown-Bilder mit Größen-/Ausrichtungsklassen: ![alt](pfad){.img-mittel .img-rechts}
 // marked.js kennt diese Attribut-Syntax nicht von Haus aus. Wir registrieren dafür eine
 // eigene Inline-Extension über die offizielle marked.use()-API (marked.parse selbst ist

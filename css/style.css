@@ -796,11 +796,19 @@ p  { margin-bottom: 1rem; }
    margin-top, damit es automatisch robust bleibt, egal wie lang der
    Einführungstext ist: Zeile 1 (intro) nimmt volle Breite, Zeile 2 (main +
    sidebar) beginnt für beide Spalten exakt an derselben Stelle. Andere Seiten
-   mit .page-content .container bleiben davon unberührt. */
+   mit .page-content .container bleiben davon unberührt.
+   Row-Gap (Frank-Feedback 04.09.2026): der Bereich oben ("Hund / Wurf
+   anbieten"-Button direkt über "Aktuelle Hunde & Würfe") wirkte zu gedrängt,
+   weil die Zeile "intro" und die Zeile "main/sidebar" bislang mit Row-Gap 0
+   aneinanderstießen. Row-Gap auf 2.5rem angehoben, damit "Aktuelle Hunde &
+   Würfe" klar als eigener, nächster Abschnitt wirkt. Column-Gap (3rem)
+   unverändert, main/sidebar bleiben weiterhin in derselben Zeile und damit
+   auf gleicher Höhe - das 31.08.2026-Ausrichtungsziel ist davon nicht
+   betroffen. */
 .page-content .container.hb-overview-layout {
   grid-template-columns: 1fr 290px;
   grid-template-areas: "intro intro" "main sidebar";
-  gap: 0 3rem;
+  gap: 2.5rem 3rem;
 }
 .hb-overview-layout .hb-overview-intro { grid-area: intro; }
 .hb-overview-layout .main-content { grid-area: main; }
@@ -2250,10 +2258,9 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .wba-devnote h2 { color: var(--text-dark); margin-bottom: .75rem; }
 .wba-devnote p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
 
-/* "+ Anzeige aufgeben"-Button im Intro-Bereich der Übersicht sowie
-   Sidebar-Boxen: reine Flex-Anordnung, keine neue Button-Optik (nutzt
-   .btn/.btn-outline-green unverändert, damit die Waffenbörse nicht wie
-   ein Onlineshop mit auffälligen Kauf-Buttons wirkt). */
+/* "+ Waffe anbieten"-Button im Intro-Bereich der Übersicht: reine
+   Flex-Anordnung, die Button-Optik selbst kommt seit 04.09.2026 über die
+   eigene ".wb-cta-btn"-Klasse weiter unten (vorher .btn-outline-green). */
 .wb-intro-row {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
 }
@@ -2261,6 +2268,32 @@ body.kjs-lightbox-lock { overflow: hidden; }
 @media (max-width: 700px) {
   .wb-intro-row { flex-direction: column; }
   .wb-intro-row .btn { align-self: flex-start; }
+}
+
+/* Primärer Waffenbörse-CTA ("+ Waffe anbieten", Frank-Feedback 04.09.2026):
+   soll bewusst ORANGE und optisch stärker hervorgehoben sein als die grünen
+   Standard-Buttons - jagdlich passend (angelehnt an Signal-/Blaze-Orange aus
+   der Jagdbekleidung), aber gedeckt statt grell, damit es seriös bleibt und
+   nicht wie ein Shop-"Kaufen"-Button wirkt. Bewusst NEUE, eigene, klar
+   begrenzte Klasse (".wb-cta-btn") statt .btn-primary/--gold zu verändern
+   oder wiederzuverwenden: .btn-primary ist grün und wird sitenweit u.a. auf
+   Hundebörse/Partner/anderen Seiten verwendet, --gold ist an anderer Stelle
+   bereits für den Erwerbsberechtigungs-Hinweis reserviert - keines von
+   beiden darf sich durch diese Änderung mitverfärben. Nur auf den einen,
+   primären CTA der Waffenbörse-Übersicht angewendet (die frühere zweite
+   CTA-Box in der Sidebar wurde entfernt, siehe Kommentar dort); die
+   sekundären "Waffe anbieten"-Links (Detail-Sidebar) bleiben bewusst als
+   dezente .btn-outline-green btn-sm, damit auf der Übersicht klar EIN
+   hervorgehobener CTA erkennbar bleibt. */
+.wb-cta-btn {
+  background: #c1611f; color: #fff; border-color: #c1611f;
+}
+.wb-cta-btn:hover {
+  background: #9c4e18; border-color: #9c4e18; color: #fff;
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
+}
+.wb-cta-btn:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px rgba(193,97,31,.3);
 }
 
 /* =========================================================

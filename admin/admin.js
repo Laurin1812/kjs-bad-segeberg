@@ -8847,5 +8847,17 @@
   // onclick="confirmNav(function(){renderPartner(...)})" auf, was im
   // globalen Scope läuft ("renderPartner is not defined" in der Konsole).
   window.renderPartner = renderPartner;
+  // Waffenbörse-Admin (Arbeitsblock 2, 04.09.2026): Ursache unabhängig
+  // geprüft statt die Partner-Lösung blind zu übernehmen - Befund ist aber
+  // exakt dasselbe Muster: renderWaffenboerse ist nur als private
+  // "function renderWaffenboerse(def, data){}" in der IIFE definiert (siehe
+  // weiter oben). Der "← Zurück zur Waffenbörse"-Button in waffenboerseEdit()
+  // ruft es per onclick="confirmNav(function(){renderWaffenboerse(S.section,
+  // S.data)})" auf - dieses Inline-onclick-Attribut (und die darin per
+  // "function(){...}" gebaute Callback-Funktion) läuft im globalen Scope,
+  // nicht in der admin.js-IIFE. window.S und window.confirmNav sind bereits
+  // oben exponiert, nur renderWaffenboerse selbst fehlte - dadurch bisher
+  // "renderWaffenboerse is not defined" beim Klick auf Zurück.
+  window.renderWaffenboerse = renderWaffenboerse;
 
 })();
