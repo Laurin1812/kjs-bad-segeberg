@@ -7,7 +7,22 @@
 :root {
   --green-dark:    #1e4620;
   --green-main:    #2e6b30;
-  --green-mid:     #2e6b30;
+  /* Frank-Feedback (Arbeitsblock 3, Farbvereinheitlichung, 04.09.2026):
+     es gab bisher zusätzlich eine Variable "--green-mid" mit identischem
+     Fallback-Wert (#2e6b30) wie
+     --green-main - offenbar aus Versehen als zweiter Name für dieselbe
+     Bedeutung entstanden. Das Laden der Admin-Farbe (design.json,
+     "farbe_gruen") setzt zur Laufzeit AUSSCHLIESSLICH --green-main, nie
+     --green-mid - seit Frank sein Hauptgrün im Admin dunkler eingestellt
+     hat, ist --green-mid dadurch beim alten Standardwert eingefroren
+     geblieben und an den 6 Stellen, die sie nutzten (Termine-Hover,
+     Formular-Fokusrahmen, Kartenplatzhalter, Footer-Listenpfeile,
+     Waffenbörse-Filter-Fokus), lief dort weiterhin das ALTE, hellere Grün,
+     während der Rest der Seite korrekt das neue dunklere Grün zeigt -
+     genau die Art von "Restfarbe" aus Franks Feedback. Variable entfernt,
+     alle bisherigen var(--green-mid)-Stellen nutzen jetzt var(--green-main)
+     - eine Bedeutung, eine Quelle, reagiert ab sofort korrekt auf die
+     Admin-Einstellung. */
   --green-light:   #e8f5e9;
   --gold:          #b8860b;
   --gold-light:    #f5e6c0;
@@ -21,6 +36,20 @@
   /* Fokus-Ring-Farbe von Formularfeldern (Architektur-Audit Punkt 8):
      bisher als identisches rgba()-Literal an zwei Stellen dupliziert. */
   --focus-ring:    rgba(61,139,64,.12);
+  /* Fehler-/Danger-Farben für Formularvalidierung (Arbeitsblock 3,
+     Farbvereinheitlichung, 04.09.2026): der rote Rahmen/Text (#c0392b) war
+     bereits überall identisch (Hundebörse- und Waffenbörse-Formulare), aber
+     die zugehörige helle Kasten-Hintergrundfarbe und der dunkle Kasten-Text
+     der Fehler-Zusammenfassung waren zwischen Hundebörse (#fdf3f2/#8c2c22)
+     und Waffenbörse (#fdecea/#7a2418) leicht auseinandergelaufen - beide
+     Formulare wurden laut Code-Kommentar bewusst "nach identischem Prinzip"
+     gebaut, nur eigenständig, wodurch sich die Werte unbemerkt
+     unterschieden haben. Auf den Hundebörse-Wert vereinheitlicht (das
+     Original, an das sich die Waffenbörse laut Kommentar ohnehin anlehnen
+     sollte) - eine Bedeutung, eine Quelle. */
+  --color-danger:      #c0392b;
+  --color-danger-bg:   #fdf3f2;
+  --color-danger-text: #8c2c22;
   --text-dark:     #1a1a1a;
   --text-body:     #3a3a3a;
   --text-muted:    #666666;
@@ -272,9 +301,28 @@ p  { margin-bottom: 1rem; }
   background-image: url('../images/hero.jpg');
   background-size: cover; background-position: center 40%; opacity: .85;
 }
+/* Frank-Feedback (Arbeitsblock 3, Farbvereinheitlichung, 04.09.2026): der
+   grüne Verlauf über dem Hero-Foto auf der Startseite war fest auf
+   rgba(30,70,32, ...) verdrahtet - das ist exakt der ALTE Standard-Farbwert
+   von --green-dark (#1e4620), von BEVOR Frank sein Hauptgrün im Admin
+   dunkler eingestellt hat (aktuell #024511 über design.json/
+   "farbe_dunkelgruen"). Der Verlauf zeigte dadurch weiterhin das alte,
+   hellere Grün, während der Rest der Seite (Header, Buttons, Footer, ...)
+   korrekt das neue, dunklere Grün nutzt - eine der auffälligsten
+   "Restfarben" auf der gesamten Seite, da die Startseite als Erstes
+   auffällt. rgba() kann keine CSS-Variable direkt einfärben (Hex-Variablen
+   lassen sich nicht in einzelne r/g/b-Kanäle zerlegen), deshalb hier
+   color-mix() verwendet: färbt den Verlauf live mit dem tatsächlichen
+   --green-dark ein, reagiert also automatisch auf jede künftige
+   Admin-Änderung, ohne dass zusätzlich eine JS-Anpassung (die auf jeder
+   Seite separat dupliziert wäre) nötig wird. Erste Deklaration ist ein
+   Fallback mit dem AKTUELLEN korrekten Wert (#024511 = rgb(2,69,17)) für
+   die seltenen Browser ohne color-mix()-Unterstützung - diese sehen dann
+   wenigstens den heute richtigen Farbton statt des alten. */
 .hero__overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(30,70,32,.88) 0%, rgba(30,70,32,.55) 55%, rgba(0,0,0,.15) 100%);
+  background: linear-gradient(135deg, rgba(2,69,17,.88) 0%, rgba(2,69,17,.55) 55%, rgba(0,0,0,.15) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green-dark) 88%, transparent) 0%, color-mix(in srgb, var(--green-dark) 55%, transparent) 55%, rgba(0,0,0,.15) 100%);
 }
 .hero .container { position: relative; z-index: 1; padding-top: 2.5rem; }
 .hero__content { max-width: 680px; }
@@ -629,13 +677,13 @@ p  { margin-bottom: 1rem; }
    beim Absenden läuft (novalidate) und wir Feld UND Fehlertext gemeinsam
    steuern wollen. */
 .hb-field-error input, .hb-field-error select, .hb-field-error textarea {
-  border-color: #c0392b !important; background: #fdf3f2;
+  border-color: var(--color-danger) !important; background: var(--color-danger-bg);
 }
-.hb-error-text { color: #c0392b; font-size: .8rem; margin-top: .35rem; display: none; }
+.hb-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: none; }
 .hb-field-error .hb-error-text { display: block; }
 .hb-error-summary {
-  display: none; background: #fdf3f2; border: 1px solid #c0392b; border-radius: var(--radius-md);
-  padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; color: #8c2c22;
+  display: none; background: var(--color-danger-bg); border: 1px solid var(--color-danger); border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; color: var(--color-danger-text);
 }
 .hb-error-summary.is-visible { display: block; }
 .hb-error-summary strong { display: block; margin-bottom: .5rem; }
@@ -665,7 +713,7 @@ p  { margin-bottom: 1rem; }
   background: rgba(0,0,0,.55); color: #fff; border: none; cursor: pointer; font-size: .85rem;
   display: flex; align-items: center; justify-content: center; line-height: 1;
 }
-.hb-img-item__remove:hover { background: #c0392b; }
+.hb-img-item__remove:hover { background: var(--color-danger); }
 .hb-img-add-label {
   display: inline-flex; align-items: center; gap: .5rem; cursor: pointer;
   border: 1px dashed var(--green-main); border-radius: var(--radius-sm);
@@ -674,7 +722,7 @@ p  { margin-bottom: 1rem; }
 }
 .hb-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
 .hb-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
-.hb-img-limit-note { font-size: .8rem; color: #c0392b; margin-top: .5rem; display: none; }
+.hb-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
 .hb-img-limit-note.is-visible { display: block; }
 
 /* Erfolgs-Box nach bestandener Validierung (Phase 3: noch kein echter Versand) */
@@ -729,7 +777,7 @@ p  { margin-bottom: 1rem; }
   border-radius: var(--radius-md); padding: 1.2rem 1.5rem;
   box-shadow: var(--shadow-sm); transition: border-color var(--transition), box-shadow var(--transition);
 }
-.termine-item:hover { border-color: var(--green-mid); box-shadow: var(--shadow-md); }
+.termine-item:hover { border-color: var(--green-main); box-shadow: var(--shadow-md); }
 .termine-item__date { text-align: center; background: var(--green-main); color: #fff; border-radius: var(--radius-sm); padding: .6rem .4rem; }
 .termine-item__day   { font-size: 1.5rem; font-weight: 800; line-height: 1; display: block; }
 .termine-item__month { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
@@ -1309,7 +1357,7 @@ p  { margin-bottom: 1rem; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-  outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--focus-ring);
+  outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .form-group textarea { resize: vertical; min-height: 130px; }
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -1320,7 +1368,7 @@ p  { margin-bottom: 1rem; }
 .kontakt-detail__label { font-weight: 700; font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: .2rem; }
 .kontakt-detail__value { font-size: .9rem; color: var(--text-dark); }
 .kontakt-detail__value a { color: var(--green-main); }
-.map-placeholder { width: 100%; height: 260px; background: var(--green-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; border: 2px dashed var(--green-mid); }
+.map-placeholder { width: 100%; height: 260px; background: var(--green-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; border: 2px dashed var(--green-main); }
 
 /* =========================================================
    DOWNLOADS
@@ -1364,7 +1412,7 @@ p  { margin-bottom: 1rem; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .service-jahr-filter:focus {
-  outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--focus-ring);
+  outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring);
 }
 /* Kategorien als aufklappbares Akkordeon (Frank-Wunsch #85) – gleiches
    <details>/<summary>-Muster wie .faq-item auf der FAQ-Seite, nur eigene
@@ -1571,7 +1619,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
 }
 .footer-col ul li { margin-bottom: .5rem; }
 .footer-col ul li a { color: rgba(255,255,255,.85); font-size: .86rem; transition: all var(--transition); display: flex; align-items: center; gap: .4rem; }
-.footer-col ul li a::before { content: '›'; color: var(--green-mid); }
+.footer-col ul li a::before { content: '›'; color: var(--green-main); }
 .footer-col ul li a:hover { color: #fff; padding-left: .35rem; }
 .footer-bottom {
   padding: 1.25rem 0; display: flex; justify-content: space-between;
@@ -2083,7 +2131,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
   padding: .6rem .8rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
   font-family: var(--font-sans); font-size: .88rem; color: var(--text-dark); background: #fff;
 }
-.wb-filter-field select:focus { outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--focus-ring); }
+.wb-filter-field select:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring); }
 #wb-filter-bar .btn { align-self: flex-end; }
 @media (max-width: 600px) {
   .wb-filter-bar { flex-direction: column; align-items: stretch; }
@@ -2146,7 +2194,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
   cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center;
   transition: all var(--transition);
 }
-.wba-kaliber-remove:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+.wba-kaliber-remove:hover { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
 .wba-kaliber-add {
   display: inline-block; padding: .55rem 1.1rem; border: 2px dashed var(--border);
   border-radius: var(--radius-sm); color: var(--green-dark); font-size: .85rem; font-weight: 600;
@@ -2190,12 +2238,12 @@ body.kjs-lightbox-lock { overflow: hidden; }
    (roter Rahmen am betroffenen Feld + zusammenfassende Liste oben), aber
    eigenständige Klassen (siehe Kommentar oben). */
 .wba-field-error input, .wba-field-error select, .wba-field-error textarea {
-  border-color: #c0392b !important;
+  border-color: var(--color-danger) !important;
 }
-.wba-error-text { color: #c0392b; font-size: .8rem; margin-top: .35rem; display: none; }
+.wba-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: none; }
 .wba-field-error .wba-error-text { display: block; }
 .wba-error-summary {
-  display: none; background: #fdecea; border: 1px solid #c0392b; color: #7a2418;
+  display: none; background: var(--color-danger-bg); border: 1px solid var(--color-danger); color: var(--color-danger-text);
   border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
 }
 .wba-error-summary.is-visible { display: block; }
@@ -2226,7 +2274,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
   background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; line-height: 1;
   font-size: .9rem; display: flex; align-items: center; justify-content: center; z-index: 1;
 }
-.wba-img-item__remove:hover { background: #c0392b; }
+.wba-img-item__remove:hover { background: var(--color-danger); }
 .wba-img-add-label {
   display: inline-block; padding: .6rem 1.2rem; border: 2px dashed var(--border);
   border-radius: var(--radius-sm); color: var(--green-dark); font-size: .88rem; font-weight: 600;
@@ -2235,7 +2283,7 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .wba-img-add-label:hover { border-color: var(--green-main); background: var(--green-light); }
 .wba-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
 .wba-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
-.wba-img-limit-note { font-size: .8rem; color: #c0392b; margin-top: .5rem; display: none; }
+.wba-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
 .wba-img-limit-note.is-visible { display: block; }
 
 /* Erfolgsansicht nach (simulierter) Einreichung - ersetzt das Formular
