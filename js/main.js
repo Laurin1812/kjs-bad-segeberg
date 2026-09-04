@@ -905,7 +905,11 @@ function splitPostadresse(raw) {
       '<div class="container">' +
         '<div class="footer-grid">' +
           '<div class="footer-about">' +
-            '<img src="/images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
+            // Footer-Hintergrund ist dasselbe sehr dunkle Grün wie die Startseiten-
+            // Kacheln (.site-footer nutzt ebenfalls var(--green-main)); deshalb hier
+            // dieselbe abgeleitete Logo-Variante wie dort (siehe css/style.css,
+            // Kommentar bei .quicklinks__icon img) statt des Original-Headerlogos.
+            '<img src="/images/logo-dunkel.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
             '<span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>' +
             '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
             (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +
