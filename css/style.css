@@ -2468,8 +2468,18 @@ body.kjs-lightbox-lock { overflow: hidden; }
    generischen 1rem von ".main-content h2". Deshalb hier auf den
    nachfahrenbasierten Selektor ".pn-detail-body .pn-section-title"
    (Spezifität 0,2,0) umgestellt, der die generische Regel zuverlässig
-   schlägt, unabhängig von der Reihenfolge im Stylesheet. */
-.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3rem; }
+   schlägt, unabhängig von der Reihenfolge im Stylesheet.
+   Finale Nachkorrektur (04.09.2026): der obere Partner-Kopf (Logo/Titel/
+   Website-Button/rechter Kasten) ist jetzt final und wird nicht mehr
+   angefasst. Hier nur noch ein letzter, bewusst kleiner Schritt (3rem ->
+   3.5rem) für etwas mehr Luft direkt vor dem Fließtext - deutlich
+   zurückhaltender als der vorherige große Sprung (1.5rem -> 3rem). Die
+   Überschrift selbst bleibt unverändert an ihrer Position (margin-top
+   weiterhin 0), nur ihr margin-bottom steuert diesen Abstand, da der
+   folgende Beschreibungstext ein einfaches <p> ohne eigenes margin-top ist
+   (globaler *-Reset). Keine weiteren Wrapper- oder Sidebar-Margins
+   angefasst - ausschließlich dieser eine Wert. */
+.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3.5rem; }
 
 /* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
    unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
