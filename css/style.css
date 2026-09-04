@@ -2378,8 +2378,18 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Zweite Runde (04.09.2026): der große Abstand zum Kopf-Bereich kommt jetzt
    zentral von der neuen ".pn-detail-body"-Wrapper-Klasse (siehe unten) statt
    vom margin-top dieser Überschrift - deshalb hier auf einen kleinen Wert
-   reduziert, sonst würde sich der Abstand unnötig verdoppeln. */
-.pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.5rem; }
+   reduziert, sonst würde sich der Abstand unnötig verdoppeln.
+   Dritte Runde (04.09.2026, Nachkorrektur): Frank empfand den Fließtext
+   direkt unter "Über X" weiterhin als zu dicht an der Überschrift. Die
+   Überschrift selbst soll an ihrer Position bleiben (margin-top weiterhin 0)
+   - der zusätzliche Abstand kommt daher bewusst über margin-bottom dieser
+   Überschrift (1.5rem -> 3rem), da der folgende Beschreibungstext ein
+   einfaches <p> ohne eigenes margin-top ist (globaler *-Reset setzt
+   margin:0, nur "p { margin-bottom: 1rem; }" ist gesetzt) - die einzige
+   Distanz zwischen Überschrift und Fließtext ist also exakt dieser
+   margin-bottom-Wert. Zentral über diese eine Klasse, gilt automatisch für
+   jeden Partner. */
+.pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3rem; }
 
 /* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
    unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
@@ -2390,3 +2400,16 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Stellen - wirkt automatisch für JEDEN Partner (LJV, Wildtierkataster, ...),
    keine Sonderlösung pro Partner. */
 .pn-detail-body { margin-top: 4rem; }
+
+/* Frank-Feedback (04.09.2026, Nachkorrektur): durch den jetzt deutlich
+   größeren Abstand zwischen "Über X" und dem Fließtext (siehe .pn-section-
+   title oben) ist der untere Inhaltsbereich der Partner-Detailseite spürbar
+   höher geworden. Der rechte Kasten ("Partner / Alle Partner ansehen")
+   bleibt wegen ".page-content .container { align-items: start; }" unabhängig
+   von dieser Höhe oben an der Grid-Zeile ausgerichtet und wirkte dadurch im
+   Vergleich zunehmend "abgehängt". Kleiner, bewusst zurückhaltender Nudge
+   nach unten (nur auf dieser Seite über eine eigene Klasse, keine Änderung
+   an der generischen ".sidebar"/".sidebar-widget"-Optik, die auch andere
+   Detailseiten nutzen), damit das Gesamtbild wieder stimmiger wirkt. Fokus
+   bleibt klar der Fließtext oben - dies ist nur ein optischer Feinschliff. */
+.pn-detail-sidebar { margin-top: 1.5rem; }
