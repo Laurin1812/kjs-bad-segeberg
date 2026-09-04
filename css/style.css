@@ -2366,14 +2366,15 @@ body.kjs-lightbox-lock { overflow: hidden; }
    minimal zu dicht am Titel - bewusst nur ein kleiner weiterer Schritt
    (1.5rem -> 2rem), keine drastische Verschiebung. Die fixe Logo-Höhe
    (160px) im Kopfbereich bleibt dabei weiterhin der höhenbestimmende
-   Faktor (Titel+Button zusammen bleiben spürbar darunter), wirkt sich also
-   nicht auf die Gesamthöhe von .pn-detail-head bzw. die darunterliegende
-   Ausrichtung des rechten Kastens (siehe .pn-detail-sidebar) aus. */
+   Faktor (Titel+Button zusammen bleiben spürbar darunter).
+   Vierte Runde (04.09.2026, dritte Nachkorrektur): erneut nur ein kleiner,
+   bewusst zurückhaltender Schritt (2rem -> 2.25rem) - Frank wollte
+   ausdrücklich "nur leicht" mehr, keinen weiteren großen Sprung. */
 .pn-website-btn {
-  display: flex; width: fit-content; margin: 2rem auto 0;
+  display: flex; width: fit-content; margin: 2.25rem auto 0;
   padding: .6rem 1.4rem; font-size: .8rem;
 }
-@media (max-width: 560px) { .pn-website-btn { margin: 2rem auto 0; } }
+@media (max-width: 560px) { .pn-website-btn { margin: 2.25rem auto 0; } }
 
 /* Frank-Feedback (04.09.2026): Zwischenüberschrift "Über <Partner>" wirkte
    zu groß (konkurrierte mit der großen Partner-Hauptüberschrift direkt
@@ -2418,40 +2419,27 @@ body.kjs-lightbox-lock { overflow: hidden; }
    keine Sonderlösung pro Partner. */
 .pn-detail-body { margin-top: 4rem; }
 
-/* Frank-Feedback (04.09.2026, Nachkorrektur): durch den jetzt deutlich
-   größeren Abstand zwischen "Über X" und dem Fließtext (siehe .pn-section-
-   title oben) ist der untere Inhaltsbereich der Partner-Detailseite spürbar
-   höher geworden. Der rechte Kasten ("Partner / Alle Partner ansehen")
-   bleibt wegen ".page-content .container { align-items: start; }" unabhängig
-   von dieser Höhe oben an der Grid-Zeile ausgerichtet und wirkte dadurch im
-   Vergleich zunehmend "abgehängt". Kleiner, bewusst zurückhaltender Nudge
-   nach unten (nur auf dieser Seite über eine eigene Klasse, keine Änderung
-   an der generischen ".sidebar"/".sidebar-widget"-Optik, die auch andere
-   Detailseiten nutzen), damit das Gesamtbild wieder stimmiger wirkt. Fokus
-   bleibt klar der Fließtext oben - dies ist nur ein optischer Feinschliff.
-   Zweite Nachkorrektur (04.09.2026): der kleine Nudge (1.5rem) reichte Frank
-   optisch nicht - der Kasten sollte spürbar an die Höhe von "Über X"
-   gekoppelt werden statt nur ein paar Pixel zu bekommen. Structurell
-   gemessen (getBoundingClientRect, live auf LJV und Wildtier-Kataster,
-   beide ohne Kurzbeschreibung): der Abstand von der natürlichen Grid-
-   Startlinie (= Oberkante ".content-back-link") bis zur Oberkante von
-   ".pn-detail-body"/".pn-section-title" beträgt konstant ca. 276.5px, weil
-   der Kopfbereich höhenmäßig vom FIXEN 160px-Logo-Quadrat dominiert wird
-   (Titel+Button bleiben auch nach Punkt 1 dieser Runde klar darunter) -
-   dieser Wert ist also kein Zufallstreffer für einen Partner, sondern
-   strukturell für jeden Partner ohne Kurzbeschreibung gleich. 17.25rem
-   (276px) matcht das auf unter 1px genau. Falls ein Partner künftig eine
-   sehr lange Kurzbeschreibung bekommt, die den Kopfbereich über 160px
-   hinaus wachsen lässt, würde der Kasten dann etwas zu früh beginnen (kein
-   Rückschritt ggü. vorher, nur nicht mehr pixelgenau) - eine für dieses
-   Projekt (kein JS-Höhenabgleich zwischen Grid-Spalten) übliche und
-   akzeptierte Grenze.
-   Bewusst nur ab ".page-content .container" noch zweispaltig ist (ab
-   901px, siehe generische Regel ".page-content .container" bei max-width:
-   900px) - darunter steht der Kasten ohnehin unter dem gesamten
-   Hauptinhalt, ein so großer margin-top würde dort nur eine sinnlose,
-   riesige Lücke erzeugen. */
-.pn-detail-sidebar { margin-top: 1.5rem; }
-@media (min-width: 901px) {
-  .pn-detail-sidebar { margin-top: 17.25rem; }
-}
+/* Frank-Feedback (04.09.2026, dritte Nachkorrektur): die beiden vorherigen
+   Versuche (erst ein kleiner 1.5rem-Nudge, danach ein großer 17.25rem-Wert,
+   der den Kasten bis auf Höhe von "Über X" hinuntergezogen hat) waren beide
+   ein Missverständnis. Frank will den rechten Kasten NICHT an den unteren
+   Beschreibungs-/Contentbereich koppeln, sondern er soll optisch weiterhin
+   zum Partner-KOPF gehören (Logo/Titel/Website-Button) - Kopf und Kasten
+   sollen zusammen "als Einheit" oben abschließen, der deutlich größere
+   Abstand zu "Über X" (siehe .pn-detail-body/.pn-section-title oben) soll
+   aber erhalten bleiben.
+   Der technisch sauberste Weg dahin ist, HIER GAR KEIN eigenes margin-top
+   mehr zu setzen: ".page-content .container" ist bereits "display:grid;
+   align-items:start" (Zeile ~786) - Hauptspalte (main) und Kasten (aside)
+   starten dadurch ohnehin auf derselben Zeile ganz oben. Der Kasten wächst
+   dabei nie mit der Höhe des Hauptinhalts mit (er hat keine eigene Höhe
+   jenseits seines eigenen Inhalts), bleibt also unabhängig davon, wie lang
+   Beschreibung/Kontakt/Weitere Informationen werden, immer oben beim Kopf
+   stehen - robuster als jeder fest verdrahtete Pixel-/Rem-Wert und ohne
+   Sonderfall für kürzere/längere Partnernamen oder Kurzbeschreibungen.
+   Die eigene Klasse ".pn-detail-sidebar" (siehe partner/detail.html) wurde
+   deshalb wieder von der <aside> entfernt - für die gewünschte Ausrichtung
+   wird keine eigene Regel mehr gebraucht, das ist die generische Grid-
+   Ausrichtung, die die Partner-Detailseite ohnehin schon von der Vorlage
+   ".page-content .container" erbt (unverändert, wird auch von anderen
+   Detailseiten genutzt). */
