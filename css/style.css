@@ -2311,3 +2311,23 @@ body.kjs-lightbox-lock { overflow: hidden; }
   .pn-detail-head { flex-direction: column; align-items: center; text-align: center; }
   .pn-detail-head__body { min-width: 0; }
 }
+
+/* Frank-Feedback (04.09.2026): "Zur Website"-Button auf den Partner-
+   Detailseiten wirkte zu wuchtig - mittig statt linksbündig, ca. 20%
+   kompakter (Padding/Höhe) und leicht kleinere Schrift, aber weiterhin klar
+   als CTA erkennbar. Scoped auf .pn-website-btn statt die globale .btn-
+   Basisklasse zu verändern (die wird site-weit von jedem Button genutzt). */
+.pn-website-btn {
+  display: flex; width: fit-content; margin: 0 auto;
+  padding: .6rem 1.4rem; font-size: .8rem;
+}
+@media (max-width: 560px) { .pn-website-btn { margin: 0 auto; } }
+
+/* Frank-Feedback (04.09.2026): Zwischenüberschrift "Über <Partner>" wirkte
+   zu groß (konkurrierte mit der großen Partner-Hauptüberschrift direkt
+   darüber) und der Beschreibungstext saß zu dicht darunter. Ca. 50% kleiner
+   als der bisherige h2-Standard, weiterhin fett, mit deutlich mehr Abstand
+   nach unten. Bewusst nur auf diese eine Überschrift beschränkt (Klasse statt
+   ".main-content h2" zu überschreiben), Kontakt/Weitere-Informationen-
+   Überschriften sind von Frank nicht als zu groß bemängelt worden. */
+.pn-section-title { font-size: 1rem; margin-top: 2.5rem; margin-bottom: 1.5rem; }

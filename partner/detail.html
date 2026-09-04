@@ -106,12 +106,12 @@
         '<div class="pn-detail-head__body">' +
           '<h2>' + escHtml(p.name || '(Ohne Namen)') + '</h2>' +
           (p.kurzbeschreibung ? '<p style="color:var(--text-muted);margin-bottom:1rem;">' + escHtml(p.kurzbeschreibung) + '</p>' : '') +
-          (p.website ? '<a href="' + escHtml(p.website) + '" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Zur Website ↗</a>' : '') +
+          (p.website ? '<a href="' + escHtml(p.website) + '" class="btn btn-primary pn-website-btn" target="_blank" rel="noopener noreferrer">Zur Website ↗</a>' : '') +
         '</div>' +
       '</div>';
 
       if (p.beschreibung) {
-        html += '<h2>Über ' + escHtml(p.name || 'diesen Partner') + '</h2><p>' + escHtml(p.beschreibung) + '</p>';
+        html += '<h2 class="pn-section-title">Über ' + escHtml(p.name || 'diesen Partner') + '</h2><p>' + escHtml(p.beschreibung) + '</p>';
       }
 
       var kontaktdaten = '';

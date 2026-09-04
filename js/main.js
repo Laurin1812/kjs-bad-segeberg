@@ -454,26 +454,29 @@ function splitPostadresse(raw) {
   // komplett ohne Hauptnavigation dasteht.
   var FALLBACK_NAV = {
     sektionsnamen: {},
-    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'hundeboerse', 'waffenboerse', 'termine', 'faq', 'service', 'kontakt'],
+    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'termine', 'faq', 'service', 'kontakt'],
     hauptmenu_meta: {
       startseite:  { label: 'Startseite',  href: '/',                        navkey: 'startseite' },
       jaeger:      { href: '#', navkey: 'jaeger' },
       verbraucher: { href: '#', navkey: 'verbraucher' },
       aktuelles:   { label: 'Aktuelles',   href: '/aktuelles/index.html',    navkey: 'aktuelles' },
-      hundeboerse: { label: 'Hundebörse',  href: '/hundeboerse/index.html',  navkey: 'hundeboerse' },
-      waffenboerse: { label: 'Waffenbörse', href: '/waffenboerse/index.html', navkey: 'waffenboerse' },
       termine:     { label: 'Termine',     href: '/termine/index.html',      navkey: 'termine' },
       faq:         { label: 'FAQ',         href: '/faq/index.html',          navkey: 'faq' },
       service:     { label: 'Service',     href: '/service.html',            navkey: 'service' },
       kontakt:     { label: 'Kontakt',     href: '/kontakt/index.html',      navkey: 'kontakt' }
     },
-    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil', 'partner'],
+    // Hundebörse/Waffenbörse (04.09.2026, Frank-Wunsch): kein eigener
+    // Hauptmenü-Eintrag mehr, sondern flache Leaf-Einträge im Jäger-
+    // Dropdown, direkt hinter Infomobil einsortiert (vor Partner).
+    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil', 'hundeboerse', 'waffenboerse', 'partner'],
     jaeger_dropdown_meta: {
       'kreisjjaegermeister': { label: 'Kreisjägermeister', href: '/kreisjjaegermeister/index.html' },
       'ueber-uns':           { label: 'Über uns',          href: '/jaeger/ueber-uns.html' },
       'kjs-segeberg':        { dropdown: true },
       'aufgaben':            { dropdown: true },
       'infomobil':           { label: 'Infomobil', href: '/jaeger/infomobil.html' },
+      'hundeboerse':         { label: 'Hundebörse', href: '/hundeboerse/index.html' },
+      'waffenboerse':        { label: 'Waffenbörse', href: '/waffenboerse/index.html' },
       'partner':             { label: 'Partner', href: '/partner/index.html' }
     },
     kjs: [], aufgaben: [], verbraucher: []
@@ -505,12 +508,14 @@ function splitPostadresse(raw) {
   // nicht zuverlässig funktionierende Laufzeit-Erkennung, siehe Kommentar
   // weiter oben in dieser Datei) durch eine einzige, aus dem aktuellen
   // URL-Pfad berechnete Regel (Punkt 4 der Phase-2-Vorgabe).
+  // Hundebörse/Waffenbörse (04.09.2026): kein eigener Hauptmenü-Eintrag
+  // mehr (siehe FALLBACK_NAV/jaeger_dropdown oben) - die eigenen Prefixe
+  // sind deshalb entfernt und stattdessen unter "jaeger" einsortiert, damit
+  // der Hauptpunkt "Jäger" auf diesen Seiten als aktiv markiert wird.
   var SECTION_PREFIXES = {
-    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/', '/partner/'],
+    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/', '/partner/', '/hundeboerse/', '/waffenboerse/'],
     verbraucher: ['/verbraucher/'],
     aktuelles: ['/aktuelles/'],
-    hundeboerse: ['/hundeboerse/'],
-    waffenboerse: ['/waffenboerse/'],
     termine: ['/termine/'],
     faq: ['/faq/'],
     kontakt: ['/kontakt/']

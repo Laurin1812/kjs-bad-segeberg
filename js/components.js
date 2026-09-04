@@ -289,23 +289,26 @@
 
     if (path === '/jaeger') return [START, { label: sn.jaeger || 'Jäger' }];
     if (path === '/verbraucher') return [START, { label: sn.verbraucher || 'Verbraucher' }];
-    if (path === '/hundeboerse') return [START, { label: (hm.hundeboerse && hm.hundeboerse.label) || 'Hundebörse' }];
     if (path === '/aktuelles') return [START, { label: (hm.aktuelles && hm.aktuelles.label) || 'Aktuelles' }];
-    // Waffenbörse: seit 02.09.2026 (Korrektur zu Phase 1) eigener
-    // Hauptnavigations-Eintrag in navigation.json (hauptmenu_meta.waffenboerse) -
-    // Label kommt daher wie bei Hundebörse/Aktuelles direkt von dort, der
-    // feste Text bleibt nur als Absicherung, falls navigation.json einmal
-    // nicht ladbar ist.
-    if (path === '/waffenboerse') return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse' }];
 
+    // Hundebörse/Waffenbörse (04.09.2026, Frank-Wunsch): kein eigener
+    // Hauptnavigations-Eintrag mehr, sondern Leaf-Einträge im Jäger-Dropdown
+    // (jaeger_dropdown_meta), direkt hinter Infomobil einsortiert - die
+    // jeweilige Übersichtsseite (/hundeboerse, /waffenboerse) wird deshalb
+    // schon vom generischen "jaegerLeaf"-Zweig weiter oben korrekt behandelt
+    // (liefert "Startseite > Jäger > ..."). Nur die Unterseiten
+    // (anbieten/detail) brauchen hier eigene Fälle, weil ihr Pfad selbst
+    // nicht in jaeger_dropdown_meta auftaucht - analog zu /partner/detail
+    // unten, Label kommt jetzt aus jaeger_dropdown_meta (jd) statt aus
+    // hauptmenu_meta (hm).
     if (path === '/hundeboerse/anbieten') {
-      return [START, { label: (hm.hundeboerse && hm.hundeboerse.label) || 'Hundebörse', href: '/hundeboerse/index.html' }, { label: 'Hund / Wurf anbieten' }];
+      return [START, JAEGER_IDX, { label: (jd.hundeboerse && jd.hundeboerse.label) || 'Hundebörse', href: '/hundeboerse/index.html' }, { label: 'Hund / Wurf anbieten' }];
     }
     if (path === '/hundeboerse/detail') {
-      return [START, { label: (hm.hundeboerse && hm.hundeboerse.label) || 'Hundebörse', href: '/hundeboerse/index.html' }, { label: 'Wird geladen …' }];
+      return [START, JAEGER_IDX, { label: (jd.hundeboerse && jd.hundeboerse.label) || 'Hundebörse', href: '/hundeboerse/index.html' }, { label: 'Wird geladen …' }];
     }
     if (path === '/waffenboerse/detail') {
-      return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Wird geladen …' }];
+      return [START, JAEGER_IDX, { label: (jd.waffenboerse && jd.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Wird geladen …' }];
     }
     // Partner (03.09.2026): kein eigener Hauptnavigations-Eintrag, sondern
     // ein Leaf-Eintrag im Jäger-Dropdown (jaeger_dropdown_meta.partner) -
@@ -321,7 +324,7 @@
     // Waffenbörse Phase 2 (03.09.2026): eigene öffentliche Einreichungsseite,
     // analog zu /hundeboerse/anbieten oben.
     if (path === '/waffenboerse/anbieten') {
-      return [START, { label: (hm.waffenboerse && hm.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Anzeige aufgeben' }];
+      return [START, JAEGER_IDX, { label: (jd.waffenboerse && jd.waffenboerse.label) || 'Waffenbörse', href: '/waffenboerse/index.html' }, { label: 'Anzeige aufgeben' }];
     }
     if (path === '/aktuelles/beitrag') {
       return [START, { label: (hm.aktuelles && hm.aktuelles.label) || 'Aktuelles', href: '/aktuelles/index.html' }, { label: 'Wird geladen …' }];

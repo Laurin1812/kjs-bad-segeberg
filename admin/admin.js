@@ -5608,20 +5608,25 @@
   ──────────────────────────────────────────────────────────── */
   function renderNavReihenfolge(def, data) {
     var sn  = data.sektionsnamen || {};
-    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','aktuelles','hundeboerse','waffenboerse','termine','faq','service','kontakt'];
-    var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil','weitere-themen'];
+    var hm  = data.hauptmenu    || ['startseite','jaeger','verbraucher','aktuelles','termine','faq','service','kontakt'];
+    var jd  = data.jaeger_dropdown || ['ueber-uns','kreisjjaegermeister','kjs-segeberg','aufgaben','infomobil','hundeboerse','waffenboerse','partner','weitere-themen'];
     var kjs = data.kjs          || [];
     var auf = data.aufgaben     || [];
     var vbr = data.verbraucher  || [];
 
     var HM_LABELS = { startseite:'Startseite', jaeger:'Jäger', verbraucher:'Verbraucher', aktuelles:'Aktuelles',
-                      hundeboerse:'Hundebörse', waffenboerse:'Waffenbörse', termine:'Termine', faq:'FAQ', service:'Service', kontakt:'Kontakt' };
+                      termine:'Termine', faq:'FAQ', service:'Service', kontakt:'Kontakt' };
+    // Hundebörse/Waffenbörse (04.09.2026, Frank-Wunsch): jetzt Leaf-Einträge
+    // im Jäger-Dropdown statt eigener Hauptmenü-Punkte, siehe navigation.json.
     var JD_LABELS = {
       'ueber-uns':           'Über uns',
       'kreisjjaegermeister': 'Kreisjägermeister',
       'kjs-segeberg':        'KJS Segeberg (Untermenü →)',
       'aufgaben':            'Aufgaben der Kreisjägerschaft (Untermenü →)',
       'infomobil':           'Infomobil',
+      'hundeboerse':         'Hundebörse',
+      'waffenboerse':        'Waffenbörse',
+      'partner':             'Partner',
       'weitere-themen':      'Weitere Themen (Untermenü →)'
     };
 
@@ -8834,5 +8839,13 @@
   // übersehen (Laurin-Bug-Report, 2026-08-28: Button reagierte nicht,
   // Konsole zeigte "renderHundeboerse is not defined").
   window.renderHundeboerse = renderHundeboerse;
+  // Partner-Admin (04.09.2026, Frank-Bug-Report "Zurück-Button reagiert
+  // nicht"): exakt derselbe Fehler wie oben bei renderService/renderMedian/
+  // renderHundeboerse - renderPartner war beim Partner-Modul-Aufbau nur als
+  // private "function renderPartner(){}" in der IIFE definiert, der
+  // "← Zurück"-Button in partnerEdit() ruft es aber per
+  // onclick="confirmNav(function(){renderPartner(...)})" auf, was im
+  // globalen Scope läuft ("renderPartner is not defined" in der Konsole).
+  window.renderPartner = renderPartner;
 
 })();
