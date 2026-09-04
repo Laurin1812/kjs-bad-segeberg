@@ -2388,8 +2388,18 @@ body.kjs-lightbox-lock { overflow: hidden; }
    margin:0, nur "p { margin-bottom: 1rem; }" ist gesetzt) - die einzige
    Distanz zwischen Überschrift und Fließtext ist also exakt dieser
    margin-bottom-Wert. Zentral über diese eine Klasse, gilt automatisch für
-   jeden Partner. */
-.pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3rem; }
+   jeden Partner.
+   Wichtiger Bugfix in derselben Runde: Die reine Klasse ".pn-section-title"
+   (Spezifität 0,1,0) wurde bislang von der generischen Regel
+   ".main-content h2" (Zeile ~830, Spezifität 0,1,1 - Klasse + Elementtyp,
+   also höher) für margin-bottom überstimmt, unabhängig vom hier gesetzten
+   Wert. Dadurch hatte auch die vorherige Anpassung (1.5rem) im Live-Betrieb
+   nie sichtbar wirkt - der tatsächlich angezeigte Abstand war immer die
+   generischen 1rem von ".main-content h2". Deshalb hier auf den
+   nachfahrenbasierten Selektor ".pn-detail-body .pn-section-title"
+   (Spezifität 0,2,0) umgestellt, der die generische Regel zuverlässig
+   schlägt, unabhängig von der Reihenfolge im Stylesheet. */
+.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3rem; }
 
 /* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
    unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
