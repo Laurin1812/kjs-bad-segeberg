@@ -2339,7 +2339,15 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .pn-detail-head__logo img { max-width: 80%; max-height: 80%; object-fit: contain; }
 .pn-detail-head__logo.pn-logo-placeholder img { max-width: none; height: 56px; }
 .pn-detail-head__body { flex: 1; min-width: 220px; }
-.pn-detail-head__body h2 { color: var(--green-dark); margin-bottom: .5rem; }
+/* Frank-Feedback (04.09.2026, zweite Runde): die große Partner-Überschrift
+   wirkte leicht nach unten versetzt gegenüber der Logo-Box links (die Box
+   beginnt exakt an der Flex-Start-Linie, der Überschriften-Text lag durch
+   das normale Zeilenhöhen-"Leading" ein paar Pixel tiefer). margin-top:0
+   explizit (nicht nur über die zufällige :first-child-Kaskade) + engere
+   line-height nur für diese eine Überschrift, damit sie sauber auf einer
+   Flucht mit der Logo-Box-Oberkante sitzt. Betrifft nur diesen Titel, nicht
+   h2 generell. */
+.pn-detail-head__body h2 { color: var(--green-dark); margin-top: 0; margin-bottom: .5rem; line-height: 1.05; }
 @media (max-width: 560px) {
   .pn-detail-head { flex-direction: column; align-items: center; text-align: center; }
   .pn-detail-head__body { min-width: 0; }
@@ -2349,18 +2357,36 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Detailseiten wirkte zu wuchtig - mittig statt linksbündig, ca. 20%
    kompakter (Padding/Höhe) und leicht kleinere Schrift, aber weiterhin klar
    als CTA erkennbar. Scoped auf .pn-website-btn statt die globale .btn-
-   Basisklasse zu verändern (die wird site-weit von jedem Button genutzt). */
+   Basisklasse zu verändern (die wird site-weit von jedem Button genutzt).
+   Zweite Runde (04.09.2026): Button saß zu dicht unter der Überschrift -
+   margin-top ergänzt (vorher 0 über die "margin: 0 auto"-Kurzschreibweise),
+   damit klar "Titel → Luft → Button" statt "Titel → Button" entsteht. Die
+   bereits vorgenommene Verkleinerung (Padding/Schriftgröße) bleibt unverändert. */
 .pn-website-btn {
-  display: flex; width: fit-content; margin: 0 auto;
+  display: flex; width: fit-content; margin: 1.5rem auto 0;
   padding: .6rem 1.4rem; font-size: .8rem;
 }
-@media (max-width: 560px) { .pn-website-btn { margin: 0 auto; } }
+@media (max-width: 560px) { .pn-website-btn { margin: 1.5rem auto 0; } }
 
 /* Frank-Feedback (04.09.2026): Zwischenüberschrift "Über <Partner>" wirkte
    zu groß (konkurrierte mit der großen Partner-Hauptüberschrift direkt
    darüber) und der Beschreibungstext saß zu dicht darunter. Ca. 50% kleiner
-   als der bisherige h2-Standard, weiterhin fett, mit deutlich mehr Abstand
-   nach unten. Bewusst nur auf diese eine Überschrift beschränkt (Klasse statt
-   ".main-content h2" zu überschreiben), Kontakt/Weitere-Informationen-
-   Überschriften sind von Frank nicht als zu groß bemängelt worden. */
-.pn-section-title { font-size: 1rem; margin-top: 2.5rem; margin-bottom: 1.5rem; }
+   als der bisherige h2-Standard, weiterhin fett. Bewusst nur auf diese eine
+   Überschrift beschränkt (Klasse statt ".main-content h2" zu überschreiben),
+   Kontakt/Weitere-Informationen-Überschriften sind von Frank nicht als zu
+   groß bemängelt worden.
+   Zweite Runde (04.09.2026): der große Abstand zum Kopf-Bereich kommt jetzt
+   zentral von der neuen ".pn-detail-body"-Wrapper-Klasse (siehe unten) statt
+   vom margin-top dieser Überschrift - deshalb hier auf einen kleinen Wert
+   reduziert, sonst würde sich der Abstand unnötig verdoppeln. */
+.pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.5rem; }
+
+/* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
+   unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
+   Informationen) begann zu früh/zu dicht am Kopf. Frank wollte hier "als
+   Block" mehr Luft, nicht nur eine einzelne Text-Margin. Zentraler Wrapper
+   ".pn-detail-body" (siehe partner/detail.html, wird um Über/Kontakt/
+   Weitere-Informationen gemeinsam gelegt) statt Einzel-Margins an mehreren
+   Stellen - wirkt automatisch für JEDEN Partner (LJV, Wildtierkataster, ...),
+   keine Sonderlösung pro Partner. */
+.pn-detail-body { margin-top: 4rem; }

@@ -110,8 +110,19 @@
         '</div>' +
       '</div>';
 
+      // Frank-Feedback (04.09.2026, zweite Runde): der gesamte Inhaltsbereich
+      // unterhalb des Partnerkopfes soll "als Block" deutlich weiter nach
+      // unten - deshalb hier erst separat in bodyHtml sammeln und danach
+      // gemeinsam in einen ".pn-detail-body"-Wrapper packen (Abstand kommt
+      // zentral von dieser Klasse, siehe style.css), statt einzelnen
+      // Überschriften/Absätzen Margin zu geben. Nur wenn tatsächlich Inhalt
+      // vorhanden ist wird der Wrapper überhaupt ausgegeben, damit ein
+      // Partner ganz ohne Beschreibung/Kontakt/weitere Infos keinen leeren,
+      // aber trotzdem Abstand erzeugenden Block bekommt.
+      var bodyHtml = '';
+
       if (p.beschreibung) {
-        html += '<h2 class="pn-section-title">Über ' + escHtml(p.name || 'diesen Partner') + '</h2><p>' + escHtml(p.beschreibung) + '</p>';
+        bodyHtml += '<h2 class="pn-section-title">Über ' + escHtml(p.name || 'diesen Partner') + '</h2><p>' + escHtml(p.beschreibung) + '</p>';
       }
 
       var kontaktdaten = '';
@@ -119,7 +130,7 @@
       kontaktdaten += zeile('Telefon', p.telefon);
       kontaktdaten += zeile('E-Mail', p.email);
       if (kontaktdaten) {
-        html += '<h2>Kontakt</h2><div class="steckbrief"><dl>' + kontaktdaten + '</dl></div>';
+        bodyHtml += '<h2>Kontakt</h2><div class="steckbrief"><dl>' + kontaktdaten + '</dl></div>';
       }
 
       var weitere = '';
@@ -127,7 +138,11 @@
       weitere += zeile('Vorteile / Leistungen', p.vorteile);
       weitere += zeile('Weitere Hinweise', p.weitere_infos);
       if (weitere) {
-        html += '<h2>Weitere Informationen</h2><div class="steckbrief"><dl>' + weitere + '</dl></div>';
+        bodyHtml += '<h2>Weitere Informationen</h2><div class="steckbrief"><dl>' + weitere + '</dl></div>';
+      }
+
+      if (bodyHtml) {
+        html += '<div class="pn-detail-body">' + bodyHtml + '</div>';
       }
 
       document.getElementById('pn-detail-inhalt').innerHTML = html;
