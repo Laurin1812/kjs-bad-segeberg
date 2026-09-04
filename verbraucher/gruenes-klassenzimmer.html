@@ -125,7 +125,7 @@
             seiten.forEach(function(s) {
               var li = document.createElement('li');
               li.innerHTML = '<a class="unterseite-tile" href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' +
-                '<span class="unterseite-tile__icon">📄</span>' +
+                '<span class="unterseite-tile__icon">' + ICONS.document + '</span>' +
                 '<span class="unterseite-tile__label">' + (s.nav_label || s.slug) + '</span>' +
               '</a>';
               nav.appendChild(li);

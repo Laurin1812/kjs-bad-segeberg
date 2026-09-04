@@ -153,7 +153,7 @@
           '<h3 class="news-card__title">' + escHtml(a.titel || '(Ohne Titel)') + '</h3>' +
           (herstellerModell ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(herstellerModell) + '</p>' : '') +
           (kaliberText(a) ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(kaliberText(a)) + '</p>' : '') +
-          '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(zustandText(a.zustand)) + (standort ? ' · 📍 ' + escHtml(standort) : '') + '</p>' +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(zustandText(a.zustand)) + (standort ? ' · <span class="wb-meta-icon">' + ICONS.pin + escHtml(standort) + '</span>' : '') + '</p>' +
           '<div class="wb-card-footer">' +
             '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .5rem;">' + escHtml(preisText(a)) + '</p>' +
             '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Anzeige ansehen →</span>' +

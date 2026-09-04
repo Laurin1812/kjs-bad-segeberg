@@ -179,7 +179,7 @@
         '<span class="news-card__cat wb-head__cat">' + escHtml(a.kategorie || '') + '</span>' +
         '<h2 class="wb-head__title">' + escHtml(a.titel || '(Ohne Titel)') + '</h2>' +
         (herstellerModell ? '<p class="wb-head__meta">' + escHtml(herstellerModell) + '</p>' : '') +
-        (standort ? '<p class="wb-head__meta">📍 ' + escHtml(standort) + '</p>' : '') +
+        (standort ? '<p class="wb-head__meta wb-meta-icon">' + ICONS.pin + escHtml(standort) + '</p>' : '') +
         '<p class="wb-head__price">' + escHtml(preisText(a)) + '</p>' +
         (a.erwerbsberechtigung_erforderlich
           ? '<div class="wb-erwerb-badge">Erwerbsberechtigung erforderlich</div>'

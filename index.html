@@ -449,8 +449,8 @@
               '<div>' +
                 '<div class="termine-item__title">' + escHtml(t.veranstaltung) + '</div>' +
                 '<div class="termine-item__info">' +
-                  (t.uhrzeit ? '<span>🕐 ' + escHtml(t.uhrzeit) + ' Uhr</span>' : '') +
-                  (ortText ? '<span>📍 ' + escHtml(ortText) + '</span>' : '') +
+                  (t.uhrzeit ? '<span>' + ICONS.clock + escHtml(t.uhrzeit) + ' Uhr</span>' : '') +
+                  (ortText ? '<span>' + ICONS.pin + escHtml(ortText) + '</span>' : '') +
                 '</div>' +
               '</div>' +
               '<a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>' +

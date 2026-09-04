@@ -784,6 +784,9 @@ p  { margin-bottom: 1rem; }
 .termine-item__title { font-weight: 700; font-size: .95rem; color: var(--text-dark); margin-bottom: .3rem; }
 .termine-item__info  { font-size: .82rem; color: var(--text-muted); display: flex; gap: .75rem; flex-wrap: wrap; }
 .termine-item__info span { display: flex; align-items: center; gap: .3rem; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Uhrzeit/Ort auf der Startseite
+   zeigten bisher 🕐/📍-Emojis statt der zentralen ICONS aus main.js. */
+.termine-item__info svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* =========================================================
    STATS
@@ -1240,6 +1243,9 @@ p  { margin-bottom: 1rem; }
   width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); color: var(--green-main);
   display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
 }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Größe für das neue Dokument-Icon
+   (ICONS.document aus main.js), das hier das bisherige 📄-Emoji ersetzt. */
+.unterseite-tile__icon svg { width: 18px; height: 18px; }
 .unterseite-tile__label { font-size: .87rem; font-weight: 600; color: var(--text-dark); }
 .contact-box { background: var(--green-main); color: #fff; border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; }
 .contact-box h4 { color: #fff; margin-bottom: 1rem; border-bottom-color: rgba(255,255,255,.2); font-family: var(--font-sans); font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(255,255,255,.2); }
@@ -1282,6 +1288,13 @@ p  { margin-bottom: 1rem; }
   font-size: 3.5rem; color: var(--green-main); background: var(--green-light);
   width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
 }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Platzhalter ohne Foto zeigte
+   bisher ein 👤-Emoji statt ICONS.user aus main.js. Gilt für die
+   Vorstand/Obleute-Personenkarten (.person-card__avatar-placeholder) und
+   für den eigenständig aufgebauten Platzhalter auf der
+   Kreisjägermeister-Seite (.kjm-avatar-placeholder). */
+.person-card__avatar-placeholder svg,
+.kjm-avatar-placeholder svg { width: 42%; height: 42%; }
 .person-card__avatar { width: 100%; height: 100%; object-fit: cover; }
 .person-card__body { padding: 1.25rem; }
 .person-card__role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green-main); display: block; margin-bottom: .35rem; line-height: 1.3; min-height: 2.6em; }
@@ -1382,6 +1395,9 @@ p  { margin-bottom: 1rem; }
 }
 .download-item:hover { border-color: var(--green-main); box-shadow: var(--shadow-md); }
 .download-item__icon { width: 44px; height: 44px; background: var(--green-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--green-main); flex-shrink: 0; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): einheitliches Dokument-Icon statt
+   der bisherigen, je nach Dateityp unterschiedlichen Emojis (📄/📝/📊/🗜️/📁). */
+.download-item__icon svg { width: 22px; height: 22px; }
 .download-item__meta { flex: 1; min-width: 0; }
 .download-item__name { font-weight: 700; font-size: .92rem; color: var(--text-dark); margin-bottom: .2rem; font-family: var(--font-sans); word-break: break-word; }
 .download-item__info { font-size: .78rem; color: var(--text-muted); }
@@ -2103,6 +2119,10 @@ body.kjs-lightbox-lock { overflow: hidden; }
    trotz späterer Reihenfolge im Stylesheet. */
 #wb-detail-inhalt .wb-head__title { margin: 0; }
 #wb-detail-inhalt .wb-head__meta { margin: 0; color: var(--text-muted); font-size: .95rem; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Standort-Zeile in Waffenbörse-
+   Übersicht und -Detail zeigte bisher ein 📍-Emoji statt ICONS.pin. */
+.wb-meta-icon { display: inline-flex; align-items: center; gap: .3rem; }
+.wb-meta-icon svg { width: 13px; height: 13px; flex-shrink: 0; }
 #wb-detail-inhalt .wb-head__price { margin: .15rem 0 0; font-size: 1.4rem; font-weight: 800; color: var(--green-dark); }
 .wb-head .wb-erwerb-badge { align-self: flex-start; margin-top: .1rem; }
 .wb-head__cta { margin-top: .6rem; }

@@ -49,7 +49,7 @@
 
           var foto = bild
             ? `<img src="${bild}" alt="Foto ${name}" style="width:100%;border-radius:var(--radius-md);border:3px solid var(--green-main);object-fit:contain;padding:8px;">`
-            : `<div style="width:100%;aspect-ratio:1;background:var(--green-light);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:5rem;border:3px solid var(--green-main);">👤</div>`;
+            : `<div class="kjm-avatar-placeholder" style="width:100%;aspect-ratio:1;background:var(--green-light);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--green-main);border:3px solid var(--green-main);">${ICONS.user}</div>`;
 
           // Ab Phase 5B.5 wird das Grußwort im Admin-Bereich über denselben
           // TipTap-Editor wie das Aufgaben-Feld gepflegt und daher als HTML

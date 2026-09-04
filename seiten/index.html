@@ -339,7 +339,7 @@
       seiten.forEach(function(s) {
         var li = document.createElement('li');
         li.innerHTML = '<a class="unterseite-tile" href="index.html?s=' + encodeURIComponent(s.slug) + '">' +
-          '<span class="unterseite-tile__icon">📄</span>' +
+          '<span class="unterseite-tile__icon">' + ICONS.document + '</span>' +
           '<span class="unterseite-tile__label">' + escHtml(s.nav_label || s.slug) + '</span>' +
         '</a>';
         navEl.appendChild(li);

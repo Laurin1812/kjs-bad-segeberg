@@ -348,7 +348,28 @@ var ICONS = {
   mail:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
   phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
   home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M5 10v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10"/></svg>',
-  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>'
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  // Arbeitsblock 4 (Icon-Audit, 04.09.2026): "clock" und "user" gab es bisher
+  // NUR als lokale Kopie in kontakt/index.html (dort "KONTAKT_ICONS" genannt -
+  // siehe Kommentar oben, "wie auf der Kontakt-Seite"). Beim ursprünglichen
+  // Übertrag in dieses zentrale ICONS-Objekt wurden nur 4 der 6 dortigen Icons
+  // mitgenommen, wodurch für "Uhrzeit" (Startseite-Termine-Widget) und
+  // "Ansprechpartner ohne Foto" (Vorstand/Obleute/Kreisjägermeister) bisher
+  // weiterhin Emojis (🕐/👤) verwendet wurden statt des gleichen Icon-Systems.
+  // Hier 1:1 aus kontakt/index.html übernommen (identisches SVG, keine zweite
+  // Variante), damit es nur eine visuelle Version je Symbol gibt.
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  user:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  // Neu (Arbeitsblock 4): einheitliches Dokument-/Seiten-Icon, ersetzt die
+  // bisher uneinheitlichen Datei-Emojis (📄/📝/📊/🗜️/📁) auf den
+  // "Unterseiten"-Kacheln (Aufgaben/Jäger/Verbraucher) und auf der
+  // Downloads-Seite. Bewusst NICHT neu gezeichnet, sondern exakt derselbe
+  // Pfad wie das bereits bestehende ICON_PDF weiter unten in dieser Datei
+  // (Formulare/Dokumente-Sidebar-Widget) - das war bereits das etablierte
+  // "Dokument"-Icon dieses Projekts, nur lokal auf eine Funktion beschränkt
+  // und deshalb von außen nicht wiederverwendbar. Damit gibt es weiterhin
+  // nur EIN Dokument-Icon im gesamten Projekt, nicht zwei ähnliche.
+  document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
 };
 
 // Zieht aus dem freien Postadresse-Text eine "Tel: ..."- und "E-Mail: ..."-Zeile
