@@ -2361,12 +2361,19 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Zweite Runde (04.09.2026): Button saß zu dicht unter der Überschrift -
    margin-top ergänzt (vorher 0 über die "margin: 0 auto"-Kurzschreibweise),
    damit klar "Titel → Luft → Button" statt "Titel → Button" entsteht. Die
-   bereits vorgenommene Verkleinerung (Padding/Schriftgröße) bleibt unverändert. */
+   bereits vorgenommene Verkleinerung (Padding/Schriftgröße) bleibt unverändert.
+   Dritte Runde (04.09.2026, zweite Nachkorrektur): laut Frank immer noch
+   minimal zu dicht am Titel - bewusst nur ein kleiner weiterer Schritt
+   (1.5rem -> 2rem), keine drastische Verschiebung. Die fixe Logo-Höhe
+   (160px) im Kopfbereich bleibt dabei weiterhin der höhenbestimmende
+   Faktor (Titel+Button zusammen bleiben spürbar darunter), wirkt sich also
+   nicht auf die Gesamthöhe von .pn-detail-head bzw. die darunterliegende
+   Ausrichtung des rechten Kastens (siehe .pn-detail-sidebar) aus. */
 .pn-website-btn {
-  display: flex; width: fit-content; margin: 1.5rem auto 0;
+  display: flex; width: fit-content; margin: 2rem auto 0;
   padding: .6rem 1.4rem; font-size: .8rem;
 }
-@media (max-width: 560px) { .pn-website-btn { margin: 1.5rem auto 0; } }
+@media (max-width: 560px) { .pn-website-btn { margin: 2rem auto 0; } }
 
 /* Frank-Feedback (04.09.2026): Zwischenüberschrift "Über <Partner>" wirkte
    zu groß (konkurrierte mit der großen Partner-Hauptüberschrift direkt
@@ -2421,5 +2428,30 @@ body.kjs-lightbox-lock { overflow: hidden; }
    nach unten (nur auf dieser Seite über eine eigene Klasse, keine Änderung
    an der generischen ".sidebar"/".sidebar-widget"-Optik, die auch andere
    Detailseiten nutzen), damit das Gesamtbild wieder stimmiger wirkt. Fokus
-   bleibt klar der Fließtext oben - dies ist nur ein optischer Feinschliff. */
+   bleibt klar der Fließtext oben - dies ist nur ein optischer Feinschliff.
+   Zweite Nachkorrektur (04.09.2026): der kleine Nudge (1.5rem) reichte Frank
+   optisch nicht - der Kasten sollte spürbar an die Höhe von "Über X"
+   gekoppelt werden statt nur ein paar Pixel zu bekommen. Structurell
+   gemessen (getBoundingClientRect, live auf LJV und Wildtier-Kataster,
+   beide ohne Kurzbeschreibung): der Abstand von der natürlichen Grid-
+   Startlinie (= Oberkante ".content-back-link") bis zur Oberkante von
+   ".pn-detail-body"/".pn-section-title" beträgt konstant ca. 276.5px, weil
+   der Kopfbereich höhenmäßig vom FIXEN 160px-Logo-Quadrat dominiert wird
+   (Titel+Button bleiben auch nach Punkt 1 dieser Runde klar darunter) -
+   dieser Wert ist also kein Zufallstreffer für einen Partner, sondern
+   strukturell für jeden Partner ohne Kurzbeschreibung gleich. 17.25rem
+   (276px) matcht das auf unter 1px genau. Falls ein Partner künftig eine
+   sehr lange Kurzbeschreibung bekommt, die den Kopfbereich über 160px
+   hinaus wachsen lässt, würde der Kasten dann etwas zu früh beginnen (kein
+   Rückschritt ggü. vorher, nur nicht mehr pixelgenau) - eine für dieses
+   Projekt (kein JS-Höhenabgleich zwischen Grid-Spalten) übliche und
+   akzeptierte Grenze.
+   Bewusst nur ab ".page-content .container" noch zweispaltig ist (ab
+   901px, siehe generische Regel ".page-content .container" bei max-width:
+   900px) - darunter steht der Kasten ohnehin unter dem gesamten
+   Hauptinhalt, ein so großer margin-top würde dort nur eine sinnlose,
+   riesige Lücke erzeugen. */
 .pn-detail-sidebar { margin-top: 1.5rem; }
+@media (min-width: 901px) {
+  .pn-detail-sidebar { margin-top: 17.25rem; }
+}
