@@ -890,8 +890,8 @@ function splitPostadresse(raw) {
             '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
             (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +
             '<div class="footer-social">' +
-              '<a href="' + escHtml(d.facebook_url || '#') + '" aria-label="Facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
-              '<a href="' + escHtml(d.instagram_url || '#') + '" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>' +
+              '<a href="' + escHtml(d.facebook_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
+              '<a href="' + escHtml(d.instagram_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>' +
             '</div>' +
           '</div>' +
           colHtml('Über die KJS', d.spalte_ueber_kjs) +
@@ -910,13 +910,16 @@ function splitPostadresse(raw) {
     footerRoot.innerHTML = html;
 
     // Social-Links spiegeln sich zusätzlich in die Kopfzeile (Topbar) -
-    // gleiches Verhalten wie vorher im Pro-Seiten-Skript.
+    // gleiches Verhalten wie vorher im Pro-Seiten-Skript. Die aria-label-
+    // Selektoren hier müssen exakt zu den aria-labels in js/components.js
+    // passen (04.09.2026: auf "Kreisjägerschaft Segeberg auf Facebook/
+    // Instagram" umgestellt, siehe dort).
     if (d.facebook_url) {
-      var fbTop = document.querySelector('.topbar__social a[aria-label="Facebook"]');
+      var fbTop = document.querySelector('.topbar__social a[aria-label="Kreisjägerschaft Segeberg auf Facebook"]');
       if (fbTop) fbTop.href = d.facebook_url;
     }
     if (d.instagram_url) {
-      var igTop = document.querySelector('.topbar__social a[aria-label="Instagram"]');
+      var igTop = document.querySelector('.topbar__social a[aria-label="Kreisjägerschaft Segeberg auf Instagram"]');
       if (igTop) igTop.href = d.instagram_url;
     }
   }
