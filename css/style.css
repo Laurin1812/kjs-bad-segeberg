@@ -2326,11 +2326,73 @@ body.kjs-lightbox-lock { overflow: hidden; }
 }
 .pn-logo-placeholder img { height: 56px; opacity: .3; }
 
+/* Frank-Feedback (04.09.2026, vierte Nachkorrektur): der rechte Kasten
+   ("Partner / Alle Partner ansehen") soll mit seiner Oberkante EXAKT auf
+   einer Flucht mit Logo und großer Partnerüberschrift stehen - beide bilden
+   zusammen den "Partner-Kopf" als gemeinsame erste Zeile. Das reine
+   Entfernen von margin-top (vorherige Runde) hat das nicht erreicht, weil
+   ".content-back-link" ("← Zurück zu allen Partnern") als erstes Kind
+   INNERHALB von .main-content über dem Kopf steht - main-content und der
+   Kasten (aside) starten dadurch zwar auf derselben Grid-Zeile, aber diese
+   Zeile beginnt bei "Zurück ...", nicht erst beim Logo. Kein margin-top auf
+   dem Kasten kann diese ca. 52px Differenz beheben, ohne wieder zu einem
+   Zufalls-Pixelwert zu werden.
+   Technisch sauberer Fix (analog zum bereits bestehenden Muster
+   ".hb-overview-layout" weiter oben in dieser Datei): eigene Klasse
+   ".pn-detail-layout" auf dem ".container"-Element dieser Seite, mit
+   grid-template-areas statt Margin-Aktivismus. ".main-content" bekommt
+   dabei "display:contents" - es erzeugt dadurch selbst keine eigene Box
+   mehr, seine Kinder (Zurück-Link, Kopf, unterer Contentblock) werden
+   direkte Grid-Kinder und können so einzeln benannten Grid-Bereichen
+   zugewiesen werden. Die ".main-content h2/p/..."-Regeln (Farbe, Abstände
+   für Kontakt/Weitere Informationen) greifen weiterhin normal, da sie über
+   die DOM-Abstammung matchen, nicht über die erzeugte Box. Row-Gap bewusst
+   auf 0 (siehe .pn-detail-layout unten) - jede Zeile bekommt ihren Abstand
+   weiterhin gezielt über die jeweils EIGENE Margin des Elements (Zurück-
+   Link: 1.5rem, Kopf→Content: 4rem über .pn-detail-body), damit sich beim
+   Umstieg auf echte Grid-Zeilen nichts an den bereits mit Frank abgestimmten
+   Abständen verdoppelt (Margins grenzender NORMALER Geschwister-Blöcke
+   kollabieren zum Max-Wert - Margins zwischen unterschiedlichen GRID-
+   Elementen dagegen nie, deshalb hier explizit einzeln über Gap=0 +
+   Element-Margins statt über Kollaps gesteuert). */
+.page-content .container.pn-detail-layout {
+  grid-template-columns: 1fr 290px;
+  grid-template-areas: "back ." "head sidebar" "body .";
+  gap: 0 3rem;
+}
+.pn-detail-layout .main-content { display: contents; }
+.pn-detail-layout .content-back-link { grid-area: back; }
+.pn-detail-layout .pn-detail-head { grid-area: head; }
+.pn-detail-layout .sidebar { grid-area: sidebar; }
+.pn-detail-layout .pn-detail-body { grid-area: body; }
+@media (max-width: 900px) {
+  .page-content .container.pn-detail-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "back" "head" "body" "sidebar";
+  }
+  /* Gestapelt (Mobile/Tablet) landet der Kasten wieder ganz unten, hinter
+     dem gesamten Inhalt - wie es die generische ".page-content .container"-
+     Regel für jede Detailseite ohnehin vorsieht. Dort fehlt ihm ohne
+     row-gap (bewusst 0, s.o.) jeglicher Abstand nach oben; 3rem stellt den
+     ursprünglichen, generischen Zeilenabstand gezielt nur für DIESEN einen
+     Übergang wieder her - betrifft nicht die Kopf-Ausrichtung oben. */
+  .pn-detail-layout .sidebar { margin-top: 3rem; }
+}
+
 /* Detail-Kopf: Logo links (fest, quadratisch), Name/Website rechts -
    eigenständig statt .wb-head/.wb-detail-top wiederzuverwenden, da Partner
-   keine Galerie/Eckdaten-Liste hat, sondern nur ein einzelnes Logo. */
+   keine Galerie/Eckdaten-Liste hat, sondern nur ein einzelnes Logo.
+   margin-bottom bewusst 0 (Frank-Feedback 04.09.2026, vierte Nachkorrektur):
+   seit .pn-detail-head ein eigener Grid-Bereich ist (siehe .pn-detail-layout
+   oben), kommt der Abstand zum folgenden Contentblock ausschließlich von
+   dessen eigenem margin-top (.pn-detail-body, 4rem) - eine zusätzliche
+   margin-bottom hier würde sich nicht mehr wie vorher automatisch mit
+   diesem Wert zum Max kollabieren (das passiert nur zwischen normalen
+   Geschwister-Blöcken, nicht zwischen Grid-Elementen verschiedener Zeilen),
+   sondern sich schlicht dazu addieren und den bereits abgestimmten Abstand
+   unbeabsichtigt vergrößern. */
 .pn-detail-head {
-  display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap;
+  display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 0; flex-wrap: wrap;
 }
 .pn-detail-head__logo {
   width: 160px; height: 160px; flex-shrink: 0; border-radius: var(--radius-md);
