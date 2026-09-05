@@ -135,7 +135,23 @@ exports.handler = async function (event, context) {
       // zunächst keine besonderen Rechte. Admin-Rechte werden anschließend,
       // falls gewünscht, gezielt über PATCH (Rollen setzen) vergeben - nie
       // automatisch bei der reinen Einladung (Prinzip geringster Rechte).
-      var r2 = await fetch(adminBase + '/users', {
+      //
+      // WICHTIGER BUGFIX (05.09.2026, Mailproblem-Diagnose): hier stand
+      // bisher `adminBase + '/users'` (= POST <identity>/admin/users, der
+      // GoTrue-Endpunkt "adminUserCreate"). Laut GoTrue-Quellcode
+      // (github.com/netlify/gotrue, api/admin.go) legt dieser Endpunkt zwar
+      // einen Benutzer-Datensatz an (daher der scheinbare Erfolg + Status
+      // "eingeladen" im Admin), verschickt dabei aber NIEMALS eine Mail - er
+      // ist für das Anlegen von Konten MIT bereits bekanntem Passwort gedacht
+      // (z.B. Migration), nicht für Einladungen. Der tatsächliche, offizielle
+      // Einladungs-Endpunkt ist POST <identity>/invite (ohne "/admin/"-
+      // Präfix, aber mit demselben Admin-Token abgesichert - siehe
+      // api/invite.go: ruft dort direkt sendInvite(...) auf). Das war die
+      // tatsächliche Ursache dafür, dass Einladungen zwar "erfolgreich"
+      // erstellt wurden, aber nie eine E-Mail beim Empfänger ankam - kein
+      // Netlify-Dashboard-/SMTP-Problem, sondern der falsche Endpunkt.
+      var inviteBase = identity.url.replace(/\/+$/, '');
+      var r2 = await fetch(inviteBase + '/invite', {
         method: 'POST',
         headers: adminHeaders,
         body: JSON.stringify({ email: email })

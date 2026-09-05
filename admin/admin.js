@@ -6378,6 +6378,17 @@
           '</div>' +
           '<div class="bu-user-controls">' +
             '<select class="field-input" style="width:auto;" id="bu-role-' + escAttr(u.id) + '" onchange="benutzerRoleChanged(\'' + escAttr(u.id) + '\')">' + roleOptions + '</select>' +
+            // "Erneut einladen" (05.09.2026): nur bei noch nicht bestätigten
+            // Einladungen sinnvoll/sichtbar - Netlify Identity kennt keinen
+            // eigenen "Resend"-Endpunkt (nur /invite für neue Adressen und
+            // /admin/users/:id für Bestehende), deshalb macht der Button
+            // serverseitig ein Entfernen + sofortiges Neu-Einladen derselben
+            // Adresse (benutzerResendInvite) - unbedenklich, weil eine noch
+            // ausstehende Einladung ohnehin nie bestätigt/mit Daten befüllt
+            // wurde, es also nichts zu verlieren gibt.
+            (u.status !== 'bestaetigt'
+              ? '<button class="btn btn-sm btn-outline" onclick="benutzerResendInvite(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🔄 Erneut einladen</button>'
+              : '') +
             '<button class="btn btn-sm btn-danger" onclick="benutzerRemove(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🗑️ Entfernen</button>' +
           '</div>' +
           '<div class="bu-perm-admin-note" id="bu-adminnote-' + escAttr(u.id) + '" style="display:' + (isAdmin ? '' : 'none') + ';">✓ Vollzugriff (Admin) - Bereichsrechte sind hier nicht nötig.</div>' +
@@ -6468,6 +6479,31 @@
     } catch(e) {
       console.error('[Benutzerverwaltung] Fehler beim Entfernen:', e);
       toast('❌ ' + e.message, 'err');
+    }
+  };
+
+  // "Erneut einladen" für eine noch ausstehende (unbestätigte) Einladung
+  // (05.09.2026, Ursache siehe admin-users.js: die Einladung wurde ohnehin
+  // nie zugestellt). Netlify Identity bietet keinen eigenen Resend-Endpunkt
+  // für eine bereits bestehende Einladung - die Adresse muss dafür zuerst
+  // wieder frei sein (Invite lehnt bereits registrierte Adressen ab), daher
+  // hier bewusst Entfernen + sofortiges Neu-Einladen derselben Adresse in
+  // Folge. Unbedenklich, weil eine ausstehende Einladung nie bestätigt wurde
+  // und daher keinerlei Rollen/Rechte/Daten verloren gehen können - dieselbe
+  // Rolle/Rechte müssten nach jeder echten Erstanmeldung ohnehin neu vergeben
+  // werden. NICHT für bereits bestätigte Benutzer angeboten (siehe
+  // benutzerLoad - Button erscheint dort nur bei status !== 'bestaetigt').
+  window.benutzerResendInvite = async function(uid, email) {
+    if (!confirm('Einladung an ' + email + ' erneut senden?\n\nDie bisherige (nie zugestellte) Einladung wird dafür entfernt und sofort neu erstellt.')) return;
+    try {
+      await buFetch('DELETE', '?id=' + encodeURIComponent(uid));
+      await buFetch('POST', '', { email: email });
+      toast('✅ Einladung erneut gesendet an ' + email);
+      benutzerLoad();
+    } catch(e) {
+      console.error('[Benutzerverwaltung] Fehler beim erneuten Einladen:', e);
+      toast('❌ ' + e.message, 'err');
+      benutzerLoad(); // UI auf tatsächlichen Serverstand zurücksetzen (z.B. falls DELETE klappte, POST aber fehlschlug)
     }
   };
 
