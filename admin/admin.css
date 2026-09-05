@@ -309,6 +309,37 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
   .field-row-2 { grid-template-columns: 1fr; }
 }
 
+/* ── Farbfeld: Color-Picker + Hex-Feld + RAL-Auswahl (Arbeitsblock 5) ── */
+.color-field-group { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.color-swatch-input {
+  width: 46px; height: 38px; padding: 0; border: none; cursor: pointer;
+  background: none; flex-shrink: 0; border-radius: 6px;
+}
+.color-hex-input { width: 108px; flex: 0 0 auto; font-family: monospace; text-transform: uppercase; }
+.field-input--invalid { border-color: var(--danger) !important; }
+
+/* RAL-Auswahl-Dialog (dynamisch erzeugt, siehe ralPickerOpen in admin.js) */
+.ral-picker-list {
+  max-height: 320px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.ral-picker-row {
+  display: flex; align-items: center; gap: .65rem; width: 100%;
+  padding: .55rem .75rem; border: none; border-bottom: 1px solid var(--border);
+  background: var(--white); cursor: pointer; text-align: left;
+  font-size: .85rem; font-family: inherit;
+}
+.ral-picker-row:last-child { border-bottom: none; }
+.ral-picker-row:hover, .ral-picker-row:focus-visible {
+  background: var(--green-light); outline: none;
+}
+.ral-picker-swatch {
+  width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+}
+.ral-picker-code { font-weight: 700; color: var(--text); flex-shrink: 0; min-width: 68px; }
+.ral-picker-name { color: var(--text-muted); }
+
 /* Kaliber: one row per entry, no comma-splitting (see waffenboerseKaliberCollect) */
 .wb-kaliber-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .5rem; }
 .wb-kaliber-row { display: flex; align-items: center; gap: .5rem; }

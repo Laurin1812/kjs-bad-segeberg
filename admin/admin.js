@@ -5148,12 +5148,9 @@
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Farben</div>' +
-          '<div class="field-row"><label class="field-label">Hauptfarbe Grün</label>' +
-            '<input type="color" id="f-farbe_gruen" value="' + escAttr(data.farbe_gruen || '#2e6b30') + '" style="width:60px;height:36px;cursor:pointer;border:none;padding:0;background:none"></div>' +
-          '<div class="field-row"><label class="field-label">Dunkelgrün (Header/Footer)</label>' +
-            '<input type="color" id="f-farbe_dunkelgruen" value="' + escAttr(data.farbe_dunkelgruen || '#1a4a1c') + '" style="width:60px;height:36px;cursor:pointer;border:none;padding:0;background:none"></div>' +
-          '<div class="field-row"><label class="field-label">Akzentfarbe (Gold)</label>' +
-            '<input type="color" id="f-farbe_akzent" value="' + escAttr(data.farbe_akzent || '#b8860b') + '" style="width:60px;height:36px;cursor:pointer;border:none;padding:0;background:none"></div>' +
+          fColorField('farbe_gruen', 'Hauptfarbe Grün', data.farbe_gruen, '#2e6b30') +
+          fColorField('farbe_dunkelgruen', 'Dunkelgrün (Header/Footer)', data.farbe_dunkelgruen, '#1a4a1c') +
+          fColorField('farbe_akzent', 'Akzentfarbe (Gold)', data.farbe_akzent, '#b8860b') +
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Schriften</div>' +
@@ -5179,6 +5176,169 @@
     ].forEach(function(k) { data[k] = gv(k); });
     return data;
   }
+
+  /* ────────────────────────────────────────────────────────────
+     FARBFELD: Color-Picker + Hex-Feld + "RAL wählen" (Arbeitsblock 5,
+     05.09.2026, Frank-Wunsch)
+
+     Reiner Komfort-Ausbau der bestehenden freien Farbauswahl in
+     renderDesign - KEINE neue Speicherlogik. Das native <input type="color">
+     mit der ID f-<key> bleibt exakt wie vorher die einzige Quelle, aus der
+     collectDesign() per gv(key) liest; alles hier Neue (Hex-Textfeld,
+     RAL-Auswahl-Button) schreibt nur in genau dieses vorhandene Feld.
+
+     - Color-Picker und Hex-Feld sind bidirektional synchronisiert
+       (ralSyncHexFromColor / ralSyncColorFromHex), beide bleiben frei manuell
+       bedienbar (freie Farbauswahl bleibt erhalten, RAL ist nur zusätzlich).
+     - Ein natives 'change'/'input' auf einem der beiden sichtbaren Felder
+       läuft über die bestehende Delegation auf #admin-main (siehe main.
+       addEventListener('input'/'change', markDirty) weiter unten) und setzt
+       Dirty-State automatisch - hier ist kein zusätzlicher markDirty()-Aufruf
+       nötig.
+     - Nur die RAL-Auswahl aus der Liste (ralPickerSelect) setzt Werte rein
+       programmatisch und braucht deshalb einen expliziten markDirty()-Aufruf,
+       genau wie an den anderen Stellen im Admin, die Feldwerte per Klick statt
+       per nativem Input setzen (vgl. bildGroesseSet, ttColor).
+  ──────────────────────────────────────────────────────────── */
+  function fColorField(key, label, value, fallback) {
+    var hex = escAttr(value || fallback);
+    return '<div class="field-row">' +
+      '<label class="field-label" for="f-' + key + '-hex">' + escHtml(label) + '</label>' +
+      '<div class="color-field-group">' +
+        '<input type="color" id="f-' + key + '" value="' + hex + '" class="color-swatch-input" ' +
+          'aria-label="' + escAttr(label) + ' – Farbwähler" oninput="ralSyncHexFromColor(\'' + key + '\')">' +
+        '<input type="text" id="f-' + key + '-hex" class="field-input color-hex-input" value="' + hex + '" ' +
+          'maxlength="7" placeholder="#000000" aria-label="' + escAttr(label) + ' – Hex-Wert" ' +
+          'onchange="ralSyncColorFromHex(\'' + key + '\')">' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="ralPickerOpen(\'' + key + '\', \'' + escAttr(label) + '\')">' +
+          '🎨 RAL wählen</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Hex-Textfeld -> Color-Picker. Manuelle Eingabe bleibt vollständig frei;
+  // nur bei gültigem #RRGGBB wird der Picker (und die Groß/Kleinschreibung
+  // der Anzeige) übernommen. Ungültige/unfertige Eingabe (z.B. während des
+  // Tippens) wird nur optisch markiert, nicht überschrieben oder verworfen.
+  window.ralSyncColorFromHex = function(key) {
+    var hexEl = id('f-' + key + '-hex');
+    var colorEl = id('f-' + key);
+    if (!hexEl || !colorEl) return;
+    var v = (hexEl.value || '').trim();
+    if (v && v.charAt(0) !== '#') v = '#' + v;
+    if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+      hexEl.value = v.toUpperCase();
+      colorEl.value = v;
+      hexEl.classList.remove('field-input--invalid');
+    } else {
+      hexEl.classList.add('field-input--invalid');
+    }
+  };
+
+  // Color-Picker (nativer Farbwähler) -> Hex-Textfeld.
+  window.ralSyncHexFromColor = function(key) {
+    var hexEl = id('f-' + key + '-hex');
+    var colorEl = id('f-' + key);
+    if (!hexEl || !colorEl) return;
+    hexEl.value = colorEl.value.toUpperCase();
+    hexEl.classList.remove('field-input--invalid');
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     RAL-AUSWAHL-DIALOG
+
+     RAL-Daten kommen ausschließlich aus window.RAL_COLORS (admin/ral-
+     colors.js, per <script> vor admin.js geladen) - keine hier erfundenen
+     Hex-Werte. Quelle und Bildschirm-Näherungs-Hinweis stehen dort und
+     zusätzlich direkt im Dialog (s.u.).
+  ──────────────────────────────────────────────────────────── */
+  var _ralPickerKey = null;
+
+  window.ralPickerOpen = function(key, label) {
+    _ralPickerKey = key;
+    var el = id('ral-picker-modal');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'ral-picker-modal';
+      el.className = 'modal';
+      el.style.display = 'none';
+      el.innerHTML =
+        '<div class="modal-backdrop" onclick="ralPickerClose()"></div>' +
+        '<div class="modal-box modal-box--sm" style="max-width:420px;">' +
+          '<div class="modal-head"><h3 id="ral-picker-title">RAL-Farbe wählen</h3>' +
+            '<button class="modal-close-btn" onclick="ralPickerClose()" aria-label="Schließen">✕</button>' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<label class="field-label" for="ral-picker-search">Suche</label>' +
+            '<input type="text" id="ral-picker-search" class="field-input" ' +
+              'placeholder="RAL-Nummer oder Name, z. B. 6005 oder Moos…" autocomplete="off" ' +
+              'style="margin-bottom:.6rem;">' +
+            '<p class="field-hint" style="margin:0 0 .75rem;">' +
+              'Bildschirmdarstellung nur annähernd – verbindlich ist der jeweilige RAL-Farbstandard.' +
+            '</p>' +
+            '<div id="ral-picker-list" class="ral-picker-list" role="listbox" aria-label="RAL-Farben"></div>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(el);
+      id('ral-picker-search').addEventListener('input', ralPickerRenderList);
+      id('ral-picker-search').addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') ralPickerClose();
+      });
+    }
+    id('ral-picker-title').textContent = label ? ('RAL-Farbe wählen – ' + label) : 'RAL-Farbe wählen';
+    id('ral-picker-search').value = '';
+    ralPickerRenderList();
+    el.style.display = 'flex';
+    setTimeout(function() { var s = id('ral-picker-search'); if (s) s.focus(); }, 0);
+  };
+
+  window.ralPickerClose = function() {
+    var el = id('ral-picker-modal');
+    if (el) el.style.display = 'none';
+    _ralPickerKey = null;
+  };
+
+  function ralPickerRenderList() {
+    var listEl = id('ral-picker-list');
+    if (!listEl) return;
+    var all = window.RAL_COLORS || [];
+    var q = (id('ral-picker-search').value || '').trim().toLowerCase();
+    var qDigits = q.replace(/^ral\s*/, '').replace(/\D/g, '');
+    var matches = !q ? all : all.filter(function(c) {
+      if (c.name.toLowerCase().indexOf(q) !== -1) return true;
+      if (c.ral.toLowerCase().indexOf(q) !== -1) return true;
+      if (qDigits && c.ral.replace(/\D/g, '').indexOf(qDigits) !== -1) return true;
+      return false;
+    });
+    if (!all.length) {
+      listEl.innerHTML = '<p style="padding:.75rem;color:var(--text-muted);font-size:.85rem;margin:0;">RAL-Farbliste nicht verfügbar.</p>';
+      return;
+    }
+    if (!matches.length) {
+      listEl.innerHTML = '<p style="padding:.75rem;color:var(--text-muted);font-size:.85rem;margin:0;">Keine RAL-Farbe gefunden.</p>';
+      return;
+    }
+    listEl.innerHTML = matches.map(function(c) {
+      return '<button type="button" class="ral-picker-row" role="option" ' +
+        'onclick="ralPickerSelect(\'' + c.hex + '\')" ' +
+        'aria-label="' + escAttr(c.ral + ' ' + c.name + ', Hex ' + c.hex) + '">' +
+        '<span class="ral-picker-swatch" style="background:' + c.hex + '" aria-hidden="true"></span>' +
+        '<span class="ral-picker-code">' + escHtml(c.ral) + '</span>' +
+        '<span class="ral-picker-name">' + escHtml(c.name) + '</span>' +
+      '</button>';
+    }).join('');
+  }
+
+  window.ralPickerSelect = function(hex) {
+    var key = _ralPickerKey;
+    if (!key) return;
+    var colorEl = id('f-' + key);
+    var hexEl = id('f-' + key + '-hex');
+    if (colorEl) colorEl.value = hex;
+    if (hexEl) { hexEl.value = hex.toUpperCase(); hexEl.classList.remove('field-input--invalid'); }
+    markDirty(); // Setzt Werte programmatisch - löst kein natives input/change-Event aus
+    ralPickerClose();
+  };
 
   /* ────────────────────────────────────────────────────────────
      IMPRESSUM
