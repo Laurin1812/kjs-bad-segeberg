@@ -404,10 +404,69 @@
 
   /* ────────────────────────────────────────────────────────────
      NAVIGATION TREE
+
+     Admin-Navigation aufgeräumt & gruppiert (05.09.2026, Laurin-Wunsch):
+     die bisher elf lose nebeneinanderstehenden Top-Level-Punkte (Start-
+     seite, Jäger, Verbraucher, Termine, Aktuelles, Service, Hundebörse,
+     Waffenbörse, Einstellungen, Downloads, Medien & Bilder) sind jetzt in
+     sechs klar benannte Gruppen sortiert: Dashboard, Redaktion,
+     Organisation, Angebote & Börsen, Weitere Inhalte, Einstellungen.
+     Das ist eine REINE Umgruppierung/Umsortierung - jeder bestehende Node
+     (key, file, form, dataKey, fields, drag, children, isAdd, navFile,
+     navKey, dir, parentSlug) ist unverändert, nur seine Position im Baum
+     hat sich geändert. Zwei technische Einschränkungen mussten dabei
+     beachtet werden (Details siehe Abschlussbericht dieser Aufgabe):
+       1. Die Gruppen "kjs" (KJS Segeberg) und "aufgaben" (Aufgaben der
+          KJS) haben direkte Kinder, deren Reihenfolge per Drag&Drop in
+          initSidebarSortables()/onSidebarReorder() direkt in die
+          ÖFFENTLICHE content/navigation.json (Arrays "kjs"/"aufgaben",
+          siehe STATIC_REORDER_MAPS) geschrieben wird. Diese direkten
+          Kinder dürfen NICHT auf verschiedene neue Kategorien aufgeteilt
+          werden, sonst würde ein künftiges Verschieben in der Sidebar
+          Einträge aus der öffentlichen Navigation verschwinden lassen.
+          Beide Gruppen bleiben deshalb als Ganzes zusammen (jetzt unter
+          "Organisation" bzw. "Weitere Inhalte") - das ist der Grund, warum
+          z.B. Niederwild/Hochwild (in "kjs" verschachtelt) nicht einzeln
+          nach "Weitere Inhalte" und Jagdhundeschule (in "aufgaben"
+          verschachtelt) nicht einzeln nach "Organisation" verschoben
+          wurden, obwohl das der ungefähren Wunschstruktur entsprochen
+          hätte.
+       2. Die NAV-Keys 'jaeger'/'verbraucher'/'kjs'/'aufgaben' werden auch
+          von initSektionsnameDblclick() (Doppelklick-Umbenennen der
+          öffentlichen Sektionsnamen) und welcomeHintCard() referenziert.
+          'jaeger' als Top-Level-Gruppe entfällt durch dieses Aufräumen
+          (ihre Kinder sind jetzt auf "Organisation"/"Angebote & Börsen"
+          verteilt) - beide Stellen wurden entsprechend angepasst (siehe
+          dortige Kommentare); 'kjs'/'aufgaben'/'verbraucher' bleiben als
+          Keys unverändert bestehen und funktionieren unverändert weiter.
+     PERM_BY_KEY/PERM_BY_DIR mussten NICHT angepasst werden - beide sind
+     ausschließlich über die (unveränderten) Node-Keys indiziert, nicht
+     über deren Position im Baum.
   ──────────────────────────────────────────────────────────── */
   var NAV = [
-    { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
-    { key:'jaeger', label:'🦌 Jäger', group:true, open:true, children:[
+    { key:'dashboard', label:'🏠 Dashboard', group:true, open:true, children:[
+      { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
+    ]},
+    { key:'redaktion', label:'📰 Redaktion', group:true, open:true, children:[
+      { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
+      { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
+      // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
+      // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
+      // Kalender" - beide schrieben schon dieselbe Datei
+      // (content/einstellungen.json), waren aber an zwei verschiedenen
+      // Stellen im Menü mit unterschiedlichen Namen zu finden. Jetzt EIN
+      // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
+      // Kontaktseite), siehe renderKontaktStammdaten().
+      // Admin-Navigation aufgeräumt (05.09.2026, Laurin-Wunsch): von
+      // "Einstellungen" nach "Redaktion" verschoben - laufende Redaktions-
+      // arbeit (Öffnungszeiten/Kontaktdaten pflegen), keine einmalige
+      // Konfiguration. War zuvor zusammen mit FAQ bewusst in "Einstellungen"
+      // (Laurin-Feedback 22.08.2026, Carsten-Hinweis "zentraler Punkt für
+      // zentrale, mehrfach verwendete Daten") - Datei/Form unverändert.
+      { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
+      { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
+    ]},
+    { key:'organisation', label:'🏛️ Organisation', group:true, open:false, children:[
       { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard', group:true, open:false, children:[
         { key:'new-sub-ueber-uns', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-sub-ueber-uns.json', navKey:'seiten', dir:'content/seiten-sub-ueber-uns',
@@ -461,6 +520,32 @@
         ]},
       ]},
       { key:'kjm', label:'Kreisjägermeister', file:'content/kreisjjaegermeister.json', form:'kjm' },
+    ]},
+    { key:'angebote-boersen', label:'🛍️ Angebote & Börsen', group:true, open:false, children:[
+      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'standard' },
+      { key:'hundeboerse', label:'🐕 Hundebörse', file:'content/hundeboerse.json', form:'hundeboerse' },
+      // Waffenbörse (Phase 1 Prototyp, 02.09.2026): eigenständiges Modul,
+      // eigene JSON-Datei (content/waffenboerse.json) - bewusst NICHT in
+      // hundeboerse.json integriert (andere Fachlogik/Felder). Noch kein
+      // Eintrag in der öffentlichen Hauptnavigation (siehe js/components.js /
+      // js/main.js) - Seiten sind bewusst nur über direkte URL erreichbar,
+      // bis nach Sichtprüfung entschieden ist, ob/wie ein Nav-Punkt ergänzt wird.
+      { key:'waffenboerse', label:'🔫 Waffenbörse', file:'content/waffenboerse.json', form:'waffenboerse' },
+      // Partner (03.09.2026): an derselben Stelle einsortiert wie in der
+      // öffentlichen Navigation (content/navigation.json: jaeger_dropdown
+      // direkt nach "infomobil") - Laurin-Wunsch, kein neuer Hauptmenüpunkt.
+      // Admin-Navigation aufgeräumt (05.09.2026): Infomobil/Hundebörse/
+      // Waffenbörse/Partner jetzt als klar zusammengehöriger Block "Angebote
+      // & Börsen" geführt (Laurin-Wunsch), in genau dieser Reihenfolge.
+      { key:'partner', label:'🤝 Partner', file:'content/partner.json', form:'partner', dataKey:'partner', drag:true },
+      // "Weitere Themen" (dynamicChildren, content/seiten-weitere.json) am
+      // 22.08.2026 auf Laurin-Wunsch entfernt ("brauchen wir eigentlich
+      // nicht, verwirrt nur") - loadDynamicChildren() hat einen Guard
+      // (if (!weitereNode) return;) und braucht daher keine eigene Anpassung.
+      // Die öffentliche Anzeige (js/main.js, Flyout im Jäger-Menü) wurde
+      // ebenfalls deaktiviert, siehe dortigen Kommentar.
+    ]},
+    { key:'weitere-inhalte', label:'📄 Weitere Inhalte', group:true, open:false, children:[
       { key:'aufgaben', label:'Aufgaben der KJS', group:true, open:false, children:[
         { key:'auf-schiessen',  label:'Schießwesen',          file:'content/aufgaben/schiessen.json',      form:'standard', drag:true, group:true, open:false, children:[
           { key:'new-sub-schiessen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
@@ -502,100 +587,67 @@
         { key:'new-aufgaben', label:'➕ Neue Aufgaben-Unterseite', form:'neueSeite', isAdd:true,
           navFile:'content/seiten-aufgaben.json', navKey:'seiten', dir:'content/seiten-aufgaben' },
       ]},
-      { key:'infomobil', label:'Infomobil', file:'content/jaeger/infomobil.json', form:'standard' },
-      // Partner (03.09.2026): an derselben Stelle einsortiert wie in der
-      // öffentlichen Navigation (content/navigation.json: jaeger_dropdown
-      // direkt nach "infomobil") - Laurin-Wunsch, kein neuer Hauptmenüpunkt.
-      { key:'partner', label:'🤝 Partner', file:'content/partner.json', form:'partner', dataKey:'partner', drag:true },
-      // "Weitere Themen" (dynamicChildren, content/seiten-weitere.json) am
-      // 22.08.2026 auf Laurin-Wunsch entfernt ("brauchen wir eigentlich
-      // nicht, verwirrt nur") - loadDynamicChildren() hat einen Guard
-      // (if (!weitereNode) return;) und braucht daher keine eigene Anpassung.
-      // Die öffentliche Anzeige (js/main.js, Flyout im Jäger-Menü) wurde
-      // ebenfalls deaktiviert, siehe dortigen Kommentar.
-    ]},
-    { key:'verbraucher', label:'🌿 Verbraucher', group:true, open:false, children:[
-      // 22.08.2026 (Laurin-Feedback): Wildfleisch/Lernort Natur/Grünes
-      // Klassenzimmer tragen jetzt selbst file+form (statt eines separaten
-      // "Seiteninhalt"-Unterpunkts) - ein Klick auf den Gruppennamen öffnet
-      // direkt den Seiteninhalt UND klappt die Unterseiten auf, statt erst
-      // eine Ebene tiefer auf "Seiteninhalt" klicken zu müssen. Siehe
-      // renderSidebar()/navItemEl() für die dafür nötige Sonderbehandlung
-      // von Gruppen mit eigenem file (anders als reine Ordner-Gruppen wie
-      // "Verbraucher" selbst, "Jäger", "Einstellungen" etc.).
-      { key:'verbraucher-wild', label:'Wildfleisch', file:'content/verbraucher/wildfleisch.json', form:'standard', group:true, open:false, children:[
-        { key:'new-sub-wild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
-          navFile:'content/seiten-sub-wildfleisch.json', navKey:'seiten', dir:'content/seiten-sub-wildfleisch',
-          parentSlug:'wildfleisch' },
+      { key:'verbraucher', label:'🌿 Verbraucher', group:true, open:false, children:[
+        // 22.08.2026 (Laurin-Feedback): Wildfleisch/Lernort Natur/Grünes
+        // Klassenzimmer tragen jetzt selbst file+form (statt eines separaten
+        // "Seiteninhalt"-Unterpunkts) - ein Klick auf den Gruppennamen öffnet
+        // direkt den Seiteninhalt UND klappt die Unterseiten auf, statt erst
+        // eine Ebene tiefer auf "Seiteninhalt" klicken zu müssen. Siehe
+        // renderSidebar()/navItemEl() für die dafür nötige Sonderbehandlung
+        // von Gruppen mit eigenem file (anders als reine Ordner-Gruppen wie
+        // "Verbraucher" selbst, "Einstellungen" etc.).
+        { key:'verbraucher-wild', label:'Wildfleisch', file:'content/verbraucher/wildfleisch.json', form:'standard', group:true, open:false, children:[
+          { key:'new-sub-wild', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-wildfleisch.json', navKey:'seiten', dir:'content/seiten-sub-wildfleisch',
+            parentSlug:'wildfleisch' },
+        ]},
+        { key:'verbraucher-lernort', label:'Lernort Natur', file:'content/verbraucher/lernort-natur.json', form:'standard', group:true, open:false, children:[
+          { key:'new-sub-lernort', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-lernort-natur.json', navKey:'seiten', dir:'content/seiten-sub-lernort-natur',
+            parentSlug:'lernort-natur' },
+        ]},
+        { key:'verbraucher-gruen', label:'Grünes Klassenzimmer', file:'content/verbraucher/gruenes-klassenzimmer.json', form:'standard', group:true, open:false, children:[
+          { key:'new-sub-gruen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
+            parentSlug:'gruenes-klassenzimmer' },
+        ]},
+        // 23.08.2026 (Laurin-Wunsch): Waidmannssprache war bisher Unterseite
+        // von Wildfleisch, ist jetzt eine eigenständige Hauptseite im
+        // Verbraucher-Dropdown wie Wildfleisch/Lernort Natur/Grünes
+        // Klassenzimmer - inkl. eigenem Unterseiten-System (gleicher Stil
+        // wie die anderen drei, Laurin-Feedback 23.08.2026: 'überall gleich').
+        { key:'verbraucher-waidmannssprache', label:'Waidmannssprache', file:'content/verbraucher/waidmannssprache.json', form:'standard', group:true, open:false, children:[
+          { key:'new-sub-waidmannssprache', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
+            navFile:'content/seiten-sub-waidmannssprache.json', navKey:'seiten', dir:'content/seiten-sub-waidmannssprache',
+            parentSlug:'waidmannssprache' },
+        ]},
+        // Der frühere generische Button "➕ Neue Verbraucher-Seite" (schrieb nach
+        // content/seiten-verbraucher/) wurde am 22.08.2026 entfernt (Frank/Laurin-
+        // Feedback: zwei parallele "Neue Seite"-Systeme unter Verbraucher waren
+        // verwirrend, Seiten landeten im falschen Topf und tauchten in keiner
+        // Sidebar auf). Neue Unterseiten jetzt IMMER über den "➕ Neue Unterseite"-
+        // Button beim jeweiligen Thema (Wildfleisch/Lernort Natur/Grünes
+        // Klassenzimmer) anlegen - siehe new-sub-wild/new-sub-lernort/new-sub-gruen
+        // oben. content/seiten-verbraucher/ bleibt als Alt-Ordner im Repo, wird
+        // aber nicht mehr beschrieben (Bestandsseiten wurden migriert, siehe
+        // content/seiten-sub-wildfleisch/).
       ]},
-      { key:'verbraucher-lernort', label:'Lernort Natur', file:'content/verbraucher/lernort-natur.json', form:'standard', group:true, open:false, children:[
-        { key:'new-sub-lernort', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
-          navFile:'content/seiten-sub-lernort-natur.json', navKey:'seiten', dir:'content/seiten-sub-lernort-natur',
-          parentSlug:'lernort-natur' },
-      ]},
-      { key:'verbraucher-gruen', label:'Grünes Klassenzimmer', file:'content/verbraucher/gruenes-klassenzimmer.json', form:'standard', group:true, open:false, children:[
-        { key:'new-sub-gruen', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
-          navFile:'content/seiten-sub-gruenes-klassenzimmer.json', navKey:'seiten', dir:'content/seiten-sub-gruenes-klassenzimmer',
-          parentSlug:'gruenes-klassenzimmer' },
-      ]},
-      // 23.08.2026 (Laurin-Wunsch): Waidmannssprache war bisher Unterseite
-      // von Wildfleisch, ist jetzt eine eigenständige Hauptseite im
-      // Verbraucher-Dropdown wie Wildfleisch/Lernort Natur/Grünes
-      // Klassenzimmer - inkl. eigenem Unterseiten-System (gleicher Stil
-      // wie die anderen drei, Laurin-Feedback 23.08.2026: 'überall gleich').
-      { key:'verbraucher-waidmannssprache', label:'Waidmannssprache', file:'content/verbraucher/waidmannssprache.json', form:'standard', group:true, open:false, children:[
-        { key:'new-sub-waidmannssprache', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
-          navFile:'content/seiten-sub-waidmannssprache.json', navKey:'seiten', dir:'content/seiten-sub-waidmannssprache',
-          parentSlug:'waidmannssprache' },
-      ]},
-      // Der frühere generische Button "➕ Neue Verbraucher-Seite" (schrieb nach
-      // content/seiten-verbraucher/) wurde am 22.08.2026 entfernt (Frank/Laurin-
-      // Feedback: zwei parallele "Neue Seite"-Systeme unter Verbraucher waren
-      // verwirrend, Seiten landeten im falschen Topf und tauchten in keiner
-      // Sidebar auf). Neue Unterseiten jetzt IMMER über den "➕ Neue Unterseite"-
-      // Button beim jeweiligen Thema (Wildfleisch/Lernort Natur/Grünes
-      // Klassenzimmer) anlegen - siehe new-sub-wild/new-sub-lernort/new-sub-gruen
-      // oben. content/seiten-verbraucher/ bleibt als Alt-Ordner im Repo, wird
-      // aber nicht mehr beschrieben (Bestandsseiten wurden migriert, siehe
-      // content/seiten-sub-wildfleisch/).
-    ]},
-    { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
-    { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
-    { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
-    { key:'hundeboerse', label:'🐕 Hundebörse', file:'content/hundeboerse.json', form:'hundeboerse' },
-    // Waffenbörse (Phase 1 Prototyp, 02.09.2026): eigenständiges Modul,
-    // eigene JSON-Datei (content/waffenboerse.json) - bewusst NICHT in
-    // hundeboerse.json integriert (andere Fachlogik/Felder). Noch kein
-    // Eintrag in der öffentlichen Hauptnavigation (siehe js/components.js /
-    // js/main.js) - Seiten sind bewusst nur über direkte URL erreichbar,
-    // bis nach Sichtprüfung entschieden ist, ob/wie ein Nav-Punkt ergänzt wird.
-    { key:'waffenboerse', label:'🔫 Waffenbörse', file:'content/waffenboerse.json', form:'waffenboerse' },
-    // "Kontakt & Stammdaten" und FAQ bewusst in "Einstellungen" verschoben
-    // (nicht mehr zwischen Service und Verbraucher-Themen als eigene
-    // Top-Level-Punkte) - beides sind Rahmendaten/Konfiguration, keine
-    // Inhaltsseiten wie Aktuelles/Termine/Service (Laurin-Feedback
-    // 22.08.2026, Carsten-Hinweis "zentraler Punkt für zentrale, mehrfach
-    // verwendete Daten"; FAQ auf Laurin-Wunsch 22.08.2026 ebenfalls dorthin
-    // verschoben).
-    { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
-      // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
-      // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
-      // Kalender" (hier drin) - beide schrieben schon dieselbe Datei
-      // (content/einstellungen.json), waren aber an zwei verschiedenen
-      // Stellen im Menü mit unterschiedlichen Namen zu finden. Jetzt EIN
-      // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
-      // Kontaktseite), siehe renderKontaktStammdaten().
-      { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
+      { key:'service',    label:'🧰 Service',    file:'content/service.json',   form:'service' },
+      { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
+      // FAQ war bis 05.09.2026 zusammen mit Kontakt & Stammdaten unter
+      // "Einstellungen" (Laurin-Wunsch 22.08.2026) - jetzt im Zuge des
+      // Admin-Navigation-Aufräumens bei den übrigen normalen Inhaltsseiten
+      // einsortiert (Datei/Form unverändert).
       { key:'faq',        label:'❓ FAQ',        file:'content/faq.json',       form:'faq' },
       { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
-      { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
+    ]},
+    { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
       { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
       { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
+      { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'benutzer', label:'👥 Benutzerverwaltung', form:'benutzer' },
     ]},
-    { key:'downloads', label:'📥 Downloads', file:'content/downloads.json', form:'downloads' },
-    { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
     // "🧪 Testseite" (content/test/testseite.json) 22.08.2026 aus dem Menü
     // entfernt (Laurin-Wunsch, Aufräumen) - war ursprünglich das Sandbox-
     // Fundament, auf dem das TipTap-Formular entwickelt wurde. Phase 5B.5
@@ -1041,7 +1093,14 @@
      SEKTIONSNAMEN – INLINE DOPPELKLICK
   ──────────────────────────────────────────────────────────── */
   function initSektionsnameDblclick() {
-    var keys = ['jaeger', 'kjs', 'aufgaben', 'verbraucher'];
+    // 'jaeger' entfernt (05.09.2026, Admin-Navigation-Aufräumen): der
+    // Top-Level-NAV-Knoten 'jaeger' entfällt, dessen Kinder sind jetzt auf
+    // "Organisation"/"Angebote & Börsen" verteilt. Der öffentliche
+    // Sektionsname "Jäger" (sektionsnamen.jaeger, siehe js/main.js) bleibt
+    // unverändert bearbeitbar - dafür weiterhin das Eingabefeld "sn-jaeger"
+    // im Panel "Navigation & Reihenfolge" (renderNavReihenfolge) nutzen,
+    // das ist unabhängig von der Admin-Sidebar-Struktur.
+    var keys = ['kjs', 'aufgaben', 'verbraucher'];
     keys.forEach(function(k) {
       var el = document.querySelector('[data-navkey="' + k + '"]');
       if (!el) return;
@@ -1200,7 +1259,10 @@
         '<div class="welcome-hints">' +
           welcomeHintCard('aktuelles', '📰', 'Aktuelles', 'Neuigkeiten hinzufügen') +
           welcomeHintCard('termine', '📅', 'Termine', 'Veranstaltungen pflegen') +
-          welcomeHintCard('jaeger', '🦌', 'Jäger', 'Vereinsinfos bearbeiten') +
+          // 'jaeger' -> 'kjs' (05.09.2026, Admin-Navigation-Aufräumen): der
+          // NAV-Knoten 'jaeger' entfällt, 'kjs' ("KJS Segeberg") ist der
+          // inhaltlich passendste verbleibende Ersatz-Ankerpunkt.
+          welcomeHintCard('kjs', '🦌', 'KJS Segeberg', 'Vereinsinfos bearbeiten') +
         '</div>' +
       '</div>';
   }
