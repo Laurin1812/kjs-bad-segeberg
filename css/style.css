@@ -2538,14 +2538,23 @@ body.kjs-lightbox-lock { overflow: hidden; }
    wich einem margin-top:auto, damit der Button innerhalb der jetzt als
    Flex-Spalte aufgebauten .pn-detail-head__body (siehe dortigen Kommentar)
    an deren Unterkante gedrückt wird - und diese Unterkante liegt dank der
-   dort gesetzten min-height exakt auf der Unterkante der Logo-Box. Die
-   horizontale Zentrierung (margin-left/right:auto) und der untere Rand
-   (0) bleiben unverändert - nur die vertikale Positionierung ändert sich.
+   dort gesetzten min-height exakt auf der Unterkante der Logo-Box.
+   Sechste Runde (05.09.2026, Laurin-Wunsch): die bisherige horizontale
+   Zentrierung kam vom mittleren "auto" in "margin: auto auto 0" (setzt
+   margin-left UND margin-right auf auto - der Button ist per width:
+   fit-content schmaler als die Spalte, dadurch zentriert dieses Auto-Paar
+   ihn quer zur Spalte). Auf Laurin-Wunsch jetzt links ausgerichtet:
+   margin-left/right von auto auf 0 - ohne eigene Quer-Ausrichtung greift
+   in der Flex-Spalte .pn-detail-head__body automatisch deren linke Kante
+   (dieselbe Kante, an der auch die Überschrift beginnt, da .pn-detail-
+   head__body keinerlei Padding hat). margin-top:auto (Unterkanten-Flucht
+   mit dem Logo) und margin-bottom:0 bleiben unverändert.
    Auf Mobile (siehe Media-Query direkt darunter) bleibt bewusst weiterhin
-   der alte feste 2.25rem-Abstand erhalten, da dort Logo/Body gestapelt
-   stehen und die Unterkanten-Flucht keine Rolle spielt. */
+   der alte feste 2.25rem-Abstand MIT Zentrierung erhalten (dort stehen
+   Logo/Body gestapelt und zentriert, siehe .pn-detail-head im Mobile-
+   Breakpoint) - diese Regel wurde für diesen Task nicht angefasst. */
 .pn-website-btn {
-  display: flex; width: fit-content; margin: auto auto 0;
+  display: flex; width: fit-content; margin: auto 0 0;
   padding: .6rem 1.4rem; font-size: .8rem;
 }
 @media (max-width: 560px) { .pn-website-btn { margin: 2.25rem auto 0; } }
