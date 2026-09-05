@@ -2559,8 +2559,20 @@ body.kjs-lightbox-lock { overflow: hidden; }
    spürbar mehr Luft als zwischen einer normalen Überschrift und ihrem Text
    üblich. Bewusst wieder auf einen normalen, angenehmen Wert zurückgesetzt
    (3.5rem -> 1.25rem) statt eines neuen Overrides - Selektor, Kopf-Bereich
-   und alles andere an dieser Regel bleiben unverändert. */
-.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.25rem; }
+   und alles andere an dieser Regel bleiben unverändert.
+   Feinkorrektur (05.09.2026, Folgetag): "Über X" sollte minimal (~8-12px)
+   höher sitzen - der Fließtext darunter darf sich dabei NICHT mitverschieben
+   und der Kopf-Bereich/Abstand darüber (.pn-detail-body, 2rem) bleibt
+   ebenfalls unangetastet. Eine Änderung von margin-top hätte über die
+   Kastenhöhe hinweg auch den Fließtext mit nach oben gezogen (margin-top
+   verschiebt die gesamte Box inkl. ihrer Unterkante, an der sich der
+   folgende Text orientiert). Stattdessen rein visueller Versatz über
+   position:relative + top:-10px auf genau dieser bestehenden Regel: die
+   Überschrift wird nur optisch angehoben, ihr Platzbedarf im Layout (und
+   damit die Position von allem danach) bleibt exakt wie zuvor. margin-top/
+   margin-bottom unverändert (0 / 1.25rem) - kein neuer Selektor, keine neue
+   Regel, nur diese zwei zusätzlichen Zeilen in der bestehenden Klasse. */
+.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.25rem; position: relative; top: -10px; }
 
 /* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
    unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
