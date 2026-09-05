@@ -60,6 +60,12 @@
 
     <!-- Main panel -->
     <main class="admin-main" id="admin-main">
+      <!-- Statischer Erstanzeige-Platzhalter (identisch zu showWelcome() in
+           admin.js, damit vor dem JS-Laden schon etwas Sinnvolles zu sehen
+           ist). Admin-Navigation aufgeräumt (05.09.2026): NAV-Knoten 'jaeger'
+           entfällt, dritte Karte daher wie in admin.js auf 'kjs' (KJS
+           Segeberg) umgestellt - siehe dortigen Kommentar bei
+           welcomeHintCard('kjs', ...). -->
       <div class="welcome-screen">
         <div class="welcome-icon"><img src="/images/logo.png" alt="KJS Segeberg e.V." style="height:72px;width:auto;opacity:.85;"></div>
         <h2 id="welcome-greeting">Willkommen im Admin-Bereich</h2>
@@ -67,7 +73,7 @@
         <div class="welcome-hints">
           <div class="hint-card" onclick="document.querySelector('[data-navkey=aktuelles]').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>
           <div class="hint-card" onclick="document.querySelector('[data-navkey=termine]').click()" style="cursor:pointer">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>
-          <div class="hint-card" onclick="document.querySelector('[data-navkey=jaeger]').click()" style="cursor:pointer">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>
+          <div class="hint-card" onclick="document.querySelector('[data-navkey=kjs]').click()" style="cursor:pointer">🦌 <strong>KJS Segeberg</strong><br>Vereinsinfos bearbeiten</div>
         </div>
       </div>
     </main>
