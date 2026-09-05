@@ -447,25 +447,6 @@
     { key:'dashboard', label:'🏠 Dashboard', group:true, open:true, children:[
       { key:'startseite',  label:'🏠 Startseite',           file:'content/startseite.json',               form:'startseite' },
     ]},
-    { key:'redaktion', label:'📰 Redaktion', group:true, open:true, children:[
-      { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
-      { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
-      // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
-      // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
-      // Kalender" - beide schrieben schon dieselbe Datei
-      // (content/einstellungen.json), waren aber an zwei verschiedenen
-      // Stellen im Menü mit unterschiedlichen Namen zu finden. Jetzt EIN
-      // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
-      // Kontaktseite), siehe renderKontaktStammdaten().
-      // Admin-Navigation aufgeräumt (05.09.2026, Laurin-Wunsch): von
-      // "Einstellungen" nach "Redaktion" verschoben - laufende Redaktions-
-      // arbeit (Öffnungszeiten/Kontaktdaten pflegen), keine einmalige
-      // Konfiguration. War zuvor zusammen mit FAQ bewusst in "Einstellungen"
-      // (Laurin-Feedback 22.08.2026, Carsten-Hinweis "zentraler Punkt für
-      // zentrale, mehrfach verwendete Daten") - Datei/Form unverändert.
-      { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
-      { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
-    ]},
     { key:'organisation', label:'🏛️ Organisation', group:true, open:false, children:[
       { key:'jaeger-ueber-uns', label:'Über uns', file:'content/jaeger/ueber-uns.json', form:'standard', group:true, open:false, children:[
         { key:'new-sub-ueber-uns', label:'➕ Neue Unterseite', form:'neueSeite', isAdd:true,
@@ -642,6 +623,29 @@
       { key:'footer',    label:'Fußzeile',                  file:'content/footer.json',           form:'footer' },
       { key:'impressum', label:'Impressum',                  file:'content/impressum.json',        form:'impressum' },
     ]},
+    { key:'redaktion', label:'📰 Redaktion', group:true, open:true, children:[
+      { key:'aktuelles',  label:'📰 Aktuelles', file:'content/aktuelles.json', form:'aktuelles' },
+      { key:'termine',    label:'📅 Termine',   file:'content/termine.json',   form:'termine' },
+      // "Kontakt & Stammdaten" ersetzt die früheren getrennten Bereiche
+      // "📞 Kontaktseite" (eigener Top-Level-Punkt) und "Telefonzentrale &
+      // Kalender" - beide schrieben schon dieselbe Datei
+      // (content/einstellungen.json), waren aber an zwei verschiedenen
+      // Stellen im Menü mit unterschiedlichen Namen zu finden. Jetzt EIN
+      // Bereich mit drei klar benannten Blöcken (Kopfzeile/Kontaktbox/
+      // Kontaktseite), siehe renderKontaktStammdaten().
+      // Admin-Navigation aufgeräumt (05.09.2026, Laurin-Wunsch): von
+      // "Einstellungen" nach "Redaktion" verschoben - laufende Redaktions-
+      // arbeit (Öffnungszeiten/Kontaktdaten pflegen), keine einmalige
+      // Konfiguration. War zuvor zusammen mit FAQ bewusst in "Einstellungen"
+      // (Laurin-Feedback 22.08.2026, Carsten-Hinweis "zentraler Punkt für
+      // zentrale, mehrfach verwendete Daten") - Datei/Form unverändert.
+      { key:'kontakt-stammdaten', label:'📞 Kontakt & Stammdaten', file:'content/einstellungen.json', form:'kontaktStammdaten' },
+      { key:'medien',    label:'🖼️ Medien & Bilder', form:'medien' },
+    ]},
+    // Redaktion (05.09.2026, Laurin-Wunsch, Sammelblock): direkt über
+    // Einstellungen verschoben - letzte inhaltliche Gruppe vor der reinen
+    // Konfigurationsgruppe, statt gleich nach Dashboard ganz oben. Reine
+    // Positionsänderung, Keys/Children/Formulare/Berechtigungen unverändert.
     { key:'einstellungen', label:'⚙️ Einstellungen', group:true, open:false, children:[
       { key:'nav-extra', label:'🧭 Hauptnavigation erweitern', file:'content/navigation-extra.json', form:'navExtra' },
       { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
@@ -5404,6 +5408,14 @@
           fText('ei-kal-url', 'Google Kalender URL', data.google_kalender_url, 'Einbettungs-URL aus Google Kalender') +
           fText('ei-kal-titel', 'Kalender-Überschrift', data.google_kalender_titel, 'z.B. Terminbuchung') +
         '</div>' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">🚐 Infomobil – Verfügbarkeit (optional, TimeTree)</div>' +
+          '<p style="margin:-.4rem 0 .85rem;color:var(--text-muted);font-size:.82rem;">' +
+            'Link zu einem öffentlichen TimeTree-Kalender (Public Calendar), der zeigt, wann das Infomobil verfügbar ist. ' +
+            'Der Button „Verfügbarkeit prüfen" auf der Infomobil-Seite erscheint nur, solange hier ein Link eingetragen ist – ohne Link bleibt er ausgeblendet, statt ins Leere zu führen.' +
+          '</p>' +
+          fText('ei-timetree-url', 'TimeTree Public-Calendar-Link', data.infomobil_timetree_url, 'https://timetreeapp.com/public_calendars/…') +
+        '</div>' +
       '</div>' + saveBar();
     renderMain(html);
     bindSaveBtn();
@@ -5423,6 +5435,7 @@
     data.telefon_header = gv('ei-telefon-header');
     data.google_kalender_url   = gv('ei-kal-url');
     data.google_kalender_titel = gv('ei-kal-titel');
+    data.infomobil_timetree_url = gv('ei-timetree-url');
     data.kontakt_ueberschrift = gv('ko-ueberschrift');
     data.kontakt_text  = gv('ko-text');
     data.telefon = gv('ko-telefon');

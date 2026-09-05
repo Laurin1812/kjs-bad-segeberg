@@ -57,10 +57,20 @@
 
 <script src="/js/main.js"></script>
 <script>
-  // Infomobil-Inhalt laden + Markdown rendern + optional Google Kalender
-  fetch('/content/jaeger/infomobil.json')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
+  // Infomobil-Inhalt laden + Markdown rendern + optional Google Kalender +
+  // optionaler "Verfügbarkeit prüfen"-Button (TimeTree, 05.09.2026).
+  // Beide Quellen (infomobil.json + einstellungen.json) werden VOR dem
+  // Rendern zusammen geladen (statt wie vorher verschachtelt/nacheinander),
+  // weil der neue Button direkt neben "Kontakt aufnehmen" im selben
+  // .btn-group stehen muss und daher schon beim ersten innerHTML-Aufbau
+  // feststehen muss, ob ein TimeTree-Link hinterlegt ist.
+  Promise.all([
+    fetch('/content/jaeger/infomobil.json').then(function(r) { return r.json(); }),
+    fetch('/content/einstellungen.json').then(function(r) { return r.json(); }).catch(function() { return {}; })
+  ])
+    .then(function(results) {
+      var d = results[0] || {};
+      var settings = results[1] || {};
       var main = document.getElementById('page-main');
       if (!main) return;
       if (d.hero_bild) {
@@ -94,6 +104,21 @@
         if (/<[a-z]/i.test(raw)) return raw;
         return typeof marked !== 'undefined' ? marked.parse(raw) : raw;
       }
+      function escAttrLokal(s) {
+        return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      }
+      // "Verfügbarkeit prüfen" (TimeTree, 05.09.2026): verlinkt auf den
+      // öffentlichen TimeTree-Kalender fürs Infomobil, zentral gepflegt über
+      // Admin -> Kontakt & Stammdaten -> "Infomobil – Verfügbarkeit"
+      // (content/einstellungen.json: infomobil_timetree_url). Ist (noch)
+      // kein Link hinterlegt, wird der Button bewusst NICHT gerendert -
+      // kein toter #-Link, keine kaputte Navigation. Öffnet in neuem Tab
+      // wie der externe Google-Datenschutz-Link weiter unten, da TimeTree
+      // eine fremde Seite ist.
+      var timetreeUrl = (settings.infomobil_timetree_url || '').trim();
+      var verfuegbarkeitBtn = timetreeUrl
+        ? '<a href="' + escAttrLokal(timetreeUrl) + '" class="btn btn-outline-green" target="_blank" rel="noopener noreferrer">Verfügbarkeit prüfen</a>'
+        : '';
       main.innerHTML =
         renderField(d.untertitel) +
         renderField(d.intro) +
@@ -101,24 +126,24 @@
         '<div id="page-inhalt"></div>' +
         kontaktStr +
         '<div id="kalender-container"></div>' +
-        '<div style="margin-top:2rem;"><a href="../kontakt/index.html" class="btn btn-outline-green">Kontakt aufnehmen</a></div>';
+        '<div class="btn-group" style="margin-top:2rem">' +
+          '<a href="../kontakt/index.html" class="btn btn-outline-green">Kontakt aufnehmen</a>' +
+          verfuegbarkeitBtn +
+        '</div>';
       if (d.inhalt) {
         var el = document.getElementById('page-inhalt');
         if (el) el.innerHTML = renderField(d.inhalt);
       }
-      // Google Kalender nach Seiteninhalt einfügen
-      return fetch('/content/einstellungen.json');
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
+      // Google Kalender (unverändert, nutzt jetzt einfach die schon
+      // geladenen "settings" statt eines eigenen zweiten Fetches)
       var container = document.getElementById('kalender-container');
-      if (!container || !d.google_kalender_url) return;
-      var titel = d.google_kalender_titel || 'Terminbuchung';
+      if (!container || !settings.google_kalender_url) return;
+      var titel = settings.google_kalender_titel || 'Terminbuchung';
       container.innerHTML =
         '<div style="margin-top:2rem;">' +
           '<h3 style="margin-bottom:1rem;">' + titel + '</h3>' +
           '<div style="border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);">' +
-            '<iframe src="' + d.google_kalender_url + '" style="width:100%;height:650px;border:none;display:block;" frameborder="0" scrolling="no" title="Google Kalender – Terminbuchung"></iframe>' +
+            '<iframe src="' + settings.google_kalender_url + '" style="width:100%;height:650px;border:none;display:block;" frameborder="0" scrolling="no" title="Google Kalender – Terminbuchung"></iframe>' +
           '</div>' +
           '<p style="font-size:.8rem;color:var(--text-muted);margin-top:.75rem;">Dieser Kalender wird von Google bereitgestellt. ' +
             '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzhinweise von Google</a></p>' +

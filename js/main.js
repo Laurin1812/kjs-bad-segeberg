@@ -914,8 +914,12 @@ function splitPostadresse(raw) {
             '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
             (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +
             '<div class="footer-social">' +
-              '<a href="' + escHtml(d.facebook_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
-              '<a href="' + escHtml(d.instagram_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>' +
+              // Gleiche Icon-Assets/Kreis-Badge-Logik wie im Header
+              // (.topbar__social--facebook/--instagram, css/style.css) -
+              // feste Markenfarben statt des alten, einheitlich blassen
+              // Icon-Buttons, damit Header und Footer "aus einem Guss" wirken.
+              '<a href="' + escHtml(d.facebook_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Facebook" class="footer-social--facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
+              '<a href="' + escHtml(d.instagram_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Instagram" class="footer-social--instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></a>' +
             '</div>' +
           '</div>' +
           colHtml('Über die KJS', d.spalte_ueber_kjs) +
@@ -999,6 +1003,8 @@ if (contactForm) {
       btn.textContent = 'Fehler – bitte erneut versuchen';
       btn.style.background = '#c0392b';
       btn.disabled = false;
+      var fallback = document.getElementById('contactFormFallback');
+      if (fallback) fallback.style.display = '';
     });
   });
 }

@@ -26,7 +26,11 @@
   <!-- Topbar -->
   <header class="admin-topbar">
     <div class="topbar-brand">
-      <img src="/images/logo.png" alt="KJS" class="topbar-logo" style="height:28px;width:auto;vertical-align:middle;display:block;">
+      <!-- Dunkelgrüne Topbar -> gleiche für dunkle Hintergründe vorgesehene
+           Logo-Variante wie im Footer der öffentlichen Seite (siehe
+           js/main.js renderFooter, dieselbe Begründung: logo.png ist für
+           helle Flächen gedacht, logo-dunkel.png für dunkles Grün). -->
+      <img src="/images/logo-dunkel.png" alt="KJS" class="topbar-logo" style="height:28px;width:auto;vertical-align:middle;display:block;">
       <span class="topbar-title">KJS Admin</span>
       <button id="home-btn" class="topbar-home-btn" title="Zurück zur Startübersicht">🏠 Start</button>
     </div>

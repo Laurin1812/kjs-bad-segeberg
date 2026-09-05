@@ -1632,9 +1632,16 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .footer-social a {
   width: 34px; height: 34px; background: rgba(255,255,255,.07); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,.65); transition: all var(--transition); font-size: .95rem;
+  color: #fff; transition: filter var(--transition); font-size: .95rem;
 }
-.footer-social a:hover { background: var(--green-main); color: #fff; }
+/* Gleiche feste Marken-Badges wie im Header (.topbar__social--facebook/
+   --instagram) statt des alten, einheitlich blassen Icon-Kreises -
+   Header und Footer sollen optisch "aus einem Guss" sein. */
+.footer-social a.footer-social--facebook { background: #1877F2; }
+.footer-social a.footer-social--instagram {
+  background: linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%);
+}
+.footer-social a:hover { filter: brightness(1.12); }
 .footer-col h5 {
   color: #fff; font-size: .82rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .12em; margin-bottom: 1.25rem; padding-bottom: .5rem;
