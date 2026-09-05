@@ -2553,8 +2553,14 @@ body.kjs-lightbox-lock { overflow: hidden; }
    weiterhin 0), nur ihr margin-bottom steuert diesen Abstand, da der
    folgende Beschreibungstext ein einfaches <p> ohne eigenes margin-top ist
    (globaler *-Reset). Keine weiteren Wrapper- oder Sidebar-Margins
-   angefasst - ausschließlich dieser eine Wert. */
-.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 3.5rem; }
+   angefasst - ausschließlich dieser eine Wert.
+   Korrektur (05.09.2026): 3.5rem hatte sich über die vorigen Runden zu groß
+   aufsummiert - zwischen "Über X" und dem Fließtext direkt darunter entstand
+   spürbar mehr Luft als zwischen einer normalen Überschrift und ihrem Text
+   üblich. Bewusst wieder auf einen normalen, angenehmen Wert zurückgesetzt
+   (3.5rem -> 1.25rem) statt eines neuen Overrides - Selektor, Kopf-Bereich
+   und alles andere an dieser Regel bleiben unverändert. */
+.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.25rem; }
 
 /* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
    unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
@@ -2563,8 +2569,15 @@ body.kjs-lightbox-lock { overflow: hidden; }
    ".pn-detail-body" (siehe partner/detail.html, wird um Über/Kontakt/
    Weitere-Informationen gemeinsam gelegt) statt Einzel-Margins an mehreren
    Stellen - wirkt automatisch für JEDEN Partner (LJV, Wildtierkataster, ...),
-   keine Sonderlösung pro Partner. */
-.pn-detail-body { margin-top: 4rem; }
+   keine Sonderlösung pro Partner.
+   Korrektur (05.09.2026): 4rem erzeugte zusammen mit dem knapp darunter
+   liegenden margin-bottom von ".pn-section-title" (siehe unten, ebenfalls
+   heute reduziert) zu viel Leerraum zwischen Partnerkopf und "Über X" -
+   der Kopf-Bereich selbst (Logo/Titel/Button/rechter Kasten) bleibt dabei
+   unverändert, es wird ausschließlich dieser eine Wert angepasst (4rem ->
+   2rem), weiterhin deutlich sichtbar getrennt vom Kopf, aber spürbar
+   kompakter. */
+.pn-detail-body { margin-top: 2rem; }
 
 /* Frank-Feedback (04.09.2026, dritte Nachkorrektur): die beiden vorherigen
    Versuche (erst ein kleiner 1.5rem-Nudge, danach ein großer 17.25rem-Wert,
