@@ -6,6 +6,12 @@
   # ausgeliefert (relative Pfade, siehe js/main.js), daher muss jede
   # Admin-Speicherung deployed werden, um sofort live zu sein.
 
+# Benutzerverwaltung (05.09.2026): "netlify/functions/admin-users.js" führt
+# Admin-Aktionen serverseitig über Netlifys Identity-Admin-API aus (Details
+# und Ursache des vorherigen 401-Fehlers direkt im Kommentar dieser Datei).
+[functions]
+  directory = "netlify/functions"
+
 [[headers]]
   for = "/admin/*"
   [headers.values]

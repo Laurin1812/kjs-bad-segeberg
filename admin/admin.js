@@ -664,21 +664,6 @@
     return user.jwt ? await user.jwt(!!forceRefresh) : (user.token && user.token.access_token);
   }
 
-  // Dekodiert den Payload eines JWT (reines Base64, keine Signaturprüfung) –
-  // dient nur zur Diagnose, damit man sehen kann, welche Rollen/E-Mail das
-  // Token tatsächlich enthält, das der Server ausgestellt hat.
-  function decodeJwtPayload(tok) {
-    try {
-      var parts = (tok || '').split('.');
-      if (parts.length < 2) return null;
-      var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      while (b64.length % 4) b64 += '=';
-      return JSON.parse(decodeURIComponent(escape(atob(b64))));
-    } catch (e) {
-      return null;
-    }
-  }
-
   async function apiGet(path) {
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
@@ -5924,7 +5909,19 @@
 
   /* ────────────────────────────────────────────────────────────
      BENUTZERVERWALTUNG
+     Läuft seit 05.09.2026 vollständig über die Netlify Function
+     "/.netlify/functions/admin-users" statt über einen direkten
+     Browser-Aufruf der rohen Identity-Admin-API (siehe ausführlicher
+     Kommentar in netlify/functions/admin-users.js: Grund für den
+     vorherigen dauerhaften 401 war, dass diese API grundsätzlich kein
+     normales Benutzer-Token akzeptiert, unabhängig von dessen Rollen).
+     Die Function prüft Login + Rolle "admin" serverseitig und führt die
+     eigentliche Identity-Admin-Aktion mit dem site-eigenen Service-Token
+     aus, das den Browser nie erreicht.
   ──────────────────────────────────────────────────────────── */
+  var BU_ENDPOINT = '/.netlify/functions/admin-users';
+  var BU_ROLES = ['admin']; // aktuell einzige existierende Rolle, s. Abschlussbericht für "redakteur" als möglichen nächsten Schritt
+
   function renderBenutzer() {
     var main = id('admin-main');
     main.innerHTML =
@@ -5932,7 +5929,7 @@
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Neuen Benutzer einladen</div>' +
-          '<p class="text-muted" style="margin-bottom:1rem;">Der Benutzer erhält eine Einladungs-E-Mail und kann sich dann anmelden.</p>' +
+          '<p class="text-muted" style="margin-bottom:1rem;">Der Benutzer erhält eine reguläre Einladungs-E-Mail von Netlify Identity und vergibt sein Passwort selbst beim ersten Anmelden.</p>' +
           '<div class="field-row">' +
             '<label class="field-label" for="bu-email">E-Mail-Adresse</label>' +
             '<input class="field-input" type="email" id="bu-email" placeholder="max@example.de">' +
@@ -5943,20 +5940,36 @@
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Aktuelle Benutzer</div>' +
+          '<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem;">Rollenänderungen wirken beim betroffenen Benutzer erst nach dessen nächster Anmeldung (neues Zugriffstoken).</p>' +
           '<div id="bu-list"><div class="gallery-loading">Wird geladen…</div></div>' +
-        '</div>' +
-        '<div class="form-card" style="border-color:#f0ad4e;background:#fffbf0;">' +
-          '<div class="form-card-title" style="color:#856404;">ℹ️ Admin-Berechtigung vergeben</div>' +
-          '<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.5rem;">Damit ein Benutzer Inhalte bearbeiten darf, muss er im Netlify-Dashboard die Rolle <strong>admin</strong> erhalten:</p>' +
-          '<ol style="font-size:.85rem;color:var(--text-muted);padding-left:1.4rem;margin:0;">' +
-            '<li>Netlify-Dashboard → <strong>Identity</strong></li>' +
-            '<li>Benutzer auswählen → <strong>Edit</strong></li>' +
-            '<li>Unter <em>Roles</em>: <code>admin</code> eintragen</li>' +
-            '<li>Speichern</li>' +
-          '</ol>' +
         '</div>' +
       '</div>';
     benutzerLoad();
+  }
+
+  // Liefert dem Benutzer eine verständliche, nicht-technische Meldung;
+  // vollständige technische Details (Status, Rohantwort) nur in der Konsole.
+  function buFehlerText(status, body) {
+    if (status === 401) return 'Sitzung abgelaufen. Bitte erneut anmelden.';
+    if (status === 403) return 'Keine Adminrechte.';
+    if (body && body.message) return body.message;
+    return 'Serverfehler – bitte später erneut versuchen.';
+  }
+
+  async function buFetch(method, pathSuffix, bodyObj) {
+    var tok = await getToken(true);
+    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
+    if (bodyObj !== undefined) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(bodyObj);
+    }
+    var r = await fetch(BU_ENDPOINT + (pathSuffix || ''), opts);
+    var data = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      console.error('[Benutzerverwaltung] ' + method + ' ' + BU_ENDPOINT + (pathSuffix || '') + ' → HTTP ' + r.status, data);
+      throw new Error(buFehlerText(r.status, data));
+    }
+    return data;
   }
 
   window.benutzerLoad = benutzerLoad;
@@ -5964,65 +5977,26 @@
     var list = id('bu-list');
     if (!list) return;
     try {
-      // forceRefresh=true: ein zuvor ausgestelltes Token kennt eine neu vergebene
-      // "admin"-Rolle in Netlify Identity nicht – erst ein frisches Token (vom
-      // Identity-Server neu ausgestellt) enthält die aktuellen Rollen. Ohne dies
-      // bleibt der Aufruf dauerhaft auf HTTP 401, selbst nachdem die Rolle im
-      // Netlify-Dashboard korrekt gesetzt wurde.
-      var tok = await getToken(true);
-      var r = await fetch('/.netlify/identity/admin/users?per_page=100', {
-        headers: { 'Authorization': 'Bearer ' + tok }
-      });
-      if (!r.ok) {
-        // Rohen Fehlercode + Antwort in der Konsole protokollieren, damit sich
-        // das Problem im Browser (F12 → Konsole) genau nachvollziehen lässt.
-        var rawBody = await r.text().catch(function() { return ''; });
-        console.error('[Benutzerverwaltung] GET /.netlify/identity/admin/users → HTTP ' + r.status, rawBody);
-        // Server-Antwort (z.B. {"code":401,"msg":"..."}) für die Anzeige im UI
-        // extrahieren, damit man den genauen Grund auch ohne Konsole sieht.
-        var serverMsg = '';
-        try { serverMsg = JSON.parse(rawBody).msg || ''; } catch(_e) { serverMsg = rawBody; }
-        var detail = serverMsg ? ' Server-Antwort: "' + serverMsg + '"' : '';
-        // Token-Inhalt zur Diagnose dekodieren (nur lokal, ohne Server-Anfrage):
-        // zeigt, welche E-Mail/Rollen das tatsächlich ausgestellte Token enthält.
-        var payload = decodeJwtPayload(tok);
-        var tokenInfo = '';
-        if (payload) {
-          var pRoles = (payload.app_metadata && payload.app_metadata.roles) || [];
-          tokenInfo = ' [Token-Inhalt: email=' + (payload.email || '?') +
-            ', app_metadata.roles=' + JSON.stringify(pRoles) +
-            ', exp=' + (payload.exp ? new Date(payload.exp * 1000).toLocaleString('de-DE') : '?') + ']';
-        } else {
-          tokenInfo = ' [Token konnte nicht dekodiert werden]';
-        }
-        if (r.status === 403) {
-          throw new Error('HTTP 403 – Keine Admin-Berechtigung. Dein Konto hat (noch) nicht die Rolle "admin" ' +
-            'in Netlify Identity. Bitte wende dich an den Netlify-Administrator: Die Rolle "admin" muss im ' +
-            'Netlify-Dashboard unter Identity → Benutzer → Edit → Roles manuell vergeben werden – das ist ' +
-            'per Code nicht möglich.' + detail + tokenInfo);
-        }
-        if (r.status === 401) {
-          throw new Error('HTTP 401 – Anmeldung ungültig/abgelaufen ODER Rolle "admin" fehlt auf dem Zugriffstoken. ' +
-            'Bitte einmal komplett ausloggen und wieder einloggen, damit ein neues Zugriffstoken ausgestellt wird. ' +
-            'Falls die Rolle "admin" gerade erst vergeben wurde, kann es einige Minuten dauern, bis sie wirksam wird.' + detail + tokenInfo);
-        }
-        throw new Error('HTTP ' + r.status + ' beim Laden der Benutzerliste.' + detail + tokenInfo);
-      }
-      var d = await r.json();
-      var users = d.users || [];
+      var data = await buFetch('GET');
+      var users = data.users || [];
       if (!users.length) {
         list.innerHTML = '<p style="color:var(--text-muted);">Keine Benutzer gefunden.</p>';
         return;
       }
       list.innerHTML = users.map(function(u) {
-        var uname = (u.user_metadata && u.user_metadata.full_name) || '';
-        var roles = (u.app_metadata && u.app_metadata.roles) || [];
+        var isAdmin = u.roles.indexOf('admin') !== -1;
+        var statusLabel = u.status === 'bestaetigt' ? 'Bestätigt' : 'Einladung ausstehend';
+        var roleOptions = '<option value=""' + (!isAdmin ? ' selected' : '') + '>— keine besondere Rolle —</option>' +
+          BU_ROLES.map(function(rl) {
+            return '<option value="' + escAttr(rl) + '"' + (u.roles.indexOf(rl) !== -1 ? ' selected' : '') + '>' + escHtml(rl) + '</option>';
+          }).join('');
         return '<div class="bu-user-row">' +
           '<div class="bu-user-info">' +
             '<strong>' + escHtml(u.email) + '</strong>' +
-            (uname ? ' <span class="bu-user-name">(' + escHtml(uname) + ')</span>' : '') +
-            (roles.length ? ' <span class="bu-badge">' + escHtml(roles.join(', ')) + '</span>' : '') +
+            (u.full_name ? ' <span class="bu-user-name">(' + escHtml(u.full_name) + ')</span>' : '') +
+            ' <span class="bu-badge">' + escHtml(statusLabel) + '</span>' +
           '</div>' +
+          '<select class="field-input" style="width:auto;" onchange="benutzerSetRole(\'' + escAttr(u.id) + '\', this.value)">' + roleOptions + '</select>' +
           '<button class="btn btn-sm btn-danger" onclick="benutzerRemove(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🗑️ Entfernen</button>' +
         '</div>';
       }).join('');
@@ -6039,23 +6013,7 @@
     var email = emailEl ? emailEl.value.trim() : '';
     if (!email) { toast('❌ Bitte E-Mail-Adresse eingeben', true); return; }
     try {
-      var tok = await getToken(true);
-      var r = await fetch('/.netlify/identity/admin/users', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, role: 'admin' })
-      });
-      if (!r.ok) {
-        var err = await r.json().catch(function() { return {}; });
-        console.error('[Benutzerverwaltung] POST /.netlify/identity/admin/users → HTTP ' + r.status, err);
-        if (r.status === 403) {
-          throw new Error('Keine Admin-Berechtigung. Bitte wende dich an den Netlify-Administrator.');
-        }
-        if (r.status === 401) {
-          throw new Error('Anmeldung ungültig oder abgelaufen. Bitte einmal aus- und wieder einloggen.');
-        }
-        throw new Error(err.msg || err.message || 'HTTP ' + r.status);
-      }
+      await buFetch('POST', '', { email: email });
       toast('✅ Einladung gesendet an ' + email);
       emailEl.value = '';
       benutzerLoad();
@@ -6065,25 +6023,22 @@
     }
   };
 
+  window.benutzerSetRole = async function(uid, role) {
+    try {
+      await buFetch('PATCH', '', { id: uid, roles: role ? [role] : [] });
+      toast('✅ Rolle aktualisiert');
+      benutzerLoad();
+    } catch(e) {
+      console.error('[Benutzerverwaltung] Fehler beim Ändern der Rolle:', e);
+      toast('❌ ' + e.message, true);
+      benutzerLoad(); // UI (Dropdown) auf tatsächlichen Stand zurücksetzen
+    }
+  };
+
   window.benutzerRemove = async function(uid, email) {
     if (!confirm('Benutzer ' + email + ' wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
     try {
-      var tok = await getToken(true);
-      var r = await fetch('/.netlify/identity/admin/users/' + uid, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + tok }
-      });
-      if (!r.ok) {
-        var err = await r.json().catch(function() { return {}; });
-        console.error('[Benutzerverwaltung] DELETE /.netlify/identity/admin/users/' + uid + ' → HTTP ' + r.status, err);
-        if (r.status === 403) {
-          throw new Error('Keine Admin-Berechtigung. Bitte wende dich an den Netlify-Administrator.');
-        }
-        if (r.status === 401) {
-          throw new Error('Anmeldung ungültig oder abgelaufen. Bitte einmal aus- und wieder einloggen.');
-        }
-        throw new Error(err.msg || err.message || 'HTTP ' + r.status);
-      }
+      await buFetch('DELETE', '?id=' + encodeURIComponent(uid));
       toast('✅ Benutzer entfernt');
       benutzerLoad();
     } catch(e) {
