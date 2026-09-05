@@ -5500,8 +5500,8 @@
       var status = id('medien-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var b64 = await fileToBase64(file);
-        await apiUploadImage(file.name, b64);
+        var prepared = await prepareImageForUpload(file);
+        await apiUploadImage(prepared.filename, prepared.base64);
         status.textContent = '✅ Hochgeladen!';
         loadMedianGallery();
       } catch(e) {
@@ -6528,8 +6528,8 @@
       var status = id('img-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var b64 = await fileToBase64(file);
-        var url = await apiUploadImage(file.name, b64);
+        var prepared = await prepareImageForUpload(file);
+        var url = await apiUploadImage(prepared.filename, prepared.base64);
         status.textContent = '✅ Hochgeladen';
         await loadGallery();
         // Auto-select the just uploaded image
@@ -6548,6 +6548,125 @@
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     ZENTRALE BILD-OPTIMIERUNG VOR UPLOAD (Arbeitsblock 6, 05.09.2026,
+     Frank-Wunsch: Uploads sollen kleiner/schneller werden, OHNE dass
+     irgendwo automatisch zugeschnitten wird)
+
+     Wird von allen drei Bild-Upload-Stellen im Admin verwendet (Medien &
+     Bilder, der generische Bild-Picker "img-upload-input" - darüber läuft
+     JEDES fImage()-Feld, also Hundebörse/Waffenbörse-Galerien, Partner-Logo,
+     Personen-Fotos, Hero-/Vorschaubilder etc. - sowie das TipTap/Markdown-
+     Bild-Einfügen "mdimg-upload-input"), jeweils direkt vor apiUploadImage().
+     PDFs (apiUploadPdf/fileToBase64) sind davon NICHT betroffen - fileToBase64
+     bleibt dafür unverändert; prepareImageForUpload() ruft es nur als
+     Fallback für unveränderte Fälle auf (s.u.).
+
+     Prinzipien:
+     - Seitenverhältnis bleibt IMMER erhalten - kein Crop, kein Stretch.
+       drawImage() zeichnet das KOMPLETTE Quellbild in ein proportional
+       verkleinertes Canvas (Breite und Höhe werden mit demselben Faktor
+       skaliert) - es wird nichts ausgeschnitten oder verzerrt.
+     - Nur verkleinert, wenn die längere Kante IMG_MAX_DIMENSION überschreitet;
+       kleine Bilder werden nie hochskaliert.
+     - JPEG/JPG -> neu komprimiert (Qualität IMG_JPEG_QUALITY) und bei Bedarf
+       verkleinert.
+     - PNG -> nur dann als PNG belassen, wenn das Bild tatsächlich
+       transparente Pixel enthält (Alpha-Kanal-Check auf dem Canvas, z.B.
+       Partner-Logo mit transparentem Hintergrund); andernfalls als JPEG
+       gespeichert, weil verlustfreies PNG bei Fotos ohne Transparenz kaum
+       kleiner wird als das Original.
+     - GIF und SVG werden NICHT verarbeitet (Animation bzw. Vektorgrafik
+       würden durch die Rasterung auf dem Canvas kaputtgehen bzw. unnötig
+       verschlechtert) - Original wie bisher unverändert hochladen.
+     - Sicherheitsnetz: Wird das Ergebnis nicht kleiner als das Original
+       (z.B. bei bereits kleinen/optimierten Bildern), wird das Original
+       unverändert verwendet - nie eine schlechtere/größere Datei hochladen
+       als vorher, und nie den Upload wegen eines Verarbeitungsfehlers
+       blockieren (jeder Fehlerfall fällt auf das Original zurück).
+     - WebP wurde geprüft, aber bewusst NICHT als Standard-Zielformat gewählt
+       (siehe Abschlussbericht) - JPEG/PNG bleiben universell kompatibel und
+       vorhersagbar. Die zentrale Funktion lässt sich bei Bedarf später leicht
+       um WebP erweitern, ohne die Aufrufstellen anzufassen.
+  ──────────────────────────────────────────────────────────── */
+  var IMG_MAX_DIMENSION = 1920; // längere Kante in px - reicht für jede Darstellung inkl. Vollbild/Lightbox
+  var IMG_JPEG_QUALITY = 0.85;  // konservativ: deutlich kleiner, ohne sichtbare Artefakte
+  var IMG_SKIP_TYPES = /^image\/(gif|svg\+xml)$/i;
+
+  function prepareImageForUpload(file) {
+    // Fallback-Helfer: Original unverändert als Base64 zurückgeben, in genau
+    // der Form, die alle Aufrufstellen erwarten ({base64, filename}).
+    function original() {
+      return fileToBase64(file).then(function(b64) {
+        return { base64: b64, filename: file.name };
+      });
+    }
+
+    if (!file || !/^image\//i.test(file.type) || IMG_SKIP_TYPES.test(file.type)) {
+      return original();
+    }
+
+    return new Promise(function(resolve, reject) {
+      var objectUrl = URL.createObjectURL(file);
+      var img = new Image();
+
+      img.onload = function() {
+        try {
+          var w = img.naturalWidth, h = img.naturalHeight;
+          var scale = Math.min(1, IMG_MAX_DIMENSION / Math.max(w, h));
+          var tw = Math.max(1, Math.round(w * scale));
+          var th = Math.max(1, Math.round(h * scale));
+
+          var canvas = document.createElement('canvas');
+          canvas.width = tw; canvas.height = th;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, tw, th); // komplettes Bild, proportional skaliert - kein Ausschnitt
+          URL.revokeObjectURL(objectUrl);
+
+          var isPng = /image\/png/i.test(file.type);
+          var hasAlpha = false;
+          if (isPng) {
+            try {
+              var data = ctx.getImageData(0, 0, tw, th).data;
+              for (var i = 3; i < data.length; i += 4) {
+                if (data[i] < 255) { hasAlpha = true; break; }
+              }
+            } catch (e) {
+              hasAlpha = true; // im Zweifel PNG/Transparenz behalten
+            }
+          }
+
+          var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
+          var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
+          var quality = (outType === 'image/jpeg') ? IMG_JPEG_QUALITY : undefined;
+
+          canvas.toBlob(function(blob) {
+            if (!blob || blob.size >= file.size) {
+              // Kein Gewinn (oder Canvas-Export fehlgeschlagen) -> Original behalten
+              original().then(resolve, reject);
+              return;
+            }
+            var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+            var reader = new FileReader();
+            reader.onload = function() {
+              resolve({ base64: reader.result.split(',')[1], filename: newName });
+            };
+            reader.onerror = function() { original().then(resolve, reject); };
+            reader.readAsDataURL(blob);
+          }, outType, quality);
+        } catch (e) {
+          URL.revokeObjectURL(objectUrl);
+          original().then(resolve, reject); // nie den Upload wegen eines Verarbeitungsfehlers blockieren
+        }
+      };
+      img.onerror = function() {
+        URL.revokeObjectURL(objectUrl);
+        original().then(resolve, reject); // Datei nicht als Bild ladbar -> unverändert hochladen
+      };
+      img.src = objectUrl;
     });
   }
 
@@ -6767,11 +6886,11 @@
       var status = id('mdimg-upload-status');
       if (status) status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var b64 = await fileToBase64(file);
-        var url = await apiUploadImage(file.name, b64);
+        var prepared = await prepareImageForUpload(file);
+        var url = await apiUploadImage(prepared.filename, prepared.base64);
         if (status) status.textContent = '✅ Hochgeladen';
         await loadMdImgGallery();
-        mdImgPick(url, file.name);
+        mdImgPick(url, prepared.filename);
       } catch(e) {
         if (status) status.textContent = '❌ ' + e.message;
       }
