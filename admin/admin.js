@@ -6202,8 +6202,14 @@
 
   function renderBenutzer() {
     var main = id('admin-main');
+    // hideDefaultSave=true: die Benutzerverwaltung hat kein zentrales
+    // Speichern - jede Zeile speichert einzeln über ihren eigenen
+    // "💾 Speichern"-Button (benutzerSave). Der generische [data-save]-Button
+    // aus panelHeader() wäre hier nie mit bindSaveBtn() verkabelt und damit
+    // ein toter Klick gewesen (gleicher Nebenfund wie schon bei
+    // renderPersonen/renderPartner/renderHegeringe, s. dortige Kommentare).
     main.innerHTML =
-      panelHeader('👥 Benutzerverwaltung') +
+      panelHeader('👥 Benutzerverwaltung', null, true) +
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Neuen Benutzer einladen</div>' +
