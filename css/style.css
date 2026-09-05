@@ -2482,7 +2482,21 @@ body.kjs-lightbox-lock { overflow: hidden; }
 }
 .pn-detail-head__logo img { max-width: 80%; max-height: 80%; object-fit: contain; }
 .pn-detail-head__logo.pn-logo-placeholder img { max-width: none; height: 56px; }
-.pn-detail-head__body { flex: 1; min-width: 220px; }
+/* Laurin-Wunsch (05.09.2026): "Zur Website"-Button soll mit seiner
+   Unterkante exakt auf der Unterkante der Logo-Box (.pn-detail-head__logo,
+   160px) liegen - unabhängig davon, wie viel Text Titel/Kurzbeschreibung
+   brauchen. Technisch über Flexbox statt Pixel-Hack gelöst: dieser Container
+   wird selbst zur Flex-Spalte mit derselben festen Mindesthöhe wie die
+   Logo-Box (160px - identischer Wert wie .pn-detail-head__logo, siehe
+   Kommentar dort bei Änderungen mitziehen). Der Button bekommt weiter unten
+   "margin-top:auto" statt eines festen rem-Werts und wird dadurch an die
+   Unterkante dieser Spalte gedrückt - bei allen aktuellen Partnern ohne
+   Kurzbeschreibung (siehe content/partner.json) ist die Spalte durch
+   min-height fast nur durch die Logo-Höhe bestimmt, die Unterkanten fluchten
+   dadurch exakt. Nur auf Desktop/Tablet relevant (Kopf steht dort als Zeile
+   nebeneinander) - im Mobile-Breakpoint unten wird min-height bewusst wieder
+   auf 0 gesetzt und der Button behält dort seinen bisherigen festen Abstand. */
+.pn-detail-head__body { flex: 1; min-width: 220px; display: flex; flex-direction: column; min-height: 160px; }
 /* Frank-Feedback (04.09.2026, zweite Runde): die große Partner-Überschrift
    wirkte leicht nach unten versetzt gegenüber der Logo-Box links (die Box
    beginnt exakt an der Flex-Start-Linie, der Überschriften-Text lag durch
@@ -2494,7 +2508,13 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .pn-detail-head__body h2 { color: var(--green-dark); margin-top: 0; margin-bottom: .5rem; line-height: 1.05; }
 @media (max-width: 560px) {
   .pn-detail-head { flex-direction: column; align-items: center; text-align: center; }
-  .pn-detail-head__body { min-width: 0; }
+  /* min-height:0 (05.09.2026): die Logo-Unterkanten-Flucht (siehe Kommentar
+     an der Basisregel oben) ergibt hier keinen Sinn - Logo und Body stehen
+     im Mobile-Stack untereinander, nicht nebeneinander. Ohne dieses Reset
+     würde die 160px-Mindesthöhe eine unnötige Lücke unter dem Titel
+     aufreißen, bevor der Button (der auf Mobile seinen festen Abstand
+     zurückbekommt, siehe .pn-website-btn weiter unten) erscheint. */
+  .pn-detail-head__body { min-width: 0; min-height: 0; }
 }
 
 /* Frank-Feedback (04.09.2026): "Zur Website"-Button auf den Partner-
@@ -2513,9 +2533,19 @@ body.kjs-lightbox-lock { overflow: hidden; }
    Faktor (Titel+Button zusammen bleiben spürbar darunter).
    Vierte Runde (04.09.2026, dritte Nachkorrektur): erneut nur ein kleiner,
    bewusst zurückhaltender Schritt (2rem -> 2.25rem) - Frank wollte
-   ausdrücklich "nur leicht" mehr, keinen weiteren großen Sprung. */
+   ausdrücklich "nur leicht" mehr, keinen weiteren großen Sprung.
+   Fünfte Runde (05.09.2026, Laurin-Wunsch): der feste margin-top (2.25rem)
+   wich einem margin-top:auto, damit der Button innerhalb der jetzt als
+   Flex-Spalte aufgebauten .pn-detail-head__body (siehe dortigen Kommentar)
+   an deren Unterkante gedrückt wird - und diese Unterkante liegt dank der
+   dort gesetzten min-height exakt auf der Unterkante der Logo-Box. Die
+   horizontale Zentrierung (margin-left/right:auto) und der untere Rand
+   (0) bleiben unverändert - nur die vertikale Positionierung ändert sich.
+   Auf Mobile (siehe Media-Query direkt darunter) bleibt bewusst weiterhin
+   der alte feste 2.25rem-Abstand erhalten, da dort Logo/Body gestapelt
+   stehen und die Unterkanten-Flucht keine Rolle spielt. */
 .pn-website-btn {
-  display: flex; width: fit-content; margin: 2.25rem auto 0;
+  display: flex; width: fit-content; margin: auto auto 0;
   padding: .6rem 1.4rem; font-size: .8rem;
 }
 @media (max-width: 560px) { .pn-website-btn { margin: 2.25rem auto 0; } }
