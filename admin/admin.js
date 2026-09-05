@@ -614,6 +614,228 @@
   ];
 
   /* ────────────────────────────────────────────────────────────
+     RECHTE / BERECHTIGUNGEN (05.09.2026)
+     Grobe Rollen: "admin" (immer Vollzugriff) und "redakteur" (nur die
+     unten explizit freigegebenen Bereiche). Ein Admin braucht nie
+     Permissions gepflegt zu bekommen - isAdminUser() schaltet überall
+     zuerst frei. Ein Redakteur ohne "permissions" hat KEINEN Modulzugriff
+     (fail-closed), bis ihm gezielt Rechte zugewiesen werden.
+
+     PERMISSIONS ist die EINE zentrale Definition (Gruppen + Labels), die
+     sowohl die Checkbox-UI in der Benutzerverwaltung als auch - über
+     PERM_BY_KEY/PERM_BY_DIR - die eigentliche Zugriffskontrolle (Sidebar,
+     Suche, Panel-Öffnen, Speichern) speist. Aus Platzgründen NICHT für
+     jede einzelne der über 40 NAV-Unterseiten ein eigenes Recht: normale
+     Inhaltsseiten (Über uns, Mitglied werden, Niederwild, Hochwild,
+     Schießobleute, Satzung, Landesjagdverband, die Aufgaben-Unterseiten
+     außer Jagdhundeschule, die Verbraucher-Themenseiten, Service,
+     Downloads, Startseite, FAQ, Fußzeile, Impressum) teilen sich bewusst
+     das Recht "inhaltsseiten" - das entspricht genau der von Laurin
+     vorgegebenen Gruppe "normale Inhaltsseiten". Module, die Laurin
+     ausdrücklich einzeln genannt hat (Aktuelles, Termine, Vorstand,
+     Obleute, Hegeringe, Kreisjägermeister, Jagdhundeschule, Infomobil,
+     Hundebörse, Waffenbörse, Partner, Kontakt/Öffnungszeiten, Medien,
+     Navigation, Design), bekommen ein eigenes Recht.
+
+     Benutzerverwaltung ist ABSICHTLICH KEINE Checkbox hier: sie bleibt
+     hart an die Rolle "admin" gebunden (admin-users.js prüft die Rolle,
+     nicht permissions) - siehe Abschlussbericht für den möglichen
+     nächsten Schritt, falls das später doch granular werden soll.
+
+     WICHTIG: Diese Namen (Schlüssel) müssen mit PERMISSIONS_BEKANNT in
+     netlify/functions/admin-users.js übereinstimmen. Es gibt (bewusst,
+     kein Build-Prozess in diesem Projekt) keinen automatischen Sync
+     zwischen Browser-Code und der Netlify Function - bei einer Änderung
+     hier IMMER auch dort nachziehen.
+  ──────────────────────────────────────────────────────────── */
+  var PERMISSIONS = [
+    { group: 'Redaktion', items: [
+      { key: 'aktuelles',     label: 'Aktuelles' },
+      { key: 'termine',       label: 'Termine' },
+      { key: 'kontakt',       label: 'Kontakt & Stammdaten (Öffnungszeiten, Geschäftsstelle)' },
+      { key: 'inhaltsseiten', label: 'Normale Inhaltsseiten' },
+    ]},
+    { group: 'Organisation', items: [
+      { key: 'vorstand',        label: 'Vorstand' },
+      { key: 'obleute',         label: 'Obleute' },
+      { key: 'hegeringe',       label: 'Hegeringe' },
+      { key: 'kjm',             label: 'Kreisjägermeister' },
+      { key: 'jagdhundeschule', label: 'Jagdhundeschule' },
+    ]},
+    { group: 'Angebote & Börsen', items: [
+      { key: 'hundeboerse',  label: 'Hundebörse' },
+      { key: 'waffenboerse', label: 'Waffenbörse' },
+      { key: 'partner',      label: 'Partner' },
+      { key: 'infomobil',    label: 'Infomobil' },
+    ]},
+    { group: 'Medien', items: [
+      { key: 'medien', label: 'Medien & Bilder' },
+    ]},
+    { group: 'System', items: [
+      { key: 'navigation', label: 'Navigation (Hauptnavigation, Reihenfolge)' },
+      { key: 'design',     label: 'Design & Farben' },
+    ]},
+  ];
+
+  // Flache Liste aller gültigen Permission-Schlüssel (für Validierung).
+  var PERMISSION_KEYS = PERMISSIONS.reduce(function(acc, g) {
+    return acc.concat(g.items.map(function(it) { return it.key; }));
+  }, []);
+
+  // NAV-key -> Permission-Schlüssel. "null" = ausdrücklich admin-only
+  // (keine Permission kann das freischalten). Fehlt ein Key hier ganz,
+  // wird der Zugriff für Nicht-Admins standardmäßig verweigert (fail-closed).
+  var PERM_BY_KEY = {
+    'startseite': 'inhaltsseiten',
+    'jaeger-ueber-uns': 'inhaltsseiten', 'new-sub-ueber-uns': 'inhaltsseiten',
+    'vorstand': 'vorstand',
+    'obleute': 'obleute',
+    'hegeringe': 'hegeringe',
+    'mitglied-werden': 'inhaltsseiten', 'new-sub-mitglied-werden': 'inhaltsseiten',
+    'jaeger-werden': 'inhaltsseiten', 'new-sub-jaeger-werden': 'inhaltsseiten',
+    'niederwild': 'inhaltsseiten', 'new-sub-niederwild': 'inhaltsseiten',
+    'hochwild': 'inhaltsseiten', 'new-sub-hochwild': 'inhaltsseiten',
+    'schiessobleute': 'inhaltsseiten', 'new-sub-schiessobleute': 'inhaltsseiten',
+    'satzung': 'inhaltsseiten', 'new-sub-satzung': 'inhaltsseiten',
+    'landesjagdverband': 'inhaltsseiten', 'new-sub-landesjagdverband': 'inhaltsseiten',
+    'kjm': 'kjm',
+    'auf-schiessen': 'inhaltsseiten', 'new-sub-schiessen': 'inhaltsseiten',
+    'auf-hunde-uebersicht': 'inhaltsseiten',
+    'jagdhundeschule-gruppe': 'jagdhundeschule', 'new-jagdhundeschule': 'jagdhundeschule',
+    'auf-schweiss': 'inhaltsseiten', 'new-sub-schweisshunde': 'inhaltsseiten',
+    'auf-jugend': 'inhaltsseiten', 'new-sub-jugend': 'inhaltsseiten',
+    'auf-jagdhorn': 'inhaltsseiten', 'new-sub-jagdhorn': 'inhaltsseiten',
+    'auf-natur': 'inhaltsseiten', 'new-sub-naturschutz': 'inhaltsseiten',
+    'auf-jungwild': 'inhaltsseiten', 'new-sub-jungwildrettung': 'inhaltsseiten',
+    'new-aufgaben': 'inhaltsseiten',
+    'infomobil': 'infomobil',
+    'partner': 'partner',
+    'verbraucher-wild': 'inhaltsseiten', 'new-sub-wild': 'inhaltsseiten',
+    'verbraucher-lernort': 'inhaltsseiten', 'new-sub-lernort': 'inhaltsseiten',
+    'verbraucher-gruen': 'inhaltsseiten', 'new-sub-gruen': 'inhaltsseiten',
+    'verbraucher-waidmannssprache': 'inhaltsseiten', 'new-sub-waidmannssprache': 'inhaltsseiten',
+    'termine': 'termine',
+    'aktuelles': 'aktuelles',
+    'service': 'inhaltsseiten',
+    'hundeboerse': 'hundeboerse',
+    'waffenboerse': 'waffenboerse',
+    'kontakt-stammdaten': 'kontakt',
+    'faq': 'inhaltsseiten',
+    'footer': 'inhaltsseiten',
+    'design': 'design',
+    'impressum': 'inhaltsseiten',
+    'nav-extra': 'navigation',
+    'nav-reihenfolge': 'navigation',
+    'benutzer': null,
+    'downloads': 'inhaltsseiten',
+    'medien': 'medien',
+  };
+
+  // Dynamisch nachgeladene Unterseiten (loadAllManifestItems/buildSearchIndex)
+  // tragen keinen festen NAV-key, sondern ein "dir" - hierüber wird ihre
+  // Permission aufgelöst.
+  var PERM_BY_DIR = {
+    'content/seiten-aufgaben': 'inhaltsseiten',
+    'content/seiten-sub-wildfleisch': 'inhaltsseiten',
+    'content/seiten-sub-lernort-natur': 'inhaltsseiten',
+    'content/seiten-sub-gruenes-klassenzimmer': 'inhaltsseiten',
+    'content/aufgaben/hundeausbildung': 'jagdhundeschule',
+    'content/seiten-sub-ueber-uns': 'inhaltsseiten',
+    'content/seiten-sub-mitglied-werden': 'inhaltsseiten',
+    'content/seiten-sub-jaeger-werden': 'inhaltsseiten',
+    'content/seiten-sub-niederwild': 'inhaltsseiten',
+    'content/seiten-sub-hochwild': 'inhaltsseiten',
+    'content/seiten-sub-schiessobleute': 'inhaltsseiten',
+    'content/seiten-sub-satzung': 'inhaltsseiten',
+    'content/seiten-sub-landesjagdverband': 'inhaltsseiten',
+    'content/seiten-sub-schiessen': 'inhaltsseiten',
+    'content/seiten-sub-schweisshunde': 'inhaltsseiten',
+    'content/seiten-sub-jugend': 'inhaltsseiten',
+    'content/seiten-sub-jagdhorn': 'inhaltsseiten',
+    'content/seiten-sub-naturschutz': 'inhaltsseiten',
+    'content/seiten-sub-jungwildrettung': 'inhaltsseiten',
+    'content/seiten-weitere': 'inhaltsseiten',
+    'content/seiten-kjs': 'inhaltsseiten',
+  };
+
+  // Rolle(n)/Rechte des GERADE eingeloggten Benutzers - befüllt in onLogin()
+  // aus dessen eigenem, von Netlify signierten Zugriffstoken. Das ist reine
+  // UI-Steuerung (was zeigen/erlauben wir dieser Person im Admin); die
+  // tatsächliche Absicherung von Benutzerverwaltungs-Aktionen läuft
+  // unabhängig davon server-seitig in admin-users.js.
+  var CURRENT_ROLES = [];
+  var CURRENT_PERMISSIONS = [];
+
+  function isAdminUser() { return CURRENT_ROLES.indexOf('admin') !== -1; }
+  function hasPermission(key) { return !!key && CURRENT_PERMISSIONS.indexOf(key) !== -1; }
+
+  function permissionKeyForDef(def) {
+    if (!def) return undefined;
+    if (Object.prototype.hasOwnProperty.call(PERM_BY_KEY, def.key)) return PERM_BY_KEY[def.key];
+    if (def.dir && Object.prototype.hasOwnProperty.call(PERM_BY_DIR, def.dir)) return PERM_BY_DIR[def.dir];
+    return undefined; // unbekanntes Modul - im Zweifel sperren, nicht öffnen
+  }
+
+  // Zentrale Zugriffsprüfung: von Sidebar-Filter, Suche UND (als eigentliche
+  // Absicherung) selectSectionImpl()/den Speicherfunktionen genutzt.
+  function canAccessDef(def) {
+    if (isAdminUser()) return true;
+    var perm = permissionKeyForDef(def);
+    if (!perm) return false; // null (admin-only) oder unbekannt -> verweigern
+    return hasPermission(perm);
+  }
+
+  // Verteidigung in der Tiefe für Speicherfunktionen: die eigentliche Sperre
+  // sitzt in selectSectionImpl() (verhindert, dass ein Panel ohne Recht
+  // überhaupt erst geladen wird) - dieser zusätzliche Check am Anfang jeder
+  // Speicherfunktion fängt zusätzlich ab, wenn einem Benutzer eine
+  // Berechtigung MITTEN in einer offenen Sitzung entzogen wird, oder wenn
+  // eine Speicherfunktion direkt aus der Konsole aufgerufen wird. Ersetzt
+  // NICHT die serverseitige Prüfung, die es für Inhalte technisch (Git
+  // Gateway kennt nur Rollen, keine einzelnen Module) nicht gibt - siehe
+  // Abschlussbericht.
+  function guardSavePermission() {
+    if (isAdminUser() || canAccessDef(S.section)) return true;
+    toast('❌ Keine Berechtigung für diesen Bereich', 'err');
+    return false;
+  }
+
+  // Baut aus NAV eine gefilterte Kopie für die Sidebar-Darstellung eines
+  // Redakteurs: nicht erlaubte Blätter fallen weg, reine Ordner-Gruppen
+  // (kein eigenes file/form) verschwinden mit, sobald keines ihrer Kinder
+  // mehr übrig ist. NAV selbst bleibt unverändert (wird an vielen Stellen
+  // per findByKey(NAV, ...) direkt referenziert). Admins bekommen die
+  // echte, ungefilterte NAV - diese Funktion wird für sie gar nicht erst
+  // aufgerufen.
+  function buildVisibleNav(items) {
+    var out = [];
+    items.forEach(function(item) {
+      if (item.isAdd) {
+        if (canAccessDef(item)) out.push(item);
+        return;
+      }
+      if (item.dynamicChildren) {
+        // "Weitere Themen" - toter Code-Pfad (findByKey(NAV,'weitere') liefert
+        // nirgends mehr einen Treffer), unverändert durchreichen ist harmlos.
+        out.push(item);
+        return;
+      }
+      if (item.children) {
+        var filteredChildren = buildVisibleNav(item.children);
+        var selfOk = item.file ? canAccessDef(item) : false;
+        if (!selfOk && !filteredChildren.length) return;
+        var clone = {};
+        for (var k in item) { if (Object.prototype.hasOwnProperty.call(item, k)) clone[k] = item[k]; }
+        clone.children = filteredChildren;
+        out.push(clone);
+        return;
+      }
+      if (canAccessDef(item)) out.push(item);
+    });
+    return out;
+  }
+
+  /* ────────────────────────────────────────────────────────────
      SIDEBAR DRAG & DROP – Mapping NAV-Key → navigation.json-Eintrag
      (für statische Seiten, deren Reihenfolge in den kjs/aufgaben-
      Arrays von content/navigation.json gepflegt wird)
@@ -794,6 +1016,14 @@
     var name = (user.user_metadata && user.user_metadata.full_name) || user.email || '';
     S.userName = name;
     id('user-name').textContent = name;
+    // Rollen/Rechte aus dem EIGENEN, von Netlify signierten Zugriffstoken
+    // dieses Benutzers übernehmen (steuert Sidebar/Suche/Panel-Zugriff für
+    // die laufende Sitzung). Wird eine Rolle/ein Recht von einem Admin
+    // geändert, wirkt das erst nach dem nächsten Login dieser Person, weil
+    // genau diese Werte im Token eingebettet sind (siehe Hinweistext in der
+    // Benutzerverwaltung).
+    CURRENT_ROLES = (user.app_metadata && user.app_metadata.roles) || [];
+    CURRENT_PERMISSIONS = (user.app_metadata && user.app_metadata.permissions) || [];
     id('login-screen').style.display = 'none';
     id('admin-app').style.display = '';
     initApp();
@@ -885,7 +1115,9 @@
      SIDEBAR
   ──────────────────────────────────────────────────────────── */
   function initApp() {
-    renderSidebar(NAV);
+    // Redakteure sehen nur die Bereiche, für die sie ein Recht haben; Admins
+    // bekommen unverändert die echte NAV (keine Filterung nötig/gewünscht).
+    renderSidebar(isAdminUser() ? NAV : buildVisibleNav(NAV));
     Promise.all([
       loadDynamicChildren(),      // "Weitere Themen" (dynamicChildren:true)
       loadAllManifestItems()      // KJS / Aufgaben / Verbraucher custom pages
@@ -942,6 +1174,16 @@
   /* ────────────────────────────────────────────────────────────
      WELCOME / DASHBOARD
   ──────────────────────────────────────────────────────────── */
+  // Rendert eine Verknüpfungs-Kachel nur, wenn der zugehörige Sidebar-Eintrag
+  // für diesen Benutzer überhaupt sichtbar ist (sonst würde der Klick ins
+  // Leere laufen, weil das Sidebar-Element gar nicht existiert).
+  function welcomeHintCard(navKey, icon, title, desc) {
+    var visible = isAdminUser() ? NAV : buildVisibleNav(NAV);
+    if (!findByKey(visible, navKey)) return '';
+    return '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=' + navKey + ']\').click()" style="cursor:pointer">' +
+      icon + ' <strong>' + escHtml(title) + '</strong><br>' + escHtml(desc) + '</div>';
+  }
+
   function showWelcome() {
     destroyMDE();
     S.section = null;
@@ -956,9 +1198,9 @@
         '<h2>' + greeting + '</h2>' +
         '<p>Wählen Sie links einen Bereich aus, um Inhalte zu bearbeiten.</p>' +
         '<div class="welcome-hints">' +
-          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=aktuelles]\').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>' +
-          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=termine]\').click()" style="cursor:pointer">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>' +
-          '<div class="hint-card" onclick="document.querySelector(\'[data-navkey=jaeger]\').click()" style="cursor:pointer">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>' +
+          welcomeHintCard('aktuelles', '📰', 'Aktuelles', 'Neuigkeiten hinzufügen') +
+          welcomeHintCard('termine', '📅', 'Termine', 'Veranstaltungen pflegen') +
+          welcomeHintCard('jaeger', '🦌', 'Jäger', 'Vereinsinfos bearbeiten') +
         '</div>' +
       '</div>';
   }
@@ -1004,6 +1246,11 @@
 
     for (var i = 0; i < sections.length; i++) {
       var sec = sections[i];
+      // Zusätzliche, explizite Absicherung (die Sidebar-Filterung lässt den
+      // "+ Neue Unterseite"-Anker für nicht erlaubte Themen ohnehin schon
+      // fehlen, wodurch "if (!addBtn) continue;" unten greift - dieser Check
+      // macht das aber nicht nur implizit, sondern klar lesbar).
+      if (!isAdminUser() && !hasPermission(PERM_BY_DIR[sec.dir])) continue;
       try {
         var resp = await apiGet(sec.file);
         var data = JSON.parse(fromBase64(resp.content));
@@ -1393,6 +1640,17 @@
     S.dirty = false;
     setActiveNav(def.key);
 
+    // Zentrale Zugriffssperre (05.09.2026): JEDES Panel - egal ob per
+    // Sidebar-Klick, Suche, Kachel oder direktem Aufruf aus der Konsole
+    // geöffnet - läuft durch diese eine Funktion. Ein Redakteur ohne
+    // passendes Recht kommt hier nicht weiter, auch wenn der Sidebar-Eintrag
+    // gar nicht sichtbar wäre (die Sichtbarkeits-Filterung ist nur Komfort/
+    // Aufräumen für die Optik, NICHT die eigentliche Absicherung).
+    if (!canAccessDef(def)) {
+      showPermissionDenied(def.label);
+      return;
+    }
+
     if (def.form === 'neueSeite') {
       renderNeueSeite(def);
       return;
@@ -1438,6 +1696,15 @@
       '<p style="color:var(--danger)">⚠️ Fehler: ' + escHtml(msg) + '</p>' +
       '<p class="mt-1"><button class="btn btn-outline" onclick="location.reload()">Seite neu laden</button></p>' +
       extra +
+      '</div></div>';
+  }
+
+  function showPermissionDenied(label) {
+    id('admin-main').innerHTML =
+      panelHeader(label || 'Bereich') +
+      '<div class="panel-body"><div class="form-card">' +
+      '<p style="color:var(--danger)">🔒 Keine Berechtigung für diesen Bereich.</p>' +
+      '<p class="text-muted" style="font-size:.85rem;">Falls das nicht stimmt: Rechte werden erst nach einer erneuten Anmeldung wirksam - bitte kurz aus- und wieder einloggen, oder einen Admin um Freischaltung bitten.</p>' +
       '</div></div>';
   }
 
@@ -2072,6 +2339,7 @@
   };
 
   window.serviceEinstSave = async function() {
+    if (!guardSavePermission()) return;
     S.data.titel          = gv('sv-titel');
     S.data.hero_bild      = gv('sv-hero_bild');
     S.data.kontakt_name   = gv('sv-kontakt_name');
@@ -2127,6 +2395,7 @@
   };
 
   window.serviceSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var b = S.data.beitraege[idx];
     b.titel      = gv('svb-titel');
     b.datum      = isoToDatum(gv('svb-datum'));
@@ -2316,6 +2585,7 @@
   // Nutzt den bestehenden fImage()/openImgPicker()-Baustein, kein neues
   // Mediensystem (Laurin-Vorgabe, Phase 3, 28.08.2026).
   window.hundeboerseHeroSave = async function() {
+    if (!guardSavePermission()) return;
     S.data.hero_bild = gv('hb-hero_bild');
     try {
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Hero-Bild aktualisiert');
@@ -2606,6 +2876,7 @@
   }
 
   window.hundeboerseSave = async function(idx) {
+    if (!guardSavePermission()) return;
     await hundeboerseCollect(idx);
     try {
       await doSave(S.section.file, S.data, '🐕 Hundebörse: Anzeige gespeichert');
@@ -3225,6 +3496,7 @@
   }
 
   window.waffenboerseSave = async function(idx) {
+    if (!guardSavePermission()) return;
     await waffenboerseCollect(idx);
     try {
       await doSave(S.section.file, S.data, '🔫 Waffenbörse: Anzeige gespeichert');
@@ -4277,6 +4549,7 @@
   };
 
   window.aktuelleSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var b = S.data.beitraege[idx];
     b.titel     = gv('b-titel');
     b.datum     = isoToDatum(gv('b-datum'));
@@ -4438,6 +4711,7 @@
   };
 
   window.termineSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var t = S.data.termine[idx];
     t.datum        = isoToDatum(gv('t-datum'));
     t.uhrzeit      = gv('t-uhrzeit');
@@ -4476,6 +4750,7 @@
   };
 
   window.termineEinstSave = async function() {
+    if (!guardSavePermission()) return;
     S.data.einstellungen = S.data.einstellungen || {};
     S.data.einstellungen.ueberschrift = gv('t-ueberschrift');
     var einlEl = id('f-t-einleitung');
@@ -4578,6 +4853,7 @@
   };
 
   window.personSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var def = S.section;
     var p = S.data[def.dataKey][idx];
     p.rolle   = gv('p-rolle');
@@ -4709,6 +4985,7 @@
   };
 
   window.partnerSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var def = S.section;
     var p = S.data[def.dataKey][idx];
     p.name             = gv('pn-name');
@@ -4829,6 +5106,7 @@
   };
 
   window.hegeringSave = async function(idx) {
+    if (!guardSavePermission()) return;
     var h = S.data.hegeringe[idx];
     h.nummer    = gv('h-nummer');
     h.name      = gv('h-name');
@@ -5920,7 +6198,7 @@
      aus, das den Browser nie erreicht.
   ──────────────────────────────────────────────────────────── */
   var BU_ENDPOINT = '/.netlify/functions/admin-users';
-  var BU_ROLES = ['admin']; // aktuell einzige existierende Rolle, s. Abschlussbericht für "redakteur" als möglichen nächsten Schritt
+  var BU_ROLES = ['redakteur', 'admin']; // "admin" = immer Vollzugriff, "redakteur" = nur explizit zugewiesene Bereiche (s. PERMISSIONS)
 
   function renderBenutzer() {
     var main = id('admin-main');
@@ -5929,7 +6207,7 @@
       '<div class="panel-body">' +
         '<div class="form-card">' +
           '<div class="form-card-title">Neuen Benutzer einladen</div>' +
-          '<p class="text-muted" style="margin-bottom:1rem;">Der Benutzer erhält eine reguläre Einladungs-E-Mail von Netlify Identity und vergibt sein Passwort selbst beim ersten Anmelden.</p>' +
+          '<p class="text-muted" style="margin-bottom:1rem;">Der Benutzer erhält eine reguläre Einladungs-E-Mail von Netlify Identity und vergibt sein Passwort selbst beim ersten Anmelden. Rolle und Bereichsrechte werden anschließend hier vergeben.</p>' +
           '<div class="field-row">' +
             '<label class="field-label" for="bu-email">E-Mail-Adresse</label>' +
             '<input class="field-input" type="email" id="bu-email" placeholder="max@example.de">' +
@@ -5940,7 +6218,7 @@
         '</div>' +
         '<div class="form-card">' +
           '<div class="form-card-title">Aktuelle Benutzer</div>' +
-          '<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem;">Rollenänderungen wirken beim betroffenen Benutzer erst nach dessen nächster Anmeldung (neues Zugriffstoken).</p>' +
+          '<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem;">Änderungen wirken beim betroffenen Benutzer erst nach dessen nächster Anmeldung (neues Zugriffstoken) - kurz aus- und wieder einloggen lassen, falls es eilt.</p>' +
           '<div id="bu-list"><div class="gallery-loading">Wird geladen…</div></div>' +
         '</div>' +
       '</div>';
@@ -5972,6 +6250,24 @@
     return data;
   }
 
+  // Rendert die gruppierten Rechte-Checkboxen für einen Benutzer (nur
+  // relevant/sichtbar bei Rolle "redakteur" - s. benutzerRoleChanged).
+  function buPermissionsHtml(uid, perms) {
+    return PERMISSIONS.map(function(g) {
+      return '<div class="bu-perm-group">' +
+        '<div class="bu-perm-group-title">' + escHtml(g.group) + '</div>' +
+        g.items.map(function(it) {
+          var cid = 'bu-perm-' + uid + '-' + it.key;
+          var checked = perms.indexOf(it.key) !== -1 ? ' checked' : '';
+          return '<label class="bu-perm-item">' +
+            '<input type="checkbox" id="' + escAttr(cid) + '" data-perm-key="' + escAttr(it.key) + '"' + checked + '> ' +
+            escHtml(it.label) +
+          '</label>';
+        }).join('') +
+      '</div>';
+    }).join('');
+  }
+
   window.benutzerLoad = benutzerLoad;
   async function benutzerLoad() {
     var list = id('bu-list');
@@ -5985,19 +6281,31 @@
       }
       list.innerHTML = users.map(function(u) {
         var isAdmin = u.roles.indexOf('admin') !== -1;
+        var isRedakteur = !isAdmin && u.roles.indexOf('redakteur') !== -1;
+        var currentRole = isAdmin ? 'admin' : (isRedakteur ? 'redakteur' : '');
         var statusLabel = u.status === 'bestaetigt' ? 'Bestätigt' : 'Einladung ausstehend';
-        var roleOptions = '<option value=""' + (!isAdmin ? ' selected' : '') + '>— keine besondere Rolle —</option>' +
+        var roleOptions = '<option value=""' + (!currentRole ? ' selected' : '') + '>— keine Rolle (kein Zugriff) —</option>' +
           BU_ROLES.map(function(rl) {
-            return '<option value="' + escAttr(rl) + '"' + (u.roles.indexOf(rl) !== -1 ? ' selected' : '') + '>' + escHtml(rl) + '</option>';
+            var label = rl === 'admin' ? 'Admin (Vollzugriff)' : 'Redakteur (nur zugewiesene Bereiche)';
+            return '<option value="' + escAttr(rl) + '"' + (currentRole === rl ? ' selected' : '') + '>' + escHtml(label) + '</option>';
           }).join('');
-        return '<div class="bu-user-row">' +
+        return '<div class="bu-user-row" id="bu-row-' + escAttr(u.id) + '">' +
           '<div class="bu-user-info">' +
             '<strong>' + escHtml(u.email) + '</strong>' +
             (u.full_name ? ' <span class="bu-user-name">(' + escHtml(u.full_name) + ')</span>' : '') +
             ' <span class="bu-badge">' + escHtml(statusLabel) + '</span>' +
           '</div>' +
-          '<select class="field-input" style="width:auto;" onchange="benutzerSetRole(\'' + escAttr(u.id) + '\', this.value)">' + roleOptions + '</select>' +
-          '<button class="btn btn-sm btn-danger" onclick="benutzerRemove(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🗑️ Entfernen</button>' +
+          '<div class="bu-user-controls">' +
+            '<select class="field-input" style="width:auto;" id="bu-role-' + escAttr(u.id) + '" onchange="benutzerRoleChanged(\'' + escAttr(u.id) + '\')">' + roleOptions + '</select>' +
+            '<button class="btn btn-sm btn-danger" onclick="benutzerRemove(\'' + escAttr(u.id) + '\',\'' + escAttr(u.email) + '\')">🗑️ Entfernen</button>' +
+          '</div>' +
+          '<div class="bu-perm-admin-note" id="bu-adminnote-' + escAttr(u.id) + '" style="display:' + (isAdmin ? '' : 'none') + ';">✓ Vollzugriff (Admin) - Bereichsrechte sind hier nicht nötig.</div>' +
+          '<div class="bu-perm-wrap" id="bu-permwrap-' + escAttr(u.id) + '" style="display:' + (isRedakteur ? '' : 'none') + ';">' +
+            buPermissionsHtml(u.id, u.permissions || []) +
+          '</div>' +
+          '<div class="form-actions">' +
+            '<button class="btn btn-primary btn-sm" onclick="benutzerSave(\'' + escAttr(u.id) + '\')">💾 Speichern</button>' +
+          '</div>' +
         '</div>';
       }).join('');
     } catch(e) {
@@ -6008,10 +6316,22 @@
     }
   }
 
+  // Blendet die Rechte-Checkboxen bzw. den "Vollzugriff"-Hinweis abhängig
+  // von der aktuell im Dropdown gewählten Rolle ein/aus. Wirkt rein lokal
+  // im Browser (nur UI) - erst "Speichern" schreibt tatsächlich etwas.
+  window.benutzerRoleChanged = function(uid) {
+    var sel = id('bu-role-' + uid);
+    var role = sel ? sel.value : '';
+    var permWrap = id('bu-permwrap-' + uid);
+    var adminNote = id('bu-adminnote-' + uid);
+    if (permWrap) permWrap.style.display = (role === 'redakteur') ? '' : 'none';
+    if (adminNote) adminNote.style.display = (role === 'admin') ? '' : 'none';
+  };
+
   window.benutzerInvite = async function() {
     var emailEl = id('bu-email');
     var email = emailEl ? emailEl.value.trim() : '';
-    if (!email) { toast('❌ Bitte E-Mail-Adresse eingeben', true); return; }
+    if (!email) { toast('❌ Bitte E-Mail-Adresse eingeben', 'err'); return; }
     try {
       await buFetch('POST', '', { email: email });
       toast('✅ Einladung gesendet an ' + email);
@@ -6019,19 +6339,42 @@
       benutzerLoad();
     } catch(e) {
       console.error('[Benutzerverwaltung] Fehler beim Einladen:', e);
-      toast('❌ ' + e.message, true);
+      toast('❌ ' + e.message, 'err');
     }
   };
 
-  window.benutzerSetRole = async function(uid, role) {
+  // Speichert Rolle + (bei Redakteur) die angehakten Bereichsrechte für
+  // einen Benutzer in EINEM PATCH-Aufruf. roles und permissions werden vom
+  // Server immer gemeinsam und vollständig ersetzt (siehe admin-users.js) -
+  // deshalb schicken wir hier bei jedem Speichern explizit beide Felder mit.
+  window.benutzerSave = async function(uid) {
+    var sel = id('bu-role-' + uid);
+    var role = sel ? sel.value : '';
+    var permissions = [];
+    if (role === 'redakteur') {
+      var wrap = id('bu-permwrap-' + uid);
+      if (wrap) {
+        wrap.querySelectorAll('input[type="checkbox"][data-perm-key]').forEach(function(cb) {
+          if (cb.checked) permissions.push(cb.getAttribute('data-perm-key'));
+        });
+      }
+    }
+    // Admin braucht keine gepflegten Rechte (immer Vollzugriff) - bestehende
+    // Rechte bleiben in diesem Fall einfach unverändert auf dem Server
+    // erhalten, indem wir sie unverändert zurückschicken statt sie zu leeren.
+    if (role === 'admin') {
+      var row = id('bu-row-' + uid);
+      var existingChecked = row ? row.querySelectorAll('input[type="checkbox"][data-perm-key]:checked') : [];
+      existingChecked.forEach(function(cb) { permissions.push(cb.getAttribute('data-perm-key')); });
+    }
     try {
-      await buFetch('PATCH', '', { id: uid, roles: role ? [role] : [] });
-      toast('✅ Rolle aktualisiert');
+      await buFetch('PATCH', '', { id: uid, roles: role ? [role] : [], permissions: permissions });
+      toast('✅ Gespeichert');
       benutzerLoad();
     } catch(e) {
-      console.error('[Benutzerverwaltung] Fehler beim Ändern der Rolle:', e);
-      toast('❌ ' + e.message, true);
-      benutzerLoad(); // UI (Dropdown) auf tatsächlichen Stand zurücksetzen
+      console.error('[Benutzerverwaltung] Fehler beim Speichern:', e);
+      toast('❌ ' + e.message, 'err');
+      benutzerLoad(); // UI auf tatsächlichen Serverstand zurücksetzen
     }
   };
 
@@ -6043,7 +6386,7 @@
       benutzerLoad();
     } catch(e) {
       console.error('[Benutzerverwaltung] Fehler beim Entfernen:', e);
-      toast('❌ ' + e.message, true);
+      toast('❌ ' + e.message, 'err');
     }
   };
 
@@ -6104,6 +6447,7 @@
   }
 
   window.neueSeiteSpeedSave = async function() {
+    if (!guardSavePermission()) return;
     var def   = S.section;
     var titel = gv('ns-titel').trim();
     var slug  = gv('ns-slug').trim() || makeSlug(titel);
@@ -6169,6 +6513,7 @@
   }
 
   window.saveCurrentSection = async function() {
+    if (!guardSavePermission()) return;
     var def = S.section;
     if (!def || !def.file) return;
 
@@ -8930,11 +9275,14 @@
           // Inhalt - ohne diesen Zweig wären sie über die Suche nicht mehr
           // auffindbar gewesen (vorher gab es dafür einen separaten,
           // durchsuchbaren "Seiteninhalt"-Unterpunkt).
-          if (item.file) indexItem(item, label, path);
+          if (item.file && canAccessDef(item)) indexItem(item, label, path);
           if (item.children) traverseNav(item.children, path);
           return;
         }
         if (!item.file && item.form !== 'medien') return;
+        // Rechte-Filter (05.09.2026): nicht erlaubte Bereiche tauchen auch in
+        // der Suche nicht auf (echte Absicherung bleibt selectSectionImpl()).
+        if (!canAccessDef(item)) return;
         indexItem(item, label, path);
       });
     }
@@ -8942,49 +9290,55 @@
 
     // 2. Aktuelles-Beiträge
     var aktDef = findByKey(NAV, 'aktuelles');
-    fetch('/content/aktuelles.json').then(function(r){return r.json();}).then(function(d){
-      (d.beitraege || []).forEach(function(b, i) {
-        _searchIndex.push({
-          icon: '📰',
-          label: b.titel || '(Kein Titel)',
-          sub: 'Aktuelles' + (b.datum ? ' · ' + b.datum : '') + (b.kategorie ? ' · ' + b.kategorie : ''),
-          match: [b.titel, b.kategorie, b.text].filter(Boolean).join(' ').toLowerCase(),
-          action: function() {
-            selectSection(aktDef).then(function() { window.aktuellesEdit(i); });
-          }
+    if (canAccessDef(aktDef)) {
+      fetch('/content/aktuelles.json').then(function(r){return r.json();}).then(function(d){
+        (d.beitraege || []).forEach(function(b, i) {
+          _searchIndex.push({
+            icon: '📰',
+            label: b.titel || '(Kein Titel)',
+            sub: 'Aktuelles' + (b.datum ? ' · ' + b.datum : '') + (b.kategorie ? ' · ' + b.kategorie : ''),
+            match: [b.titel, b.kategorie, b.text].filter(Boolean).join(' ').toLowerCase(),
+            action: function() {
+              selectSection(aktDef).then(function() { window.aktuellesEdit(i); });
+            }
+          });
         });
-      });
-    }).catch(function(){});
+      }).catch(function(){});
+    }
 
     // 3. FAQ
     var faqDef = findByKey(NAV, 'faq');
-    fetch('/content/faq.json').then(function(r){return r.json();}).then(function(d){
-      (d.fragen || []).forEach(function(f, i) {
-        _searchIndex.push({
-          icon: '❓',
-          label: f.frage || '(Keine Frage)',
-          sub: 'FAQ',
-          match: [f.frage, f.antwort].filter(Boolean).join(' ').toLowerCase(),
-          action: function() { selectSection(faqDef); }
+    if (canAccessDef(faqDef)) {
+      fetch('/content/faq.json').then(function(r){return r.json();}).then(function(d){
+        (d.fragen || []).forEach(function(f, i) {
+          _searchIndex.push({
+            icon: '❓',
+            label: f.frage || '(Keine Frage)',
+            sub: 'FAQ',
+            match: [f.frage, f.antwort].filter(Boolean).join(' ').toLowerCase(),
+            action: function() { selectSection(faqDef); }
+          });
         });
-      });
-    }).catch(function(){});
+      }).catch(function(){});
+    }
 
     // 4. Termine
     var termDef = findByKey(NAV, 'termine');
-    fetch('/content/termine.json').then(function(r){return r.json();}).then(function(d){
-      (d.termine || []).forEach(function(t, i) {
-        _searchIndex.push({
-          icon: '📅',
-          label: t.veranstaltung || '(Kein Titel)',
-          sub: 'Termine' + (t.datum ? ' · ' + t.datum : '') + (t.ort ? ' · ' + t.ort : ''),
-          match: [t.veranstaltung, t.ort, t.kategorie].filter(Boolean).join(' ').toLowerCase(),
-          action: function() {
-            selectSection(termDef).then(function() { window.termineEdit(i); });
-          }
+    if (canAccessDef(termDef)) {
+      fetch('/content/termine.json').then(function(r){return r.json();}).then(function(d){
+        (d.termine || []).forEach(function(t, i) {
+          _searchIndex.push({
+            icon: '📅',
+            label: t.veranstaltung || '(Kein Titel)',
+            sub: 'Termine' + (t.datum ? ' · ' + t.datum : '') + (t.ort ? ' · ' + t.ort : ''),
+            match: [t.veranstaltung, t.ort, t.kategorie].filter(Boolean).join(' ').toLowerCase(),
+            action: function() {
+              selectSection(termDef).then(function() { window.termineEdit(i); });
+            }
+          });
         });
-      });
-    }).catch(function(){});
+      }).catch(function(){});
+    }
 
     // 5. Dynamische Seiten (Manifeste)
     var manifeste = [
@@ -8997,6 +9351,7 @@
       { url: '/content/aufgaben/hundeausbildung-seiten.json', icon: '🐕', bereich: 'Aufgaben / Jagdhundeschule', dir: 'content/aufgaben/hundeausbildung', form: 'standard' },
     ];
     manifeste.forEach(function(m) {
+      if (!isAdminUser() && !hasPermission(PERM_BY_DIR[m.dir])) return;
       fetch(m.url).then(function(r){return r.json();}).then(function(d){
         (d.seiten || []).filter(function(s){ return s.veroeffentlicht !== false; }).forEach(function(s) {
           var def = { key: 'dyn-' + s.slug, label: s.nav_label || s.slug, file: m.dir + '/' + s.slug + '.json', form: m.form, isDynamic: true, navFile: m.url.replace('/content/','content/'), navKey: 'seiten', slug: s.slug, dir: m.dir };

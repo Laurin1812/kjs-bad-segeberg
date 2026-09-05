@@ -23,10 +23,18 @@
 // Das Admin-Service-Token verlässt diese Function nie in Richtung Client.
 //
 // Aufruf: GET/POST/PATCH/DELETE /.netlify/functions/admin-users
-//   GET                       → Benutzerliste
-//   POST    { email }         → Benutzer einladen (Einladungs-Mail)
-//   PATCH   { id, roles }     → Rollen eines Benutzers setzen
-//   DELETE  ?id=<id>          → Benutzer entfernen
+//   GET                                    → Benutzerliste (inkl. roles + permissions)
+//   POST    { email }                      → Benutzer einladen (Einladungs-Mail)
+//   PATCH   { id, roles, permissions }     → Rolle(n) + Bereichsrechte eines Benutzers setzen
+//   DELETE  ?id=<id>                       → Benutzer entfernen
+//
+// Granulare Bereichsrechte (05.09.2026, "Benutzerrechte granular pro
+// Bereich"): zusätzlich zur groben Rolle ("admin"/"redakteur") kann ein
+// Benutzer mit Rolle "redakteur" gezielt einzelne Bereiche freigeschaltet
+// bekommen, gespeichert als app_metadata.permissions (Array von Keys, siehe
+// PERMISSIONS_BEKANNT unten). "admin" hat unabhängig von permissions immer
+// vollen Zugriff. roles und permissions werden bei PATCH immer gemeinsam
+// und vollständig ersetzt (siehe Kommentar am PATCH-Handler).
 //
 // Autorisierung: Netlify entschlüsselt das im Authorization-Header
 // mitgesendete Identity-JWT des aufrufenden Benutzers serverseitig selbst
@@ -36,7 +44,23 @@
 // behauptet wird. Kein Browser-Parameter wird hier je als Autorisierung
 // akzeptiert.
 
-var ROLES_BEKANNT = ['admin']; // aktuell einzige existierende Rolle (s. Abschlussbericht: "redakteur" als möglicher nächster Schritt)
+var ROLES_BEKANNT = ['admin', 'redakteur'];
+
+// Granulare Bereichsrechte (05.09.2026, "Benutzerrechte granular pro Bereich").
+// WICHTIG - MANUELLER SYNC: Diese Liste MUSS exakt den Keys aus
+// PERMISSION_KEYS in admin/admin.js entsprechen (dort die einzige
+// sichtbare/gruppierte Quelle für Label + Gruppierung im Admin-UI). Es gibt
+// in diesem Projekt kein Build-System, das beide Dateien aus einer
+// gemeinsamen Quelle generieren könnte - beim Hinzufügen/Umbenennen eines
+// Rechts IMMER beide Stellen anpassen, sonst werden hier vergebene Rechte
+// vom Admin-UI ignoriert bzw. dort definierte Rechte hier abgelehnt.
+var PERMISSIONS_BEKANNT = [
+  'aktuelles', 'termine', 'kontakt', 'inhaltsseiten',
+  'vorstand', 'obleute', 'hegeringe', 'kjm', 'jagdhundeschule',
+  'hundeboerse', 'waffenboerse', 'partner', 'infomobil',
+  'medien',
+  'navigation', 'design'
+];
 
 function json(statusCode, data) {
   return {
@@ -56,6 +80,7 @@ function mapUser(u) {
     email: u.email,
     full_name: (u.user_metadata && u.user_metadata.full_name) || '',
     roles: (u.app_metadata && u.app_metadata.roles) || [],
+    permissions: (u.app_metadata && u.app_metadata.permissions) || [],
     status: u.confirmed_at ? 'bestaetigt' : 'eingeladen',
     created_at: u.created_at || null
   };
@@ -132,10 +157,20 @@ exports.handler = async function (event, context) {
       try { payload2 = JSON.parse(event.body || '{}'); } catch (e) { /* siehe Validierung unten */ }
       var id = payload2.id;
       var roles = Array.isArray(payload2.roles) ? payload2.roles : [];
+      // WICHTIG: roles UND permissions werden hier immer gemeinsam und
+      // vollständig ersetzt (kein Merge) - genau wie roles es schon vorher
+      // getan hat. Das Admin-UI (admin/admin.js, Benutzerverwaltung) schickt
+      // daher bei jedem Speichern beide Felder zusammen (permissions ggf. als
+      // leeres Array), damit hier nie versehentlich Rechte verloren gehen.
+      var permissions = Array.isArray(payload2.permissions) ? payload2.permissions : [];
       if (!id) return json(400, { error: 'missing_id', message: 'Keine Benutzer-ID angegeben.' });
       var unbekannt = roles.filter(function (rl) { return ROLES_BEKANNT.indexOf(rl) === -1; });
       if (unbekannt.length) {
         return json(400, { error: 'unknown_role', message: 'Unbekannte Rolle: ' + unbekannt.join(', ') });
+      }
+      var unbekanntePerm = permissions.filter(function (p) { return PERMISSIONS_BEKANNT.indexOf(p) === -1; });
+      if (unbekanntePerm.length) {
+        return json(400, { error: 'unknown_permission', message: 'Unbekanntes Recht: ' + unbekanntePerm.join(', ') });
       }
       // Schutz vor versehentlicher Selbst-Aussperrung: der aufrufende Admin
       // kann sich über diese UI nicht selbst die admin-Rolle entziehen.
@@ -145,7 +180,7 @@ exports.handler = async function (event, context) {
       var r3 = await fetch(adminBase + '/users/' + encodeURIComponent(id), {
         method: 'PUT',
         headers: adminHeaders,
-        body: JSON.stringify({ app_metadata: { roles: roles } })
+        body: JSON.stringify({ app_metadata: { roles: roles, permissions: permissions } })
       });
       var body3 = await r3.json().catch(function () { return {}; });
       if (!r3.ok) {

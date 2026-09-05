@@ -750,18 +750,45 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .navreo-names { display: flex; flex-direction: column; gap: .25rem; }
 
 /* ── BENUTZERVERWALTUNG ──────────────────────────────────────── */
+/* Jede Benutzerzeile ist seit der Einführung granularer Bereichsrechte
+   (05.09.2026) eine kleine vertikale Karte statt einer einzeiligen Zeile,
+   damit unter Rolle+Aktionen optional die gruppierten Rechte-Checkboxen
+   bzw. der Vollzugriff-Hinweis Platz finden. */
 .bu-user-row {
-  display: flex; align-items: center; gap: .75rem;
-  padding: .6rem .75rem; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: .5rem;
+  padding: .75rem .75rem; border-bottom: 1px solid var(--border);
 }
 .bu-user-row:last-child { border-bottom: none; }
-.bu-user-info { flex: 1; font-size: .9rem; }
+.bu-user-info { font-size: .9rem; }
 .bu-user-name { color: var(--text-muted); font-size: .85rem; }
 .bu-badge {
   display: inline-block; padding: 1px 7px; border-radius: 99px;
   background: var(--green-light); color: var(--green); font-size: .75rem;
   font-weight: 600; margin-left: .3rem; border: 1px solid var(--green);
 }
+.bu-user-controls {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.bu-perm-admin-note {
+  font-size: .85rem; color: var(--green); font-weight: 600;
+}
+.bu-perm-wrap {
+  display: flex; flex-wrap: wrap; gap: .75rem 1.5rem;
+  padding: .6rem .75rem; background: var(--bg-alt, #f7f7f8);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.bu-perm-group {
+  display: flex; flex-direction: column; gap: .3rem; min-width: 180px;
+}
+.bu-perm-group-title {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .02em; color: var(--text-muted); margin-bottom: .1rem;
+}
+.bu-perm-item {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .85rem; cursor: pointer;
+}
+.bu-perm-item input[type="checkbox"] { margin: 0; }
 
 /* ── SEKTIONSNAME INLINE-EDIT ────────────────────────────────── */
 .sektions-edit-input {
