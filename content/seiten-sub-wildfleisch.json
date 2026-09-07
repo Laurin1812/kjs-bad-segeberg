@@ -11,12 +11,6 @@
       "nav_label": "Rezepte Wildfleisch",
       "in_navigation": true,
       "veroeffentlicht": true
-    },
-    {
-      "slug": "test",
-      "nav_label": "t",
-      "in_navigation": true,
-      "veroeffentlicht": true
     }
   ]
 }
