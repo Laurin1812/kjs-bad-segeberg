@@ -5,12 +5,6 @@
       "nav_label": "Lagerung Wildfleisch",
       "in_navigation": true,
       "veroeffentlicht": false
-    },
-    {
-      "slug": "rezepte-fuer-wildfleisch-testseite",
-      "nav_label": "Rezepte Wildfleisch",
-      "in_navigation": true,
-      "veroeffentlicht": true
     }
   ]
 }
