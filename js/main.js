@@ -871,7 +871,7 @@ function splitPostadresse(raw) {
   // Absichtlich KEIN zweiter vollständiger Footer als Fallback (Punkt 8
   // der Phase-3A-Vorgabe - keine dauerhaft zweite, separat zu pflegende
   // Footer-Struktur) - nur ein minimaler Not-Anker (Copyright +
-  // Impressum/Datenschutz/Login), falls footer.json ausnahmsweise nicht
+  // Impressum/Datenschutz), falls footer.json ausnahmsweise nicht
   // ladbar ist, damit die Seite nicht komplett ohne Fußzeile dasteht.
   var FALLBACK_FOOTER = {
     ueber_text: '', facebook_url: '', instagram_url: '',
@@ -931,7 +931,6 @@ function splitPostadresse(raw) {
           '<div class="footer-bottom__links">' +
             '<a href="/impressum.html">Impressum</a>' +
             '<a href="/datenschutz.html">Datenschutz</a>' +
-            '<a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a>' +
           '</div>' +
         '</div>' +
       '</div>';
