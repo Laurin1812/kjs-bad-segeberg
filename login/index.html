@@ -5,11 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login – KJS Segeberg</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    /* Arbeitsblock 3 (Farbvereinheitlichung, 04.09.2026): die Login-Seite
+       hatte als einzige öffentliche Seite gar kein design.json-Fetch und
+       zeigte dadurch dauerhaft die alten, helleren Vorgabewerte (#1e4620 /
+       #2e6b30), unabhängig davon was Frank im Admin einstellt. Hier wird
+       derselbe Lade-Mechanismus wie auf allen anderen Seiten ergänzt, damit
+       Hintergrund/Überschrift/Button live Franks aktuelle Grüntöne zeigen. */
+    fetch('/content/design.json').then(r=>r.json()).then(d=>{
+      const r = document.documentElement.style;
+      if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+      if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    }).catch(()=>{});
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: #1e4620;
+      background: var(--green-dark, #1e4620);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -31,7 +44,7 @@
       display: block;
     }
     h1 {
-      color: #1e4620;
+      color: var(--green-dark, #1e4620);
       font-size: 1.3rem;
       margin-bottom: .4rem;
     }
@@ -41,7 +54,7 @@
       margin-bottom: 2rem;
     }
     button {
-      background: #2e6b30;
+      background: var(--green-main, #2e6b30);
       color: #fff;
       border: none;
       padding: .9rem 2rem;
@@ -52,13 +65,13 @@
       font-weight: 600;
       transition: background .2s;
     }
-    button:hover { background: #1e4620; }
+    button:hover { background: var(--green-dark, #1e4620); }
     .hint {
       margin-top: 1.5rem;
       font-size: .78rem;
       color: #999;
     }
-    .loading { color: #2e6b30; margin-top: 1rem; font-size: .9rem; display: none; }
+    .loading { color: var(--green-main, #2e6b30); margin-top: 1rem; font-size: .9rem; display: none; }
   </style>
 </head>
 <body>

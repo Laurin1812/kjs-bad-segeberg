@@ -1,0 +1,14 @@
+{
+  "titel": "Service",
+  "hero_bild": "",
+  "kontakt_name": "Test",
+  "kontakt_email": "Test",
+  "veroeffentlicht": true,
+  "einstellungen": {
+    "kategorien": [
+      "Umweltschutz",
+      "Test"
+    ]
+  },
+  "beitraege": []
+}

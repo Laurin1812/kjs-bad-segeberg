@@ -257,6 +257,10 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 
 /* Panel body */
 .panel-body { padding: 1.5rem; max-width: 800px; }
+/* Medien & Bilder (Punkt 10): normale Formulare bleiben bewusst bei 800px
+   (bessere Lesbarkeit für Textfelder), aber das Bilder-Grid soll die volle
+   Seitenbreite nutzen statt rechts leeren Platz zu lassen. */
+.panel-body--wide { max-width: none; }
 
 /* Loading */
 .panel-loading {
@@ -301,6 +305,45 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .field-textarea { resize: vertical; min-height: 80px; }
 .field-select { cursor: pointer; }
 .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) {
+  .field-row-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Farbfeld: Color-Picker + Hex-Feld + RAL-Auswahl (Arbeitsblock 5) ── */
+.color-field-group { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.color-swatch-input {
+  width: 46px; height: 38px; padding: 0; border: none; cursor: pointer;
+  background: none; flex-shrink: 0; border-radius: 6px;
+}
+.color-hex-input { width: 108px; flex: 0 0 auto; font-family: monospace; text-transform: uppercase; }
+.field-input--invalid { border-color: var(--danger) !important; }
+
+/* RAL-Auswahl-Dialog (dynamisch erzeugt, siehe ralPickerOpen in admin.js) */
+.ral-picker-list {
+  max-height: 320px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.ral-picker-row {
+  display: flex; align-items: center; gap: .65rem; width: 100%;
+  padding: .55rem .75rem; border: none; border-bottom: 1px solid var(--border);
+  background: var(--white); cursor: pointer; text-align: left;
+  font-size: .85rem; font-family: inherit;
+}
+.ral-picker-row:last-child { border-bottom: none; }
+.ral-picker-row:hover, .ral-picker-row:focus-visible {
+  background: var(--green-light); outline: none;
+}
+.ral-picker-swatch {
+  width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+}
+.ral-picker-code { font-weight: 700; color: var(--text); flex-shrink: 0; min-width: 68px; }
+.ral-picker-name { color: var(--text-muted); }
+
+/* Kaliber: one row per entry, no comma-splitting (see waffenboerseKaliberCollect) */
+.wb-kaliber-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .5rem; }
+.wb-kaliber-row { display: flex; align-items: center; gap: .5rem; }
+.wb-kaliber-row .wb-kaliber-input { flex: 1 1 auto; }
 
 /* Image field */
 .image-field { }
@@ -707,18 +750,45 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .navreo-names { display: flex; flex-direction: column; gap: .25rem; }
 
 /* ── BENUTZERVERWALTUNG ──────────────────────────────────────── */
+/* Jede Benutzerzeile ist seit der Einführung granularer Bereichsrechte
+   (05.09.2026) eine kleine vertikale Karte statt einer einzeiligen Zeile,
+   damit unter Rolle+Aktionen optional die gruppierten Rechte-Checkboxen
+   bzw. der Vollzugriff-Hinweis Platz finden. */
 .bu-user-row {
-  display: flex; align-items: center; gap: .75rem;
-  padding: .6rem .75rem; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: .5rem;
+  padding: .75rem .75rem; border-bottom: 1px solid var(--border);
 }
 .bu-user-row:last-child { border-bottom: none; }
-.bu-user-info { flex: 1; font-size: .9rem; }
+.bu-user-info { font-size: .9rem; }
 .bu-user-name { color: var(--text-muted); font-size: .85rem; }
 .bu-badge {
   display: inline-block; padding: 1px 7px; border-radius: 99px;
   background: var(--green-light); color: var(--green); font-size: .75rem;
   font-weight: 600; margin-left: .3rem; border: 1px solid var(--green);
 }
+.bu-user-controls {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.bu-perm-admin-note {
+  font-size: .85rem; color: var(--green); font-weight: 600;
+}
+.bu-perm-wrap {
+  display: flex; flex-wrap: wrap; gap: .75rem 1.5rem;
+  padding: .6rem .75rem; background: var(--bg-alt, #f7f7f8);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.bu-perm-group {
+  display: flex; flex-direction: column; gap: .3rem; min-width: 180px;
+}
+.bu-perm-group-title {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .02em; color: var(--text-muted); margin-bottom: .1rem;
+}
+.bu-perm-item {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .85rem; cursor: pointer;
+}
+.bu-perm-item input[type="checkbox"] { margin: 0; }
 
 /* ── SEKTIONSNAME INLINE-EDIT ────────────────────────────────── */
 .sektions-edit-input {
@@ -757,6 +827,11 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 }
 .tt-btn:hover  { background: var(--green-light); border-color: var(--green); color: var(--green); }
 .tt-btn--active { background: var(--green); color: #fff; border-color: var(--green); }
+.tt-color-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+.tt-color-input {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; padding: 0; border: none;
+}
 .tt-sep {
   display: inline-block;
   width: 1px;
@@ -804,6 +879,30 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .tt-mount .ProseMirror img.img-links     { float: left;  margin: .25rem 1rem .5rem 0; }
 .tt-mount .ProseMirror img.img-rechts    { float: right; margin: .25rem 0 .5rem 1rem; }
 .tt-mount .ProseMirror img.img-zentriert { float: none; display: block; margin: 1rem auto; }
+/* ── Inline-Bilder: ohne Rahmen (Logos/Grafiken mit eigenem weißen Hintergrund) ── */
+.tt-mount .ProseMirror img.img-flat { box-shadow: none; border-radius: 0; }
+/* ── Abstand: drei feste Stufen über die Toolbar-Buttons "Eng/Normal/Weit"
+   (Frank-Feedback 19.08.2026: statt einem unzuverlässigen Umschalter). ── */
+.tt-mount .ProseMirror [data-spacing="compact"] { margin: .05rem 0; }
+.tt-mount .ProseMirror li[data-spacing="compact"] p,
+.tt-mount .ProseMirror p[data-spacing="compact"] { margin: 0; line-height: 1.3; }
+.tt-mount .ProseMirror [data-spacing="wide"] { margin: 1.1rem 0; }
+.tt-mount .ProseMirror li[data-spacing="wide"] p,
+.tt-mount .ProseMirror p[data-spacing="wide"] { margin: 0; line-height: 2; }
+/* Abstand-Stufe landet auf der ganzen Liste (ul/ol), nicht auf jedem
+   Listenpunkt – ohne diese Regeln wirkt "Eng"/"Weit" im Editor nur auf den
+   Abstand vor/nach der Liste, nicht zwischen den Punkten (Frank 20.08.2026). */
+.tt-mount .ProseMirror ul[data-spacing="compact"] li,
+.tt-mount .ProseMirror ol[data-spacing="compact"] li { margin: .05rem 0; }
+.tt-mount .ProseMirror ul[data-spacing="compact"] li p,
+.tt-mount .ProseMirror ol[data-spacing="compact"] li p { margin: 0; line-height: 1.25; }
+.tt-mount .ProseMirror ul[data-spacing="wide"] li,
+.tt-mount .ProseMirror ol[data-spacing="wide"] li { margin: 1rem 0; }
+.tt-mount .ProseMirror ul[data-spacing="wide"] li p,
+.tt-mount .ProseMirror ol[data-spacing="wide"] li p { margin: 0; line-height: 2; }
+/* ── Video-Einbettung (YouTube) ── */
+.tt-mount .ProseMirror div[data-youtube-video] { max-width: 100%; margin: .5rem 0; }
+.tt-mount .ProseMirror div[data-youtube-video] iframe { width: 100%; aspect-ratio: 16/9; height: auto; border-radius: 6px; }
 /* Placeholder-Text wenn Editor leer */
 .tt-mount .ProseMirror.is-editor-empty::before {
   content: attr(data-placeholder);
@@ -822,6 +921,12 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 
 /* ── TIPTAP BILD-KONTEXTMENÜ ─────────────────────────────────── */
 #tt-img-menu { pointer-events: auto; }
+/* ── TIPTAP LINK-DIALOG ──────────────────────────────────────── */
+#tt-link-menu { pointer-events: auto; }
+.tt-linkmenu-inner { min-width: 280px; }
+.tt-linkmenu-inner .field-input { margin: .35rem 0 .55rem; }
+.tt-linkmenu-actions { display: flex; gap: .4rem; justify-content: flex-end; }
+.tt-linkmenu-actions .tt-imgmenu-btn--danger { margin-right: auto; }
 .tt-imgmenu-inner {
   display: flex;
   align-items: center;

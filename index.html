@@ -24,147 +24,8 @@
 <body>
 
 <!-- ===== TOP BAR ===== -->
-<div class="topbar">
-  <div class="container">
-    <div class="topbar__left">
-      <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
-      <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
-    </div>
-    <div class="topbar__right">
-      <div class="topbar__social">
-        <a href="#" aria-label="Facebook" title="Facebook">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
-        </a>
-        <a href="#" aria-label="Instagram" title="Instagram">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== HEADER ===== -->
-<header class="site-header">
-  <div class="container header-inner">
-    <a href="index.html" class="site-logo">
-      <img src="images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
-      <div class="site-logo__text">
-        <span class="site-logo__name">Kreisjägerschaft</span>
-        <span class="site-logo__sub">Segeberg e.V.</span>
-      </div>
-    </a>
-
-    <nav aria-label="Hauptnavigation">
-      <ul class="main-nav">
-        <li class="active"><a href="index.html" data-navkey="startseite">Startseite</a></li>
-
-        <li>
-          <a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
-          <ul class="dropdown" id="jaeger-dropdown">
-          <li><a href="jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li class="has-sub"><a href="#">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="jaeger/vorstand.html">Vorstand</a></li>
-              <li><a href="jaeger/obleute.html">Obleute</a></li>
-              <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
-              <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
-              <li><a href="jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
-              <li><a href="jaeger/niederwild.html">Niederwild</a></li>
-              <li><a href="jaeger/hochwild.html">Hochwild</a></li>
-              <li><a href="jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
-              <li><a href="jaeger/satzung.html">Satzung</a></li>
-              <li><a href="jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-            </ul>
-          </li>
-          <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="aufgaben/schiessen.html">Schie&#223;wesen</a></li>
-              <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-              <li><a href="aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
-              <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
-              <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-              <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
-              <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-            </ul>
-          </li>
-          <li><a href="jaeger/infomobil.html">Infomobil</a></li>
-          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
-          </li>
-        </ul>
-        </li>
-
-        <li>
-          <a href="verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
-          <ul class="dropdown">
-          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-        </ul>
-        </li>
-
-          <li><a href="termine/index.html" data-navkey="termine">Termine</a></li>
-        <li><a href="aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
-        <li><a href="faq/index.html" data-navkey="faq">FAQ</a></li>
-        <li><a href="kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-      </ul>
-    </nav>
-
-    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</header>
-
-<!-- ===== MOBILE NAV ===== -->
-<nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
-  <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
-  <ul>
-    <li><a href="index.html">Startseite</a></li>
-    <li>
-      <details>
-        <summary>Jäger</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li><a href="jaeger/vorstand.html">Vorstand</a></li>
-          <li><a href="jaeger/obleute.html">Obleute</a></li>
-          <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
-          <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
-          <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <li><a href="jaeger/niederwild.html">Niederwild</a></li>
-          <li><a href="jaeger/hochwild.html">Hochwild</a></li>
-          <li><a href="jaeger/schiessobleute.html">Schießobleute</a></li>
-          <li><a href="jaeger/satzung.html">Satzung</a></li>
-          <li><a href="jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-          <li><a href="aufgaben/schiessen.html">Schießwesen</a></li>
-          <li><a href="aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-          <li><a href="aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
-          <li><a href="aufgaben/jugend.html">Jugendarbeit</a></li>
-          <li><a href="aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-          <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
-          <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-          <li><a href="jaeger/infomobil.html">Infomobil</a></li>
-        </ul>
-      </details>
-    </li>
-    <li>
-      <details>
-        <summary>Verbraucher</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-        </ul>
-      </details>
-    </li>
-    <li><a href="termine/index.html">Termine</a></li>
-    <li><a href="aktuelles/index.html">Aktuelles</a></li>
-    <li><a href="faq/index.html">FAQ</a></li>
-    <li><a href="kontakt/index.html">Kontakt</a></li>
-  </ul>
-</nav>
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
 
 <!-- ===== HERO ===== -->
 <section class="hero">
@@ -195,28 +56,28 @@
 <section class="quicklinks" aria-label="Schnellzugriff">
   <div class="quicklinks__grid">
     <a href="jaeger/ueber-uns.html" class="quicklinks__item">
-      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo"></span>
+      <span class="quicklinks__icon"><img src="images/logo-dunkel.png" alt="KJS Logo"></span>
       <div>
         <div class="quicklinks__label">Für Mitglieder</div>
         <div class="quicklinks__title">KJS Segeberg</div>
       </div>
     </a>
     <a href="verbraucher/wildfleisch.html" class="quicklinks__item">
-      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo"></span>
+      <span class="quicklinks__icon"><img src="images/logo-dunkel.png" alt="KJS Logo"></span>
       <div>
         <div class="quicklinks__label">Für Verbraucher</div>
         <div class="quicklinks__title">Regionales Wildfleisch</div>
       </div>
     </a>
     <a href="aufgaben/jugend.html" class="quicklinks__item">
-      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo"></span>
+      <span class="quicklinks__icon"><img src="images/logo-dunkel.png" alt="KJS Logo"></span>
       <div>
         <div class="quicklinks__label">Nachwuchs</div>
         <div class="quicklinks__title">Jugendarbeit</div>
       </div>
     </a>
     <a href="aufgaben/naturschutz.html" class="quicklinks__item">
-      <span class="quicklinks__icon"><img src="images/logo.png" alt="KJS Logo"></span>
+      <span class="quicklinks__icon"><img src="images/logo-dunkel.png" alt="KJS Logo"></span>
       <div>
         <div class="quicklinks__label">Engagement</div>
         <div class="quicklinks__title">Naturschutz</div>
@@ -275,7 +136,6 @@
         bringen sich das ganze Jahr über aktiv ein.
       </p>
       <div class="welcome__signature">
-        <div class="welcome__sig-avatar">🤝</div>
         <div>
           <span class="welcome__sig-name" id="welcome-sig-name">Ihr Kreisjägermeister</span>
           <span class="welcome__sig-role" id="welcome-sig-rolle">Kreisjägerschaft Segeberg e.V.</span>
@@ -428,6 +288,10 @@
   </div>
 </section>
 
+<!-- Gemeinsame Datenschicht (Sichtbarkeit/Sortierung Termine & Aktuelles) -
+     muss vor den beiden folgenden Inline-Scripts geladen werden. -->
+<script src="js/content.js"></script>
+
 <script>
   (function() {
     var grid = document.getElementById('home-news-grid');
@@ -459,12 +323,23 @@
     fetch('/content/aktuelles.json')
       .then(function(r){ return r.json(); })
       .then(function(data){
-        var beitraege = data.beitraege || [];
+        // Sichtbarkeit + Sortierung kommen jetzt zentral aus js/content.js
+        // (KJSContent.Aktuelles), damit Startseite und /aktuelles/ dieselbe
+        // Grundlogik verwenden (vorher: hier einfach ungefiltert/unsortiert
+        // die ersten 3 Einträge – dadurch konnte die Startseite andere
+        // Beiträge zeigen als die Aktuelles-Übersichtsseite). "i" im Link
+        // muss der Index im UNGEFILTERTEN Original-Array bleiben, sonst
+        // zeigt "Weiterlesen" auf den falschen Beitrag.
+        var alleBeitraege = data.beitraege || [];
+        var beitraege = window.KJSContent
+          ? window.KJSContent.Aktuelles.neuesteNichtArchiviert(alleBeitraege, 3)
+          : alleBeitraege.filter(function(b) { return !b.archiviert; }).slice(0, 3);
         if (!beitraege.length) {
           grid.innerHTML = '<p>Zurzeit keine Beiträge vorhanden.</p>';
           return;
         }
-        grid.innerHTML = beitraege.slice(0, 3).map(function(b, i){
+        grid.innerHTML = beitraege.map(function(b){
+          var i = alleBeitraege.indexOf(b);
           var imgHtml = b.bild
             ? '<img class="news-card__img" src="' + (b.bild.indexOf('/') === 0 ? '.' + b.bild : b.bild) + '" alt="' + b.titel + '" loading="lazy">'
             : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">' +
@@ -498,66 +373,8 @@
     <div class="section-divider"></div>
     <p class="section-subtitle">Aktuelle Veranstaltungen der Kreisjägerschaft Segeberg</p>
 
-    <div class="termine-list">
-      <div class="termine-item">
-        <div class="termine-item__date">
-          <span class="termine-item__day">12</span>
-          <span class="termine-item__month">Mai</span>
-        </div>
-        <div>
-          <div class="termine-item__title">Kreisvorstandssitzung KJS Segeberg</div>
-          <div class="termine-item__info">
-            <span>🕕 18:00 Uhr</span>
-            <span>📍 Gasthaus Zum Forst, Bad Segeberg</span>
-          </div>
-        </div>
-        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
-      </div>
-
-      <div class="termine-item">
-        <div class="termine-item__date">
-          <span class="termine-item__day">18</span>
-          <span class="termine-item__month">Mai</span>
-        </div>
-        <div>
-          <div class="termine-item__title">Übungsschießen Hegering Segeberg</div>
-          <div class="termine-item__info">
-            <span>🕗 09:00 Uhr</span>
-            <span>📍 Schießstand Fredesdorf</span>
-          </div>
-        </div>
-        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
-      </div>
-
-      <div class="termine-item">
-        <div class="termine-item__date">
-          <span class="termine-item__day">24</span>
-          <span class="termine-item__month">Mai</span>
-        </div>
-        <div>
-          <div class="termine-item__title">Jagdhornbläsertreffen – Kreiswettbewerb</div>
-          <div class="termine-item__info">
-            <span>🕑 14:00 Uhr</span>
-            <span>📍 Kulturzentrum Bad Segeberg</span>
-          </div>
-        </div>
-        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
-      </div>
-
-      <div class="termine-item">
-        <div class="termine-item__date">
-          <span class="termine-item__day">07</span>
-          <span class="termine-item__month">Jun</span>
-        </div>
-        <div>
-          <div class="termine-item__title">Jungwildrettung – Koordinationstreffen Frühjahr</div>
-          <div class="termine-item__info">
-            <span>🕖 19:00 Uhr</span>
-            <span>📍 Feuerwehrhaus Leezen</span>
-          </div>
-        </div>
-        <a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>
-      </div>
+    <div class="termine-list" id="home-termine-list">
+      <p style="color:var(--text-muted);">Termine werden geladen …</p>
     </div>
 
     <div class="news__more">
@@ -566,12 +383,92 @@
   </div>
 </section>
 
+<script>
+  (function() {
+    var list = document.getElementById('home-termine-list');
+    if (!list) return;
+
+    // Sichtbarkeit + Sortierung kommen jetzt zentral aus js/content.js
+    // (KJSContent.Termine), damit Startseite und Termine-Seite immer
+    // denselben Stand zeigen (vorher: hier fest eingetragene Demo-Termine
+    // bzw. eine eigene Kopie der Regeln, siehe Frank-Bug-Report 21.08.2026).
+    function escHtml(s) {
+      return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function pad2(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+    function parseDatumFallback(raw) {
+      if (!raw) return null;
+      var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+      if (m1) return new Date(+m1[3], +m1[2] - 1, +m1[1]);
+      var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m2) return new Date(+m2[1], +m2[2] - 1, +m2[3]);
+      return null;
+    }
+    var parseDatum = window.KJSContent ? window.KJSContent.Termine.parseDatum : parseDatumFallback;
+    var MONATE_KURZ = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+    fetch('/content/termine.json?_=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var alleTermine = data.termine || [];
+        var sichtbar = window.KJSContent
+          ? window.KJSContent.Termine.sichtbareSortiert(alleTermine)
+          : alleTermine.filter(function(t){
+              if (t.archiviert) return false;
+              var d = parseDatumFallback(t.datum);
+              if (!d) return true;
+              var grenze = new Date(d.getTime());
+              grenze.setDate(grenze.getDate() + 7);
+              grenze.setHours(23, 59, 59, 999);
+              return grenze >= new Date();
+            }).sort(function(a, b){
+              var da = parseDatumFallback(a.datum), db = parseDatumFallback(b.datum);
+              if (!da && !db) return 0;
+              if (!da) return 1;
+              if (!db) return -1;
+              return da - db;
+            });
+        if (!sichtbar.length) {
+          list.innerHTML = '<p style="color:var(--text-muted);">Zurzeit keine Termine vorhanden.</p>';
+          return;
+        }
+        list.innerHTML = sichtbar.slice(0, 4).map(function(t){
+          var d = parseDatum(t.datum);
+          var tag = d ? pad2(d.getDate()) : '–';
+          var monat = d ? MONATE_KURZ[d.getMonth()] : '';
+          var ortTeile = [];
+          if (t.strasse) ortTeile.push(t.strasse);
+          var plzOrt = [t.plz, t.ort].filter(Boolean).join(' ');
+          if (plzOrt) ortTeile.push(plzOrt);
+          var ortText = ortTeile.join(', ') || t.ort || '';
+          return '<div class="termine-item">' +
+              '<div class="termine-item__date">' +
+                '<span class="termine-item__day">' + tag + '</span>' +
+                '<span class="termine-item__month">' + monat + '</span>' +
+              '</div>' +
+              '<div>' +
+                '<div class="termine-item__title">' + escHtml(t.veranstaltung) + '</div>' +
+                '<div class="termine-item__info">' +
+                  (t.uhrzeit ? '<span>' + ICONS.clock + escHtml(t.uhrzeit) + ' Uhr</span>' : '') +
+                  (ortText ? '<span>' + ICONS.pin + escHtml(ortText) + '</span>' : '') +
+                '</div>' +
+              '</div>' +
+              '<a href="termine/index.html" class="btn btn-sm btn-outline-green">Details</a>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(function(){
+        list.innerHTML = '<p style="color:var(--text-muted);">Termine konnten nicht geladen werden.</p>';
+      });
+  })();
+</script>
+
 <!-- ===== TESTIMONIALS ===== -->
 <section class="testimonials">
   <div class="container">
-    <h2 class="section-title">Was unsere Jäger und Mitglieder sagen</h2>
+    <h2 class="section-title" id="testimonials-titel">Was unsere Jäger und Mitglieder sagen</h2>
     <div class="section-divider"></div>
-    <p class="section-subtitle">Stimmen aus unserer Gemeinschaft</p>
+    <p class="section-subtitle" id="testimonials-untertitel">Stimmen aus unserer Gemeinschaft</p>
 
     <div class="testimonials__grid">
       <div class="testimonial-card">
@@ -639,72 +536,44 @@
 </section>
 
 <!-- ===== FOOTER ===== -->
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-about">
-        <img src="images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
-        <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
-        <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
-        <p>Verantwortungsvolle Jagd, aktiver Naturschutz und regionales Engagement
-           im Kreis Bad Segeberg seit 2000.</p>
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
-          </a>
-          <a href="#" aria-label="Instagram">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-          </a>
-        </div>
-      </div>
+<footer class="site-footer" id="siteFooter"></footer>
 
-      <div class="footer-col">
-        <h5>Über die KJS</h5>
-        <ul>
-          <li><a href="jaeger/vorstand.html">Vorstand</a></li>
-          <li><a href="jaeger/obleute.html">Obleute</a></li>
-          <li><a href="jaeger/hegeringe.html">Hegeringe</a></li>
-              <li><a href="aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h5>Schnellübersicht</h5>
-        <ul>
-          <li><a href="index.html">Startseite</a></li>
-          <li><a href="verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="aufgaben/naturschutz.html">Naturschutz</a></li>
-          <li><a href="downloads/index.html">Downloads</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h5>Informationen</h5>
-        <ul>
-          <li><a href="kontakt/index.html">Kontakt</a></li>
-          <li><a href="aktuelles/index.html">Aktuelles</a></li>
-          <li><a href="termine/index.html">Termine</a></li>
-          <li><a href="jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <li><a href="jaeger/mitglied-werden.html">Mitglied werden</a></li>
-          <li><a href="faq/index.html">FAQ</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
-      <div class="footer-bottom__links">
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<script src="js/main.js"></script>
+<script src="/js/main.js"></script>
 <script>
   fetch('/content/startseite.json').then(function(r){return r.json();}).then(function(d){
+    // Hero-Hintergrund: ein Bild (fest) oder mehrere Bilder (automatische
+    // Diashow mit Crossfade, je Bild eigene Anzeigedauer in Sekunden).
+    // Fallback auf das bisherige hero_bild (Alt-Feld, war nie verdrahtet)
+    // bzw. ohne beides bleibt das feste css/hero.jpg wie gehabt bestehen.
+    var heroSlides = (Array.isArray(d.hero_slides) && d.hero_slides.length)
+      ? d.hero_slides.filter(function(s){ return s && s.bild; })
+      : (d.hero_bild ? [{ bild: d.hero_bild, dauer: 6 }] : []);
+    if (heroSlides.length) {
+      var heroBgAlt = document.querySelector('.hero__bg');
+      var heroOverlayEl = document.querySelector('.hero__overlay');
+      if (heroBgAlt && heroOverlayEl) {
+        heroBgAlt.style.display = 'none';
+        var heroSlideEls = heroSlides.map(function(s, i){
+          var el = document.createElement('div');
+          el.className = 'hero__bg--slide' + (i === 0 ? ' is-active' : '');
+          el.style.backgroundImage = "url('" + s.bild + "')";
+          heroOverlayEl.parentNode.insertBefore(el, heroOverlayEl);
+          return el;
+        });
+        if (heroSlideEls.length > 1) {
+          (function loop(idx){
+            var dauerSek = parseFloat(heroSlides[idx].dauer);
+            if (!dauerSek || dauerSek < 1) dauerSek = 6;
+            setTimeout(function(){
+              var next = (idx + 1) % heroSlideEls.length;
+              heroSlideEls[idx].classList.remove('is-active');
+              heroSlideEls[next].classList.add('is-active');
+              loop(next);
+            }, dauerSek * 1000);
+          })(0);
+        }
+      }
+    }
     // Hero Titel (Zeile 1 + Zeile 2)
     var heroH1 = document.querySelector('.hero__content h1');
     if(heroH1){
@@ -761,6 +630,33 @@
     if(wkText2 && d.willkommen_text2) wkText2.textContent = d.willkommen_text2;
     if(wkSigName && d.willkommen_signatur_name) wkSigName.textContent = d.willkommen_signatur_name;
     if(wkSigRolle && d.willkommen_signatur_rolle) wkSigRolle.textContent = d.willkommen_signatur_rolle;
+    // Stimmen/Testimonials: waren bisher 3 fest im HTML verdrahtete
+    // Beispiel-Zitate (Fantasienamen) - jetzt aus dem Admin-Feld befüllt.
+    // Ohne gespeicherte Zitate bleiben die vorhandenen HTML-Karten als
+    // Fallback stehen, damit der Bereich nicht leer wirkt.
+    var tsTitelEl = document.getElementById('testimonials-titel');
+    if (tsTitelEl && d.testimonials_titel) tsTitelEl.textContent = d.testimonials_titel;
+    var tsUntertitelEl = document.getElementById('testimonials-untertitel');
+    if (tsUntertitelEl && d.testimonials_untertitel) tsUntertitelEl.textContent = d.testimonials_untertitel;
+    if (Array.isArray(d.testimonials) && d.testimonials.length) {
+      var tsGrid = document.querySelector('.testimonials__grid');
+      if (tsGrid) {
+        tsGrid.innerHTML = d.testimonials.map(function(t) {
+          var icon = (t.icon && t.icon.trim()) ? t.icon.trim() : '';
+          var avatarHtml = icon ? '<div class="testimonial-card__avatar">' + icon + '</div>' : '';
+          return '<div class="testimonial-card">' +
+            '<p class="testimonial-card__text">„' + (t.text || '') + '"</p>' +
+            '<div class="testimonial-card__author">' +
+              avatarHtml +
+              '<div>' +
+                '<span class="testimonial-card__name">' + (t.name || '') + '</span>' +
+                '<span class="testimonial-card__role">' + (t.rolle || '') + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
   }).catch(function(){});
 </script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
@@ -785,18 +681,6 @@
       }
     });
   }
-</script>
-<script>
-  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
-    const ft = document.querySelector('.footer-about p');
-    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
-    const cp = document.querySelector('.footer-bottom span');
-    if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
-  }).catch(()=>{});
 </script>
 </body>
 </html>

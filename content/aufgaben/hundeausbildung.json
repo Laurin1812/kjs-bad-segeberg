@@ -1,11 +1,15 @@
 {
   "hero_bild": "",
   "titel": "Jagdhundeschule",
-  "inhalt": "![](/images/hundeausbildung.jpg)\n\n## Ausbildungsangebot\n\nVon der Grundausbildung für junge Hunde bis hin zur Verbandsprüfung – wir begleiten Hundeführer und ihre Hunde auf dem Weg zur optimalen Zusammenarbeit.\n\n## Prüfungen\n\n* Verbandsgehorsamstest (VGT)\n* Brauchbarkeitsprüfung\n* Schweißprüfung (Frühjahr & Herbst)\n* Stöberjagdprüfung\n\n  ![Test ](/images/hero.jpg \"Test\")",
+  "inhalt": "<p></p><img src=\"/images/hundeausbildung.jpg\" alt=\"\"><h2>Ausbildungsangebot</h2><p>Von der Grundausbildung für junge Hunde bis hin zur Verbandsprüfung – wir begleiten Hundeführer und ihre Hunde auf dem Weg zur optimalen Zusammenarbeit.</p><h2>Prüfungen</h2><ul><li><p>Verbandsgehorsamstest (VGT)</p></li><li><p>Brauchbarkeitsprüfung</p></li><li><p>Schweißprüfung (Frühjahr &amp; Herbst)</p></li><li><p>Stöberjagdprüfung</p><p></p></li></ul>",
   "bild_alt": "",
   "kontakt_name": "Rolf Petersen",
-  "intro": "Gut ausgebildete Jagdhunde sind unersetzliche Partner bei der Jagd. Die KJS Segeberg fördert die Hundeausbildung und -prüfung aktiv und bietet regelmäßige Ausbildungstage an.\n",
+  "intro": "<p>Gut ausgebildete Jagdhunde sind unersetzliche Partner bei der Jagd. Die KJS Segeberg fördert die Hundeausbildung und -prüfung aktiv und bietet regelmäßige Ausbildungstage an.</p>",
   "kontakt_email": "hunde@kjs-bad-segeberg.de",
-  "untertitel": "Hundeausbildung in der KJS Segeberg",
-  "bild": ""
+  "untertitel": "<p>Hundeausbildung in der KJS Segeberg</p>",
+  "bild": "",
+  "bild_groesse": "img-100",
+  "downloads": [],
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }

@@ -1,5 +1,25 @@
 /* KJS Segeberg – main.js */
 
+// ── Markdown-Rendering: Backtick-Codespans deaktivieren ──────────────────
+// Plattdeutsche Texte schreiben den Apostroph manchmal als Backtick
+// (z.B. "op`n Stohl" = "op'n Stohl"). marked.js interpretiert ein Paar
+// Backticks aber als Inline-Code-Span - enthält ein Beitrag zufällig zwei
+// solcher Apostroph-Backticks, wird der komplette Text dazwischen fälschlich
+// in Monospace-Schrift dargestellt (Frank-Bug-Report 20.08.2026, Beitrag
+// "Plattschölers buuten Nistkastens"). Echte Code-Formatierung wird in den
+// Vereinstexten nie gebraucht, deshalb wird die Codespan-Erkennung hier über
+// marked.js' offizielle Erweiterungs-API abgeschaltet - zentral hier, damit
+// es für jede Seite gilt, die diese main.js einbindet (kein Einzelfix pro
+// Seite nötig). Einzelne Backticks werden dadurch als normales Zeichen
+// dargestellt statt als Code-Formatierung interpretiert.
+if (typeof marked !== 'undefined' && marked && typeof marked.use === 'function') {
+  marked.use({
+    tokenizer: {
+      codespan: function () { return undefined; }
+    }
+  });
+}
+
 // ── content/*.json laden ─────────────────────────────────────────────────
 // Direkt von der Netlify-Website (relative Pfade), kein GitHub Raw, kein CDN.
 // Jedes Speichern im Admin erzeugt einen GitHub-Commit → Netlify löst
@@ -10,11 +30,11 @@ function fetchContent(path) {
   return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
 }
 
-// ── Tabellen aus dem Admin/TipTap scrollbar machen ──────────────────────
+// ── Tabellen aus dem Admin/TipTap scrollbar machen (Desktop-Fallback) ────
 // Wichtig: die <table> selbst bleibt display:table (Spaltenberechnung des
 // Browsers funktioniert nur so korrekt) – nur eine umschließende Box
-// bekommt overflow-x:auto. Die Termine-Tabelle hat ihre eigene Lösung und
-// wird hier bewusst ausgeschlossen. Per MutationObserver, weil viele
+// bekommt overflow-x:auto. Die Termine-Tabelle hat ihre eigene Wrapper-Box
+// und wird hier bewusst ausgeschlossen. Per MutationObserver, weil viele
 // Seiten ihren Inhalt erst nach einem fetch() per innerHTML einfügen.
 function wrapContentTables(root) {
   root.querySelectorAll('table:not(.termine-table)').forEach(function (table) {
@@ -25,10 +45,117 @@ function wrapContentTables(root) {
     wrap.appendChild(table);
   });
 }
+
+// ── Tabellen auf dem Handy: Karten-Ansicht statt seitlichem Wischen ──────
+// Frank-Wunsch: das horizontale Scrollen/Swipen in Tabellen (bisher über
+// .content-table-wrap/.termine-table-wrap mit overflow-x:auto gelöst) soll
+// komplett entfallen – auf schmalen Screens muss man alles ohne Wischen
+// sehen können. Lösung: jede <td> bekommt per data-label die zugehörige
+// Spaltenüberschrift zugewiesen; eine CSS-Regel (siehe style.css) stapelt
+// die Zeilen dann unterhalb einer bestimmten Bildschirmbreite zu Karten und
+// zeigt data-label per ::before als Feldbezeichnung vor dem Wert – ganz
+// ohne die Tabellen im Admin manuell anpassen zu müssen. Funktioniert für
+// JEDE Tabelle (Admin/TipTap-Inhalte UND die Termine-Tabelle), da hier rein
+// aus den vorhandenen <th>-Texten gelesen wird. Läuft bewusst bei jedem
+// Observer-Durchlauf erneut (kein "nur einmal"-Schutz), weil z.B. die
+// Termine-Tabelle ihren <tbody>-Inhalt beim Filtern komplett neu aufbaut.
+function labelTableCells(root) {
+  root.querySelectorAll('table').forEach(function (table) {
+    var headRow = table.querySelector('thead tr');
+    var bodyRows;
+    if (headRow) {
+      bodyRows = table.querySelectorAll('tbody tr');
+    } else {
+      // Keine <thead> vorhanden (z.B. einfache Markdown-Tabelle ohne
+      // explizite Kopfzeile) – erste Zeile der Tabelle dient als Kopfzeile
+      // und wird bei den Datenzeilen ausgeklammert.
+      var allRows = table.querySelectorAll('tr');
+      headRow = allRows[0];
+      bodyRows = Array.prototype.slice.call(allRows, 1);
+    }
+    if (!headRow) return;
+    var headCells = headRow.querySelectorAll('th,td');
+    var labels = Array.prototype.map.call(headCells, function (c) {
+      return c.textContent.trim();
+    });
+    if (!labels.length) return;
+    // Kopfzeilen-Zellen bekommen ihr eigenes data-label ebenfalls (bisher
+    // nur die Datenzellen). Wirkt sich für sich genommen auf nichts aus
+    // (die Kopfzeile wird im Karten-Layout ohnehin ausgeblendet), macht
+    // aber Spalten wie "E-Mail"/"Mobil" für style.css gezielt ansprechbar -
+    // z.B. um Kontakt-Tabellen an ihrer Spalten-Kombination zu erkennen und
+    // ihre Spaltenbreiten zentral zu verteilen (siehe style.css).
+    Array.prototype.forEach.call(headCells, function (cell, i) {
+      if (labels[i]) cell.setAttribute('data-label', labels[i]);
+    });
+    // Falls TipTap ein <colgroup> erzeugt hat: dieselben Labels auch auf die
+    // <col>-Elemente übertragen. So kann eine CSS-Regel eine bestimmte
+    // Spalte (z.B. "col[data-label='E-Mail']") gezielt in der Breite
+    // steuern, unabhängig von ihrer Position oder der Gesamt-Spaltenzahl.
+    var cols = table.querySelectorAll(':scope > colgroup > col');
+    Array.prototype.forEach.call(cols, function (col, i) {
+      if (labels[i]) col.setAttribute('data-label', labels[i]);
+    });
+    Array.prototype.forEach.call(bodyRows, function (row) {
+      Array.prototype.forEach.call(row.querySelectorAll('td'), function (cell, i) {
+        if (labels[i]) cell.setAttribute('data-label', labels[i]);
+      });
+    });
+  });
+}
+
+// ── Tabellen: dynamisch stapeln statt fester Mobile-Grenze ──────────────
+// Frank-Wunsch: "ob Handy, ob Bildschirm" – nie mehr seitliches Scrollen in
+// Tabellen, unabhängig von der Fensterbreite. Ein fester @media-Breakpoint
+// reicht nicht, weil manche Tabellen schon bei mittleren Breiten (z.B.
+// Tablet/schmales Desktop-Fenster) nicht mehr reinpassen, andere auch auf
+// dem Handy noch locker passen. Deshalb wird pro Tabelle live gemessen, ob
+// ihre natürliche Breite den verfügbaren Platz im Wrapper überschreitet,
+// und danach die .is-stacked-Klasse gesetzt/entfernt (siehe style.css für
+// die eigentliche Karten-Darstellung). Läuft initial, bei jeder DOM-
+// Änderung (MutationObserver, z.B. Termine-Filter) und bei jedem Resize.
+//
+// Wichtig: hier bewusst OHNE white-space:nowrap gemessen – normales
+// Umbrechen von Zellinhalt (mehrzeilige Zellen) ist völlig in Ordnung und
+// soll NICHT zum Stapeln führen, nur weil eine Zeile "nicht auf eine Zeile
+// passt". Gestapelt werden soll nur, wenn selbst mit normalem Umbruch noch
+// echtes horizontales Überlaufen entsteht (z.B. ein einzelnes sehr langes
+// Wort/URL, die auch nach Umbruch die Spalte sprengt). Voraussetzung dafür:
+// .main-content td hat KEIN word-break:break-word mehr (siehe style.css) –
+// das ließ Spalten sonst bis zur Unlesbarkeit schrumpfen, ohne je als "zu
+// breit" erkannt zu werden.
+function applyTableLayout(root) {
+  root.querySelectorAll('table').forEach(function (table) {
+    var wrap = table.closest('.content-table-wrap') || table.closest('.termine-table-wrap');
+    if (!wrap) return;
+    wrap.classList.remove('is-stacked');
+    var needsStack = table.scrollWidth > wrap.clientWidth + 1;
+    wrap.classList.toggle('is-stacked', needsStack);
+  });
+}
+
+var _tableRelayoutContainers = [];
+var _tableRelayoutTimer = null;
+function scheduleTableRelayout() {
+  if (_tableRelayoutTimer) clearTimeout(_tableRelayoutTimer);
+  _tableRelayoutTimer = setTimeout(function () {
+    _tableRelayoutContainers.forEach(function (container) {
+      applyTableLayout(container);
+    });
+  }, 150);
+}
+window.addEventListener('resize', scheduleTableRelayout);
+
 document.querySelectorAll('.main-content, #seite-inhalt, #page-inhalt').forEach(function (container) {
+  _tableRelayoutContainers.push(container);
   wrapContentTables(container);
-  new MutationObserver(function () { wrapContentTables(container); })
-    .observe(container, { childList: true, subtree: true });
+  labelTableCells(container);
+  applyTableLayout(container);
+  new MutationObserver(function () {
+    wrapContentTables(container);
+    labelTableCells(container);
+    applyTableLayout(container);
+  }).observe(container, { childList: true, subtree: true });
 });
 
 // Mobile Navigation
@@ -52,6 +179,33 @@ if (mobileNavClose) mobileNavClose.addEventListener('click', closeMobileNav);
 
 // Close mobile nav on ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
+
+// Bugfix (Frank-Report, 04.09.2026): "Jäger"-Dropdown blieb nach Browser-
+// Zurück offen (z.B. Startseite → Jäger-Dropdown → Hundebörse → Zurück).
+// Ursache: bfcache (Back/Forward Cache) - der Browser friert die Seite beim
+// Verlassen exakt so ein, wie sie im DOM stand, und zeigt beim Zurück-
+// Navigieren dieses eingefrorene Abbild wieder an, statt die Seite neu zu
+// laden. Klickt man einen Link INNERHALB eines offenen Dropdowns (Maus
+// bewegt sich vom Hauptpunkt in das Untermenü, nie ein "mouseleave" auf dem
+// äußeren <li>), bleibt die von wireHoverFlyouts gesetzte Klasse ".nav-open"
+// im eingefrorenen DOM-Stand erhalten - das eingefrorene Bild zeigt das
+// Dropdown deshalb weiterhin als geöffnet an. Genau dasselbe Prinzip betrifft
+// auf dem Handy das Slide-in-Menü (#mobileNav.open) und die aufgeklappten
+// <details>-Akkordeons im Jäger-Bereich des Mobile-Menüs.
+// Zentrale, seitenunabhängige Lösung statt Einzellösung pro Seite/Hundebörse:
+// beim "pageshow"-Event mit persisted=true (= aus dem bfcache wiederhergestellt)
+// werden alle offenen Menüzustände zurückgesetzt - unabhängig davon, welche
+// Seite das gerade ist oder welcher Menüpunkt betroffen war.
+window.addEventListener('pageshow', function (e) {
+  if (!e.persisted) return; // normaler Seitenaufbau: nichts zu tun
+  document.querySelectorAll('.main-nav .nav-open').forEach(function (el) {
+    el.classList.remove('nav-open');
+  });
+  closeMobileNav();
+  document.querySelectorAll('#mobileNavList details[open]').forEach(function (d) {
+    d.removeAttribute('open');
+  });
+});
 
 // Markdown-Bilder mit Größen-/Ausrichtungsklassen: ![alt](pfad){.img-mittel .img-rechts}
 // marked.js kennt diese Attribut-Syntax nicht von Haus aus. Wir registrieren dafür eine
@@ -162,20 +316,38 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileN
   }
 })();
 
-// Active nav link highlighting
-(function() {
-  const path = window.location.pathname;
-  document.querySelectorAll('.main-nav a, .mobile-nav a').forEach(a => {
-    if (a.getAttribute('href') && path.includes(a.getAttribute('href')) && a.getAttribute('href') !== '/') {
-      a.closest('li')?.classList.add('active');
-    }
-  });
-})();
+// Hinweis: Die frühere separate "Active nav link highlighting" hier wurde
+// mit Architektur-Audit Phase 2 (31.08.2026) entfernt - sie funktionierte
+// wegen unterschiedlich tiefer relativer Links (z.B. "../hundeboerse/index.html")
+// ohnehin nur zufällig (z.B. gar nicht auf den Hundebörse-Unterseiten) und ist
+// jetzt durch die URL-basierte Berechnung im zentralen Navigations-Modul
+// weiter oben (isActiveSection(), direkt beim Rendern von .main-nav/.mobile-nav
+// aus navigation.json) ersetzt, die zuverlässig für alle Seitentiefen gilt.
 
 // Smooth scroll for anchor links
+//
+// Hinweis (04.09.2026, Social-Media-Icon-Verknüpfung): Die Topbar-Social-
+// Icons (Facebook/Instagram) starten im statischen Markup aus components.js
+// bewusst mit href="#" (Platzhalter, siehe dortiger Kommentar) und werden
+// erst asynchron weiter unten in main.js auf die echte URL umgehängt,
+// sobald content/footer.json geladen ist. Da dieses querySelectorAll hier
+// synchron beim Seitenaufbau läuft, bekommen diese Icons denselben Klick-
+// Handler wie echte Sprungmarken-Links - liest zum Klickzeitpunkt aber via
+// getAttribute('href') den dann bereits echten externen URL-Wert aus, was
+// document.querySelector() mit einem SyntaxError abbrechen ließe (kein
+// gültiger CSS-Selektor). Der externe Link funktioniert davon unberührt
+// (kein preventDefault), aber der Fehler landet unnötig in der Konsole.
+// Deshalb hier robust gegen jeden nicht-fragment-artigen href absichern.
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    let target;
+    try {
+      target = document.querySelector(href);
+    } catch (err) {
+      return;
+    }
     if (target) {
       e.preventDefault();
       const offset = 100;
@@ -186,10 +358,75 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // Topbar & Geschäftsstelle dynamisch laden (aus content/einstellungen.json)
+//
+// Einheitliche Icons: Frank wollte, dass überall dieselben Icons verwendet
+// werden wie auf der Kontakt-Seite (dort als KONTAKT_ICONS definiert) –
+// statt der bisherigen Emojis (📧 📞 🏠 ✉️) in Kopfzeile und Kontaktbox.
+// Da diese beiden Bereiche auf JEDER Seite vorkommen, werden die Icons hier
+// zentral an einer Stelle eingesetzt statt in jeder HTML-Datei einzeln.
+var ICONS = {
+  mail:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M5 10v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10"/></svg>',
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  // Arbeitsblock 4 (Icon-Audit, 04.09.2026): "clock" und "user" gab es bisher
+  // NUR als lokale Kopie in kontakt/index.html (dort "KONTAKT_ICONS" genannt -
+  // siehe Kommentar oben, "wie auf der Kontakt-Seite"). Beim ursprünglichen
+  // Übertrag in dieses zentrale ICONS-Objekt wurden nur 4 der 6 dortigen Icons
+  // mitgenommen, wodurch für "Uhrzeit" (Startseite-Termine-Widget) und
+  // "Ansprechpartner ohne Foto" (Vorstand/Obleute/Kreisjägermeister) bisher
+  // weiterhin Emojis (🕐/👤) verwendet wurden statt des gleichen Icon-Systems.
+  // Hier 1:1 aus kontakt/index.html übernommen (identisches SVG, keine zweite
+  // Variante), damit es nur eine visuelle Version je Symbol gibt.
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  user:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  // Neu (Arbeitsblock 4): einheitliches Dokument-/Seiten-Icon, ersetzt die
+  // bisher uneinheitlichen Datei-Emojis (📄/📝/📊/🗜️/📁) auf den
+  // "Unterseiten"-Kacheln (Aufgaben/Jäger/Verbraucher) und auf der
+  // Downloads-Seite. Bewusst NICHT neu gezeichnet, sondern exakt derselbe
+  // Pfad wie das bereits bestehende ICON_PDF weiter unten in dieser Datei
+  // (Formulare/Dokumente-Sidebar-Widget) - das war bereits das etablierte
+  // "Dokument"-Icon dieses Projekts, nur lokal auf eine Funktion beschränkt
+  // und deshalb von außen nicht wiederverwendbar. Damit gibt es weiterhin
+  // nur EIN Dokument-Icon im gesamten Projekt, nicht zwei ähnliche.
+  document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
+};
+
+// Zieht aus dem freien Postadresse-Text eine "Tel: ..."- und "E-Mail: ..."-Zeile
+// heraus (case-insensitive, auch "Telefon:"), damit sie separat als klickbare
+// Icon-Zeile angezeigt werden können statt als reiner Fließtext in der
+// Postadresse selbst zu stehen. Identische Logik wie in kontakt/index.html.
+function splitPostadresse(raw) {
+  var telefon = '', email = '';
+  var lines = (raw || '').split('\n').filter(function(line) {
+    var telMatch = line.match(/^\s*tel(?:efon)?\s*[:.]?\s*(.+)$/i);
+    if (telMatch) { telefon = telMatch[1].trim(); return false; }
+    var mailMatch = line.match(/^\s*e-?mail\s*[:.]?\s*(.+)$/i);
+    if (mailMatch) { email = mailMatch[1].trim(); return false; }
+    return true;
+  });
+  return { text: lines.join('\n'), telefon: telefon, email: email };
+}
+
 (function() {
   var topbarLinks = document.querySelectorAll('.topbar__left a');
   var boxes = document.querySelectorAll('.contact-box');
   if (!topbarLinks.length && !boxes.length) return;
+
+  // Kopfzeile: Emoji vor dem Link durch das einheitliche SVG-Icon ersetzen
+  topbarLinks.forEach(function(a) {
+    var span = a.parentElement;
+    if (!span || span.querySelector('svg')) return;
+    var icon = a.href.indexOf('mailto:') > -1 ? ICONS.mail
+             : a.href.indexOf('tel:') > -1 ? ICONS.phone
+             : null;
+    if (!icon) return;
+    Array.prototype.slice.call(span.childNodes).forEach(function(node) {
+      if (node.nodeType === 3) span.removeChild(node); // altes Emoji (Textknoten)
+    });
+    span.insertAdjacentHTML('afterbegin', '<span class="topbar__icon">' + icon + '</span>');
+  });
+
   fetchContent('/content/einstellungen.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
@@ -206,422 +443,520 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           a.textContent = topbarTel;
         }
       });
-      // Geschäftsstelle-Boxen aktualisieren
+      // Kontaktbox aktualisieren: gleiche Struktur wie der Geschäftsstelle-Block
+      // auf der Kontaktseite (kontakt/index.html) – Überschrift, Reihenfolge und
+      // Feld-Aufteilung müssen exakt übereinstimmen (Frank hatte die abweichende
+      // Groß-/Kleinschreibung "Adresse KJS" vs. "GESCHÄFTLICHE POSTADRESSE"
+      // bemängelt). Ablauf: Geschäftsstelle-Überschrift → Adresse → Telefon →
+      // E-Mail → Postadresse (Frank persönlich) → deren eigene Telefon-/
+      // E-Mail-Zeilen als separate klickbare Icon-Zeilen.
       var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';
-      var postadresseHtml = d.postadresse ? d.postadresse.trim().split('\n').join('<br>') : '';
+
+      // Postadresse (Frank persönlich): Telefon/E-Mail sollen als eigene,
+      // klickbare Icon-Zeilen erscheinen – genau wie beim Geschäftsstelle-Block
+      // oben. Bevorzugt werden die dedizierten Felder postadresse_telefon/
+      // postadresse_email; ist eins leer, wird automatisch aus dem
+      // Postadresse-Fließtext eine Zeile "Tel: ..." bzw. "E-Mail: ..."
+      // herausgelöst (self-migrierend, kein manuelles Nacharbeiten im Admin
+      // nötig, bis Frank die neuen Felder separat pflegt).
+      var postadresseSplit = splitPostadresse(d.postadresse || '');
+      var postadresseHtml = postadresseSplit.text.split('\n').join('<br>');
+      var postadresseTelefon = d.postadresse_telefon || postadresseSplit.telefon;
+      var postadresseEmail   = d.postadresse_email   || postadresseSplit.email;
+
       boxes.forEach(function(box) {
         box.innerHTML =
           '<h4>Geschäftsstelle</h4>' +
-          (d.email    ? '<p><span class="cb-icon">📧</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
-          (d.telefon  ? '<p><span class="cb-icon">📞</span><a href="tel:' + d.telefon.replace(/\s|-/g,'') + '">' + d.telefon + '</a></p>' : '') +
-          (d.telefon_festnetz ? '<p><span class="cb-icon">☎️</span><a href="tel:' + d.telefon_festnetz.replace(/\s|-/g,'') + '">' + d.telefon_festnetz + '</a></p>' : '') +
-          (adresseHtml ? '<p><span class="cb-icon">🏠</span><span>' + adresseHtml + '</span></p>' : '') +
-          (postadresseHtml ? '<p><span class="cb-icon">✉️</span><span>' + postadresseHtml + '</span></p>' : '');
+          (adresseHtml ? '<p><span class="cb-icon">' + ICONS.home + '</span><span>' + adresseHtml + '</span></p>' : '') +
+          (d.telefon  ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + d.telefon.replace(/\s|\/|\./g,'') + '">' + d.telefon + '</a></p>' : '') +
+          (d.email    ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + d.email + '">' + d.email + '</a></p>' : '') +
+          (postadresseHtml ?
+            '<h4 class="contact-box__sub">Postadresse</h4>' +
+            '<p><span class="cb-icon">' + ICONS.pin + '</span><span>' + postadresseHtml + '</span></p>'
+            : '') +
+          (postadresseTelefon ? '<p><span class="cb-icon">' + ICONS.phone + '</span><a href="tel:' + postadresseTelefon.replace(/\s|\/|\./g,'') + '">' + postadresseTelefon + '</a></p>' : '') +
+          (postadresseEmail   ? '<p><span class="cb-icon">' + ICONS.mail + '</span><a href="mailto:' + postadresseEmail + '">' + postadresseEmail + '</a></p>' : '');
       });
     })
     .catch(function() {});
 })();
 
-// Eigene Seiten nach Bereich in die Navigation verteilen + anschließend
-// die gespeicherte Gesamt-Reihenfolge aus navigation.json anwenden
-(function() {
-  var weitereItem = document.getElementById('weitere-themen-item');
-  var weltereSub  = document.getElementById('weitere-themen-sub');
-  if (!weitereItem || !weltereSub) return;
+/* =========================================================
+   ZENTRALE NAVIGATION (Architektur-Audit Phase 2, 31.08.2026)
 
-  // "Weitere Themen"-Unterpunkt bleibt versteckt –
-  // Seiten aus seiten-weitere.json erscheinen direkt im Jäger-Dropdown
+   Vorher: pro HTML-Datei komplett ausgeschriebenes <ul class="main-nav">
+   und eine eigene flache <details>-Liste fürs Handy-Menü (~42 Dateien),
+   zusätzlich nachträglich per main.js umsortiert/umbenannt anhand von
+   navigation.json, UND ein drittes, unabhängiges System, das eigene
+   Admin-Unterseiten (seiten-kjs.json usw.) direkt ins bereits gerenderte
+   DOM nachschob. Drei Mechanismen für eine einzige sichtbare Navigation -
+   das führte u.a. dazu, dass "Hundevermittlung" (per Admin angelegt) am
+   Desktop im Aufgaben-Flyout auftauchte, im Handy-Menü aber komplett fehlte,
+   weil die Handy-Spiegelung nur bestehende <li> umsortierte, nie aber neue
+   einfügte - und dazu, dass der aktive Menüpunkt auf den Hundebörse-
+   Unterseiten (anbieten.html/detail.html) nie gesetzt wurde, weil dort schlicht
+   niemand das statische class="active" von Hand ergänzt hatte.
 
-  // Hilfsfunktion: Unter-Dropdown im Jäger-Menü per Link-Text finden
-  function findJaegerSub(textSnippet) {
-    var dd = document.getElementById('jaeger-dropdown');
-    if (!dd) return null;
-    var hasSubs = dd.querySelectorAll('.has-sub');
-    for (var i = 0; i < hasSubs.length; i++) {
-      var a = hasSubs[i].querySelector(':scope > a');
-      if (a && a.textContent.includes(textSnippet)) {
-        return hasSubs[i].querySelector('ul.dropdown--sub');
-      }
-    }
-    return null;
+   Jetzt: navigation.json ist die EINE Quelle für Reihenfolge, Beschriftung,
+   Link und Sichtbarkeit des Hauptmenüs. Die bereits bestehenden, im
+   Admin-Panel "Navigation & Reihenfolge" per Drag & Drop editierbaren Felder
+   (sektionsnamen/hauptmenu/jaeger_dropdown/kjs/aufgaben/verbraucher) bleiben
+   unverändert in Struktur und Bedeutung, damit dieses Panel unverändert
+   weiterfunktioniert - ergänzt wurden nur zwei neue, rein strukturelle
+   Metadaten-Felder (hauptmenu_meta/jaeger_dropdown_meta) mit Label/Link für
+   die Punkte, die vorher ausschließlich im statischen HTML standen. Eigene
+   Admin-Unterseiten werden jetzt VOR dem Rendern in dieselben Datenarrays
+   gemischt statt hinterher per DOM-Manipulation eingefügt - Desktop und
+   Handy entstehen dadurch aus exakt denselben Daten (Punkt 5 der
+   Phase-2-Vorgabe), inklusive derselben eigenen Unterseiten.
+   ========================================================= */
+(function () {
+  var mainNavRoot = document.getElementById('mainNav');
+  var mobileNavRoot = document.getElementById('mobileNavList');
+  if (!mainNavRoot || !mobileNavRoot) { window.__navReady = Promise.resolve(); return; }
+
+  // Absichtlich KEINE zweite vollständige Navigationsstruktur als Fallback
+  // (das wäre wieder eine zweite, dauerhaft mitzupflegende Datenquelle,
+  // Punkt 6 der Phase-2-Vorgabe) - nur ein minimaler Not-Anker, falls
+  // navigation.json ausnahmsweise nicht ladbar ist, damit die Seite nicht
+  // komplett ohne Hauptnavigation dasteht.
+  var FALLBACK_NAV = {
+    sektionsnamen: {},
+    hauptmenu: ['startseite', 'jaeger', 'verbraucher', 'aktuelles', 'termine', 'faq', 'service', 'kontakt'],
+    hauptmenu_meta: {
+      startseite:  { label: 'Startseite',  href: '/',                        navkey: 'startseite' },
+      jaeger:      { href: '#', navkey: 'jaeger' },
+      verbraucher: { href: '#', navkey: 'verbraucher' },
+      aktuelles:   { label: 'Aktuelles',   href: '/aktuelles/index.html',    navkey: 'aktuelles' },
+      termine:     { label: 'Termine',     href: '/termine/index.html',      navkey: 'termine' },
+      faq:         { label: 'FAQ',         href: '/faq/index.html',          navkey: 'faq' },
+      service:     { label: 'Service',     href: '/service.html',            navkey: 'service' },
+      kontakt:     { label: 'Kontakt',     href: '/kontakt/index.html',      navkey: 'kontakt' }
+    },
+    // Hundebörse/Waffenbörse (04.09.2026, Frank-Wunsch): kein eigener
+    // Hauptmenü-Eintrag mehr, sondern flache Leaf-Einträge im Jäger-
+    // Dropdown, direkt hinter Infomobil einsortiert (vor Partner).
+    jaeger_dropdown: ['kreisjjaegermeister', 'ueber-uns', 'kjs-segeberg', 'aufgaben', 'infomobil', 'hundeboerse', 'waffenboerse', 'partner'],
+    jaeger_dropdown_meta: {
+      'kreisjjaegermeister': { label: 'Kreisjägermeister', href: '/kreisjjaegermeister/index.html' },
+      'ueber-uns':           { label: 'Über uns',          href: '/jaeger/ueber-uns.html' },
+      'kjs-segeberg':        { dropdown: true },
+      'aufgaben':            { dropdown: true },
+      'infomobil':           { label: 'Infomobil', href: '/jaeger/infomobil.html' },
+      'hundeboerse':         { label: 'Hundebörse', href: '/hundeboerse/index.html' },
+      'waffenboerse':        { label: 'Waffenbörse', href: '/waffenboerse/index.html' },
+      'partner':             { label: 'Partner', href: '/partner/index.html' }
+    },
+    kjs: [], aufgaben: [], verbraucher: []
+  };
+
+  // Netlify liefert intern verlinkte Seiten ohne ".html"-Endung aus und kürzt
+  // ".../index.html" sogar auf nur den Ordner ("Pretty URLs") - das greift
+  // aber nur bei Links, die schon beim Deploy als statisches HTML vorliegen.
+  // Von main.js per JS erzeugte <a>-Elemente durchlaufen diese Umschreibung
+  // nicht. Damit per JSON gerenderte Links optisch/im href-Attribut exakt
+  // gleich aussehen wie die vorher statischen (kein ".html" im Linkziel),
+  // wird dieselbe Kürzung hier clientseitig nachgebildet.
+  function prettyHref(href) {
+    if (!href || href === '#' || /^https?:\/\//i.test(href)) return href;
+    var h = href.replace(/(^|\/)index\.html?$/i, '$1');
+    if (h === '') h = '/';
+    h = h.replace(/\.html?$/i, '');
+    return h;
   }
 
-  // Hilfsfunktion: Top-Level-Dropdown per Link-Text finden
-  function findTopDropdown(textSnippet) {
-    var items = document.querySelectorAll('.main-nav > li');
-    for (var i = 0; i < items.length; i++) {
-      var a = items[i].querySelector(':scope > a');
-      if (a && a.textContent.includes(textSnippet)) {
-        return items[i].querySelector('ul.dropdown');
-      }
-    }
-    return null;
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // Hilfsfunktion: Seiten-Liste in Ziel-Dropdown einfügen
-  function einfuegenInNav(seiten, target) {
-    (seiten || []).filter(function(s) {
-      return s.veroeffentlicht === true && s.in_navigation === true;
-    }).forEach(function(s) {
-      var href = '/seiten/?s=' + encodeURIComponent(s.slug);
-      if (target && !target.querySelector('a[href="' + href + '"]')) {
-        var li = document.createElement('li');
-        var a  = document.createElement('a');
-        a.href = href;
-        a.textContent = s.nav_label || s.titel;
-        li.appendChild(a);
-        target.appendChild(li);
-      }
+  // Welcher Hauptpunkt auf der aktuell angezeigten Seite als aktiv gilt.
+  // Ersetzt die frühere zweigleisige Lösung (von Hand gesetztes
+  // class="active" pro Datei UND eine zusätzliche, mit relativen Pfaden
+  // nicht zuverlässig funktionierende Laufzeit-Erkennung, siehe Kommentar
+  // weiter oben in dieser Datei) durch eine einzige, aus dem aktuellen
+  // URL-Pfad berechnete Regel (Punkt 4 der Phase-2-Vorgabe).
+  // Hundebörse/Waffenbörse (04.09.2026): kein eigener Hauptmenü-Eintrag
+  // mehr (siehe FALLBACK_NAV/jaeger_dropdown oben) - die eigenen Prefixe
+  // sind deshalb entfernt und stattdessen unter "jaeger" einsortiert, damit
+  // der Hauptpunkt "Jäger" auf diesen Seiten als aktiv markiert wird.
+  var SECTION_PREFIXES = {
+    jaeger: ['/jaeger/', '/kreisjjaegermeister/', '/aufgaben/', '/partner/', '/hundeboerse/', '/waffenboerse/'],
+    verbraucher: ['/verbraucher/'],
+    aktuelles: ['/aktuelles/'],
+    termine: ['/termine/'],
+    faq: ['/faq/'],
+    kontakt: ['/kontakt/']
+  };
+  function isActiveSection(key) {
+    var path = window.location.pathname;
+    if (key === 'startseite') return /^\/(index\.html?)?$/i.test(path);
+    if (key === 'service') return /^\/service(\.html)?$/i.test(path);
+    return (SECTION_PREFIXES[key] || []).some(function (p) { return path.indexOf(p) === 0; });
+  }
+
+  function leafHtml(item) {
+    return '<li><a href="' + escHtml(prettyHref(item.href)) + '">' + escHtml(item.label) + '</a></li>';
+  }
+
+  function flyoutHtml(labelText, items) {
+    return '<li class="has-sub"><a href="#">' + escHtml(labelText) + ' <span class="arrow-right">&#9658;</span></a>' +
+      '<ul class="dropdown dropdown--sub">' + items.map(leafHtml).join('') + '</ul></li>';
+  }
+
+  function mobileLeafHtml(item) {
+    return '<li><a href="' + escHtml(prettyHref(item.href)) + '">' + escHtml(item.label) + '</a></li>';
+  }
+
+  function mobileDetailsHtml(labelText, itemsHtml) {
+    return '<li><details><summary>' + escHtml(labelText) + '</summary>' +
+      '<ul class="mobile-nav__sub">' + itemsHtml + '</ul></details></li>';
+  }
+
+  // Inhalt des Jäger-Dropdowns wird für Desktop (verschachtelte Flyouts) UND
+  // Handy (eine flache Liste, Punkt 5 der Phase-2-Vorgabe) aus demselben
+  // jaeger_dropdown-Array + denselben kjs/aufgaben-Daten gebaut - nur die
+  // Ausgabe (onLeaf/onFlyout) unterscheidet sich.
+  function buildJaegerChildren(nav, onLeaf, onFlyout) {
+    var sn = nav.sektionsnamen || {};
+    var jdMeta = nav.jaeger_dropdown_meta || {};
+    var out = '';
+    (nav.jaeger_dropdown || []).forEach(function (jkey) {
+      var jmeta = jdMeta[jkey];
+      if (!jmeta || jmeta.hidden) return;
+      if (jkey === 'kjs-segeberg') out += onFlyout(sn.kjs || 'KJS Segeberg', nav.kjs || []);
+      else if (jkey === 'aufgaben') out += onFlyout(sn.aufgaben || 'Aufgaben der Kreisjägerschaft', nav.aufgaben || []);
+      else out += onLeaf(jmeta);
     });
+    return out;
   }
 
-  // Alle Sektions-Dateien laden
-  var sektionen = [
-    { url: '/content/seiten-kjs.json',        target: function() { return findJaegerSub('KJS Segeberg'); } },
-    { url: '/content/seiten-aufgaben.json',    target: function() { return findJaegerSub('Aufgaben'); } },
-    { url: '/content/seiten-verbraucher.json', target: function() { return findTopDropdown('Verbraucher'); } },
-    // Legacy: alte seiten.json mit bereich-Feld
-    { url: '/content/seiten.json', bereich: true }
-  ];
+  function renderDesktopNav(nav) {
+    var sn = nav.sektionsnamen || {};
+    var html = '';
 
-  // insertJobs sammelt alle Promises, die eigene Unterseiten in die Menüs
-  // einfügen. Die finale Sortierung anhand von navigation.json darf erst
-  // starten, NACHDEM alle diese Seiten im DOM stehen – sonst landen frisch
-  // eingefügte Seiten nach der Umsortierung wieder am Ende und die per
-  // Drag & Drop im Admin gespeicherte Reihenfolge wird auf der Website
-  // nicht korrekt angezeigt.
-  var insertJobs = sektionen.map(function(s) {
-    return fetchContent(s.url)
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        if (s.bereich) {
-          // Legacy seiten.json: bereich-Feld auswerten
-          (data.seiten || []).filter(function(p) {
-            return p.veroeffentlicht === true && p.in_navigation === true;
-          }).forEach(function(p) {
-            var bereich = p.bereich || 'weitere-themen';
-            var t = bereich === 'kjs' ? findJaegerSub('KJS Segeberg')
-                  : bereich === 'aufgaben' ? findJaegerSub('Aufgaben')
-                  : bereich === 'verbraucher' ? findTopDropdown('Verbraucher')
-                  : document.getElementById('weitere-themen-sub');
-            var href = '/seiten/?s=' + encodeURIComponent(p.slug);
-            if (t && !t.querySelector('a[href="' + href + '"]')) {
-              var li = document.createElement('li');
-              var a  = document.createElement('a');
-              a.href = href; a.textContent = p.nav_label || p.titel;
-              li.appendChild(a); t.appendChild(li);
-            }
-          });
-        } else {
-          einfuegenInNav(data.seiten, s.target());
-        }
-      })
-      .catch(function(){});
-  });
-
-  // seiten-weitere.json → "Weitere Themen"-Flyout im Jäger-Menü
-  insertJobs.push(
-    fetchContent('/content/seiten-weitere.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var publishedSeiten = (data.seiten || []).filter(function(s) {
-          return s.veroeffentlicht === true && s.in_navigation === true;
-        });
-        if (!publishedSeiten.length) return;
-        weitereItem.style.display = '';   // Flyout-Punkt sichtbar machen
-        einfuegenInNav(publishedSeiten, weltereSub);
-      })
-      .catch(function() {})
-  );
-
-  // ── Navigationsreihenfolge, Sektionsnamen und Hauptmenü-Reihenfolge
-  //    aus navigation.json (läuft erst, wenn alle obigen Seiten eingefügt
-  //    sind, siehe Kommentar bei insertJobs oben) ─────────────────────
-  Promise.all(insertJobs).then(function() {
-    // Reorder <li> children of `sub` to match `items` array order
-    // (items kann statische Seiten UND eigene Unterseiten enthalten,
-    // z.B. href="/jaeger/vorstand.html" oder href="/seiten/?s=mein-slug")
-    function reorderSub(sub, items) {
-      if (!sub || !items || !items.length) return;
-      // Netlify liefert interne Links ohne ".html" aus (Pretty URLs) – deshalb
-      // Dateiname beidseitig ohne Endung/Query vergleichen, sonst matcht nichts.
-      function baseName(href) {
-        return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
+    (nav.hauptmenu || []).forEach(function (key) {
+      if (key === 'jaeger') {
+        var sub = buildJaegerChildren(nav, leafHtml, flyoutHtml);
+        // "Weitere Themen": seit 22.08.2026 auf Laurin-Wunsch deaktiviert
+        // (siehe admin.js) - Platzhalter bleibt unsichtbar im DOM (kein
+        // funktionales Risiko, spätere Aufräumaktion außerhalb dieser
+        // Phase). Bewusst nicht Teil von jaeger_dropdown_meta, da dauerhaft
+        // leer/inaktiv.
+        sub += '<li class="has-sub" id="weitere-themen-item" style="display:none;">' +
+          '<a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>' +
+          '<ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul></li>';
+        html += '<li' + (isActiveSection('jaeger') ? ' class="active"' : '') + '>' +
+          '<a href="#" data-navkey="jaeger">' + escHtml(sn.jaeger || 'Jäger') + ' <span class="arrow">▾</span></a>' +
+          '<ul class="dropdown" id="jaeger-dropdown">' + sub + '</ul></li>';
+        return;
       }
-      items.forEach(function(item) {
-        var filename = baseName(item.href);
-        sub.querySelectorAll(':scope > li').forEach(function(li) {
-          var a = li.querySelector('a');
-          if (a && a.getAttribute('href') && filename && baseName(a.getAttribute('href')) === filename) {
-            sub.appendChild(li);
-          }
+      if (key === 'verbraucher') {
+        var vSub = (nav.verbraucher || []).map(leafHtml).join('');
+        html += '<li' + (isActiveSection('verbraucher') ? ' class="active"' : '') + '>' +
+          '<a href="#" data-navkey="verbraucher">' + escHtml(sn.verbraucher || 'Verbraucher') + ' <span class="arrow">▾</span></a>' +
+          '<ul class="dropdown">' + vSub + '</ul></li>';
+        return;
+      }
+      var meta = (nav.hauptmenu_meta || {})[key];
+      if (!meta) return;
+      html += '<li' + (isActiveSection(key) ? ' class="active"' : '') + '>' +
+        '<a href="' + escHtml(prettyHref(meta.href)) + '" data-navkey="' + escHtml(meta.navkey || key) + '">' +
+        escHtml(meta.label || key) + '</a></li>';
+    });
+
+    mainNavRoot.innerHTML = html;
+  }
+
+  function renderMobileNav(nav) {
+    var sn = nav.sektionsnamen || {};
+    var html = '';
+
+    (nav.hauptmenu || []).forEach(function (key) {
+      if (key === 'jaeger') {
+        var sub = buildJaegerChildren(nav, mobileLeafHtml, function (label, items) {
+          return items.map(mobileLeafHtml).join('');
         });
+        html += mobileDetailsHtml(sn.jaeger || 'Jäger', sub);
+        return;
+      }
+      if (key === 'verbraucher') {
+        html += mobileDetailsHtml(sn.verbraucher || 'Verbraucher', (nav.verbraucher || []).map(mobileLeafHtml).join(''));
+        return;
+      }
+      var meta = (nav.hauptmenu_meta || {})[key];
+      if (!meta) return;
+      html += '<li><a href="' + escHtml(prettyHref(meta.href)) + '">' + escHtml(meta.label || key) + '</a></li>';
+    });
+
+    mobileNavRoot.innerHTML = html;
+  }
+
+  // Hauptmenü/Dropdowns beim Verlassen mit der Maus mit kurzer Verzögerung
+  // schließen (Frank-Bug-Report: sofortiges Zuklappen beim leicht diagonalen
+  // Rüberfahren zum Untermenü, weil das bisher rein per CSS ":hover"
+  // gesteuert war). Läuft jetzt erst NACH dem Rendern (vorher eine
+  // eigenständige IIFE weiter unten in dieser Datei, siehe Hinweis dort),
+  // weil .main-nav/.has-sub erst nach dem Laden von navigation.json existieren.
+  function wireHoverFlyouts() {
+    var CLOSE_DELAY = 350; // ms
+    var timers = new WeakMap();
+    function openNow(elm) {
+      var t = timers.get(elm);
+      if (t) { clearTimeout(t); timers.delete(elm); }
+      elm.classList.add('nav-open');
+    }
+    function closeDelayed(elm) {
+      var t = timers.get(elm);
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { elm.classList.remove('nav-open'); timers.delete(elm); }, CLOSE_DELAY);
+      timers.set(elm, t);
+    }
+    function wire(selector) {
+      document.querySelectorAll(selector).forEach(function (elm) {
+        elm.addEventListener('mouseenter', function () { openNow(elm); });
+        elm.addEventListener('mouseleave', function () { closeDelayed(elm); });
       });
     }
+    wire('.main-nav > li');   // Hauptmenü-Dropdowns (Jäger, Verbraucher, ...)
+    wire('.has-sub');         // Verschachtelte Flyout-Untermenüs (KJS Segeberg, Aufgaben ...)
+  }
 
-    // Rename the text node of a nav link (preserves inner <span> elements)
-    function renameNavLink(el, newText) {
-      if (!el) return;
-      el.childNodes.forEach(function(node) {
-        if (node.nodeType === 3 && node.textContent.trim()) {
-          node.textContent = newText + ' ';
-        }
+  function fetchJsonSafe(path) {
+    return fetchContent(path).then(function (r) { return r.json(); }).catch(function () { return null; });
+  }
+
+  function filteredSeiten(list) {
+    return (list || []).filter(function (s) { return s.veroeffentlicht === true && s.in_navigation === true; })
+      .map(function (s) { return { label: s.nav_label || s.titel, href: '/seiten/?s=' + encodeURIComponent(s.slug) }; });
+  }
+
+  // Eigene Admin-Unterseiten (seiten-kjs.json/seiten-aufgaben.json/
+  // seiten-verbraucher.json + legacy seiten.json mit bereich-Feld) werden
+  // VOR dem Rendern in die kjs/aufgaben/verbraucher-Arrays gemischt, an den
+  // Anfang gestellt (das entspricht der bisherigen sichtbaren Reihenfolge,
+  // die durch das alte nachträgliche Umsortieren zufällig entstand - siehe
+  // vorherige main.js-Version). Dadurch entstehen Desktop- und Handy-Menü
+  // aus derselben, bereits vollständigen Datenbasis.
+  function mergeDynamicSeiten(nav, results) {
+    var dynKjs = filteredSeiten(results[1] && results[1].seiten);
+    var dynAufgaben = filteredSeiten(results[2] && results[2].seiten);
+    var dynVerbraucher = filteredSeiten(results[3] && results[3].seiten);
+
+    ((results[4] && results[4].seiten) || [])
+      .filter(function (p) { return p.veroeffentlicht === true && p.in_navigation === true; })
+      .forEach(function (p) {
+        var entry = { label: p.nav_label || p.titel, href: '/seiten/?s=' + encodeURIComponent(p.slug) };
+        var bereich = p.bereich || 'weitere-themen';
+        if (bereich === 'kjs') dynKjs.push(entry);
+        else if (bereich === 'aufgaben') dynAufgaben.push(entry);
+        else if (bereich === 'verbraucher') dynVerbraucher.push(entry);
+        // 'weitere-themen': Flyout ist seit 22.08.2026 deaktiviert, Eintrag bleibt ungenutzt.
       });
-    }
 
-    // Map nav key to main-nav <li> by matching first <a> href pattern
-    // Netlify liefert interne Links ohne ".html"-Endung aus (Pretty URLs) –
-    // UND kürzt "/ordner/index.html" sogar auf "/ordner/" (kein "index" mehr
-    // im Pfad, nur der Ordner mit Schrägstrich). Alle drei Formen müssen hier
-    // erkannt werden, sonst matcht z.B. "termine" nach dem Deploy gar nichts
-    // mehr (siehe auch reorderSub()/baseName() oben für dieselbe Ursache).
-    var KEY_HREF = {
-      startseite: /^(\.\.\/)*(index(\.html)?)?\/?$/,
-      jaeger:     /jaeger\/(index(\.html)?)?$/,
-      verbraucher:/verbraucher\/(index(\.html)?)?$/,
-      termine:    /termine\/(index(\.html)?)?$/,
-      aktuelles:  /aktuelles\/(index(\.html)?)?$/,
-      faq:        /faq\/(index(\.html)?)?$/,
-      kontakt:    /kontakt\/(index(\.html)?)?$/
+    return {
+      sektionsnamen: nav.sektionsnamen || {},
+      hauptmenu: nav.hauptmenu || FALLBACK_NAV.hauptmenu,
+      hauptmenu_meta: nav.hauptmenu_meta || FALLBACK_NAV.hauptmenu_meta,
+      jaeger_dropdown: nav.jaeger_dropdown || FALLBACK_NAV.jaeger_dropdown,
+      jaeger_dropdown_meta: nav.jaeger_dropdown_meta || FALLBACK_NAV.jaeger_dropdown_meta,
+      kjs: dynKjs.concat(nav.kjs || []),
+      aufgaben: dynAufgaben.concat(nav.aufgaben || []),
+      verbraucher: dynVerbraucher.concat(nav.verbraucher || [])
     };
+  }
 
-    // Robusterer Abgleich für Hauptmenü-Punkte: bevorzugt das feste
-    // data-navkey-Attribut (unabhängig vom href, funktioniert auch wenn ein
-    // Punkt wie "Jäger" bewusst auf "#" zeigt, siehe KJS-Segeberg-Fix weiter
-    // unten). Fällt nur zurück auf den href-Regex, falls data-navkey auf
-    // einer Seite mal fehlen sollte.
-    function matchesNavKey(a, key) {
-      if (!a) return false;
-      var dk = a.getAttribute('data-navkey');
-      if (dk) return dk === key;
-      var pattern = KEY_HREF[key];
-      return !!(pattern && pattern.test(a.getAttribute('href') || ''));
-    }
+  // Eigene Hauptpunkte aus navigation-extra.json, vor FAQ eingefügt - jetzt
+  // in Desktop UND Handy (vorher fehlte diese Einfügung im Handy-Menü
+  // komplett, aktuell nicht sichtbar, da navigation-extra.json derzeit leer ist).
+  function insertNavigationExtra() {
+    return fetchJsonSafe('/content/navigation-extra.json').then(function (data) {
+      if (!data || !data.hauptpunkte || !data.hauptpunkte.length) return;
 
-    var jaegerDD = document.getElementById('jaeger-dropdown');
-    var mainNav  = document.querySelector('.main-nav');
+      data.hauptpunkte.forEach(function (hp) {
+        var seiten = (hp.seiten || []).filter(function (s) { return s.veroeffentlicht === true && s.in_navigation === true; });
+        if (!seiten.length || !hp.label) return;
 
-    fetchContent('/content/navigation.json').then(function(r) { return r.json(); }).then(function(d) {
-
-      // ── 1. Sub-menu item ordering (FEATURE 1) ──────────────────
-      if (jaegerDD) {
-        // KJS Segeberg sub-menu
-        if (d.kjs && d.kjs.length) {
-          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-            var a = hs.querySelector(':scope > a');
-            if (a && a.textContent.indexOf('KJS') !== -1) {
-              reorderSub(hs.querySelector('ul.dropdown--sub'), d.kjs);
-            }
-          });
-        }
-        // Aufgaben sub-menu
-        if (d.aufgaben && d.aufgaben.length) {
-          jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-            var a = hs.querySelector(':scope > a');
-            if (a && a.textContent.indexOf('Aufgaben') !== -1) {
-              reorderSub(hs.querySelector('ul.dropdown--sub'), d.aufgaben);
-            }
-          });
-        }
-      }
-      // Verbraucher dropdown
-      if (d.verbraucher && d.verbraucher.length && mainNav) {
-        mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-          var a = li.querySelector(':scope > a');
-          if (a && a.textContent.indexOf('Verbraucher') !== -1) {
-            reorderSub(li.querySelector('ul.dropdown'), d.verbraucher);
-          }
-        });
-      }
-
-      // ── 2. Section name renaming (FEATURE 2) ───────────────────
-      if (d.sektionsnamen) {
-        var sn = d.sektionsnamen;
-        if (jaegerDD) {
-          // KJS Segeberg label
-          if (sn.kjs) {
-            jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-              var a = hs.querySelector(':scope > a');
-              if (a && a.textContent.indexOf('KJS') !== -1) renameNavLink(a, sn.kjs);
-            });
-          }
-          // Aufgaben label
-          if (sn.aufgaben) {
-            jaegerDD.querySelectorAll(':scope > .has-sub').forEach(function(hs) {
-              var a = hs.querySelector(':scope > a');
-              if (a && a.textContent.indexOf('Aufgaben') !== -1) renameNavLink(a, sn.aufgaben);
-            });
-          }
-        }
-        // Jäger main nav label
-        if (sn.jaeger && mainNav) {
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, 'jaeger')) renameNavLink(a, sn.jaeger);
-          });
-        }
-        // Verbraucher main nav label
-        if (sn.verbraucher && mainNav) {
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, 'verbraucher')) renameNavLink(a, sn.verbraucher);
-          });
-        }
-      }
-
-      // ── 3. Main menu reordering (FEATURE 3) ────────────────────
-      if (d.hauptmenu && d.hauptmenu.length && mainNav) {
-        d.hauptmenu.forEach(function(key) {
-          if (!KEY_HREF[key]) return;
-          mainNav.querySelectorAll(':scope > li').forEach(function(li) {
-            var a = li.querySelector(':scope > a');
-            if (matchesNavKey(a, key)) {
-              mainNav.appendChild(li); // move to end in specified order
-            }
-          });
-        });
-      }
-
-      // ── 4. Jäger-Dropdown Direktpunkte umsortieren (FEATURE 4) ───
-      if (d.jaeger_dropdown && d.jaeger_dropdown.length && jaegerDD) {
-        var JAEGER_MATCH = {
-          'ueber-uns':           function(li) { var a = li.querySelector(':scope > a'); return a && /ueber-uns/.test(a.getAttribute('href') || ''); },
-          'kreisjjaegermeister': function(li) { var a = li.querySelector(':scope > a'); return a && /kreisjjaegermeister/.test(a.getAttribute('href') || ''); },
-          'kjs-segeberg':        function(li) { var a = li.querySelector(':scope > a'); return a && li.classList.contains('has-sub') && /KJS/.test(a.textContent || ''); },
-          'aufgaben':            function(li) { var a = li.querySelector(':scope > a'); return a && /Aufgaben/.test(a.textContent || ''); },
-          'infomobil':           function(li) { var a = li.querySelector(':scope > a'); return a && /infomobil/.test(a.getAttribute('href') || ''); },
-          'weitere-themen':      function(li) { return li.id === 'weitere-themen-item'; }
-        };
-        d.jaeger_dropdown.forEach(function(key) {
-          var match = JAEGER_MATCH[key];
-          if (!match) return;
-          jaegerDD.querySelectorAll(':scope > li').forEach(function(li) {
-            if (match(li)) jaegerDD.appendChild(li);
-          });
-        });
-      }
-
-      // ── 5. Mobile-Nav: gleiche Reihenfolge wie Desktop anwenden ──
-      // Handy-Menü ist eine eigene flache Liste (kein has-sub-Flyout wie
-      // am Desktop) – Gruppen werden über die href-Listen aus
-      // navigation.json (kjs/aufgaben) erkannt und dann als zusammen-
-      // hängender Block in der gespeicherten Reihenfolge einsortiert.
-      (function() {
-        function hrefBase(href) {
-          return (href || '').split('/').pop().replace(/\.html$/i, '').split(/[?#]/)[0];
-        }
-        var jaegerDetails = Array.prototype.filter.call(
-          document.querySelectorAll('#mobileNav details'),
-          function(det) {
-            var sum = det.querySelector('summary');
-            return sum && sum.textContent.trim() === 'Jäger';
-          }
-        )[0];
-        var mobileSub = jaegerDetails && jaegerDetails.querySelector('ul.mobile-nav__sub');
-        if (!mobileSub) return;
-
-        var kjsHrefs = (d.kjs || []).map(function(i) { return hrefBase(i.href); });
-        var aufgabenHrefs = (d.aufgaben || []).map(function(i) { return hrefBase(i.href); });
-
-        var groups = { 'ueber-uns': [], 'kreisjjaegermeister': [], infomobil: [], kjs: [], aufgaben: [], rest: [] };
-        Array.prototype.forEach.call(mobileSub.querySelectorAll(':scope > li'), function(li) {
-          var a = li.querySelector('a');
-          var href = a ? (a.getAttribute('href') || '') : '';
-          var base = hrefBase(href);
-          if (/ueber-uns/.test(href)) groups['ueber-uns'].push(li);
-          else if (/kreisjjaegermeister/.test(href)) groups['kreisjjaegermeister'].push(li);
-          else if (/infomobil/.test(href)) groups.infomobil.push(li);
-          else if (kjsHrefs.indexOf(base) !== -1) groups.kjs.push({ li: li, base: base });
-          else if (aufgabenHrefs.indexOf(base) !== -1) groups.aufgaben.push({ li: li, base: base });
-          else groups.rest.push(li);
-        });
-
-        function sortByOrder(items, order) {
-          var out = [];
-          order.forEach(function(base) {
-            var found = items.filter(function(it) { return it.base === base; })[0];
-            if (found) out.push(found.li);
-          });
-          return out;
-        }
-
-        var KEY_LIS = {
-          'ueber-uns':           groups['ueber-uns'],
-          'kreisjjaegermeister': groups['kreisjjaegermeister'],
-          'kjs-segeberg':        sortByOrder(groups.kjs, kjsHrefs),
-          'aufgaben':            sortByOrder(groups.aufgaben, aufgabenHrefs),
-          'infomobil':           groups.infomobil,
-          'weitere-themen':      []
-        };
-
-        (d.jaeger_dropdown || []).forEach(function(key) {
-          (KEY_LIS[key] || []).forEach(function(li) { mobileSub.appendChild(li); });
-        });
-        // Sicherheitsnetz: alles nicht Zugeordnete (z.B. neue Seiten) hinten anhängen
-        groups.rest.forEach(function(li) { mobileSub.appendChild(li); });
-      })();
-
-    }).catch(function() {
-      // navigation.json not yet present – silently keep original order
-    });
-  });
-})();
-
-// Eigene Hauptpunkte aus navigation-extra.json in die Hauptnavigation einfügen
-(function() {
-  fetchContent('/content/navigation-extra.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var nav = document.querySelector('.main-nav');
-      if (!nav || !data.hauptpunkte || !data.hauptpunkte.length) return;
-
-      data.hauptpunkte.forEach(function(hp) {
-        var seiten = (hp.seiten || []).filter(function(s) {
-          return s.veroeffentlicht === true && s.in_navigation === true;
-        });
-        if (!seiten.length) return;
-
-        var li = document.createElement('li');
-
+        var desktopLi = document.createElement('li');
+        var mobileHtml;
         if (seiten.length === 1) {
-          // Einzelne Seite → direkt verlinken
-          var a = document.createElement('a');
-          a.href = '/seiten/?s=' + encodeURIComponent(seiten[0].slug);
-          a.textContent = hp.label;
-          li.appendChild(a);
+          var href = escHtml('/seiten/?s=' + encodeURIComponent(seiten[0].slug));
+          var label = escHtml(hp.label);
+          desktopLi.innerHTML = '<a href="' + href + '">' + label + '</a>';
+          mobileHtml = '<li><a href="' + href + '">' + label + '</a></li>';
         } else {
-          // Mehrere Seiten → Dropdown
-          var a = document.createElement('a');
-          a.href = '#';
-          a.innerHTML = hp.label + ' <span class="arrow">&#9662;</span>';
-          li.appendChild(a);
-          var ul = document.createElement('ul');
-          ul.className = 'dropdown';
-          seiten.forEach(function(s) {
-            var sli = document.createElement('li');
-            var sa = document.createElement('a');
-            sa.href = '/seiten/?s=' + encodeURIComponent(s.slug);
-            sa.textContent = s.nav_label || s.titel;
-            sli.appendChild(sa);
-            ul.appendChild(sli);
-          });
-          li.appendChild(ul);
+          var subHtml = seiten.map(function (s) {
+            return '<li><a href="' + escHtml('/seiten/?s=' + encodeURIComponent(s.slug)) + '">' + escHtml(s.nav_label || s.titel) + '</a></li>';
+          }).join('');
+          desktopLi.innerHTML = '<a href="#">' + escHtml(hp.label) + ' <span class="arrow">&#9662;</span></a>' +
+            '<ul class="dropdown">' + subHtml + '</ul>';
+          mobileHtml = mobileDetailsHtml(hp.label, subHtml);
         }
 
-        // Vor FAQ einfügen (oder am Ende der Nav)
-        var faqItem = Array.from(nav.querySelectorAll(':scope > li > a')).find(function(a) {
+        var faqLink = Array.prototype.find.call(mainNavRoot.querySelectorAll(':scope > li > a'), function (a) {
           return a.textContent.trim() === 'FAQ';
         });
-        if (faqItem) {
-          nav.insertBefore(li, faqItem.closest('li'));
-        } else {
-          nav.appendChild(li);
-        }
+        if (faqLink) mainNavRoot.insertBefore(desktopLi, faqLink.closest('li'));
+        else mainNavRoot.appendChild(desktopLi);
+
+        var mobileFaqLi = Array.prototype.find.call(mobileNavRoot.querySelectorAll(':scope > li'), function (li) {
+          var a = li.querySelector(':scope > a');
+          return a && a.textContent.trim() === 'FAQ';
+        });
+        var mobileWrap = document.createElement('div');
+        mobileWrap.innerHTML = mobileHtml;
+        var mobileEl = mobileWrap.firstElementChild;
+        if (mobileFaqLi) mobileNavRoot.insertBefore(mobileEl, mobileFaqLi);
+        else mobileNavRoot.appendChild(mobileEl);
       });
-    })
-    .catch(function() {});
+    }).catch(function () {});
+  }
+
+  // WICHTIG: window.__navReady muss SOFORT (synchron) ein echtes Promise sein
+  // - sonst liest die "Verwandte Seiten"-Rechtsnavigation (weiter unten in
+  // dieser Datei, per Promise.resolve(window.__navReady).then(...)) noch
+  // "undefined" aus und wartet dadurch gar nicht wirklich.
+  window.__navReady = Promise.all([
+    fetchJsonSafe('/content/navigation.json'),
+    fetchJsonSafe('/content/seiten-kjs.json'),
+    fetchJsonSafe('/content/seiten-aufgaben.json'),
+    fetchJsonSafe('/content/seiten-verbraucher.json'),
+    fetchJsonSafe('/content/seiten.json')
+  ]).then(function (results) {
+    var merged = mergeDynamicSeiten(results[0] || FALLBACK_NAV, results);
+    renderDesktopNav(merged);
+    renderMobileNav(merged);
+    wireHoverFlyouts();
+    return insertNavigationExtra();
+  }).catch(function () {
+    // navigation.json nicht ladbar (oder unerwarteter Fehler beim Rendern):
+    // minimaler Not-Anker (siehe FALLBACK_NAV oben), damit die Seite nicht
+    // komplett ohne Hauptnavigation dasteht.
+    var merged = mergeDynamicSeiten(FALLBACK_NAV, []);
+    renderDesktopNav(merged);
+    renderMobileNav(merged);
+    wireHoverFlyouts();
+  });
 })();
 
+/* =========================================================
+   ZENTRALER FOOTER (Architektur-Audit Phase 3A, 01.09.2026)
+
+   Vorher: pro HTML-Datei ein komplett ausgeschriebener
+   <footer class="site-footer">…</footer>-Block (~42 Dateien) mit
+   fachlich unterschiedlichem Spalteninhalt je nach Seite (eigene
+   "Aufgaben"-Spalte auf den 8 aufgaben/*.html-Seiten, eigene
+   "Verbraucher"-Spalte auf der Verbraucher-Seite, 2 Rechtsseiten
+   (impressum.html/datenschutz.html) sogar nur mit einer Mini-Fußzeile
+   ohne Logo/Spalten) - dazu ein eigenes <script> pro Seite, das
+   content/footer.json lud und nur Über-uns-Text/Copyright/Social-Links
+   nachträglich ins bereits vorhandene statische Markup schrieb (inkl.
+   Spiegelung der Social-Links in die Topbar).
+
+   Jetzt: content/footer.json ist die EINE Quelle für den gesamten
+   Footer-Inhalt - Über-uns-Text, Copyright, Social-Links UND (neu,
+   analog zu hauptmenu_meta/jaeger_dropdown_meta in navigation.json aus
+   Phase 2) die drei laut Laurin vereinheitlichten Spalten-Linklisten
+   (spalte_ueber_kjs/spalte_uebersicht/spalte_informationen). Jede Seite
+   bindet nur noch einen leeren Container ein
+   (<footer class="site-footer" id="siteFooter"></footer>), der hier
+   zentral befüllt wird - identisch auf jeder Seite, unabhängig von der
+   Verzeichnistiefe (root-relative Links + prettyHref(), gleiches
+   Prinzip wie im Navigations-Modul weiter oben).
+   ========================================================= */
+(function () {
+  var footerRoot = document.getElementById('siteFooter');
+  if (!footerRoot) return;
+
+  // Absichtlich KEIN zweiter vollständiger Footer als Fallback (Punkt 8
+  // der Phase-3A-Vorgabe - keine dauerhaft zweite, separat zu pflegende
+  // Footer-Struktur) - nur ein minimaler Not-Anker (Copyright +
+  // Impressum/Datenschutz/Login), falls footer.json ausnahmsweise nicht
+  // ladbar ist, damit die Seite nicht komplett ohne Fußzeile dasteht.
+  var FALLBACK_FOOTER = {
+    ueber_text: '', facebook_url: '', instagram_url: '',
+    copyright: 'Kreisjägerschaft Segeberg e.V.',
+    spalte_ueber_kjs: [], spalte_uebersicht: [], spalte_informationen: []
+  };
+
+  function prettyHref(href) {
+    if (!href || href === '#' || /^https?:\/\//i.test(href)) return href;
+    var h = href.replace(/(^|\/)index\.html?$/i, '$1');
+    if (h === '') h = '/';
+    h = h.replace(/\.html?$/i, '');
+    return h;
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function colHtml(title, items) {
+    if (!items || !items.length) return '';
+    var lis = items.map(function (it) {
+      return '<li><a href="' + escHtml(prettyHref(it.href)) + '">' + escHtml(it.label) + '</a></li>';
+    }).join('');
+    return '<div class="footer-col"><h5>' + escHtml(title) + '</h5><ul>' + lis + '</ul></div>';
+  }
+
+  function renderFooter(d) {
+    var html =
+      '<div class="container">' +
+        '<div class="footer-grid">' +
+          '<div class="footer-about">' +
+            // Footer-Hintergrund ist dasselbe sehr dunkle Grün wie die Startseiten-
+            // Kacheln (.site-footer nutzt ebenfalls var(--green-main)); deshalb hier
+            // dieselbe abgeleitete Logo-Variante wie dort (siehe css/style.css,
+            // Kommentar bei .quicklinks__icon img) statt des Original-Headerlogos.
+            '<img src="/images/logo-dunkel.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
+            '<span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>' +
+            '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
+            (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +
+            '<div class="footer-social">' +
+              // Gleiche Icon-Assets/Kreis-Badge-Logik wie im Header
+              // (.topbar__social--facebook/--instagram, css/style.css) -
+              // feste Markenfarben statt des alten, einheitlich blassen
+              // Icon-Buttons, damit Header und Footer "aus einem Guss" wirken.
+              '<a href="' + escHtml(d.facebook_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Facebook" class="footer-social--facebook"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>' +
+              '<a href="' + escHtml(d.instagram_url || '#') + '" target="_blank" rel="noopener noreferrer" aria-label="Kreisjägerschaft Segeberg auf Instagram" class="footer-social--instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></a>' +
+            '</div>' +
+          '</div>' +
+          colHtml('Über die KJS', d.spalte_ueber_kjs) +
+          colHtml('Schnellübersicht', d.spalte_uebersicht) +
+          colHtml('Informationen', d.spalte_informationen) +
+        '</div>' +
+        '<div class="footer-bottom">' +
+          '<span>' + escHtml(d.copyright) + '</span>' +
+          '<div class="footer-bottom__links">' +
+            '<a href="/impressum.html">Impressum</a>' +
+            '<a href="/datenschutz.html">Datenschutz</a>' +
+            '<a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    footerRoot.innerHTML = html;
+
+    // Social-Links spiegeln sich zusätzlich in die Kopfzeile (Topbar) -
+    // gleiches Verhalten wie vorher im Pro-Seiten-Skript. Die aria-label-
+    // Selektoren hier müssen exakt zu den aria-labels in js/components.js
+    // passen (04.09.2026: auf "Kreisjägerschaft Segeberg auf Facebook/
+    // Instagram" umgestellt, siehe dort).
+    if (d.facebook_url) {
+      var fbTop = document.querySelector('.topbar__social a[aria-label="Kreisjägerschaft Segeberg auf Facebook"]');
+      if (fbTop) fbTop.href = d.facebook_url;
+    }
+    if (d.instagram_url) {
+      var igTop = document.querySelector('.topbar__social a[aria-label="Kreisjägerschaft Segeberg auf Instagram"]');
+      if (igTop) igTop.href = d.instagram_url;
+    }
+  }
+
+  fetchContent('/content/footer.json')
+    .then(function (r) { return r.json(); })
+    .then(renderFooter)
+    .catch(function () { renderFooter(FALLBACK_FOOTER); });
+})();
 
 // Contact form handler (Formsubmit.co)
 var contactForm = document.getElementById('contactForm');
@@ -668,6 +1003,8 @@ if (contactForm) {
       btn.textContent = 'Fehler – bitte erneut versuchen';
       btn.style.background = '#c0392b';
       btn.disabled = false;
+      var fallback = document.getElementById('contactFormFallback');
+      if (fallback) fallback.style.display = '';
     });
   });
 }
@@ -841,4 +1178,272 @@ if (contactForm) {
       }, 150);
     })
     .catch(function () {});
+})();
+
+// ── Bildergalerie pro Seite ────────────────────────────────────────────
+// Gleiches Prinzip wie "Dokumente & Downloads" oben: Im Admin können pro
+// Seite mehrere Bilder mit eigener Beschriftung hinterlegt werden
+// (data.galerie = [{bild, titel}]). Wird hier generisch als Bilder-Raster
+// am Ende des Seiteninhalts eingefügt, sobald die jeweilige content/*.json
+// ein nicht-leeres "galerie"-Array enthält. Erscheint NICHT auf reinen
+// Personen-Seiten (Vorstand/Obleute/Hegeringe) – dort gibt es im Admin gar
+// kein Galerie-Feld, die content-Datei enthält also nie ein galerie-Array.
+(function () {
+  var path = window.location.pathname;
+  var basePath = path.replace(/\.html$/, '');
+  var isKJM = /\/kreisjjaegermeister\/index$/.test(basePath) || /\/kreisjjaegermeister\/?$/.test(basePath);
+  var isIndex = basePath === '' || /\/$/.test(basePath) || /\/index$/.test(basePath);
+  if (!isKJM && isIndex) return;
+  var contentPath = isKJM ? '/content/kreisjjaegermeister.json' : '/content' + basePath + '.json';
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  fetchContent(contentPath)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d) return;
+      var items = (Array.isArray(d.galerie) ? d.galerie : []).filter(function (g) { return g && g.bild; });
+      if (!items.length) return;
+
+      var cards = items.map(function (g) {
+        var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
+        return '<a href="' + escHtml(g.bild) + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
+          '<img src="' + escHtml(g.bild) + '" alt="' + escHtml(g.titel || '') + '" loading="lazy">' +
+          caption +
+        '</a>';
+      }).join('');
+
+      var galerieTitel = (d.galerie_titel && d.galerie_titel.trim()) || 'Bildergalerie';
+      var html = '<div class="galerie-section">' +
+        '<div class="galerie-section__title">' + escHtml(galerieTitel) + '</div>' +
+        '<div class="galerie-grid">' + cards + '</div>' +
+      '</div>';
+
+      var attempts = 0;
+      var iv = setInterval(function () {
+        attempts++;
+        var inhalt = document.getElementById('page-inhalt');
+        var main = document.getElementById('page-main');
+        var kjm = isKJM ? document.getElementById('kjm-content') : null;
+        var target = inhalt || main || kjm;
+        var ready = inhalt || (main && !main.querySelector('.loading-spinner')) ||
+          (kjm && kjm.textContent.indexOf('Wird geladen') === -1);
+        if (ready && target) {
+          clearInterval(iv);
+          var box = document.createElement('div');
+          box.innerHTML = html;
+          var parent = inhalt ? inhalt.parentNode : (main || kjm);
+          while (box.firstChild) parent.appendChild(box.firstChild);
+        } else if (attempts > 60) {
+          clearInterval(iv);
+        }
+      }, 150);
+    })
+    .catch(function () {});
+})();
+
+// ── "Verwandte Seiten" – generische rechte Navigation ────────────────────
+// Füllt jede <ul class="sidebar-nav" data-related-nav> automatisch mit den
+// "Geschwister-Seiten" der aktuellen Seite, direkt aus dem echten Hauptmenü
+// oben ausgelesen. Die aktuelle Seite selbst wird dabei weggelassen (man ist
+// ja schon drauf). Menüpunkte, die selbst nur eine Klapp-Überschrift ohne
+// eigene Seite sind (z.B. "KJS Segeberg", href="#"), werden als
+// nicht-klickbare Zwischenüberschrift mit eingerückten Unterpunkten gezeigt –
+// genau wie im Hauptmenü selbst.
+//
+// Dadurch muss diese Liste nirgends mehr von Hand gepflegt werden: ändert
+// sich später ein Menüpunkt, zieht die rechte Navigation automatisch nach.
+//
+// Für Seiten, die selbst nicht direkt im Hauptmenü stehen (z.B. die
+// Jagdhundeschule-Kachelübersicht, die "unter" Hundeausbildung hängt), kann
+// per data-related-for="<href-wie-im-menü>" festgelegt werden, für welchen
+// Menüpunkt die Geschwister-Liste gelten soll.
+(function () {
+  var targets = document.querySelectorAll('[data-related-nav]');
+  if (!targets.length) return;
+
+  // Erst starten, wenn das Hauptmenü vollständig ist (inkl. eigener
+  // Unterseiten aus dem Admin, siehe window.__navReady weiter oben in
+  // dieser Datei) – sonst fehlen z.B. selbst angelegte Verbraucher-Seiten
+  // in der rechten Navigation, weil deren Einfügung ins Menü noch läuft.
+  Promise.resolve(window.__navReady).then(run).catch(run);
+
+  function normPath(href) {
+    try {
+      var u = new URL(href, location.href);
+      return u.pathname.replace(/index\.html?$/, '').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function findLink(navRoot, pathOrHref) {
+    var wantPath = normPath(pathOrHref);
+    var links = navRoot.querySelectorAll('a[href]');
+    var found = null;
+    links.forEach(function (a) {
+      if (found) return;
+      var href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      if (normPath(href) === wantPath) found = a;
+    });
+    return found;
+  }
+
+  function groupHeaderHtml(label) {
+    return '<li style="font-size:.75rem;font-weight:700;text-transform:uppercase;' +
+      'letter-spacing:.05em;color:var(--green-dark);padding:.5rem 0 .25rem;' +
+      'margin-top:.5rem;border-top:1px solid var(--border);pointer-events:none;">' +
+      label.replace(/&/g, '&amp;') + '</li>';
+  }
+
+  function itemHtml(label, href, indent) {
+    return '<li><a href="' + href + '"' + (indent ? ' style="padding-left:.75rem;"' : '') + '>' +
+      label.replace(/&/g, '&amp;') + '</a></li>';
+  }
+
+  function renderSiblings(ul, excludeLi) {
+    var html = '';
+    ul.querySelectorAll(':scope > li').forEach(function (li) {
+      if (li === excludeLi) return;
+      var a = li.querySelector(':scope > a');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      var label = a.textContent.trim();
+      var childUl = li.querySelector(':scope > ul');
+      var childItems = childUl ? childUl.querySelectorAll(':scope > li > a') : null;
+      if (childItems && childItems.length && (!href || href === '#')) {
+        // Klapp-Überschrift ohne eigene Seite (z.B. "KJS Segeberg"):
+        // als Zwischenüberschrift + eingerückte Unterpunkte anzeigen.
+        html += groupHeaderHtml(label);
+        childItems.forEach(function (childA) {
+          html += itemHtml(childA.textContent.trim(), childA.getAttribute('href'), true);
+        });
+      } else if (href && href !== '#') {
+        html += itemHtml(label, href, false);
+      }
+    });
+    return html;
+  }
+
+  function run() {
+    var navRoot = document.querySelector('nav[aria-label="Hauptnavigation"] > ul');
+    if (!navRoot) return;
+
+    targets.forEach(function (target) {
+      var forHref = target.getAttribute('data-related-for');
+      var matched = findLink(navRoot, forHref || location.pathname);
+      if (!matched) return;
+      var parentLi = matched.closest('li');
+      var parentUl = parentLi ? parentLi.parentElement : null;
+      if (!parentUl) return;
+      var html = renderSiblings(parentUl, forHref ? null : parentLi);
+      if (html) target.innerHTML = html;
+    });
+  }
+})();
+
+// Hinweis: Das Öffnen/Schließen der Dropdowns mit kurzer Verzögerung beim
+// Rüberfahren mit der Maus (Frank-Bug-Report, "KJS Segeberg"-Flyout schloss
+// beim leicht diagonalen Rüberfahren sofort) läuft seit Architektur-Audit
+// Phase 2 (31.08.2026) als wireHoverFlyouts() im zentralen Navigations-Modul
+// weiter oben in dieser Datei - dort erst NACH dem Rendern von .main-nav aus
+// navigation.json aufgerufen, da diese Elemente vorher noch nicht existieren.
+
+// ── Bildergalerie-Lightbox (site-weit) ────────────────────────────────────
+// Frank-Wunsch: Klick auf ein Galerie-Bild soll es NICHT mehr als eigene
+// Bilddatei-Seite öffnen (target="_blank"), sondern als Overlay direkt auf
+// der aktuellen Seite, mit Vor/Zurück-Navigation (Pfeile, Tastatur, Swipe)
+// durch alle Bilder derselben Galerie. Per Event-Delegation auf document
+// registriert – funktioniert dadurch automatisch für JEDE Bildergalerie
+// (Standard-Seiten via main.js-Renderer und aktuelles/beitrag.html), ohne
+// dass jede Stelle einzeln verdrahtet werden muss.
+(function () {
+  var overlay = null, imgEl = null, captionEl = null, counterEl = null;
+  var items = []; // aktuelle Galerie-Bilder (Array von {href, alt, caption})
+  var idx = 0;
+
+  function build() {
+    if (overlay) return;
+    overlay = document.createElement('div');
+    overlay.className = 'kjs-lightbox';
+    overlay.innerHTML =
+      '<button type="button" class="kjs-lightbox__close" aria-label="Schließen">&times;</button>' +
+      '<button type="button" class="kjs-lightbox__prev" aria-label="Vorheriges Bild">&#10094;</button>' +
+      '<button type="button" class="kjs-lightbox__next" aria-label="Nächstes Bild">&#10095;</button>' +
+      '<div class="kjs-lightbox__stage">' +
+        '<img class="kjs-lightbox__img" alt="">' +
+        '<div class="kjs-lightbox__caption"></div>' +
+        '<div class="kjs-lightbox__counter"></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    imgEl = overlay.querySelector('.kjs-lightbox__img');
+    captionEl = overlay.querySelector('.kjs-lightbox__caption');
+    counterEl = overlay.querySelector('.kjs-lightbox__counter');
+
+    overlay.querySelector('.kjs-lightbox__close').addEventListener('click', close);
+    overlay.querySelector('.kjs-lightbox__prev').addEventListener('click', function (e) { e.stopPropagation(); show(idx - 1); });
+    overlay.querySelector('.kjs-lightbox__next').addEventListener('click', function (e) { e.stopPropagation(); show(idx + 1); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    // Touch-Swipe
+    var touchX = null;
+    overlay.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    overlay.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40) show(idx + (dx < 0 ? 1 : -1));
+      touchX = null;
+    }, { passive: true });
+  }
+
+  function show(i) {
+    if (!items.length) return;
+    idx = (i + items.length) % items.length;
+    var it = items[idx];
+    imgEl.src = it.href;
+    imgEl.alt = it.alt || '';
+    captionEl.textContent = it.caption || '';
+    captionEl.style.display = it.caption ? '' : 'none';
+    counterEl.textContent = items.length > 1 ? (idx + 1) + ' / ' + items.length : '';
+  }
+
+  function open(galleryItems, startIdx) {
+    build();
+    items = galleryItems;
+    overlay.classList.add('kjs-lightbox--open');
+    document.body.classList.add('kjs-lightbox-lock');
+    show(startIdx);
+  }
+
+  function close() {
+    if (!overlay) return;
+    overlay.classList.remove('kjs-lightbox--open');
+    document.body.classList.remove('kjs-lightbox-lock');
+    items = [];
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest ? e.target.closest('.galerie-item') : null;
+    if (!link) return;
+    e.preventDefault();
+    var grid = link.closest('.galerie-grid') || document;
+    var links = Array.prototype.slice.call(grid.querySelectorAll('.galerie-item'));
+    var galleryItems = links.map(function (a) {
+      var img = a.querySelector('img');
+      var capEl = a.querySelector('.galerie-item__caption');
+      return { href: a.getAttribute('href'), alt: img ? img.getAttribute('alt') : '', caption: capEl ? capEl.textContent : '' };
+    });
+    open(galleryItems, links.indexOf(link));
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!overlay || !overlay.classList.contains('kjs-lightbox--open')) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') show(idx - 1);
+    else if (e.key === 'ArrowRight') show(idx + 1);
+  });
 })();

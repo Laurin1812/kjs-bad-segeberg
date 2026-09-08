@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aktuelle Hunde und Würfe der Kreisjägerschaft Segeberg e.V.">
+  <title>Hundebörse – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero">
+  <div class="page-hero__bg" id="hb-index-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Hundebörse</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container hb-overview-layout">
+    <div class="hb-overview-intro">
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:1.5rem;">
+        Hier finden Sie aktuell angebotene Jagdhunde und Würfe. Entdecken Sie die aktuellen Angebote oder bieten Sie selbst einen Hund bzw. Wurf an.
+      </p>
+      <p style="margin-bottom:0;">
+        <a href="anbieten.html" class="btn btn-primary">+ Hund / Wurf anbieten</a>
+      </p>
+    </div>
+
+    <main class="main-content" id="hb-main">
+      <h2 style="margin-bottom:1.5rem;">Aktuelle Hunde &amp; Würfe</h2>
+      <div class="news__grid" id="hb-grid">
+        <p style="color:var(--text-muted);">Anzeigen werden geladen …</p>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <!-- Die frühere zweite "Hund/Wurf anbieten"-Box hier in der Seitenleiste
+           wurde entfernt (Frank-Feedback über Laurin, 29.08.2026): sie
+           duplizierte den bereits prominenten grünen Button oben im
+           Hauptinhalt ("+ Hund / Wurf anbieten"). Eine alleinstehende
+           Kontakt-Box in der Seitenleiste ist ein etabliertes Muster auf
+           dieser Seite (siehe z.B. aktuelles/index.html, jaeger/vorstand.html)
+           und wirkt dank align-items:start im Grid nicht unausgewogen, auch
+           wenn sie kürzer ist als der Hauptinhalt. -->
+      <div class="contact-box">
+        <h4>Kontakt</h4>
+        <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
+        <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  function formatDatum(raw) {
+    if (!raw) return '';
+    var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var m1 = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (m1) return parseInt(m1[1],10) + '. ' + mon[parseInt(m1[2],10)-1] + ' ' + m1[3];
+    var m2 = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m2) return parseInt(m2[3],10) + '. ' + mon[parseInt(m2[2],10)-1] + ' ' + m2[1];
+    return raw;
+  }
+
+  function alterText(geburtsdatum) {
+    var m = geburtsdatum && geburtsdatum.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (!m) return '';
+    var geburt = new Date(parseInt(m[3],10), parseInt(m[2],10)-1, parseInt(m[1],10));
+    if (isNaN(geburt.getTime())) return '';
+    var heute = new Date();
+    var monate = (heute.getFullYear()-geburt.getFullYear())*12 + (heute.getMonth()-geburt.getMonth());
+    if (heute.getDate() < geburt.getDate()) monate--;
+    if (monate < 0) monate = 0;
+    if (monate < 24) return monate + (monate === 1 ? ' Monat' : ' Monate');
+    var jahre = Math.floor(monate/12);
+    return jahre + (jahre === 1 ? ' Jahr' : ' Jahre');
+  }
+
+  function preisText(a) {
+    if (a.priceType === 'fixed') return a.price ? (a.price + ' €') : 'Festpreis';
+    if (a.priceType === 'negotiable') return a.price ? (a.price + ' € VB') : 'VB';
+    if (a.priceType === 'on_request') return 'Preis auf Anfrage';
+    return 'Keine Preisangabe';
+  }
+
+  function typLabel(t) { return t === 'litter' ? 'WURF' : 'EINZELHUND'; }
+
+  function typZeile(a) {
+    if (a.type === 'litter') {
+      var teile = [];
+      if (a.litterDate) teile.push('Wurf vom ' + formatDatum(a.litterDate));
+      var anzahl = [];
+      if (a.maleCount) anzahl.push(a.maleCount + ' Rüden');
+      if (a.femaleCount) anzahl.push(a.femaleCount + ' Hündinnen');
+      if (anzahl.length) teile.push(anzahl.join(', '));
+      return teile.join(' · ');
+    }
+    var teile2 = [];
+    if (a.gender) teile2.push(a.gender === 'male' ? 'Rüde' : 'Hündin');
+    var alter = alterText(a.birthDate);
+    if (alter) teile2.push(alter);
+    return teile2.join(' · ');
+  }
+
+  function renderKarte(a, i) {
+    var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
+    var imgSrc = toSrc(bild);
+    var standort = [a.postalCode, a.city].filter(Boolean).join(' ');
+    // WICHTIG (Laurin-Rückmeldung 28.08.2026): Der vorherige Fix für die
+    // Kachel-Höhen (#hb-grid .news-card > a { display:flex; ... } in
+    // css/style.css) griff live NICHT, weil dieser <a>-Wrapper hier bisher
+    // ein Inline-style="...display:block;" hatte - Inline-Styles gewinnen
+    // IMMER gegen externe CSS-Regeln, unabhängig von Spezifität. Deshalb
+    // jetzt kein "display:block" mehr inline setzen; die Flex-Regel aus
+    // css/style.css kommt dadurch tatsächlich zum Tragen.
+    return '<article class="news-card">' +
+      '<a href="detail.html?i=' + i + '" style="text-decoration:none;color:inherit;">' +
+        '<div class="news-card__img-wrap">' +
+          (imgSrc
+            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.title || '') + '" loading="lazy">'
+            : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
+        '</div>' +
+        '<div class="news-card__body">' +
+          '<div class="news-card__meta">' +
+            '<span class="news-card__cat">' + typLabel(a.type) + '</span>' +
+          '</div>' +
+          '<h3 class="news-card__title">' + escHtml(a.title || '(Ohne Titel)') + '</h3>' +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(a.breed || '') + '</p>' +
+          (standort ? '<p style="font-size:.86rem;color:var(--text-muted);margin:0 0 .2rem;">' + escHtml(standort) + '</p>' : '') +
+          '<p style="font-size:.86rem;color:var(--text-muted);margin:0;">' + escHtml(typZeile(a)) + '</p>' +
+          '<div class="hb-card-footer">' +
+            '<p style="font-size:.95rem;font-weight:700;color:var(--green-dark);margin:0 0 .5rem;">' + escHtml(preisText(a)) + '</p>' +
+            '<span style="font-size:.88rem;font-weight:600;color:var(--green-main);">Details ansehen →</span>' +
+          '</div>' +
+        '</div>' +
+      '</a>' +
+    '</article>';
+  }
+
+  fetch('../content/hundeboerse.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      // Hero-Bild: im Admin unter Hundebörse konfigurierbar (Phase 3,
+      // 28.08.2026). Ohne gesetztes Bild bleibt das bisherige Standardbild
+      // (bereits als Inline-style im HTML hinterlegt) unverändert bestehen.
+      if (data.hero_bild) {
+        document.getElementById('hb-index-hero-bg').style.backgroundImage = "url('" + toSrc(data.hero_bild) + "')";
+      }
+      var alle = data.anzeigen || [];
+      var indexed = alle.map(function(a, i) { return { a: a, i: i }; });
+      var veroeffentlicht = indexed.filter(function(e) { return e.a.status === 'published'; });
+      veroeffentlicht.sort(function(x, y) {
+        var dx = x.a.createdAt || '', dy = y.a.createdAt || '';
+        return dy.localeCompare(dx);
+      });
+
+      var grid = document.getElementById('hb-grid');
+      if (!veroeffentlicht.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;background:var(--bg-light);border-radius:var(--radius-md);">' +
+          '<h3 style="color:var(--green-dark);margin-bottom:.5rem;">Aktuell sind keine Anzeigen veröffentlicht.</h3>' +
+          '<p style="color:var(--text-muted);">Schauen Sie gerne bald wieder vorbei.</p>' +
+        '</div>';
+        return;
+      }
+      grid.innerHTML = veroeffentlicht.map(function(e) { return renderKarte(e.a, e.i); }).join('');
+    })
+    .catch(function() {
+      document.getElementById('hb-grid').innerHTML = '<p style="color:var(--text-muted);">Anzeigen konnten nicht geladen werden.</p>';
+    });
+})();
+</script>
+
+<footer class="site-footer" id="siteFooter"></footer>
+<script src="/js/main.js"></script>
+</body>
+</html>

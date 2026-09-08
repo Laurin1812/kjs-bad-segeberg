@@ -6,135 +6,31 @@
   <meta name="description" content="Schießwesen – Kreisjägerschaft Segeberg e.V.">
   <title>Schießwesen – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
 </head>
 <body>
 
-<div class="topbar"><div class="container">
-  <div class="topbar__left">
-    <span>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></span>
-    <span>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></span>
-  </div>
-</div></div>
-
-<header class="site-header">
-  <div class="container header-inner">
-    <a href="../index.html" class="site-logo">
-      <img src="../images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
-      <div class="site-logo__text">
-        <span class="site-logo__name">Kreisjägerschaft</span>
-        <span class="site-logo__sub">Segeberg e.V.</span>
-      </div>
-    </a>
-    <nav aria-label="Hauptnavigation"><ul class="main-nav">
-      <li><a href="../index.html" data-navkey="startseite">Startseite</a></li>
-      <li class="active"><a href="#" data-navkey="jaeger">Jäger <span class="arrow">▾</span></a>
-        <ul class="dropdown" id="jaeger-dropdown">
-          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li class="has-sub"><a href="#">KJS Segeberg <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-              <li><a href="../jaeger/obleute.html">Obleute</a></li>
-              <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
-              <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
-              <li><a href="../jaeger/jaeger-werden.html">J&#228;ger/in werden</a></li>
-              <li><a href="../jaeger/niederwild.html">Niederwild</a></li>
-              <li><a href="../jaeger/hochwild.html">Hochwild</a></li>
-              <li><a href="../jaeger/schiessobleute.html">Schie&#223;obleute</a></li>
-              <li><a href="../jaeger/satzung.html">Satzung</a></li>
-              <li><a href="../jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-            </ul>
-          </li>
-          <li class="has-sub"><a href="#">Aufgaben der Kreisjägerschaft <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub">
-              <li><a href="../aufgaben/schiessen.html">Schie&#223;wesen</a></li>
-              <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-              <li><a href="../aufgaben/schweisshunde.html">Schwei&#223;hundef&#252;hrer</a></li>
-              <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
-              <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-              <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
-              <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-            </ul>
-          </li>
-          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
-          <li class="has-sub" id="weitere-themen-item" style="display:none;"><a href="#">Weitere Themen <span class="arrow-right">&#9658;</span></a>
-            <ul class="dropdown dropdown--sub" id="weitere-themen-sub"></ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="../verbraucher/index.html" data-navkey="verbraucher">Verbraucher <span class="arrow">▾</span></a>
-        <ul class="dropdown">
-          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-        </ul>
-      </li>
-      <li><a href="../termine/index.html" data-navkey="termine">Termine</a></li>
-      <li><a href="../aktuelles/index.html" data-navkey="aktuelles">Aktuelles</a></li>
-      <li><a href="../faq/index.html" data-navkey="faq">FAQ</a></li>
-      <li><a href="../kontakt/index.html" data-navkey="kontakt">Kontakt</a></li>
-    </ul></nav>
-    <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
-  </div>
-</header>
-
-<nav class="mobile-nav" id="mobileNav" aria-label="Mobile Navigation">
-  <button class="mobile-nav__close" id="mobileNavClose" aria-label="Menü schließen">✕</button>
-  <ul>
-    <li><a href="../index.html">Startseite</a></li>
-    <li>
-      <details>
-        <summary>Jäger</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="../jaeger/ueber-uns.html">Über uns</a></li>
-          <li><a href="../kreisjjaegermeister/index.html">Kreisjägermeister</a></li>
-          <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-          <li><a href="../jaeger/obleute.html">Obleute</a></li>
-          <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
-          <li><a href="../jaeger/mitglied-werden.html">Mitglied werden</a></li>
-          <li><a href="../jaeger/jaeger-werden.html">Jäger/in werden</a></li>
-          <li><a href="../jaeger/niederwild.html">Niederwild</a></li>
-          <li><a href="../jaeger/hochwild.html">Hochwild</a></li>
-          <li><a href="../jaeger/schiessobleute.html">Schießobleute</a></li>
-          <li><a href="../jaeger/satzung.html">Satzung</a></li>
-          <li><a href="../jaeger/landesjagdverband.html">Landesjagdverband</a></li>
-          <li><a href="../aufgaben/schiessen.html">Schießwesen</a></li>
-          <li><a href="../aufgaben/hundeausbildung.html">Hundeausbildung</a></li>
-          <li><a href="../aufgaben/schweisshunde.html">Schweißhundeführer</a></li>
-          <li><a href="../aufgaben/jugend.html">Jugendarbeit</a></li>
-          <li><a href="../aufgaben/jagdhorn.html">Jagdhornblasen</a></li>
-          <li><a href="../aufgaben/naturschutz.html">Naturschutz</a></li>
-          <li><a href="../aufgaben/jungwildrettung.html">Jungwildrettung</a></li>
-          <li><a href="../jaeger/infomobil.html">Infomobil</a></li>
-        </ul>
-      </details>
-    </li>
-    <li>
-      <details>
-        <summary>Verbraucher</summary>
-        <ul class="mobile-nav__sub">
-          <li><a href="../verbraucher/wildfleisch.html">Wildfleisch</a></li>
-          <li><a href="../verbraucher/lernort-natur.html">Lernort Natur</a></li>
-          <li><a href="../verbraucher/gruenes-klassenzimmer.html">Grünes Klassenzimmer</a></li>
-        </ul>
-      </details>
-    </li>
-    <li><a href="../termine/index.html">Termine</a></li>
-    <li><a href="../aktuelles/index.html">Aktuelles</a></li>
-    <li><a href="../faq/index.html">FAQ</a></li>
-    <li><a href="../kontakt/index.html">Kontakt</a></li>
-  </ul>
-</nav>
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
 
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('../images/schiessen.jpg')"></div>
   <div class="container">
     <h1>Schießwesen</h1>
-    <nav class="breadcrumb">
-      <a href="../index.html">Startseite</a><span class="sep">/</span>
-      <span>Jäger</span><span class="sep">/</span>
-      <span>Schießwesen</span>
-    </nav>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
   </div>
 </div>
 
@@ -152,6 +48,24 @@
           if (d.hero_bild) {
             var bg = document.querySelector('.page-hero__bg');
             if (bg) bg.style.backgroundImage = "url('" + d.hero_bild + "')";
+          }
+          if (Array.isArray(d.linkliste) && d.linkliste.length) {
+            var lnNav = document.getElementById('linkliste-nav');
+            var lnWidget = document.getElementById('linkliste-widget');
+            var lnTitelEl = document.getElementById('linkliste-titel');
+            if (lnTitelEl && d.linkliste_titel) lnTitelEl.textContent = d.linkliste_titel;
+            var stTitelEl = document.getElementById('sub-seiten-titel');
+            if (stTitelEl && d.unterseiten_titel) stTitelEl.textContent = d.unterseiten_titel;
+            if (lnNav && lnWidget) {
+              d.linkliste.forEach(function(l) {
+                if (!l || !l.url) return;
+                var li = document.createElement('li');
+                var externLink = /^https?:\/\//i.test(l.url);
+                li.innerHTML = '<a href="' + l.url + '"' + (externLink ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + (l.titel || l.url) + '</a>';
+                lnNav.appendChild(li);
+              });
+              lnWidget.style.display = '';
+            }
           }
           var bild = d.bild ? '<img src="' + d.bild + '" alt="' + (d.bild_alt||'') + '" class="' + ((d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')) + '" style="border-radius:8px;margin-bottom:1.5rem;">' : '';
           var kontaktStr = '';
@@ -174,7 +88,7 @@
             var el = document.getElementById('page-inhalt');
             if (el) {
               el.innerHTML = typeof marked !== 'undefined'
-                ? marked.parse(d.inhalt)
+                ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt))
                 : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
             }
           }
@@ -186,17 +100,35 @@
         });
     </script>
     <aside class="sidebar">
+      <div class="sidebar-widget sidebar-widget--highlight" id="linkliste-widget" style="display:none;">
+        <h4 id="linkliste-titel">Weiterführende Links</h4>
+        <ul class="sidebar-nav" id="linkliste-nav"></ul>
+      </div>
+      <div class="sidebar-widget" id="sub-seiten-widget" style="display:none;">
+        <h4 id="sub-seiten-titel">Unterseiten zu Schießwesen</h4>
+        <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
+        <script>
+          fetch('/content/seiten-sub-schiessen.json').then(function(r){return r.json();}).then(function(d){
+            var nav = document.getElementById('sub-seiten-nav');
+            var widget = document.getElementById('sub-seiten-widget');
+            if (!nav) return;
+            var seiten = (d.seiten || []).filter(function(s) { return s.veroeffentlicht !== false && s.in_navigation !== false; });
+            if (!seiten.length) return;
+            seiten.forEach(function(s) {
+              var li = document.createElement('li');
+              li.innerHTML = '<a class="unterseite-tile" href="../seiten/index.html?s=' + encodeURIComponent(s.slug) + '">' +
+                '<span class="unterseite-tile__icon">' + ICONS.document + '</span>' +
+                '<span class="unterseite-tile__label">' + (s.nav_label || s.slug) + '</span>' +
+              '</a>';
+              nav.appendChild(li);
+            });
+            widget.style.display = '';
+          }).catch(function(){});
+        </script>
+      </div>
       <div class="sidebar-widget">
         <h4>Aufgaben des Hegerings</h4>
-        <ul class="sidebar-nav">
-          <li class="active"><a href="schiessen.html">Schießwesen</a></li>
-          <li><a href="hundeausbildung.html">Hundeausbildung</a></li>
-          <li><a href="schweisshunde.html">Schweißhundeführer</a></li>
-          <li><a href="jugend.html">Jugendarbeit</a></li>
-          <li><a href="jagdhorn.html">Jagdhornblasen</a></li>
-          <li><a href="naturschutz.html">Naturschutz</a></li>
-          <li><a href="jungwildrettung.html">Jungwildrettung</a></li>
-        </ul>
+        <ul class="sidebar-nav" data-related-nav></ul>
       </div>
       <div class="contact-box">
         <h4>Kontakt</h4>
@@ -207,48 +139,8 @@
   </div>
 </div>
 
-<footer class="site-footer"><div class="container">
-  <div class="footer-grid">
-    <div class="footer-about">
-      <img src="../images/logo.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">
-      <span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>
-      <span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>
-      <p>Verantwortungsvolle Jagd und aktiver Naturschutz im Kreis Bad Segeberg seit 2000.</p>
-    </div>
-    <div class="footer-col"><h5>Über die KJS</h5><ul>
-      <li><a href="../jaeger/vorstand.html">Vorstand</a></li>
-      <li><a href="../jaeger/hegeringe.html">Hegeringe</a></li>
-    </ul></div>
-    <div class="footer-col"><h5>Aufgaben</h5><ul>
-      <li><a href="schiessen.html">Schießwesen</a></li>
-      <li><a href="jugend.html">Jugendarbeit</a></li>
-      <li><a href="naturschutz.html">Naturschutz</a></li>
-      <li><a href="jungwildrettung.html">Jungwildrettung</a></li>
-    </ul></div>
-    <div class="footer-col"><h5>Informationen</h5><ul>
-      <li><a href="../kontakt/index.html">Kontakt</a></li>
-      <li><a href="../termine/index.html">Termine</a></li>
-      <li><a href="../faq/index.html">FAQ</a></li>
-    </ul></div>
-  </div>
-  <div class="footer-bottom">
-    <span>Copyright 2026 © Kreisjägerschaft Segeberg e.V.</span>
-    <div class="footer-bottom__links"><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="/admin/" class="admin-login-link" target="_blank" rel="noopener noreferrer">Login</a></div>
-  </div>
-</div></footer>
+<footer class="site-footer" id="siteFooter"></footer>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="../js/main.js"></script>
-<script>
-  fetch('/content/footer.json').then(r=>r.json()).then(d=>{
-    const ft = document.querySelector('.footer-about p');
-    if(ft && d.ueber_text) ft.textContent = d.ueber_text;
-    const cp = document.querySelector('.footer-bottom span');
-    if(cp && d.copyright) cp.textContent = d.copyright;
-    const fbLink = document.querySelector('.footer-social a[aria-label="Facebook"]');
-    if(fbLink && d.facebook_url) fbLink.href = d.facebook_url;
-    const igLink = document.querySelector('.footer-social a[aria-label="Instagram"]');
-    if(igLink && d.instagram_url) igLink.href = d.instagram_url;
-  }).catch(()=>{});
-</script>
+<script src="/js/main.js"></script>
 </body>
 </html>

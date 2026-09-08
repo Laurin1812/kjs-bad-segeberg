@@ -26,7 +26,11 @@
   <!-- Topbar -->
   <header class="admin-topbar">
     <div class="topbar-brand">
-      <img src="/images/logo.png" alt="KJS" class="topbar-logo" style="height:28px;width:auto;vertical-align:middle;display:block;">
+      <!-- Dunkelgrüne Topbar -> gleiche für dunkle Hintergründe vorgesehene
+           Logo-Variante wie im Footer der öffentlichen Seite (siehe
+           js/main.js renderFooter, dieselbe Begründung: logo.png ist für
+           helle Flächen gedacht, logo-dunkel.png für dunkles Grün). -->
+      <img src="/images/logo-dunkel.png" alt="KJS" class="topbar-logo" style="height:28px;width:auto;vertical-align:middle;display:block;">
       <span class="topbar-title">KJS Admin</span>
       <button id="home-btn" class="topbar-home-btn" title="Zurück zur Startübersicht">🏠 Start</button>
     </div>
@@ -60,6 +64,12 @@
 
     <!-- Main panel -->
     <main class="admin-main" id="admin-main">
+      <!-- Statischer Erstanzeige-Platzhalter (identisch zu showWelcome() in
+           admin.js, damit vor dem JS-Laden schon etwas Sinnvolles zu sehen
+           ist). Admin-Navigation aufgeräumt (05.09.2026): NAV-Knoten 'jaeger'
+           entfällt, dritte Karte daher wie in admin.js auf 'kjs' (KJS
+           Segeberg) umgestellt - siehe dortigen Kommentar bei
+           welcomeHintCard('kjs', ...). -->
       <div class="welcome-screen">
         <div class="welcome-icon"><img src="/images/logo.png" alt="KJS Segeberg e.V." style="height:72px;width:auto;opacity:.85;"></div>
         <h2 id="welcome-greeting">Willkommen im Admin-Bereich</h2>
@@ -67,7 +77,7 @@
         <div class="welcome-hints">
           <div class="hint-card" onclick="document.querySelector('[data-navkey=aktuelles]').click()" style="cursor:pointer">📰 <strong>Aktuelles</strong><br>Neuigkeiten hinzufügen</div>
           <div class="hint-card" onclick="document.querySelector('[data-navkey=termine]').click()" style="cursor:pointer">📅 <strong>Termine</strong><br>Veranstaltungen pflegen</div>
-          <div class="hint-card" onclick="document.querySelector('[data-navkey=jaeger]').click()" style="cursor:pointer">🦌 <strong>Jäger</strong><br>Vereinsinfos bearbeiten</div>
+          <div class="hint-card" onclick="document.querySelector('[data-navkey=kjs]').click()" style="cursor:pointer">🦌 <strong>KJS Segeberg</strong><br>Vereinsinfos bearbeiten</div>
         </div>
       </div>
     </main>
@@ -90,6 +100,7 @@
         </label>
         <input type="file" id="img-upload-input" accept="image/*" style="display:none">
         <span id="img-upload-status"></span>
+        <button type="button" class="btn btn-outline btn-sm" id="img-archiv-toggle" onclick="imgPickerArchivToggle()" style="margin-left:auto;">📁 Archivierte Bilder</button>
       </div>
       <div class="img-gallery" id="img-gallery">
         <div class="gallery-loading">Bilder werden geladen…</div>
@@ -115,6 +126,7 @@
         <label class="btn btn-primary" for="mdimg-upload-input">📤 Neu hochladen</label>
         <input type="file" id="mdimg-upload-input" accept="image/*" style="display:none">
         <span id="mdimg-upload-status"></span>
+        <button type="button" class="btn btn-outline btn-sm" id="mdimg-archiv-toggle" onclick="mdImgArchivToggle()" style="margin-left:auto;">📁 Archivierte Bilder</button>
       </div>
       <div class="img-gallery" id="mdimg-gallery">
         <div class="gallery-loading">Bilder werden geladen…</div>
@@ -219,6 +231,41 @@
   </div>
 </div>
 
+<!-- ── EINGABE-DIALOG (Ersatz für window.prompt, das oben im Browser-Fenster
+     statt im Programm selbst erscheint und Frank verwirrt hat) ─────────── -->
+<div id="prompt-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="prompt-backdrop"></div>
+  <div class="modal-box modal-box--sm">
+    <div class="modal-head">
+      <h3 id="prompt-title">Eingabe</h3>
+    </div>
+    <div class="modal-body">
+      <p id="prompt-msg" style="margin-bottom:.6rem;"></p>
+      <input type="text" id="prompt-input" class="field-input" style="width:100%;">
+      <div class="confirm-actions">
+        <button class="btn btn-outline" id="prompt-cancel">Abbrechen</button>
+        <button class="btn btn-primary" id="prompt-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HINWEIS-DIALOG (Ersatz für window.alert) ──────────────────────── -->
+<div id="alert-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="alert-backdrop"></div>
+  <div class="modal-box modal-box--sm">
+    <div class="modal-head">
+      <h3 id="alert-title">Hinweis</h3>
+    </div>
+    <div class="modal-body">
+      <p id="alert-msg" style="white-space:pre-line;"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-primary" id="alert-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── TIPTAP BILD-KONTEXTMENÜ ────────────────────────────────── -->
 <div id="tt-img-menu" style="display:none;position:fixed;z-index:9999;">
   <div class="tt-imgmenu-inner">
@@ -233,7 +280,22 @@
     <button type="button" class="tt-imgmenu-btn" data-pos="img-zentriert" onclick="ttImgPos('img-zentriert')">Zentriert</button>
     <button type="button" class="tt-imgmenu-btn" data-pos="img-rechts"    onclick="ttImgPos('img-rechts')">Rechts</button>
     <span class="tt-imgmenu-sep"></span>
+    <button type="button" class="tt-imgmenu-btn" data-flat="img-flat" onclick="ttImgFlat()" title="Kein Schatten/Rahmen – für Logos &amp; Grafiken mit eigenem weißen Hintergrund">Ohne Rahmen</button>
+    <span class="tt-imgmenu-sep"></span>
     <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" onclick="ttImgDelete()" title="Bild löschen">🗑️</button>
+  </div>
+</div>
+
+<!-- ── TIPTAP LINK-DIALOG ────────────────────────────────────── -->
+<div id="tt-link-menu" style="display:none;position:fixed;z-index:9999;">
+  <div class="tt-imgmenu-inner tt-imgmenu-inner--col tt-linkmenu-inner">
+    <span class="tt-imgmenu-label">Link-Ziel</span>
+    <input type="text" id="tt-link-input" class="field-input" placeholder="https://… oder /kontakt.html">
+    <div class="tt-linkmenu-actions">
+      <button type="button" class="tt-imgmenu-btn tt-imgmenu-btn--danger" id="tt-link-remove" onclick="ttLinkRemove()" style="display:none;">Entfernen</button>
+      <button type="button" class="tt-imgmenu-btn" onclick="ttLinkCancel()">Abbrechen</button>
+      <button type="button" class="tt-imgmenu-btn" onclick="ttLinkApply()">Übernehmen</button>
+    </div>
   </div>
 </div>
 
@@ -262,6 +324,9 @@
      mit Fallback-CDN (ensureTiptap). So bleibt der Editor bei einem kalten/
      fehlgeschlagenen CDN-Versuch nicht hängen, sondern lädt automatisch neu. -->
 
+<!-- Statische RAL-Classic-Referenzliste für die RAL-Auswahl im Design-/
+     Farbbereich (Arbeitsblock 5, 05.09.2026) - siehe ral-colors.js für Quelle. -->
+<script src="ral-colors.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>

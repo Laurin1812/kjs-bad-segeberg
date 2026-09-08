@@ -1,12 +1,23 @@
 {
   "titel": "Kurs 2: Anlagenprüfung",
   "veroeffentlicht": true,
-  "inhalt": "Der Kurs zur Vorbereitung auf die Anlagenprüfung (HZP) richtet sich an Hundeführer, die die natürlichen Anlagen ihres Jagdhundes gezielt fördern und unter Prüfungsbedingungen zeigen möchten.\n\n## Trainingsbereiche\n\n- Nase und Spurarbeit\n- Vorstehen und Verweisen\n- Schussfestigkeit\n- Wasserarbeit\n- Gehorsam\n\n## Hegering-Kontakte\n\nDie Ausbildung wird in den einzelnen Hegeringen koordiniert. Bitte wenden Sie sich an Ihren zuständigen Hegeringhundewart für aktuelle Kurstermine und Anmeldeinformationen.",
+  "inhalt": "<p>Der Kurs zur Vorbereitung auf die Anlagenprüfung (HZP) richtet sich an Hundeführer, die die natürlichen Anlagen ihres Jagdhundes gezielt fördern und unter Prüfungsbedingungen zeigen möchten.</p><h2>Trainingsbereiche</h2><ul><li><p>Nase und Spurarbeit</p></li><li><p>Vorstehen und Verweisen</p></li><li><p>Schussfestigkeit</p></li><li><p>Wasserarbeit</p></li><li><p>Gehorsam</p></li></ul><h2>Hegering-Kontakte</h2><p>Die Ausbildung wird in den einzelnen Hegeringen koordiniert. Bitte wenden Sie sich an Ihren zuständigen Hegeringhundewart für aktuelle Kurstermine und Anmeldeinformationen.</p>",
   "untertitel": "",
   "intro": "",
-  "hero_bild": "/images/20231123_215043.jpg",
-  "bild": "",
+  "hero_bild": "",
+  "bild": "/images/1787141423525-hunderassen.jpg",
   "bild_alt": "",
   "kontakt_name": "",
-  "kontakt_email": ""
+  "kontakt_email": "",
+  "bild_groesse": "img-50",
+  "vorschaubild": "/images/1787141423525-hunderassen.jpg",
+  "kurzbeschreibung": "",
+  "downloads": [],
+  "galerie": [
+    {
+      "bild": "/images/1787145706348-Fitzner_Heidi_2.webp",
+      "titel": "test"
+    }
+  ],
+  "galerie_titel": "Bildergalerie"
 }

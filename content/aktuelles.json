@@ -1,29 +1,1287 @@
 {
   "einstellungen": {
     "hauptseite_anzahl": 0,
-    "hauptseite_modus": "aktuelles_jahr"
+    "hauptseite_modus": "aktuelles_jahr",
+    "kategorien": [
+      "Allgemein",
+      "Naturschutz",
+      "Jagd",
+      "Jungwildrettung",
+      "Hundeausbildung",
+      "Schießwesen",
+      "Jugend",
+      "Jagdhornblasen",
+      "Veranstaltung",
+      "Pressemitteilung",
+      "Tierkrankheiten",
+      "Jagdausbildung",
+      "aus den Revieren"
+    ]
   },
   "beitraege": [
+    {
+      "titel": "Mit den Jägern in der Natur – wieder ein voller Erfolg",
+      "datum": "18.07.2026",
+      "jahr": "2026",
+      "kategorie": "Jugend",
+      "bild": "/images/1787827470453-Helferteam.jpg",
+      "text": "132 Teilnehmende entdeckten am 18. und 19. Juli 2026 im Winsener Wohld die heimische Welt der Wildtiere, lernten die vielfältigen Aufgaben der Jägerschaft kennen und erlebten Natur hautnah. Die Ferienpassaktion „Mit den Jägern in der Natur“ der Hegeringe Hartenholm, Kisdorf und Kaltenkirchen knüpfte damit nahtlos an den großen Erfolg des Vorjahres an.\nNach den hervorragenden Rückmeldungen auf die Premiere im vergangenen Jahr und der Auszeichnung mit dem 1. Preis des Hubertuscups für die beste Jugendarbeit 2025 durch den Landesjagdverband konnten die Erwartungen in diesem Jahr sogar noch übertroffen werden.\n\nBereits im Mai begann das Organisationsteam um die Jugendobfrau des Hegerings VIII, Jana Forstreuter, mit den Vorbereitungen. Die Helferposten waren schnell besetzt, Ende Juni waren auch alle Teilnehmerplätze vergeben.\n\nAm Veranstaltungstag bauten die ehrenamtlichen Helferinnen und Helfer die acht Stationen auf. Nach der Begrüßung durch Jana Forstreuter starteten die Teilnehmenden in Kleingruppen, erkennbar an Ansteckbuttons mit verschiedenen heimischen Wildtieren, zu ihrem Rundgang.\n\nZwischen 10 und 15 Uhr erhielten die Teilnehmenden an den Stationen spannende Einblicke in die Arbeit der Jägerschaft. Vorgestellt wurden unter anderem die Vogelvergrämung am Hamburger Flughafen mit Greifvögeln, die Arbeit verschiedener Jagdhunderassen an Land und im Wasser, die Wildtierrettung mit Drohnen und Wärmebildtechnik, sowie die heimische Tierwelt am Infomobil von der Kreisjägerschaft Segeberg. Auch die Jagdpraxis wurde kindgerecht erklärt. Beim Bogenschießen konnten die Kinder ihre Treffsicherheit testen, für das leibliche Wohl sorgten gegrillte Wildwürste aus der Region. Die Jagdhornbläser präsentierten die Geschichte der Jagdhörner und verschiedene Signale.\n\nZum Abschluss erhielten alle Kinder eine Erinnerungsmedaille, eine Holzfigur eines Wildtieres sowie alle Teilnehmenden Informationsmaterial. Jana Forstreuter bedankte sich bei allen Helferinnen und Helfern für ihren Einsatz. Ein besonderer Dank gilt der Hamburger Flughafengesellschaft, der VR Bank Kaltenkirchen, Deerhunter, dem Natur & Du Café Hartenholm, dem Tischler Merlin Hänel, den Schleswig-Holsteinischen Landesforsten, dem Landesjagdverband und der Kreisjägerschaft Segeberg, deren Geld- und Sachspenden wesentlich zum Gelingen der Veranstaltung beitrugen.\n\nInsgesamt engagierten sich an beiden Tagen 57 Jägerinnen und Jäger, 30 Jagdhornbläserinnen und Jagdhornbläser sowie 20 Jagdhunde für die 132 Teilnehmenden. Besonders aufmerksam hatte ein Kind die Hunde mitgezählt und gewann dafür einen Tag mit Jana Forstreuter im Revier.\n\nDie Veranstalter ziehen ein rundum positives Fazit. Die große Resonanz und die Begeisterung der Teilnehmenden, sowie das Engagement der zahlreichen Ehrenamtlichen haben erneut gezeigt, wie wertvoll praktische Natur- und Umweltbildung ist. Bereits jetzt steht fest: „Mit den Jägern in der Natur“ soll auch im kommenden Jahr wieder viele Kinder für die heimische Natur begeistern.\n\nJana Forstreuter\nfür das Orga-Team",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787827470453-Helferteam.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827459424-Bei-der-Wasserarbeit.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827482608-IMG_9647.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827489737-IMG_9653.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827498192-IMG_9659.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827506408-IMG_9663.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787827513627-img-20171018-wa0044.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831617508-IMG_9664.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831642212-IMG_9670.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831651554-IMG_9680.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831658951-IMG_9682.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831664919-IMG_9686.JPG",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787831675289-IMG_9689.JPG",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Hunde zeigten ihr Können",
+      "datum": "1.10.2021",
+      "jahr": "2021",
+      "kategorie": "Hundeausbildung",
+      "bild": "/images/1787329888477-img_3579__2_.jpg",
+      "text": "Hundeobmann Heinz Marin hatte die Hundeführer des Hegerings VIII mit Ihren Vierbeinern zu einem Übungstag ins Revier Kisdorf eingeladen. Durch eine derzeit bei Hunden grassierende infektiöse Erkrankung konnten einige unserer Hunde nicht teilnehmen, sodass eine vergleichsweise kleine Gruppe sich bei strahlendem Sonnenschein auf dem Waldhof in Kisdorferwohld traf. Nach einer kurzen Begrüßung ging es ins Revier, wo zunächst die großen Hunde der Rassen Kleiner Münsterländer, Labrador, Drahthaar und Flatcoated Retriever ihre gute Nase unter Beweis stellen mussten. Es wurden Schleppen von Feder- und Haarwild gelegt und die Hunde nacheinander auf immer neu gelegte Schleppen angesetzt. Die Aufgabe wurde meist mit Bravour gemeistert, sprich die Schleppspur sauber gearbeitet, das ausgelegte Wild apportiert, dem Hundeführer gebracht und auf Kommando ausgegeben.\n\nMit den Bauhunden, zwei Westfalenterriern und einem Teckel, ging es zu einem Kunstbau in dessen Kessel ein toter Fuchs abgelegt worden war. Alle drei schlieften zügig in den Kunstbau ein und fanden schnell den Fuchs und brachten ihn. Der Westfalenterrier Alf von Führer Klaus Richter aus Kisdorferwohld zeigte sich dabei besonders passioniert.\n\nAnschließend konnten die großen Hunde nochmal ihren Finde- und Apportierwillen in der freien\nVerlorensuche in einem Rübenfeld unter Beweis stellen.\n\nAbschließend trafen sich die Teilnehmer in Steenbucks Gasthof in Kattendorf zu einem Grünkohlessen und ließen den Tag noch einmal Revue passieren. Der Kleine Münsterländer Leo mit seinem Führer Norbert Wenk aus Henstedt-Ulzburg ragte in seinen Leistungen deshalb heraus, weil er das apportierte Kaninchen seinem Führer brachte, obwohl vor ihm ein Hase aufsprang und flüchtete. Bei den Bauhunden machte Alf das Rennen.\nAutor: Volker Schmidt, Öffentlichkeitsobmann Hegering VIII (Oktober 2021)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787329888477-img_3579__2_.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787329893402-img_3598.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Henstedter Jäger feiern 100 Jahre Jagdverein",
+      "datum": "1.11.2021",
+      "jahr": "2021",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787329553926-henstedter_jaeger_1.jpg",
+      "text": "Auf ein Jahrhundert blicken die Mitglieder des Jagdvereins Henstedt in Henstedt-Ulzburg zurück. Im Jahr 1921 gründete sich die Gemeinschaft der Henstedter Jäger, die heute auf fast 1.700 Hektar jagt. Angesichts der Corona-Pandemie verzichteten die elf Pächter und Begehungsscheininhaber auf ein großes Fest in 2021. \"Das soll in 2022 nachgeholt werden\", verspricht Jäger Thomas Geist. Der Termin werde rechtzeitig bekannt gegeben.\n\nAm 16. Juni 1921 wurde der Jagdverein Henstedt von Wilhelm Lentfer, Julius Kabel, Ernst Steenbock, Hermann Biehl, Johannes Hamdorf, Christian Studt, Gustav Ahrens, Ernst Lohse, Emil Wrage, Albert Wriggers und Willi Kabel gegründet. In den ersten Jahren wurden jährlich drei Rehböcke aber keine Ricken gestreckt. Die Hasenstrecke belief sich auf 126 Stück auf den damals 1.040 Hektar. An Fasanenhähne kamen in den Anfangsjahren zwischen 19 und 135 Stück im Jahr zur Strecke. Auch Rebhühner waren im Revier Henstedt heimisch. Geschossen wurden im Jahr 1934 sogar 345 Stück - ein Rekord. Der Birkwildbestand betrug 1930 etwa 100 Stück. \"Weil nach Kriegsende sehr stark Torf abgegraben und die Birkhühner dadurch in der Brut- und Aufzucht zu sehr gestört wurden, verschwand das Birkwild bis 1958 ganz\", heißt es in der Chronik zum 70-jährigen Bestehen des Jagdvereins Henstedt. \n\nHenstedter Jäger 2Auf der 1961 von Otto Schwartinski gestifteten Königskette sind auf den Plaketten die Strecken der Treibjagdkönige  verzeichnet. So wurde beispielsweise Helmut Wrage im Jahr 1970 mit 16 Hasen, zwei Kaninchen und zwei Fasane bester Schütze der Treibjagd. Nach etlichen Jahren Pause wurde nun wieder eine Klapperjagd geplant.\n\nHeute steht die Jagd auf Schalenwild im Zentrum der waidmännischen Arbeit. Rehwild und Schwarzwild - vereinzelnd Damwild - kommen im Revier Henstedt vor und zur Strecke. Das Revier habe sich im Laufe der 100 Jahre stark verändert, sagen Thomas Geist und seine Jagdfreunde. Die stetig zugenommende Bebauung, die Einrichtung zweier Naturschutzgebiete (Oberalsterniederung und Henstedter Moor) und der damit zusammenhängende Besucherverkehr im Revier haben die Jagd beeinflusst. Dennoch beteiligen die Henstedter Jäger sich gerne an Raubwildwoche und Entenjagd, sitzen auf Ricken an und suchen zur Mahd Rehkitze zu Fuß oder per Drohne. \n\nBesonders gut sei das Verhältnis zu den Landwirten, betonen die Henstedter Jäger. Die Bauern würden Bescheid sagen, wenn sie ihre Wiesen mähen wollen und melden sich, wenn Schwarzwild gesichtet wurde. \n\nAutorin: Nicole Scholmann (November 2021)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787329553926-henstedter_jaeger_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787329559840-henstedter_jaeger_2.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Jungjägerkurs bei der KJS Segeberg",
+      "datum": "1.05.2022",
+      "jahr": "2022",
+      "kategorie": "Jagdausbildung",
+      "bild": "/images/1787329376730-img-nr._4.jpg",
+      "text": "„Links vorbei! Hast Du die Taube überhaupt gesehen?“, fragt uns zum gefühlt 1000. Mal unser strenger Ausbilder Burkhard. Der richtige Anschlag und das Mitschwingen beim Flintenschießen sind nicht die einzigen Herausforderungen, die wir Jungjäger Anwärter innerhalb von acht Monaten Kursdauer bewältigen müssen.  \n\nDoch immer der Reihe nach: Am 2. September 2021 versammelten sich erwartungsfroh 54 Interessierte für das grüne Abitur auf dem Tannenhof in Schönmoor. Der 49.Jungjägerkurs begann. „Wir haben dieses Jahr besonders viele Anfragen. Daher entschlossen wir uns erstmalig zwei Gruppen zu bilden. Auf diese Weise müssen wir niemanden abweisen und können auf jeden Teilnehmer eingehen“, fasst Kursleiterin Dr. Monika Schroedter zusammen. \n\nCorona behinderte die Ausbildung so manches Mal, dennoch konnten fast alle Ausbildungsabschnitte in Präsenz durchgeführt werden, wofür das engagierte Ausbilderteam mit seinem unermüdlichen Einsatz für seine Jagdschützlinge gesorgt hat. Und das war gut so, denn die Jagd ist letztlich ein Handwerk, das am praktischen Beispiel erlernt werden will. \n\nEntsprechend zeichnete sich der Kurs neben den Theorieinhalten in Wildtierkunde, Jagdhundewesen, Wildbrethygiene, Recht und Waffenkunde vor allem durch Praxisanteile aus. Dazu gehörte unsere Teilnahme als Treiber an Drückjagden, erste Erfahrungen im Aufbrechen und das obligatorische Fallenseminar. \n\nReviergänge, Bestimmungsübungen an Sträuchern und einer umfangreichen Präparate Sammlung sowie der Besuch des Wildparks Eekholt haben das praktische Ausbildungsangebot komplettiert. \n\nDas Schießtraining und die Waffenhandhabung war für viele eine besondere Herausforderung, da nicht jeder schon vorher intensiven Kontakt zu Schusswaffen hatte und die absolute Handlungssicherheit mit der Waffe das A und O des Jungjägers ist und so wurden wir von unseren Ausbildern und insbesondere Stefan Eggers unermüdlich auf die Prüfung und unser Jägerleben vorbereitet. \n\nDank dieser lehrreichen Zeit von acht Monaten, haben sich 45 Teilnehmer der Prüfung gestellt. Einige hatten aufgegeben, weil sie erkennen mussten, dass der erhebliche Lernaufwand zu viel Tribut von Beruf und Familie fordert. Die verbliebenen Teilnehmer freuen sich nun darüber, dass sich ihr Fleiß gelohnt hat und sie den begehrten grünen Schein in den Händen halten. „Wir haben nicht nur unheimlich viel gelernt, sondern auch Freunde für’s Leben gefunden“, war das Fazit des Jagdkurses. Autoren: Oliver Kaus und Tanja Schacht (Mai 2022)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787329376730-img-nr._4.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Stürmische Winde ließen die Tontauben tanzen",
+      "datum": "1.07.2022",
+      "jahr": "2022",
+      "kategorie": "Schießwesen",
+      "bild": "/images/1786891321853-16-08-_2026_16-39-38.png",
+      "text": "83 Jäger aus dem Kreisgebiet konnte Schießobmann Björn Schlatz aus Schmalfeld auf dem Schießstand in Hasenmoor/Wolfsberg zur Kreismeisterschaft 2022 begrüßen. Alle 13 Hegeringe des Kreises stellten eine Mannschaft und auch die Junioren waren mit 7 Mädels und 9 Jungs stark vertreten. Ebenso waren 13 Kurzwaffenschützen mit ihrer Pistole am Start. Stürmische Böen ließen mache Tontaube durch die Lüfte flattern und verhinderten so manchen Treffer!\n\nIn einem spannenden Mannschaftswettbewerb gelang es dem Hegering V/Neuengörs wieder nicht den Hegering VI zu schlagen. Ganz knapp entschieden die Hartenholmer mit den Schützen Uwe Erfurth, Ralf Erfurth, Michael Wilken, Alice Wilken, Carsten Schroedter\n\nund Hans-Jörg Faden mit 1190 zu 1183 Punkten für sich. Den 3.Platz belegte die Mannschaft des Hegering II/Seedorf.\n\nKreismeister aller Klassen in der der Einzelwertung und somit auch in seiner A-Klasse wurde Tobias Haacks aus Damsdorf mit sehr guten 335 Pkt. vor dem Seniorenschützen Hans-Jürgen Hamann aus Bühnsdorf mit 329 Pkt. und dem B-Klassen-Schützen Florian Frank aus Fresenfelde mit 318 Pkt., der mit dieser Leistung zu den Goldschützen aufgestiegen ist.\n\nKreismeisterin wurde Carmen Molt aus Hennstedt mit 265 Pkt., welches gleichzeitig den Erwerb der silbernen Schießleistungsnadel bedeutet. In der Altersklasse siegte Hans-Jörg Faden aus Hasenmoor mit 309 Pkt.\n\nDen Titel des Juniorenmeisters sicherte sich Eicke Remmersmit 308 Pkt. vor Thorben Mahlstedt mit 299 Pkt. und Juniorin Sophia Greve mit 294 Pkt., alle aus Norderstedt stammend. Kugelmeister mit hervorragenden 198 von 200 möglichen Punkten wurde Florian Frank, bester Tontaubenschütze Sven Hahn aus Groß Niendorf mit 29 von 30 getroffenen Tauben.\n\nIm jagdlichen Kurzwaffenschießen mit der Pistole siegte Michael Schirrmacher aus Bimöhlen mit 181 Pkt.\n\nDie \"Königsdisziplin\" aus Lang- und Kurzwaffe gewann mit 508 Pkt. Hans-Jürgen Hamann.\n\nDie Bläsergruppe des Hegering Kaltenkirchen begrüßten die Jagdschützen mit ihren Jagdhörnern zur Siegerehrung.\n\nAlle anwesenden Sieger und Platzierte erhielten einen Preis.\n\nDie Ergebnisse im Überblick:\n\n**** Damen:****\n\n1. Carmen Molt                    265 Pkt.\n2. Wanja Ellerbrook              251 Pkt.\n3. Ulrike Theuner                 130 Pkt.\n\n**** Junioren:****\n\n1. Eike Remmers                  308 Pkt.\n2. Thorben Mahlstedt          299 Pkt.\n3. Sophia Greve                   294 Pkt.\n\n**** B-Klasse:****\n\n1. Florian Frank                    318 Pkt.\n2. Henning Fock.                  300 Pkt.\n3. Henning Schwartinski.     300 Pkt.\n\n**** A-Klasse:****\n\n1. Tobias Haacks                  335 Pkt.\n2. Jan Philip Wohlert           317 Pkt.\n3. Sven Hahn                       316 Pkt.\n\n**** Altersklasse:****\n\n1. Hans-Jörg Faden              309 Pkt.\n2. Volker Willebrand             286 Pkt.\n3. Götz Leonhard                  283 Pkt.\n\n**** Seniorenklasse:****\n\n1. Hans-Jürgen Hamann        329 Pkt.\n2. Uwe Erfurth                        313 Pkt.\n3. Wolfgang Harm                  308 Pkt.\n\n**** Kurzwaffenschießen:****\n\n1. Michael Schirrmacher         181 Pkt.\n2. Björn Schlatz                       180 Pkt.\n3. Hans-Jürgen Hamann         179 Pkt.\n\n**** Große Kombination:****\n\n1. Hans-Jürgen Hamann          508 Pkt.\n2. Björn Schlatzt                       486 Pkt.\n3.Wolfgang Harm                     476 Pkt.\n\n**** Kugelmeister:****\n \n1. Florian Frank                        198 Pkt.\n2. Tobias Haacks                      195 Pkt.\n3. Hans-Jürgen Hamann           194 Pkt.\n\n**Taubenmeister:**\n\n1. Sven Hahn                              29    Tb.\n2. Uwe Erfurth                            28/1 Tb.\n3. Tobias Haacks                        28/2  Tb.\n4. Ludwig Isenberg                    28/4  Tb.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Zwei ausgebuchte Kurzwaffen-Workshops",
+      "datum": "1.08.2022",
+      "jahr": "2022",
+      "kategorie": "Schießwesen",
+      "bild": "/images/1787328304086-kurzwaffenschiessen221-1-2048x1592.jpg",
+      "text": "\"Kurzwaffenschießen unter realen Bedingungen, wie es beim Fangschuss vorkommen kann\":  Das war das Motto des diesjährigen Kurzwaffen-Workshops vom Jagdkurs Segeberg. Die beiden Dozenten Stefan Eggers und Rüdiger Mengel waren sich einig, dass aufgrund der großen Nachfrage ein Termin nicht reichte. Es wurden dann zwei komplett ausgebuchte Tage auf der IPSC Schießanlage in Burg Dithmarschen organisiert. Frisch gebackene Jungjäger und auch erfahrene „alte Hasen“ erwarteten ein spannendes Programm. Bei der  Theorie anhand von Stefans Power-Point-Folien und begleitet durch Fall-Beispielen aus Rüdigers Polizeialltag verging die Zeit wie im Fluge. Anregende Diskussionen verdoppelten sogar glatt die Theoriestunde. \n\nDanach ging es auf den jagdlich, präparierten Kellerschießstand, der eigens dafür „begrünt“ wurde und einige Situationen zum Schuss auf krankes Wild realitätsnah darstellte. Zuvor wurden die vorhandenen Fertigkeiten an der Pistole sowie Revolver der Teilnehmer geprüft oder soweit hergestellt, dass jeder Teilnehmende kleine Ziele sicher treffen konnte. Die Sicherheit stand wie immer an erster Stelle. Das klappte an beiden Tagen bei allen Teilnehmern wirklich vorbildlich. Nach kurzer Pause mit erstem Erfahrungsaustausch bei Kaffee und selbstgemachten Erdbeerkuchen, ging es an die Fangschussübungen.\n\nAls erstes sollte ein kranker Frischling im Dickicht erlegt werden. Die Meinungen, wo der Treffer nun genau sitzen sollte, hat sich schnell geklärt. Schlechte Schüsse auf’s Haupt bringen keine Lösungen, sondern verlängern das Leid. Also in die Kammer schießen. Anschließend sollte ein angefahrener Überläufer im Straßengraben abgefangen werden. Eine komplett andere Situation. Der neue Kugelfang erlaubte Schüsse direkt auf das am Boden liegenden Wild. \nDie Krönung war ein annehmender Keiler im Dunkeln. Es gab nur eine Taschenlampe und das Blaulicht des bereits eingetroffenen Streifenwagens. Der Keiler war noch „mobil“ und versuchte anzugreifen. Eine echte Herausforderung. Alle haben das Beste daraus gemacht. Die anschließend gezählten Treffer zeigten, was alles möglich ist, wenn man nur die Ruhe\nbehält. Ein nächstes Kurzwaffenseminar ist 2023 geplant.\n\nAutor: Stefan Eggers (August 2022)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787328304086-kurzwaffenschiessen221-1-2048x1592.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787328308417-kurzwaffenschiessen222-2018x2048.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787328314205-kurzwaffenschiessen223-scaled.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Auf die Rohre los!",
+      "datum": "1.03.2023",
+      "jahr": "2023",
+      "kategorie": "Allgemein",
+      "bild": "/images/1787311667947-img-20230312-wa0003.jpg",
+      "text": "Die KJS Segeberg hat in Zusammenarbeit mit der Unteren Naturschutzbehörde die Rohrfallen und Kofferfallen im Oktober vergangenen Jahres mit in ihre Leistungsvereinbarung aufgenommen. Im Kreis Segeberg steht das Jagdsteueraufkommen zu 100 Prozent je zur Hälfte der KJS und der UNB für Biotopmaßnahmen zu Verfügung. Viele Knicks, Hecken, Streuobstwiesen, Teiche, Feuchtbiotope und vieles mehr konnten gefördert werden. Zur intensiven Bejagung der Neozonen möchte man auch hier einen Anreiz schaffen.\n\nDankenswerter Weise durfte der Hegering V Neuengörs alle Fallentypen im benachbarten Hegering Reinfeld-Zarpen begutachten. Die Wahl war auf eine mobile und vollständig gekapselte Ausführung gefallen. Der Preis für Falle mit Melder war aber nicht ohne. So war die Resonanz aus dem Kreisgebiet sehr zurückhaltend. Die UNB und KJS erklärten sich auf Anfrage bereit, den Zuschuss zu erhöhen. \n\nJetzt kam die Sache ins Rollen. Der erste Lastzug konnte geordert werden. Die HaGe in Bühnsdorf stellte ihr Anwesen für die Lieferung und Einweisung in die Montage zur Verfügung.  Berufsjäger Dennis Klindwort aus Ganderkesee in Niedersachsen reiste an. Einige Rohrfallen wurden unter Anleitung von Ihm und mit vielen nützlichen Tipps montiert. \n\nNach Rehsteaks und Wildwurst vom Grill ging es dann anschließend nochmal ins Revier. Der Berufsjäger gab viele Anregungen und Tipps zur Standortwahl der Fallen. Somit konnten die Fallen die Reise in die jeweiligen Reviere antreten und warten jetzt nur noch auf den Einbau.\n\nDer nächste Lastzug voller Rohrfallen ist geordert und es wird wieder eine gemeinsame Montage unter Leitung vom Berufsjäger stattfinden. Gespannt erwarten wir dann die nächste Fangsaison und hoffen auf positive Auswirkungen auf unsere Vogelwelt und unser Niederwild. Autor: Hans-Jürgen Hamann (Hegeringleiter V, März 2023)\n\n ",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787311667947-img-20230312-wa0003.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "20. Raubwildwoche im Hegering VIII",
+      "datum": "14.02.2023",
+      "jahr": "2023",
+      "kategorie": "Jagd",
+      "bild": "/images/1787311451104-img_5334.jpg",
+      "text": "Der Hegering VIII der KJS Segeberg mit seinen Revieren rund um Kisdorf hatte seine Jägerinnen und Jäger  aufgerufen, Fuchs, Marder und Co. im Rahmen der mittlerweile 20. Raubwildwoche, kurz vor dem Vollmond Ende Januar/Anfang Februar 2023 intensiv zu bejagen. Diana war leider nicht mit Petrus im Bunde, denn Sturm und Regen ließen auch die Hartgesottenen unter den Jägerinnen und Jägern auf den Ansitz am Luderplatz allzuoft verzichten. Da lag die große Hoffnung auf der Baujagd am Wochenende. Meist aber waren die Kunstbaue leer.\n\nEs kam zwar keine besonders reichliche, aber dennoch eine bunte Strecke zusammen, die zum Abschluss der Woche vor dem Landgasthof Goldener Hahn in Stuvenborn gelegt wurde. Für sechs Füchse, einen Dachs, einen Marderhund, fünf Steinarder, zwei Iltisse und sechs Rabenkrähen ertönten die entsprechenden Totsignale. Das abschließende Signal zum Essen veranlasste die 58 Jägerinnen und Jäger des Hegerings die Plätze im Saal des Landgasthofs einzunehmen und sich das Grünkohlbuffet schmecken zu lassen.\n\nDas Revier Henstedt war mit 3 Füchsen und einem Marderhund am erfolgreichsten. Die eifrigsten Bauhunde hatte das Revier Struvenhütten im Einsatz. Die entsprechenden Ehrungen mit Vergabe der Wanderpokale nahm der Hegeringleiter Thomas Liedtke vor, Autor: Volker Schmidt (Presseobmann im Hegering VIII, Februar 2023)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787311451104-img_5334.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": " Kinder besuchten die Jäger in Sievershütten",
+      "datum": "1.06.2023",
+      "jahr": "2023",
+      "kategorie": "Jugend",
+      "bild": "/images/1787311194873-huesiborns_wackelzaehne_bei_den_sievershuetter_jaegern_3172.jpg",
+      "text": "Die künftigen Erstklässler aus den Orten Hüttblek, Sievershütten und Stuvenborn besuchten mit ihren Erzieherinnen Andrea Pfennig und Katja Bendler die Sievershütter Jäger. Bevor es im kommenden Schuljahr in die Grundschule am Wald geht, erlebten die „Wackelzähne“ des Kindergartens Hüsiborn eine Unterrichtseinheit im Freien.\n\nNach einem Fußmarsch wurde die Gruppe von dem Jagdpächter Gerhard Wrage auf dem Hof am Hasenhörn begrüßt. Nach kurzer Fahrt mit dem Traktor gelangten alle gespannt am Treffpunkt an, wo bereits Marc Nürnberg mit seinen Jagdhunden Bosse und Arri und Volker Schmidt mit seinem Jagdhorn auf die aufgeregte Gruppe warteten. Aus Strohballen wurde im Halbrund mit vereinten Kräften das „grüne Klassenzimmer“ so zusammengestellt, dass alle freien Blick auf die Vortragenden und das bereitgestellte Material aus dem Infomobil der Kreisjägerschaft Segeberg hatten.\n\nVolker Schmidst erklärte anhand praktischer Beispiele, wozu das Jagdhorn früher in erster Linie diente. Marc Nürnberg fragte zunächst einmal, wer denn Tiere kennt, die in der heimischen Wildbahn ihre Fährten und Spuren ziehen. Er ging auch auf die „Jägersprache“ ein. So wunderte sich sicher manches Kind, dass die Ohren mal Lauscher, mal Gehöre oder auch Löffel genannt werden, oder von Gehörnen, Geweihen oder Schaufeln die Rede ist und er selbst auf einer Wildschweinschwarte saß, während neben ihm die Bälge von Fuchs, Waschbär und Steinmarder lagen.\n\nBosse, ein Flatcoated Retriever, zeigte, was so ein ausgebildeter Jagdhund alles drauf hat. Die von seinem Führer mitgebrachten und vor den Augen der Kinder verteilten Dummys suchte und brachte Bosse ebenso zuverlässig, wie er den Anweisungen seines Führers auf Handzeichen folgte. Der Rauhhaardackel Arri, so erläuterte Marc Nürnberg den Kindern, komme besonders bei der Baujagd zum Einsatz und sei am Apportieren nicht sonderlich interessiert, aber bei Fuß gehen und Sitz, sowie Platz machen, konnte Arri auch. \n\nBei dem herrlichen Wetter war es an der Zeit eine Trink- und Essenspause einzulegen. Dazu erklang aus dem Jagdhorn das Signal zum Essen und anschließend durfte ausgiebig auf der vor kurzem gemähten Wiese getobt werden. Mit dem Fernglas konnten die Kinder, sich um 360 Grad in der Mitte der Wiese drehend, Fuchs, Waschbär, Otter, Hase, Kaninchen, Bussard, Fasan und Grünspecht, allesamt Präparate aus dem Infomobil, in Anblick bekommen. Dazu gesellten sich lebende Enten und Gänse auf dem hinteren Teil der Wiese.Plötzlich war helle Aufregung unter den Wasservögeln bei den nahe gelegenen Stuvenborner Klärteichen festzustellen. Als Ursache konnte ein Seeadler ausgemacht werden, dessen weißer Stoß in der strahlenden Sonne aufblitze, während ein Kolkrabe „schimpfend“ abstrich.. Mit diesem abschließenden Eindruck ging der Feiluftunterricht zu Ende.\n\nAutor: Volker Schmidt, Presseobmann für den Hegering VIII (Juni 2023)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787311194873-huesiborns_wackelzaehne_bei_den_sievershuetter_jaegern_3172.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787311188201-huesiborns_wackelzaehne_bei_den_sievershuetter_jaegern_3162.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Heimvorteil bringt Medaillenregen",
+      "datum": "1.08.2023",
+      "jahr": "2023",
+      "kategorie": "Allgemein",
+      "bild": "/images/1787304348263-damenmannschaft_segeberg--1-.jpg",
+      "text": "**Kreisjägerschaft Segeberg stellt auch den Meister aller Klassen**\n\n Bei herrlichstem Wetter und den allerbesten Bedingungen fanden die Landesmeisterschaften im jagdlichen Schießen auf dem Schießstand in Hasenmoor/Wolfsberg statt. Über 200 Jägerinnen und Jäger gingen an den Start. Geschossen wurden die Disziplinen Trap und Skeet auf den Tontaubenständen, sowie die Scheiben liegend Fuchs, angestrichen Rehbock, freihändig Überläufer und laufender Keiler auf den Kugelbahnen. Das jagdliche Kurzwaffenschießen (Revolver/Pistole) rundete für einige Teilnehmer den Wettbewerb ab.\n\nSchon am Freitag legte der Segeberger Einzelschütze Eike Schuldt aus Fuhlenrüe mit 337 Pkt. gut vor! 29 Getroffene von 30 geworfenen Tontauben und 192 von 200 möglichen Punkten auf der Kugelbahn sicherte Ihm später auch den Landesmeistertitel in seiner, der \"Altersklasse\".\n\nAuch Philipp Penzlin aus Wakendorf I hatte einen guten Tag. Er errang mit 306 Pkt. die Schießleistungsnadel in Gold und in seiner \"B-Klasse\" die Silbermedaille.\n\nEike Remmers aus Norderstedt freute sich über Bronze im Kugelschießen mit 193 Pkt.\n\nSpannend wurde es am Samstag! Alle Kreismannschaften des Landes wetteiferten um Platzierungen. Bei den Jägerinnen konnte sich Nadine Weers aus Ellerau ganz knapp punktgleich mi 312 Pkt. vor Isabell Rupsch von der KJS-Eutin behaupten und den Titel holen.\n\nWeers siegte auch mit 28 getroffenen Scheiben beim Tontaubenschießen. Die Segeberger Damenmannschaft, mit Carina Hahn,  Wanja Ellerbrock, Solveij Schmidt, Sophia Greve, Nadine Weers und Karolin Klar, freute sich, hinter den siegreichen Stormarnerinnen, über den Gewinn der Silbermedaille.\n\nLutz Eggers aus Trenthorst/Kreis Stormarn setzte mit 338 Pkt. eine neue Bestmarke, welche Ihm den Meistertitel in der \"S-Klasse\" bescherte. In der letzten Rotte des Tages, den \"Segebergern\", konnte Hans-Jürgen Hamann aus Bühnsdorf gleich ziehen. Nur die Doppelschüsse bei den Tontauben entschieden den Wettkampf! Mit 15 getroffenen Skeettauben ohne einen Doppelschuss wurde Hamann hauchdünn \"Meister aller Klassen\" und somit auch in seiner \"Seniorenklasse\". Hamann sicherte sich auch den Titel in der\n\n\"Großen Kombination\", der Wertung aus Langwaffe und Kurzwaffe mit 517 Pkt..\n\nNach Abschluss des Wettkampfes musste noch ein spannendes Stechen über die Bronzemedaille im Tontaubenschießen entscheiden. Hans-Jörg Faden behauptete sich mit 28 vor Hans-Jürgen Hamann mit 27 und Philip von Papen mit 25 getroffenen Scheiben.\n\nDie Bronzemedaille im Kurzwaffenschießen gewann Björn Schlatz aus Schmalfeld mit 181 Pkt..\n\nDie Mannschaftswertung entschieden die \"Segeberger\" mit den Schützen Hans-Jürgen Hamann, Hans-Jörg Faden, Tobias Haaks, Björn Schlatz, Jan-Philip Wohlert und Uwe Erfurth, vor den Mannschaften aus Oldenburg und Dithmarschen-Nord, für sich.\n\nAuch die 2. Segeberger Garde, mit den Schützen Florian Frank, Marcel Zickermann, Eike Remmers, Dennis Schiller, Heino Burmeister und Wolfgang Harm, sicherte sich den Landestitel der B-Mannschaften.\n\nDie Kurzwaffenmannschaft mit Björn Schlatz, Dennis Schiller, Hans-Jürgen Hamann, Wolfgang Harm und Hans-Jörg Faden siegte ebenfalls vor Pinneberg und Eutin.\n\nDie Jagdhornbläser der Kreisjägerschaft umrahmten die Siegerehrungen und ließen für alle Platzierten die Jagdsignale erklingen.\n\nGroßer Dank galt allen Organisatoren und Helfern der Kreisjägerschaft und des Club für jagdliches Schießen, die die Anlage und die Meisterschaft hervorragend vorbereitet hatten und somit für einen reibungslosen Ablauf gesorgt haben. Autor: Hans-Jürgen Hamann (August 2023)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787304348263-damenmannschaft_segeberg--1-.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787304353581-damen_einzelwertung_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787304358399-b-mannschaft.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787304363933-meister_aller_klassen.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "200 Bäume für die Hegeringe",
+      "datum": "1.10.2023",
+      "jahr": "2023",
+      "kategorie": "Naturschutz",
+      "bild": "/images/1787304043996-20231023_140225.jpg",
+      "text": "Die Kreisjägerschaft Segeberg hat ihren Mitgliedern wieder 200 Obstbäume gekauft, die an die Hegeringe und damit an die Reviere verteilt wurden. Zur Wahl standen Apfel-, Biernen-, Kirsch- und Pflaumenbäume. Die Hegeringe konnten Wünsche äußern. Auf dem Schießplatz Wolfsberg in Hasenmoor wurden die Hochstammbäume dann verteilt. Bereits seit einigen Jahren stellt die Kreisjägerschaft Segeberg die Aktion auf die Beine und finanziert den Kauf der Pflanzen, die in den Revieren ihren neuen Platz finden. (Oktober 2023)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787304043996-20231023_140225.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Plattschölers buuten Nistkastens",
+      "datum": "1.12.2023",
+      "jahr": "2023",
+      "kategorie": "Jugend",
+      "bild": "/images/1787303088770-IMG_6787_7195.jpg",
+      "text": "In de Grundschool an Wald in Sievershütten und uck in Struvenhütten ward in Rahmen vun de oppene\nGanzdachsschool uck een Plattkurs vun Volker Schmidt anboten. Dormit dat nich son drögen Ünnerricht, blots mit Vokabeln lehrn und dorbi de ganze Tied op`n Stohl sitten is, hät de Dozent sien Vebindungen na de Kreisjägerschapp Sebarch nutzt und mol Nistkasten-Buusätze för sien Schölers ordert. De wurrn denn vun de Kreisjägerschapp kostenlos to Vefügung stellt. Een Unnerrichtsstunn wurr dorvör nutzt erstmol de vörhandenen Nistkastens op`n Schoolhof to kontrolleern. Utrüst mit Schietammer, Leller und beeten Warktüch gung dat över de Schoolhof und de Nistkastens de noch gut wärn, wurrn sauber mockt, de nix mehr döögen deen, wurr affnohmen. Jedeen durf dorbi Hand anleng. De Schiet wurr ordnungsgemäß entsorgt.\nIn de nächsten beiden Ünnerrichtsstunnen wurrn denn mit Begeisterung de Buusätze för Höhlen- und\nHalfhöhlenbröter tosomenklütert. Dor hät dat denn heeten:\" Ick bruuk de Hamer, kannst mi mol de\nKnieptang langen, dörf ick de Halfhöhlenkasten buun oder de Starenkasten har ick gern usw.!Meist\nallerdings fungen de Sätze Hochdüütsch an und müssen denn vun de Dozent korrigeert warn, aver\ninsgesamt leep sick dat torecht und de Stunn wär gauer rum, as manch eener dacht hät.\nJedeen kreech denn een Nistkasten mit na Huus und för de Schoolhoff wärn uck noch wöck över.\n\nVolker Schmidt (Presseobmann im Hegering VIII, Dezember 2023)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787303088770-IMG_6787_7195.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787303093450-IMG_6799_7186.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787303098361-IMG_6801_7188.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Erfolgreiche Raubwildbejagung im Hegering IX Kaltenkirchen",
+      "datum": "1.01.2024",
+      "jahr": "2024",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787302877973-IMG-20240206-WA0003.jpg",
+      "text": "Eine noch nie da gewesene Strecke konnten die Jägerinnen und Jäger Hegering IX Kaltenkirchen beim Streckelegen der Raubwildwoche präsentieren. Auf dem Schießstand Wolfsberg in Hasenmoor fanden die Waidmänner und -frauen sich ein, um die Tradition zu pflegen. \"Neun Reviere trugen zur Strecke bei, die für unsere Verhältnisse außergewöhnlich hoch war - quasi noch nie da gewesen\", teilt Hegeringleiter Henning Schwartinsky  mit. Es sind insgesamt 51 Stück Raubwild erlegt worden: 24 Füchse, 12 Marderhunde, 5 Dachse, 5 Marder, 2 Iltis und 3 Rabenkrähen. \n\nNach dem Streckelegen bei bestem Wetter wurde noch gemeinsam gegessen und ein paar gemütliche Stunden miteinander verbracht und sich über die Raubwildjagd ausgetauscht. (Henning Schwartinsky, Hegering IX Kaltenkirchen, Januar 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787302877973-IMG-20240206-WA0003.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Erste Hilfe: Auffrischung auf dem Wolfsberg",
+      "datum": "1.01.2024",
+      "jahr": "2024",
+      "kategorie": "Allgemein",
+      "bild": "/images/1787302667665-20240127_152539.jpg",
+      "text": "Für das Team des Schießstandes Wolfsberg der Kreisjägerschaft Segeberg in Hasenmoor und die Mitglieder der ASP-Kadaversuchhundegruppe Segeberg gab es einen Tag lang eine intensive Erste-Hilfe-Auffrischung. Oliver Bannuscher, Referent und Mitarbeiter des Unternehmens Der Dozent (Henstedt-Ulzburg), ging in den acht Stunden Fortbildung nicht nur auf die klassischen Erste-Hilfe-Themen ein, sondern gab den Teilnehmern auch mit auf den Weg, was bei Schuss- und Messerverletzungen sowie bei Verletzungen durch Wildtiere zu tun ist. Keine Scheu hatten die Jägerinnen und Jäger, sich mit Verbandsmaterial gegenseitig zu \"verarzten\". Die Stimmung war dementsprechend bestens. Zum zweiten Mal hatte die Kreisjägerschaft Segeberg Mitgliedern das Angebot der Auffrischung angeboten. (Januar 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787302667665-20240127_152539.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Junge Feuerwehrleute setzen sich für die Natur ein",
+      "datum": "1.02.2024",
+      "jahr": "2024",
+      "kategorie": "Jugend",
+      "bild": "/images/1787302465378-IMG_3202.jpg",
+      "text": "Schon seit Jahren ist die Jugendfeuerwehr Nahe/Itzstedt im Frühjahr aktiv in Sachen Naturschutz. Die Mädchen und Jungen haben inzwischen zahlreiche Nistkästen gebaut und in die Feldmark gehängt. Jedes Frühjahr werden die Nisthilfen überprüft, gereinigt und zum Teil ersetzt. Die Kreisjägerschaft Segeberg stellt regelmäßig Bausätze zur Verfügung. Für die Jugendlichen ist der Aktionstag immer etwas Besonderes und eine Abwechslung zu den Feuerwehrübungen. Nach dem Einsatz gab es zur Stärkung ein gemeinsames Essen. Die Jugendfeuerwehr der beiden Ortswehren hat fast 40 Mitglieder zwischen 10 und 17 Jahren. (Februar 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787302465378-IMG_3202.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787302471006-IMG_3259.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Gemeinsame Krähenjagd",
+      "datum": "7.08.2023",
+      "jahr": "2023",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787311044810-20230805102800_img_6220.jpg",
+      "text": "Den Artikel aus dem Jäger 07+08/2023 im Hinterkopf, dürften unsere Jägerinnen und Jäger zusätzlich motiviert in ihren Revieren der Hegeringe VIII und IX schon vor Sonnenaufgang unterwegs gewesen sein. Lockbild aufbauen, Tarnschirm beziehen und dem Sonnenaufgang entgegenfiebern, um dann an den vorher ausgekundschafteten Flugrouten, die ins Lockbild einfallenden Rabenkrähen zu bejagen. Dann war es so weit. An der Geräuschkulisse in den frühen Morgenstunden war erkennbar, dass es beim gemeinsamen Streckelegen später auf dem Gelände des Schießstandes Hasenmoor zu einem Resümee über eine erfolgreiche Jagd führen könnte. Es fanden sich schließlich 50 Jägerinnen und Jäger aus beiden Hegeringen zum Streckelegen und anschließenden Frühstück ein.\n\nDa nicht alle aus terminlichen Gründen an dieser Zusammenkunft teilnehmen konnten, lagen an diesem Morgen „nur“ ein Fuchs, eine Kanadagans und 58 Rabenkrähen auf der Strecke. Tatsächlich konnten insgesamt 91 Rabenkrähen an diesem Morgen gestreckt werden, was nicht nur den einen oder anderen Landwirt freuen dürfte, sondern auch ein wenig Druck von Bodenbrütern und unserem Niederwild insgesamt nehmen sollte.\nDie Hegeringleiter Thomas Liedtke (VIII) und Henning Schwartinsky (IX) begrüßten die Anwesenden und stellten das Ergebnis, sowie das erfolgreichste Revier vor, bevor die Strecke von Mitgliedern der beiden Jagdhorngruppen Diana Kisdorf und Hubertus Kaltenkirchen mit den Signalen Fuchs und Flugwild tot verblasen wurde. (August 2023)\n\nAutor: Volker Schmidt, Presseobmann im Hegering VIII",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787311044810-20230805102800_img_6220.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787311052676-20230805095754_img_6216.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Segeberger Jäger pflanzen weitere Bäume in ihren Reviere",
+      "datum": "1.02.2024",
+      "jahr": "2024",
+      "kategorie": "Naturschutz",
+      "bild": "/images/1787302223438-baum3.jpg",
+      "text": "Auf Vermittlung von Henning Schwartinsky (Hegeringleiter Kaltenkirchen) konnten interessierte Jägerinnen und Jäger beim Obsthof Lüders in Seestermühe über 200 Apfelbäume ausgraben und mit in ihre Reviere nehmen. Das einmalige Angebot wurde gut angenommen und über 100 der Obstbäume  der Sorte Hamburger Cox gingen in den Kreis Segeberg. Großer Dank gilt der  Familie Lüders. (Februar 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787302223438-baum3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787302218370-baum2.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Besondere Ehrung für lange Mitgliedschaft",
+      "datum": "1.02.2024",
+      "jahr": "2024",
+      "kategorie": "Pressemitteilung",
+      "bild": "/images/1787301916028-Bild1_HegX2024.jpg",
+      "text": "Ganze 80 Jahre ist Klaus Rissmann Mitglied im Landesjagdverband Schleswig-Holstein. Für diese seltene Ehrung wurde Rissmann auf der Versammlung des Hegerings X Bad Bramstedt ausgezeichnet. LJV-Präsident Wolfgang Heins ließ es sich nicht nehmen, dem Jubilar persönlich zu gratulieren und ihm zu danken. Extra ihm zu Ehren hatte die Bläsergruppe eine Ehrenfanfare einstudiert.  Der Hegering X Bad Bramstedt hat weitere treue Mitglieder. So konnten Helmut Meiser, Dieter Güllnitz und Dirk Hinz für 60 Jahre Mitgliedschaft ausgezeichnet werden, Burkhard Witt und Gerd Saggau für 40 Jahre sowie Uwe Thies-Jansen und Jens Saggau für je 25 Jahre Mitgliedschaft im LJV",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787301916028-Bild1_HegX2024.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Rätselhafter Damhirsch im Revier Hüttblek",
+      "datum": "1.01.2024",
+      "jahr": "2024",
+      "kategorie": "Jagd",
+      "bild": "/images/1787295249701-IMG-20240206-WA0009.jpg",
+      "text": "Ende Januar 2024 befand sich Marco Thies im GJB Hüttblek mit seinem Kleinen Münsterländer Leo auf einer Revierrunde. Plötzlich sprang sein Hund in ein Brombeerdickicht und packte dort einen todkranken Damhirsch an der Drossel. Der Hirsch machte einen bemitleidenswerten Eindruck, schlegelte nur noch und die eingefallenen Lichter ließen auf eine schon längere Leidenszeit schließen. Marco Thies fing den Hirsch mit der blanken Waffe ab. Jetzt sah er, dass die linke Schaufel mit dem entsprechenden Teil der Decke herausgebrochen und auch in der Nähe nicht aufzufinden war. Marco Thies verständigte den Reviernachbarn, gleichzeitig Vorsitzender des Damwildhegebezirks Kisdorferwohld, Jasper Müller, an dessen Grenze sich das Drama zugetragen hatte und bat ihn ihm bei der Bergung und Beurteilung des Sachverhalts behilflich zu sein. \n\nDa er noch etwas auf die Hilfe warten musste, ging der Hüttbleker Jäger durch die Brombeeren zu seinem Fahrzeug und fand auf dem Weg dorthin, etwa 15 Meter vom Fundort des Hirsches entfernt, ein Geweih, ebenfalls mit herausgebrochenem Schädelknochen.\nAls Jasper Müller nun hinzu kam und das aufgefundene Geweih sah, vermutete er sofort, dass dieses zu dem ihm von diversen Wildkameraaufnahmen bekannten Damhirsch gehörte, den man nun gemeinsam barg. Das zu glauben fiel zunächst einmal schwer, musste dieses Geweih doch in einem der Vorjahre/dem Vorjahr herausgebrochen sein und zwar so, dass die Rosenstöcke trotz dieser Verletzung im darauf folgenden Jahr wieder ein Geweih schieben konnten. \n\nNach dem Abkochen des Damhirschschädels mit der fehlenden Schaufel war erkennbar, dass der Schädel zwischen den Rosenstöcken eine zweite knöcherne Schicht mit einem kleinen Zwischenraum ausgebildet hatte. Die Bruchkanten des aufgefundenen vollständigen Geweihs schienen an einigen Stellen perfekt zu denen des Hirsches mit der fehlenden linken Schaufel zu passen, so dass die Theorie, dass alles zusammen gehört, zwar unglaublich, aber dennoch nicht unwahrscheinlich erscheint.  Autor: Volker Schmidt. Presseobmann Hegering VIII",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787295249701-IMG-20240206-WA0009.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787295384767-IMG-20240206-WA0008.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Fast 80 Obstbäume beim Kreisjägertag verlost",
+      "datum": "1.08.2024",
+      "jahr": "2024",
+      "kategorie": "Naturschutz",
+      "bild": "/images/1787294788763-IMG-20240428-WA0017.jpg",
+      "text": "Der Kreisjägertag hielt für die Mitglieder, die den Weg nach Hartenholm auf sich genommen hatten, noch eine Überraschung bereit: Fast 80 Obstgehölze wurden unter den Besuchern des Kreisjägertages Segeberg verlost, sodass nur wenige Mitglieder ohne Baum nach Hause gingen. Möglich gemacht hatte diese Aktion, die bei allen Besuchern gut ankam, Geschäftsführer Heino Burmeister. Er hatte bei der Landespflanzenbörse anlässlich der Messe Outdoor in Neumünster die übrig gebliebenen Obstbäume mit in den Kreis Segeberg genommen und sich die Verlosung ausgedacht. Die jungen Bäume werden nun in den Revieren einen neuen Platz finden. ",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787294788763-IMG-20240428-WA0017.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787294794623-IMG-20240423-WA0027.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Jagdkurs-Tombola für den guten Zweck",
+      "datum": "1.08.2024",
+      "jahr": "2024",
+      "kategorie": "Pressemitteilung",
+      "bild": "/images/1787294581854-IMG_9802.jpeg",
+      "text": "Die Teilnehmer des 50. Jagdscheinkurses des Jagdkurses von Dr. Monika Schroedter in Schönmoor hatten für ihren Abschlussabend eine große Tombola auf die Beine gestellt. Der Erlös, genau 691,01 Euro, wurde nun an die Leitung des Wildparks Eekholt in Großenaspe überreicht. Geschäftsführer Wolf Gunthram Freiherr von Schenk hat die Spender begrüßt. Er selbst hat den 30. Kurs bei Monika Schroedter absolviert und hat sich sehr über die Idee gefreut, dass der Wildpark Eekholt unterstützt wird. Für die Geldspende wurde die Patenschaft für einen Rothirsch übernommen. Monika Schroedter hat die Urkunde für die Patenschaft bekommen, die nun in Schönmoor aufgehängt wird. Autorin/Foto: Silke Altner",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787294581854-IMG_9802.jpeg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kindergartenkinder in Nahe bekamen Besuch",
+      "datum": "1.07.2024",
+      "jahr": "2024",
+      "kategorie": "Jugend",
+      "bild": "/images/1787294202593-PHOTO-2024-06-21-12-53-37.jpg",
+      "text": "Die Jugendobleute des Hegering VII – kommissarisch vertreten durch Collin Kaphengst, mit Unterstützung von Nina Grohmann, Ireen Hermes, Arne Gamerdinger und Mark Stormer – haben das Infomobil der Kreisjägerschaft Segeberg am Kindergarten in Nahe, Standort Birkenhof, vorgestellt. Mit einem spannenden Quiz rund um die Tierpräparate sowie Knicksträucher und Bäume und Ackerpflanzen haben sie drei Kindergartengruppen begeistert und spielerisches Wissen vermittelt. Die Kinder hatten viel Spaß beim Erraten der Namen der Ohren des Schwarzwildes und des Feldhasen sowie beim Erkennen von Ahorn, Haselnuss und Wintergerste. In der Grabbelkiste konnten mutige Kinder Mais, Tannenzapfen, Kastanien und eine Fuchslunte ertasten. Viele spannende Informationen mit lustigen Geschichten und vollem Körpereinsatz mit Röhren und Rülpsen sorgten für leuchtende Kinderaugen und das ein oder andere Lachen. Als Quizpreise erhielten die Kinder Wildtier-Malbücher, Wildschwein-Radiergummis sowie ein Heft über Fährten und Spuren, das sie stolz in Empfang nahmen. Die Aktion ist so gut angenommen worden, dass bereits für einen weiteren Standort angefragt wurde. Autorin: Nina Grohmann (Juli 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787294202593-PHOTO-2024-06-21-12-53-37.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787294211640-PHOTO-2024-06-21-12-53-40.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Aus dem Leben der Jungtierretter Kisdorf ",
+      "datum": "1.08.2024",
+      "jahr": "2024",
+      "kategorie": "Jungwildrettung",
+      "bild": "/images/1787292483845-181.jpg",
+      "text": "Anfrage in unserem Jungwildrettungs-Chat: „Morgen will Bauer Harry seine Grünlandflächen mähen. Wir fliegen mit zwei Drohnen. Treffen um 4.30h. Wer kann dabei sein?“  Innerhalb von Minuten trudeln die Rückmeldungen ein und schnell sind Funker als Assistenten für den Drohnenpiloten und mindestens zwei Läuferpaare pro Drohne gefunden. Hier melden sich Menschen, die sich für das Wild einsetzen und früh morgens schon gute Laune haben.\n\nWir sind sehr dankbar im Kisdorfer Revier für diese engagierte und zuverlässige Jungwildrettungs-Gruppe, die tatsächlich zum größeren Teil aus Nicht-Jägern besteht. Fast jeder Einsatz endet bei unserem Bäcker, wo wir bei einem schnellen, gemeinsamen Frühstück das Erlebte Revue passieren lassen, bevor jeder in seinen Arbeitsalltag startet.  \n\nBedingt durch die besonderen Wetterumstände reduzierte sich die Anzahl der Kitze im Vergleich zum vergangenen Jahr deutlich und wir haben tatsächlich einige Damkälber gefunden. Unsere stolze Bilanz 2024 lautet: 50 Kitze, 7 Damkälber, 7 Hasen und 2 Gänseküken, die wir vor dem Mähtod bewahren konnten. Highlight der Saison war der Fund eines weißen Damkalbes. Von einer gelungenen Rückführung ist auszugehen, da wir beim Freilassen des Kalbes das ebenfalls weiße Alttier schon in der Nähe beobachten konnten. Autorin Anke Kröger (August 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787139524160-18.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Waldtag mit den Jägern Hegering VIII Kisdorf",
+      "datum": "1.09.2024",
+      "jahr": "2024",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787292066787-Jagdhornblaeser.jpg",
+      "text": "Die Jägerschaft aus dem Hegering VIII Kisdorf haben Kinder und Erwachsene zu einem Waldtag mit Jägern und Jagdhunden eingeladen, organisiert wurde dies von der Jugendobfrau Jana Forstreuter und dem Niederwildhegeringleiter Thomas Liedtke. 14 Kinder und acht Erwachsene nahmen teil und konnten sich über ein abwechslungsreiches Programm freuen. \n\nNach einer Begrüßung und einem Wildtierquiz ging es durch den Wald auf einen Erkundungsspaziergang bevor es in Kleingruppen an die Stationen ging. Vorgestellt wurden heimische Wildtiere am Info-Mobil der Kreisjägerschaft, Jagdausrüstung, Jagdhunde und Brauchtum, Kitzrettung und Verhalten beim Wildunfall. Jagdhunde wurden vorgestellt, Jagdhörner geblasen. \n\nNach einem gemeinsamen Mittagsimbiss mit Wildbratwurst und Kaltgetränk konnten die Jagdhunde ihre Arbeit in der Praxis vorstellen. Zum Abschluss wurde Bogenschießen angeboten. Für 2025 sind hegeringübergreifende Aktionen geplant.\n\nEinen großen Dank seitens der Jugendobfrau Jana Forstreuter und des Hegeringleiters Thomas Liedtke vom Hegering VIII Kisdorf gilt den beteiligten Jägern und den Bläsergruppen von Diana Kisdorf und Hubertus Kaltenkirchen. (September 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787292066787-Jagdhornblaeser.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Waldwoche in der Dörfergemeinschaftsschule Neuengörs",
+      "datum": "1.11.2024",
+      "jahr": "2024",
+      "kategorie": "Allgemein",
+      "bild": "/images/1787291897090-IMG_2826.jpeg",
+      "text": "Für 120 Kinder der 1. bis 4. Klasse haben die Jäger des Hegering V Neuengörs eine Waldwoche organisiert. Jede Klasse hat einen Schultag mit einem Jäger, den Lehrkräften und auch einigen Eltern im Wald verbracht.  Zusätzlich war an zwei Tagen das Infomobil der Kreisjägerschaft auf dem Schulhof aufgebaut. Hier konnten die Kinder Präparate, Abwurfstangen, Felle, Schautafeln und vieles mehr bestaunen.  Die 2. Klasse startete am Montag in Dreggers mit einem Frühstück auf dem Hof David. Anschließend ging es in den Wald, die Dreggerser Hege. Der Jagdhund, ein Münsterländer, war auch dabei und konnte Schleppen arbeiten und auch versteckte Abwurfstangen finden. \n\nDie beiden 3. Klassen trafen sich am Dienstag auf dem Pulvermann‘schen Hof in Bahrenhof und konnten als erstes den Eiskeller bewundern, nachdem sie durch Hörnerklang begrüßt wurden. Dann ging es in den Wald, dem Wulfsbruch, um erstmal eine Frühstückspause einzulegen. In drei Gruppen aufgeteilt, konnten die Kinder jeweils eine Bastelgruppe, eine Lupengruppe und eine Pirschgruppe durchlaufen. Sonne und Mond wurden aus den gefundenen Materialien wie Moos, Blätter, Zweige, Eicheln, Bucheckern, Pilzen und mehr gebastelt. Die Lupengruppe erkundete den Waldboden und die Bäume und fanden Würmer, Asseln, Molche, Eidechsen und Spinnen. Beim Pirschgang konnte vom Hochsitz die Umgebung erkundet werden und ein Fuchsbau wurde gefunden. Am Mittwoch traf sich die 1.Klasse in Stubben auf dem Hof Meyer. Nach dem Frühstück im Pferdestall zeigte der Kurzhaarrüde Alf sein Können auf der Kaninchenschleppe. Dann ging  die Wanderung auf den Buchenberg im Söhrener Wald. Hier konnten die Erstklässler nach Herzenslust spielen, herumtoben und den Wald erkunden. Alle hatten viel Spaß.\n\nZum Abschluss der Woche traf sich am Donnerstag die 4.Klasse im Wakendorfer Moor. Eine Wanderung in den Wald mit Frühstückspause und anschließender Erkundung des Waldes machte den Schülern einen Riesenspaß. Wissenswertes gab es über Waldbau und Nutzen eines Moores vom Jäger zu hören. In der Streuobstwiese wurde das Beschneiden der Obstbäume erklärt und dann leckere Äpfel gepflückt, die die Kinder dann verzehren konnten, bevor es auf den Heimweg ging. \n\nAutor: Hans-Jürgen Hamann (November 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787291897090-IMG_2826.jpeg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Damhirsch-Hegeabschuss: Ein besonderes Weihnachtsgeschenk ",
+      "datum": "1.12.2024",
+      "jahr": "2024",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787291670968-IMG_0289.jpg",
+      "text": "Der passionierte und erfahrene Niederwildjäger Tim beschenkte sich am Vorabend von Heiligabend mit einem ganz besonderen Jagderfolg: Er konnte seinen ersten Damhirsch erlegen – und das mit einem Hegeabschuss. Seit Wochen wurde das Stück gemeinsam mit anderen Hirschen mehrfach im Revier Henstedt gesichtet. Zahlreiche Ansitze blieben zunächst erfolglos, doch am 23. Dezember bot sich endlich die lang ersehnte Gelegenheit. Besonders bemerkenswert war die Konstitution des Hirsches: Er war auf einem Licht blind und wies eine Geweihanomalie auf: an beiden Seiten des Geweihs fehlten die Mittelsprossen.\n \nBei der genaueren Inaugenscheinnahme des erlegten Hirsches zeigte sich zudem, dass das Tier an zwei Läufen schwere Verletzungen aufwies, die seine Fortbewegung vermutlich stark beeinträchtigten. Mit einem Gewicht von nur 55 Kilogramm war der Hirsch auch im Wildbret nicht sonderlich stark. Dies bestätigte, dass die Erlegung nicht nur jagdlich, sondern auch waidgerecht eine sinnvolle Entscheidung war. Der Damwild Hegering schätzt den Hirsch auf den 8. Kopf. \n \nDer Jagderfolg wurde im Rahmen eines ausgelassenen Hirschfestes gebührend gefeiert. Jagdfreunde aus dem eigenen sowie benachbarten Revieren kamen zusammen, um auf die erfolgreiche Jagd anzustoßen und das besondere Stück zu würdigen. \"Ein denkwürdiger Moment für Tim, der mit diesem reifen Damhirsch nicht nur sein erstes Stück Damwild, sondern auch eine nachhaltige, waidgerechte Entscheidung für das Wild und das Revier getroffen hat\", meinen seine Mitjäger. Autoren: Jan Wrage & Malte Witowski (Dezember 2024)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787291670968-IMG_0289.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Erfolgreiche Raubwildwochen Hergering Hartenholm",
+      "datum": "16.02.2025",
+      "jahr": "2025",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787291437328-image0_2.jpeg",
+      "text": "Am 16. Februar fanden die Raubwildwochen im Hegering Hartenholm ihren gebührenden Abschluss mit dem Legen der Strecke und einem gemeinsamen Mittagessen auf dem Schießstand Wolfsberg. Insgesamt wurden von den beteiligten Jägern seit dem 31. Januar 21 Füchse, 1 Dachs, 2 Marderhunde, 2 Baum- und 1 Steinmarder sowie 1 Iltis zur Strecke. Für seinen besonderen Einsatz im Rahmen der Niederwildhege wurde Florian Schlatz vom Hegeringleiter Frank Zabel mit dem Wanderpokal des Hegerings ausgezeichnet. Text und Foto: Frank Zabel (Februar 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787291437328-image0_2.jpeg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Große Strecke in Kaltenkirchen",
+      "datum": "1.02.2025",
+      "jahr": "2025",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787291119675-IMG-20250119-WA0037.jpg",
+      "text": "Auch der Hegering Kaltenkirchen war erfolgreich bei seiner Raubwildwoche. 41 Stück Raubwild konnten zur Strecke gebracht werden, wie Hegeringleiter Henning Schwartinsky stolz berichtete. Es wurden von zehn Revieren des Hegerings 31 Füchse, ein Dachs, fünf Marderhunde, zwei Steinmarder, ein Iltis und ein Waschbär gestreckt. Das Niederwild in den Revieren wird es den Jägerinnen und Jägern danken. Autor: Nicole Scholmann, Foto: Schwartinsky (Februar 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Pflanztag im Revier Kayhude",
+      "datum": "1.03.2025",
+      "jahr": "2025",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787290884590-IMG_7465.jpg",
+      "text": "Anfang März fand in Kayhude eine besondere Aktion statt. Die Jägerschaft Kayhude und einige fleißige Helfer versammelten sich, um rund 400 Bäume und Sträucher zu pflanzen – darunter Sanddorn, Brombeeren, Schlehen und Apfelbäume – allesamt wertvolle Äsung für das Wild.\n\nDie Niederwildhege ist ein zentrales Thema in der Jagd und wird von vielen Revieren zunehmend ernst genommen. Andreas Gamerdinger, Pächter des Reviers, hat in den vergangenen Jahren bereits mehrere Wildäcker angelegt, um dem Wild Schutz und Äsung zu bieten. Durch den Rückgang von Zwischenfrucht und die sich intensivierende Landwirtschaft bleibt dem Wild viel weniger sicherer Rückzugsraum. Besonders heimische Arten wie Fasan, Kiebitz und Rebhuhn finden oftmals keine guten Revierbedingungen vor. Ohne ausreichende Deckung sind sie ihren natürlichen Feinden schutzlos ausgeliefert – was große Bestandsrückgänge zur Folge hat.\n\nErst im vergangenen Jahr wurden auf zwei Wildäckern im Revier kleine natürliche Teiche angelegt. In den kommenden Jahren sollen die neu gepflanzten Weiden und Gräser dort eine dichte, strukturreiche Begrenzung schaffen und wertvollen Lebensraum bieten. Dieser Wildacker wird nicht der letzte sein, der in Kayhude in voller Pracht erblüht. Da ist Familie Gamerdinger sich sicher. Autorin: Ireen Hermes (März 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787290884590-IMG_7465.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Erfolgreicher 50. Jagdkurs in Schönmoor",
+      "datum": "1.04.2024",
+      "jahr": "2024",
+      "kategorie": "Jagdausbildung",
+      "bild": "/images/1787290375592-IMG-20240428-WA0027_1.jpg",
+      "text": "„Achteinhalb Monate, es war der Wahnsinn!“ So beschreibt Ann-Katrin Meis aus Negenharrie bei Neumünster die Zeit, bis sie sowie 28 weitere Frauen und Männer die Prüfung zur Jägerin und Jäger erfolgreich geschafft hatten. Bei Monika Schroedter und ihrem Team vom Jagdkurs Segeberg auf dem Tannenhof Schönmoor bei Rickling hatten die neuen Jungjäger sich seit September 2023 auf die umfangreichen praktischen und theoretischen Prüfungen vorbereitet. \n\nWarum sie Jäger geworden sind? Christoph Lorenzen aus Winsen bei Kaltenkirchen, der als bester Mann die Jägerprüfung geschafft hat: „Ich bin ein Naturbursche und hatte schon immer ein Faible für Pflanzen und Tiere.\"  Andrea Hennemann aus Sievershütten hatte sich erst vier Tage vor dem Beginn des 50. Jagdkurses Segeberg bei Familie Schroedter gemeldet. „Ich bin dann zum ersten Abend gegangen und habe gedacht, hier bleibe ich und mache die Ausbildung“, so Hennemann. Andrea Hennemann hat als beste Frau die Abschlussprüfung zur Jägerin hinter sich gebracht. Beide, Christoph Lorenzen und Andrea Hennemann, wurden für ihre Leistungen von Kreisjägermeister Klaus Rathje und der Leiterin den Jagdkurses Segeberg, Monika Schroedter, ausgezeichnet. Ebenfalls geehrt wurden Nicole Arnold aus Itzstedt und Max Metzelthin aus Bornhöved, die die besten Schießergebnisse der Gruppe vorlegten. \n\nFür Familie Schroedter aus Schönmoor bei Rickling war es der 50. Kursus zur Jägerausbildung. Klaus Schroedter hatte die private Jagdschule gegründet, seine Frau Monika Schroedter stieg später mit ein und hat nach dem Tod des Gründers die volle Verantwortung übernommen. Ihr zur Seite steht ein über Jahre erfahrenes Team an Ausbildern, zu dem immer auch neue Experten für einzelne Bereiche stoßen.\n\nIm September 2024 startet der nächste Kursus bei Monika Schroedter und ihren Ausbildern auf dem Tannenhof in Schönmoor. Die Nachfrage nach der Jägerausbildung scheint ungebrochen. Auch wenn es mit den Jagdmöglichkeiten für die erfolgreich geprüften Jungjäger allzu oft nicht gut aussieht: Die beiden Besten der Prüfung 2024 etwa haben zwar eine Einladung zu einer Jagd im Landesforst im Herbst, bis dahin aber keine Möglichkeit, die Jagd in einem Revier auszuüben.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787290375592-IMG-20240428-WA0027_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787290383448-IMG-20240428-WA0022.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787290391010-IMG-20240428-WA0019.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787290396533-IMG-20240428-WA0020.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Nistkästen gebaut und aufgehängt",
+      "datum": "1.03.2025",
+      "jahr": "2025",
+      "kategorie": "Jugend",
+      "bild": "/images/1787290006194-Nistkaesten_Jugendfeuerwehr_Hasenmoor_und_Hartenholm_17.03.2025.jpg",
+      "text": "Der Hegering Hartenholm hatte auf dem Schießstand Hasenmoor zum Nistkastenbau eingeladen - und 21 Kinder und 16 Erwachsene kamen gerne, um zu Holz und Schrauben zu greifen. Helfer waren Jäger und die Jugendfeuerwehren Hasenmoor und Hartenholm. Nach der Begrüßungsrunde mit kleinem Wldtierquiz ging es in Kleingruppen zu einem Waldspaziergang. \n\nDort standen die heimischen Singvögel im Mittelpunkt. Sophie Göttsch hatte dazu Bilder vorbereitet. Im Anschluss ging es ran ans Material und die Nistkästen wurden zusammengebaut. Jeder Kasten erhielt eine Nummer und einen Namen. Nach der Pizzapause wurden die Nisthilfen am Forstweg aufgehängt. Mit einer Abschlussrunde für Fragen endeten die Aktionstage. Das Angebot wurde von den Jugendobleuten Sophie Göttsch und Jana Forstreuter vom Hegering Hartenholm organisiert und geleitet. Die Schleswig-Holsteinischen Landesforsten, die Försterei Hartenholm, unterstützten die Aktion. Die Bausätze für die Nistkästen waren gestiftet worden. (März 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787290016027-Nistkaesten_Foto_Mutter_und_Sohn_17.03.2025.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Damhirsche befreit",
+      "datum": "1.03.2025",
+      "jahr": "2025",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787289662206-IMG-20250226-WA0017.jpg",
+      "text": "Zwei Damhirsche in großer Not sind bei Henstedt-Ulzburg von einem Tierarzt gerettet worden. Landwirt und Jäger Stephan Bruhn aus dem Ortsteil Götzberg hatte einen Anruf erhalten: Einem Passanten waren zwei Damhirsche aufgefallen, um deren Geweihe herum etliche Meter weiße Kordellitze gebunden waren. Die Hirsche waren auf kurzer Distanz mit diesem Zaunmaterial miteinander verbunden und in höchster Not. Allein hätten sie sich nicht befreien können.\n\nBruhn stand vor der Frage, was zu tun ist. Über den Kontakt mit einer Jägerin aus Kisdorf erhielt Bruhn die Telefonnummer von Dr. Sebastian Lutz, von der Pferdepraxis Oberalster in Norderstedt, der sofort seine Hilfe angeboten habe. Der Tierarzt nahm sein Betäubungsgewehr, packte zudem „Schlafmittel“ für die Hirsche ein und machte sich auf den Weg nach Götzberg. Eine Dreiviertelstunde später war der Profi vor Ort. Dort warteten bereits einige Jäger auf ihn.\n\nAm Forst Endern standen die beiden an sich gefesselten Wildtiere demnach auf einer Wiese. Langsam hätten sich die Retter den Tieren genähert, die aber dann miteinander verknotet eine kurze Flucht versucht hätten. „Die hatten uns bemerkt“, berichtet Jäger Bruhn. Weiter pirschten die Beteiligten sich demnach an die Wildtiere heran, bis endlich eine ideale Schussentfernung gegeben gewesen sei. „Je dichter, desto besser“, so Tierarzt Lutz.\n\nAls die Tiere nur noch gut 20 Meter entfernt standen, versuchte der Fachmann sein Glück. Der Pfeil mit der Betäubung saß offenbar. Der erste Hirsch sackte zusammen und verlor das Bewusstsein. Auch der zweite Hirsch bekam einen Betäubungspfeil ab. Ein zweiter Pfeil zur Sicherheit folgte. Dann schliefen beide Tiere, so der Bericht.\n\nMit einem Seitenschneider wurde dann die stramme Kordellitze herausgeschnitten. Viele Meter Zaun seien von den Geweihen der beiden Hirsche gezogen worden. Ein dickes Bündel Plastik-Metall-Seil blieb am Ende übrig. Die Hirsche seien nach einiger Zeit wieder aufgewacht und in den Forst Endern zurückgekehrt. Autorin: Nicole Scholmann (März 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787289662206-IMG-20250226-WA0017.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289666899-IMG-20250304-WA0008.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289672407-IMG-20250304-WA0009.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "35 neue Jungjäger: Alle haben bestanden",
+      "datum": "1.04.2025",
+      "jahr": "2025",
+      "kategorie": "Jagdausbildung",
+      "bild": "/images/1787289204777-IMG-20250413-WA0005.jpg",
+      "text": "Auf einen wirklich erfolgreichen Jagdkurs können Dr. Monika Schroedter und ihr Ausbilderteam in diesem Frühjahr zurückblicken. Alle 35 Prüflinge haben beim Schießen, bei der theoretischen und der praktischen Prüfung ihr Können gezeigt und den Jagdkurs erfolgreich beendet. Sie dürfen sich nun Jungjäger nennen. Keiner ist durchgefallen. Eine 100% Quote konnten die Ausbilder in den 51 Jahren, in denen in Rickling-Schönmoor das Wissen rund um die Jagd vermittelt wird, erst vier Mal vermelden. \"Das ist nicht selbstverständlich\", meinte Monika Schroedter im Namen ihres Team anerkennend. \n\n40 Frauen und Männer hatten im September 2024 mit dem Jagdkurs begonnen. Aus unterschiedlichen Gründen verließen fünf Teilnehmerinnen und Teilnehmer im Winter den Kursus. Alle anderen gaben Gas und stürzten sich weiter in die Themen. Insgesamt hatte es 55 Kursabende, 14 Schießtermine auf dem Schießplatz Wolfsberg Hasenmoor und verschiedene andere Veranstaltungen wie Drückjagden, an denen die Schülerinnen und Schüler als Treiber durchgehen durften, gegeben. \n\nDie besten Prüfungen - mit gleicher Punktzahl - legten fünf Teilnehmende hin. Heyko Degenhart und Frank Lewin wurden als beste Absolventen ausgezeichnet. Sie hatten in den Hauptfächern geglänzt. Beim Schießen trafen Moritz Schuckart und Ann-Christin Below am Besten. \n\nEine besondere Ehre wurde Burkhard Witt zuteil. Für ihn war es der 40. Jagdkurs, in dem er als Ausbilder tätig war. Kreisjägermeister Klaus Rathje bedankte sich mit einer Medaille für den Einsatz. \n\nDer nächste Jagdkurs startet im September. Anmeldungen sind möglich (www.jagdkurs-segeberg.de). Autorin/Fotos: Nicole Scholmann (April 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787289204777-IMG-20250413-WA0005.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289466393-IMG-20250413-WA0000.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289471177-IMG-20250413-WA0002.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289476266-IMG-20250413-WA0003.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787289482677-IMG-20250413-WA0004.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Besuch des Wildtiermobils in der Kita Junges Gemüse in Tangstedt",
+      "datum": "1.04.2025",
+      "jahr": "2025",
+      "kategorie": "Jugend",
+      "bild": "/images/1787289013990-IMG_2975.jpg",
+      "text": "Im Frühjahr waren wir mit dem Infomobil der Kreisjägerschaft Segeberg zu Gast in der Kita Junges Gemüse in Tangstedt. Der Kontakt kam über das Revier Kayhude zustande. Obwohl das Gebiet eigentlich zur Kreisjägerschaft Stormarn gehört, haben wir uns dank der unkomplizierten Zusammenarbeit mit den Jugendobleuten aus Stormarn darauf geeinigt, den Termin aufgrund der Nähe zu Kayhude und der persönlichen Anbindung zu übernehmen.\n\nEs war ein spannender Tag für die Kinder: Insgesamt nahmen vier Gruppen mit je 20 Kindern teil. Mit einem Quiz konnten die Kinder ihr Wissen testen und kleine Preise gewinnen. Zudem präsentierten wir Sträucher und Bäume aus heimischen Knicks sowie Tiere wie Reh, Hase und Füchse. Es war ein voller Erfolg, und allen Kindern hat der Besuch viel Spaß gemacht!\nFür die KJS im Einsatz waren Ireen Hermes, Arne Gamerdinger, Kiki Schlömer und Nina Grohmann. Autorin: Nina Grohmann (April 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787289022565-d8c6ec0a-e0ce-4e3e-a5e6-b4b41c162d8d.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Wildtiermobil begeistert kleine Naturfreunde im Familienzentrum Nahe",
+      "datum": "1.04.2025",
+      "jahr": "2025",
+      "kategorie": "Jugend",
+      "bild": "/images/1787288570639-IMG_3241.jpeg",
+      "text": "Im Frühjahr machte das Wildtiermobil Halt am Familienzentrum Nahe – und bot rund 30 Kindern sowie ihren Eltern und Begleitpersonen spannende Einblicke in die heimische Tier- und Pflanzenwelt.\n\nMit großem Interesse erkundeten die Kinder Löffel, Teller, Haken und Gabeln und konnten beim Natur-Quiz ihr Wissen testen. Auch Pflanzen- und Baumkunde kamen nicht zu kurz, sodass für alle etwas dabei war – zum Staunen, Lernen und Mitraten.\n\nBegleitet wurde der Einsatz von Collin (Revier Kayhude) und Nina (Revier Sülfeld) , unterstützt von Katja (Revier Borstel), sowie den beiden Jagdhunden Rosi und Lisbeth. Die beiden Vierbeiner erhielten nicht nur für viele Streicheleinheiten, sondern vermittelten ganz nebenbei Wissenswertes rund um das Thema Jagdhunde. Autorin: Nina Grohmann (April 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisjägertages 2025",
+      "datum": "1.04.2025",
+      "jahr": "2025",
+      "kategorie": "Veranstaltung",
+      "bild": "/images/1787288279554-IMG_1784.jpeg",
+      "text": "**der Vereinsbericht ist hier hochgeladen**",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787288268490-IMG-20250523-WA0019.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787288274381-IMG_1778.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787288285719-IMG-20250523-WA0020.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impressionen",
+      "downloads": [
+        {
+          "titel": "KJS Jahresbericht 2024",
+          "datei": "/downloads/1787288181206-KJS_Jahresbericht_2024_1.pdf",
+          "vorschau": ""
+        }
+      ]
+    },
+    {
+      "titel": "Gemeinsam für Natur und Zukunft: Pflanzaktion im Revier Sülfeld",
+      "datum": "1.05.2025",
+      "jahr": "2025",
+      "kategorie": "Naturschutz",
+      "bild": "/images/1787287788291-IMG_3644.jpg",
+      "text": "Im Rahmen des schulischen Projekts „Lernen durch Engagement“ war die Klasse AP24a der Beruflichen Schule des Kreises Stormarn aus Bad Oldesloe zu Gast im Revier Sülfeld. Die Schülerinnen und Schüler engagieren sich hierbei aktiv für Umwelt und Gesellschaft – dieses Mal mit Schaufel, Handschuhen und großem Einsatz für die Natur. \n\nGemeinsam mit ihren Lehrkräften und unterstützt von den Jägern und Jägerinnen aus dem Revier Sülfeld, pflanzten die Jugendlichen heimische Gehölze. Ziel war es, durch praktischen Einsatz einen nachhaltigen Beitrag zum Erhalt naturnaher Lebensräume zu leisten – für Wildtiere ebenso wie für den Menschen.\n\nIm Anschluss an die Pflanzung fand ein anschaulicher Exkurs zum Thema Bienenhaltung und Imkerei statt. Ergänzend dazu vermittelten die Jäger fundiertes Wissen zu heimischen Wild- und Baumarten. \n\nDie Aktion stand unter dem Motto „Wachstum schafft Leben – und Engagement schafft Zusammenhalt.“ Sie verband praktisches Lernen mit gelebtem Naturschutz und ermöglichte den Schülerinnen und Schülern wertvolle Erfahrungen – nicht nur für den Schulalltag. Autorin: Nina Grohmann (Mai 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787287796273-IMG_3536.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Gemeinsam gegen die Rosskastanienmotte",
+      "datum": "1.06.2025",
+      "jahr": "2025",
+      "kategorie": "Jugend",
+      "bild": "/images/1787258021843-Olaf_Weddern_beim_vorgeschalteten_Naturunterricht.jpg",
+      "text": "Kinder der ersten Klasse der Grundschule Groß Kummerfeld zimmerten an einem Praxis-Tag eifrig\nNistkästen, die zuvor von der Kreisjägerschaft Segeberg gesponsert wurden. Der Umgang mit\nHammer und Nägeln war zwar für einige das erste Mal, am Ende des (Schul-)Tages standen aber 15\nneue Meisenkästen auf den Tischen. Um das anschließende Aufhängen kümmerten sich dann die\nKinder und Jugendlichen der Jugendfeuerwehr der Gemeinde, die diesen Beitrag zum Naturschutz\ngerne unterstützen wollten. Jäger Olaf Weddern, der das Projekt initiiert hatte, stieß mit seiner Idee\nbei allen Beteiligten auf große Begeisterung. Schon lange stören ihn die sich bereits im Sommer eines\njeden Jahres braun färbenden Blättern der Kastanienbäume. Schuld ist die sich seit den 1990er\nJahren aus Südeuropa ausbreitende Minier- oder Rosskastanienmotte, deren Larven das Innere der\nBlätter zerfressen. Neben dem konsequenten Entfernen des Falllaubes, helfen Schlupfwespen,\nFledermäuse und vor allem Meisen dabei, den kleinen Plagegeist auf natürliche Art und Weise zu\nreduzieren. Da Meisen in Höhlen brüten, sind sie hier auf die menschliche Unterstützung angewiesen\nund nehmen die künstlichen Nisthilfen in der Regel gerne an. So hängen die neuen Meisenkästen nun\nin den drei Ortsteilen der Gemeinde verteilt am Kindergarten in Willingrade, an der Grundschule in\nGroß Kummerfeld und am Feuerwehrhaus in Kleinkummerfeld. Auch Bürgermeister Wilhelm\nMöllhoff freute sich sehr über die Aktion und will als kleines Dankeschön etwas gegen die leere\nNaschibox der Jugendfeuerwehr unternehmen. Autor: Olaf Weddern (Juni 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787258012354-Stolz_praesentieren_die_Grundschulkinder_die_neuen_Nistkaesten_Foto_Heina.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Wurstgenuss beim Hegering VII",
+      "datum": "1.06.2025",
+      "jahr": "2025",
+      "kategorie": "aus den Revieren",
+      "bild": "/images/1787246882956-image11.jpeg",
+      "text": "Vor kurzem hieß es: Messer wetzen, Wolf anwerfen und Muskelkraft zeigen – beim Bratwurstseminar des Hegering VII Itzstedt. Unter der fachkundigen Anleitung von Markus Hofmann von Rehzept lernten die Teilnehmenden alle wichtigen Schritte: vom Zerwirken und Wolfen über das richtige Würzen bis hin zum Füllen der Därme. \n\nHöhepunkt des Tages war natürlich das gemeinsame Verkosten der selbstgemachten Würste – vier Sorten standen auf dem Tisch und sorgten für begeisterte Gesichter. In geselliger Runde wurde gemeinsam gegessen, gelacht und gefachsimpelt – ein Tag, der allen lange in Erinnerung bleiben wird. \n\nEin großes Dankeschön an Familie Gamerdinger, die uns die Räumlichkeiten im Heidkrug zur Verfügung gestellt hat, und an alle, die diesen Tag zu einem rundum gelungenen Erlebnis gemacht haben. Autorin: Nina Grohmann (Juni 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787247078506-image14.jpeg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Ferienpass der Fehrenbötler und Ricklinger Jäger",
+      "datum": "1.06.2025",
+      "jahr": "2025",
+      "kategorie": "Jugend",
+      "bild": "/images/1787239733207-Thomas_u._Marvin--1-.webp",
+      "text": "In den Ferien veranstalteten die Fehrenbötler und Ricklinger Jäger zum ersten Mal die Ferienpassaktion \"Hege und Pflege des heimischen Wildes\". 17 begeisterte Kinder im Alter von 6 bis 13 Jahren konnten an einem herrlichen Nachmittag eine Drohne bei der Suche nach einem Rehkitz beobachten und erhielten eine Einweisung, wie die Kitzrettung funktioniert. Jagdhunden bei der Arbeit zuzusehen, selbst von den Jagdhunden gefunden zu werden, die Hunde zu streicheln, faszinierte die Kinder. Als die Schweißhündin Hanna mit ihren sieben Welpen vorbeikam, leuchteten die Kinderaugen.\n\nVon der Kreisjägerschaft gestiftete Nistkästen konnten unter fachkundiger Anleitung zusammengebaut werden und können nun in den Gärten der Kinder Blaumeisen und Rotschwänzen ein Zuhause bieten.  Das heimische Wild wurde anhand von Präparaten gezeigt und erklärt und alle Kinder waren erstaunt als zwei Feldhasen dem lustigen Treiben von weitem zu sahen.\n\nDen Abschluss bildete ein gemütliches Beisammensein bei Bratwurst und Stockbrot backen. Autor: R. Ehlers (Juni 2025)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787239839995-Ferienpass5.webp",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kranken Rothirsch erlöst",
+      "datum": "6.10.2025",
+      "jahr": "2025",
+      "kategorie": "Naturschutz",
+      "bild": "/images/1787231889194-20-08-_2026_15-13-101.png",
+      "text": "Ein ganz besonderes Erlebnis hatte Thomas Tensfeldt, seit diesem Jagdjahr Mitpächter im Revier Gönnebek. Der Jäger konnte einen offensichtlich kranken Rothirsch von seinem Leiden erlösen. Das sei sein \"Lebenshirsch im eigenen Revier\", wie Thomas Tensfeldt berichtet. \"Durch die Angrenzung an den Segeberger Forst haben wir immer wieder Rotwild im Revier, insbesondere vor und nach der Brunftzeit\", erzählt der Jäger. In diesem Jahr erhielt er am 6. Oktober von einem Landwirt die Mitteilung, dass er einen kranken Hirsch in seinem Maisschlag gesehen habe. Mithilfe einer Drohne konnte Thomas Tensfeldt das Stück bestätigen und erkennen, dass es stark geforkelt war. Wenige Tage später konnte der Waidmann den Hirsch erlösen. Die Freude war groß, denn die Forkelverletzung sowie ein deutlich geschwollenes Gelenk am linken Hinterlauf bestätigten sich nach dem Erlegen. Das Stück war elf  Jahre alt, ein ungerader 16-Ender. Autorin Nicole Scholmann, Foto privat",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787232070456-ce773fc0-e420-4fd3-8972-3881fedc92a3.webp",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Hubertus Cup 2026 für Segeberger Jäger",
+      "datum": "1.04.2026",
+      "jahr": "2026",
+      "kategorie": "Pressemitteilung",
+      "bild": "/images/1787231206767-Preis_Hegering_1.webp",
+      "text": "Große Freude bei den Organisatoren der großen Ferienaktion im Sommer 2025 in einem Wald bei Winsen: Auf der Messe Outdoor in Neumünster wurden die drei Hegeringe Hartenholm, Kaltenkirchen und Kisdorf für die Veranstaltung „Mit den Jägern in der Natur“ ausgezeichnet. Die Organisatoren Jana Forstreuter, Sophie Göttsch, Henning Schwartinsky und Thomas Liedtke wurden für ihren ehrenamtlichen Einsatz geehrt. Ein Dutzend Projekte aus Schleswig-Holstein hatten sich beworben.\n\nLandwirtschaft- und Forstministerin Cornelia Schmachtenberg (CDU) hatte die Aufgabe übernommen, den Initiatoren der Ferienaktion den Hubertus Cup und den symbolischen Scheck über 1000 Euro Preisgeld zu überreichen. Besonders sei bei dieser Sommerferienaktion gewesen, dass drei Hegeringe der Kreisjägerschaft Segeberg und 35 Jägerinnen und Jäger mehrere Tage lang den rund 80 interessierten Kindern und Jugendlichen zeigten, was die Natur für Geheimnisse hat und wie Jäger in Wald und Feld arbeiten. \n\nSechs unterschiedliche Stationen hatte es gegeben. Die Technikbegeisterten kamen bei der Station der Wildtierrettung auf ihre Kosten. Die Profis zeigten, wie per Drohne Jungtiere wie Rehkitze und Junghasen vor dem Mähen der Wiesen gesucht werden. Die Kinder verfolgten den Flug der Drohne auf einem Bildschirm und meldeten gleich, wenn ein Wärmepunkt ins Bild kam. Ein Höhepunkt war die Begegnung mit mehreren ausgebildeten Greifvögeln, die die Kinder auch auf die Hand nehmen durften. Dazu gab es Einblicke ins Jagdhornblasen und für die kleinen und großen Teilnehmer Wildbratwurst vom Grill.\n\nZum zweiten Mal hatten die Hegeringe Hartenholm, Kaltenkirchen und Kisdorf die Ferienaktion organisiert. Unterstützt wurden die Waldtage der Jäger von mehreren Kooperationspartnern. „Ohne die vielen Helfer würde das gar nicht klappen“, bedankt sich Jana Forstreuter bei den Ehrenamtlichen. \n\nAuch in diesen Sommerferien haben Mädchen und Jungen wieder die Gelegenheit, den Jägern über die Schulter zu schauen. Am 18. und 19. Juli findet die Aktion für maximal 100 Kinder statt. Wieder treffen die Besucher sich im Wald bei Winsen und durchlaufen die Stationen. \n\nAnmeldungen nimmt Jana Forstreuter bereits jetzt unter Telefon 0172-2814451 oder Mail an Jana.Forstreuter@forst-sh.de entgegen. „Unsere Helfer haben da schon wieder richtig Bock drauf“, freut sich die Hauptorganisatorin. \n\nFoto Marcel Morsdorf\nText Nicole Scholmann",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787135170795-Ministerin-Schmachtenberg-verlieh-den-Hubertus-Cup-Bild-LJV.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Viertklässlern ins Revier",
+      "datum": "1.06.2022",
+      "jahr": "2022",
+      "kategorie": "Jugend",
+      "bild": "/images/1787206429501-7e5afdc3a61694f7f818c1866435fd58_leezen.jpg",
+      "text": "„Es ist in unserem Hegering seit über 30 Jahren gute Tradition, einmal im Jahr mit allen Viertklässlern ins Revier zu gehen“, erläutert Klaus Stolten, Leiter des Hegerings XII Leezen. In diesem Jahr kommen die Lütten aus dem Kindergarten Groß Niendorf hinzu. „Zumindest können wir den Kindern unser Handwerk näher bringen und ihnen etwas über die Natur in ihrer Heimat beibringen“, betont Jäger Heiner Hahn.\n\nOrganisiert wird der jährliche Kindertag von den Obleuten für Jugendarbeit; im Moment haben die Jägerinnen Carina und Lena Hahn dieses Amt inne. Für etwa 80 Schulkinder der vierten Klassen im Schulzentrum Leezen und 30 Kinder aus dem Kindergarten Groß Niendorf ging es unterschiedlich weit durch das Revier zwischen Leezen und Groß Niendorf. Die weiteste Wanderung ging über mehr als sieben Kilometer. Die Kinder wussten aufgeregt zu berichten von gesichteten Rehen, Hirschen, Hasen, Greifvögeln und Graugänsen.\n\n„Ich war positiv überrascht, wie viel die Kinder über unsere heimische Fauna und Flora wissen“, freute sich Hegeringleiter Stolten aus Leezen. Am Ende der Begehung stand ein Treffen auf der Dorfwiese hinter dem Dörpshus. Dort konnten die Kinder alle Tiere, die sie nicht zu sehen bekamen, als Präparat in Augenschein nehmen.\n\nAußerdem konnten die Jungen und Mädchen viel über Jagdhunde lernen während der Vorführung von Thomas und Regina Harm mit ihren bestens ausgebildeten Münsterländern. Ein gemeinsames Grillen rundete den Tag mit den Waidmännern ab und einige der Mädchen und Jungen begleiteten die Jäger aus dem heimischen Hegering noch beim Ansitzen am Abend.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Hubertusmesse Kaltenkirchen",
+      "datum": "1.12.2021",
+      "jahr": "2021",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787130026679-messe_cimg1206.jpg",
+      "text": "Nach 25 Jahren hat der Hegering Kaltenkirchen unter Leitung von Hans-Jürgen Gätjens  wieder eine gut besuchte Hubertusmesse veranstaltet. Geblasen wurde die Messe vom Parforcehorncorps Norderstedt unter Leitung von H. Löffka. An diesem Tag schwieg die Orgel in der Kirche; es erklangen nur die Hörner der Bläser. Geschmückt war die Kirche u.a. mit einer Hirschtrophäe, die in Anlehnung an die Legende des Heiligen Hubertus ein helles Kreuz zwischen den Geweihstangen trug.\n\nAls einst Hubert an einem Karfreitag mit seinem lauten Tross zur Jagd zog, warnte ihn seine\n\nGattin und flehte ihn dringend an, den ernsten Todestag des Herrn nicht zu entweihen. Er\n\nschien von der liebevollen Warnung seiner frommen Gattin gerührt, dennoch siegte die\n\nJagdlust. Mit seinem zahlreichen Gefolge sprengte er durch Wald und Busch, durch Wiesen\n\nund Gründe und verfolgte einen prächtigen Hirschen. Als er demselben nahe kam und schon\n\nden Bolzen nach dem Tiere abdrücken wollte, bleibt dasselbe plötzlich stehen, wendet sich\n\nnach dem Jäger, und mitten in seinem Geweih erscheint ein strahlendes Kreuz. Eine klagende\n\nStimme ertönt: 'Hubertus, ich erlöste dich und dennoch verfolgst du mich!'\n\nHubert erbebte, warf sein Geschoß von sich und flehte innig zu Gott um Erbarmen. Darauf\n\nbaute er sich eine Hütte aus Baumzweigen und Schilf und führte, von der Welt geschieden, in\n\nstiller Waldeinsamkeit ein bußfertiges, abgetötetes Leben.\"\n\n(Großes Hausbuch der Heiligen. Berichte und Legenden. Hrg. von Diethard H. Klein, S. 551f.)\n\n \n\nDie Predigt, in der die Legende des Heiligen Hubertus eingebettet war und ein Bezug zur\n\nheutigen Jagd hergestellt wurde, hielt Pastor Dr. Tilmann Fuß. Das traditionelle Lesen des Psalms\n\n104 (Ein Loblied auf den Schöpfer!) wurde vom Hegeringleiter vollzogen.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Neuer Vorsitzender bei Hubertus Kaltenkirchen",
+      "datum": "1.11.2021",
+      "jahr": "2021",
+      "kategorie": "Allgemein",
+      "bild": "/images/1787129807389-rudi_u._stefan.jpg",
+      "text": "Generationswechsel bei Hubertus Kaltenkirchen: Die Mitglieder der Jagdhorngruppe wählten auf ihrer Jahreshauptversammlung einen neuen Vorsitzenden. 40 Jahre ist Rudi Paululat Jäger und solange auch Mitglied der Gruppe Hubertus Kaltenkirchen. 21 Jahre war er als Vorsitzender für die Repräsentation der Gruppe in der Öffentlichkeit und für den Zusammenhalt zuständig. Nun folgt Stefan Schäfer als Vorsitzender der Gruppe.\n\nAls ehemaliger Diakon liegt Rudi Paululat die Mitmenschlichkeit und Verantwortung für die Menschen in seinem Umfeld quasi im Blut. Seine fürsorgliche Art zollte ihm die Gruppe mit entsprechendem Respekt und er hinterlässt seinem Nachfolger entsprechend große Fußstapfen. Jetzt, in seinem 86. Lebensjahr, gibt er die Verantwortung aber in jüngere Hände, um sich mehr um seine Familie zu kümmern. Die verbleibende Zeit wird er weiter an den Übungsabenden und Auftritten mit den Jagdhornbläsern, dem Lionsclub Kaltenkirchen und nicht zuletzt auf der Jagd verbringen. Für sein Wirken als Vorsitzender der Gruppe Hubertus Kaltenkirchen war er kürzlich mit der silbernen Verdienstnadel des DJV geehrt worden. Auch das Amt des Hegeringobmannes für das Jagdhornblasen möchte Rudi Paululat gern an seinen Nachfolger vererben. Darüber muss aber die Mitgliederversammlung des Hegerings IX am 10. März entscheiden.\n\nIm Jahre 2014 stieß der heute 56-jährige Stefan Schäfer mit seinen Kindern Nicole und Daniel zur Gruppe. Stefan Schäfer stammt aus der Rhön und hat schon in jungen Jahren als Bläser in einer Musikkapelle auf den Tanzböden für Stimmung gesorgt. Stefan Schäfer ist Maschinenbauingenieur. Beruflich verschlug es ihn und seine Familie in den Norden mit Wohnort Kaltenkirchen, wo er im Kreise netter Nachbarn und als Bläser bei Hubertus Kaltenkirchen eine neue Heimat fand. Notenfest und stimmgewaltig führte er sich ein und fand über die Gruppe auch schnell seine jagdliche Heimat in einem Segeberger Revier. Seine Kinder haben das musikalische Talent offensichtlich geerbt, denn beide wurden im Jahre 2016 Landesmeister und Vizemeister beim Landesbläserwettbewerb im Einzelblasen und sind heute stützende Mitglieder der Gruppe.\n\nSchäfer wurde einstimmig zum neuen 1. Vorsitzenden von Hubertus Kaltenkirchen gewählt. Die Wahl von Rudi Paululat zum Ehrenvorsitzenden war ein Selbstgänger.\n\nSo präsentiert sich Hubertus Kaltenkirchen mit seinen 25 aktiven Mitgliedern nun unter neuer Führung, dabei weiter unter bewährter musikalischer Leitung von Benjamin Liebe und bietet jeden Montag ab 18 Uhr Anfängern im Dorfhaus in Oersdorf an, das Jagdhornblasen in Gemeinschaft zu erlernen.\n\nAutor: Volker Schmidt, Hubertus Kaltenkirchen (Nov 2021)",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Bläser setzen auf das neue Jahr",
+      "datum": "1.02.2022",
+      "jahr": "2022",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787128988025-blaeser1.jpg",
+      "text": "Anfang Februar traf sich zum ersten Mal nach zwei Jahren das Jagdhornbläsercorps Hubertus der Kreisjägerschaft. Etwas enttäuscht zeigte sich Bläserobfrau Christiane Stock von der Resonanz auf die Einladung. Zwar hatte sie gebeten, wegen der noch herrschenden Corona-Beschränkungen pro Bläsergruppe nur ein Mitglied zu entsenden, aber doch gehofft, dass mehr gekommen wären.\n\nSeit März 2020 waren in allen Gruppen die Termine ausgefallen, nur zeitweise konnte geübt werden und an Auftritte war gar nicht zu denken gewesen. „Wenn wir mal auf einer Beerdigung das letzte Halali blasen durften, war es schon ein Highlight“, beschrieb Christiane Stock sarkastisch die Lage. 219 aktive Bläser verzeichnet das Corps zurzeit, aber nur etwa die Hälfte hatte in Kleingruppen im Freien oder Industriehallen weiter geübt, wenn es denn rechtlich möglich war. So wurde dann der Trainingsstand von den Hornmeistern durchweg als schlecht bis mäßig benotet. Daher wird auch keine Gruppe an dem Bläserwettbewerb auf Gut Görtz am 12. Juni teilnehmen.\n\nMit einem Ausblick auf 2022 endete die Versammlung. Wettblasen oder ähnliches will man nicht ausrichten, aber ein Kreisbläsertreffen im Sommer soll geplant werden. Da könnte man einen Kanon von etwa einem Dutzend Märschen und Signalen zusammenstellen, die dann von allen\n\ngemeinsam geblasen werden. Vor allem freut man sich aber auf das absehbare Ende der Beschränkungen und einen hoffentlich regelmäßigen Übungsbetrieb. „Das wird aber nicht leicht“, meinte ein Corpsleiter, „viele haben herausgefunden, dass es auf dem Sofa gemütlicher ist, als zwei Stunden zu üben.“ Autor: Klaus J. Harm",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787231889194-20-08-_2026_15-13-101.png",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisbläserfest 2023 in Schackendorf",
+      "datum": "14.07.2023",
+      "jahr": "2023",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787035364884-2023_03.jpg",
+      "text": "Das Kreisbläserfest am 14. Juli ab 19 Uhr in Schackendorf soll in ganz neuer Ausrichtung stattfinden. Das stellten Oliver Jürgens, Vorsitzender der Kreisjägerschaft Segeberg, und seine Bläserobfrau Christiane Stock vor kurzem vor. Waren es früher eher interne Treffen der Jagdhornbläser, soll es jetzt ein kreisweites Meeting von „Jägern, Bläsern und Jagdhunden“ werden, wie Christiane Stock erläuterte. Einige Bläsergruppen werden neu eingeübte Stücke vorstellen, der Schwerpunkt wird aber im gemeinsamen Blasen bekannter Märsche und Signale liegen. Für die Verpflegung zwischendurch konnte die Freiwillige Feuerwehr Schackendorf gewonnen werden. Autor Klaus-J. Harm",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisbläserfest kam gut an",
+      "datum": "1.06.2023",
+      "jahr": "2023",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787128807847-kreisblaeserfest2023.jpg",
+      "text": "Es wurde mal wieder Zeit, ein gemeinsames Bläserfest aller Jagdhornbläser des Kreises Segeberg zu feiern. In Schackendorf versammelten sich über 100 Jagdhornbläser auf dem  Dorfplatz zu einem gemeinsamen Konzert. Ausgerichtet wurde das Kreisbläserfest, zu dem auch Gruppen aus den Nachbarkreisen gekommen waren, vom Bläsercorps Hubertus Segeberg, das in diesem Jahr seinen 70. Geburtstag feiert.\n\nKreisbläserobfrau Christiane Stock konnte unter den über 300 Gästen auch viele Ehrengäste begrüßen. Musikalisch hatte Christiane Stock auf ein neues Konzept gesetzt, das bei den Bläsern auf sehr viel Zustimmung traf: Neben den Darbietungen einzelner Bläsergruppen war der Schwerpunkt des Festes ein gemeinsames Blasen unter der bewährten Leitung von Meinhard Schweim. Ob er eine simulierte Treibjagd musikalisch vor den Ohren der Gäste erscheinen ließ oder bekannte Märsche und Fanfaren intonieren ließ – diese Änderung des Konzeptes kam bei allen bestens an. Autor: Klaus J. Harm / Foto Kurt-S. Becker",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Trauer um Hans-Friedrich Boß",
+      "datum": "1.05.2025",
+      "jahr": "2025",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787128376737-Jagdhornbl_serLeezen-Nahe.jpg",
+      "text": "Die Jagdhornbläsergemeinschaft Leezen-Nahe hat sich von ihrem langjährigen musikalischen Ausbilder verabschiedet. Hans Boß verstarb im 87. Lebensjahr. Der Preetzer übernahm vor 25 Jahren die musikalische Leitung der Bläsergruppe. Durch seine Förderung hat er uns auf ein gutes musikalisches Niveau gebracht. Er verstand es, seine Leidenschaft und seinen Ehrgeiz für gute Jagdmusik auch zu unserem Ziel zu machen. Dank seiner Ausbildung konnten wir auf Bläserwettbewerben viele gute Erfolge erzielen. Ob zu öffentlichen Auftritten oder zu privaten Ständchen, Hans hat uns stets begleitet und unterstützt. Über die Jahre ist eine tiefe persönliche Verbundenheit zu unserer Bläsergruppe entstanden. Für sein unermüdliches Engagement und seine jahrelange Treue sind wir ihm sehr dankbar. Autorin: Kathi Teegen",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kaltenkirchener Jagdhornbläser erstmals beim Bundeswettbewerb",
+      "datum": "14.06.2025",
+      "jahr": "2025",
+      "kategorie": "Jagdhornblasen",
+      "bild": "/images/1787061799472-DSC07472.jpg",
+      "text": "Am 14. und 15. Juni 2025 hatte der Deutsche Jagdverband zum Bundeswettbewerb 2025 unter dem Motto \"Jagdhornblasen – gelebtes Brauchtum\" eingeladen. Austragungsort war der Hofgarten des Barockschlosses Fasanerie in Eichenzell bei Fulda. \n\nBeim Bundeswettbewerb zeigten die Bläser, dass mit dem Jagdhorn weitaus mehr als nur die Signale bei der Jagd entlockt werden können.\n\nUnter der Leitung der Bundesbläserobmanns Jürgen Keller wurden drei Wertungsklassen angeboten. Dies waren die Klassen A (Fürst-Pless Hörner), Es (Parforcehörner) und G (gemischte Gruppen). Etwa 1.000 Bläser aus 58 Gruppen waren aus ganz Deutschland angereist, um sich den Wertungsrichtern zu zeigen. \n\nJedes Bundesland hatte einen Vorentscheid und die Besten wurden hergeschickt, erklärte der Bundesbläserobmann. Die Bläser vom Jagdhornbläserkorps Hubertus Kaltenkirchen hatten sich seit Anfang dieses Jahres unter der Leitung ihres Dirigenten Benjamin Liebe intensiv vorbereitet. Mindestens zwei wöchentliche Proben forderten den Mitgliedern viel Freizeit ab, die letzten zwei Wochen der Vorbereitung hat man sich sogar täglich zum gemeinsamen Üben zusammengetan. Erst eine Woche vor der Veranstaltung wurde den Teilnehmern bekannt gegeben, welche Signale und welches Selbstwahlstück zum Vortrag zu bringen sind. \n\nFür die Kaltenkirchener Bläser in der Wertungsklasse „G“ (Gemischte Pless- und B-Parforcehorn-Gruppen ohne Ventile) bedeutete dies, dass die Signale Begrüßung, Wisent tot, Hirsch tot und Wagenruf zur Wertung vorgetragen werden mussten. Als Selbstwahlstück wurde die Holstein Fanfare gewählt, welche in Uraufführung vorgetragen wurde. Komponist ist der musikalische Leiter der Gruppe Benjamin Liebe aus Kaltenkirchen.\n\nBewertet wurde in den drei Kriterien Gesamteindruck, Tonreinheit sowie notengerechter Vortrag. Jeder Richter hat für jedes Kriterium Punkte notiert welche schlussendlich je Richter und Vortragsstück addiert wurden. \n\nDie Kulisse vor dem Schloss Fasanerie war sehr beeindruckend und die Klänge der Jagdhörner schallten weit ins Rhöner Land. Das weitläufige Gelände war erfüllt mit Bläsern, die letzte Übungen trainierten, von vielen verschiedenen in jagdlicher Tradition gehaltenen Bekleidungen der Bläsergruppen und auch Einzelpersonen, Händler für Zubehör für die jagdliche Musik und mitgeführten Jagdhunden. \n\nEin besonderer Höhepunkt: das Abschlussblasen vor der Siegerehrung. Unter Leitung von Bundesbläserobmann Jürgen Keller bliesen die Gruppen gemeinsam einige Jagdsignale, die bei den Besuchern für Gänsehaut sorgten. \n\nIn der Klasse Es gewann die Gruppe aus Mildetal-Gardelegen aus (Sachsen-Anhalt). Die Jagdhornbläsergruppen des KJV Groß-Gerau (Hessen) und Das Große Freie (Niedersachsen) folgten auf den Plätzen zwei und drei. In der Klasse A setzte sich die Bläsergruppe des KJV Gelnhausen (Hessen) an die Spitze. Den zweiten Platz belegte die Gruppe des Hegerings Kronsberg (Niedersachsen), gefolgt von Hubertus Gießen (Hessen).\n\nIn der Klasse G wurde Hameln-Pyrmont (Niedersachsen) Bundessieger vor dem Bläserkorps der Kreisjägerschaft Krefeld (N ordrhein-Westfalen). Den dritten Platz belegte die Jagdhornbläsergruppe des KJV Groß-Gera. Die Bläser aus Kaltenkirchen erreichten Platz 19 von 22, was genau der persönlichen Einschätzung der Gruppenmitglieder vor dem Wettbewerb entsprach. Es war die erste Teilnahme an einer solch hochkarätigen Veranstaltung und die Monate der Vorbereitung und die gemeinsame Reise ins Fuldaer Land haben der Kameradschaft im Verein sehr gute Impulse gegeben. Die vorher gesteckten Zielmarken, nicht letzter zu werden und genügend Punkte zur Erlangung der Leistungsspange des Deutschen Jagdverbandes zu erreichen wurden gut erreicht.\nDer Vorsitzende Stefan Schäfer kann seinen Stolz auf die Gruppe nicht verbergen, dass man es durch Fleiß und Disziplin der vergangenen Jahre so weit bis auf Bundesebene gebracht hat. Das Jagdhornbläserkorps Hubertus Kaltenkirchen besteht seit 1975 und demnächst wird  ein Jubiläumsfest gefeiert. Zurzeit musizieren 24 Bläser regelmäßig und ein Dutzend Nachwuchsbläser befinden sich in Ausbildung.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisjägertages 2026 in Blunk",
+      "datum": "17.04.2026",
+      "jahr": "2026",
+      "kategorie": "Veranstaltung",
+      "bild": "/images/1787039418088-2026_3.jpeg",
+      "text": "**Vereinsbericht 2025 ist hier hochgeladen**",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787039404836-2026_1.webp",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039410561-2026_2.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039428464-2026_4.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039436657-2026_5.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039443285-2026_6.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787039449253-2026_7.webp",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impressionen Kreisjägertages 2026 in Blunk",
+      "downloads": [
+        {
+          "titel": "Jahresbericht KJS Segeberg 2025",
+          "datei": "/downloads/1787039302075-Jahresbericht_KJS_Segeberg_2025.pdf",
+          "vorschau": ""
+        }
+      ]
+    },
+    {
+      "titel": "Neue Abgabezeiten für Trichinenproben",
+      "datum": "1.03.2022",
+      "jahr": "2022",
+      "kategorie": "Tierkrankheiten",
+      "bild": "/images/1787038896896-267_Trichinenprobe-2.jpg",
+      "text": "Mitteilung des Kreises Segeberg (März 2022):\n\n**Hinweis für Jäger*innen: Neue Abgabezeiten für Trichinenproben**\n\nKreis Segeberg. Das Veterinäramt teilt mit, dass sich die Abgabezeiten für Trichinenproben und Schweißproben von Schwarzwild geändert haben. Ab sofort können Jäger*innen die Proben im neuen Dienstgebäude des Veterinäramtes in der Rosenstraße 28a in Bad Segeberg zu folgenden Zeiten abgeben: montags bis freitags von 8.30 bis 12 Uhr sowie dienstags und donnerstags zusätzlich von 14 bis 16 Uhr.\nNach dem Umzug an den neuen Standort steht vorübergehend keine Klingel zur Verfügung. Jäger*innen müssen sich daher vor Ort telefonisch unter den Rufnummern 04551-951 9337 oder 04551-951 9292 melden. Ein Hinweis mit den Nummern hängt auch am Haupteingang. Alternativ können die Proben täglich bis 12 Uhr oder nach telefonischer Absprache (04192-2779) im Fleischhygieneamt in Bad Bramstedt (Tegelbarg 19-21) abgegeben werden.",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisjägertages 2022 in Hartenholm",
+      "datum": "18.05.2022",
+      "jahr": "2022",
+      "kategorie": "Veranstaltung",
+      "bild": "/images/1787037368126-2022_2.jpg",
+      "text": "**Vereinsbericht 2022 ist hier hochgeladen**\n\n\n\n\n",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787037361774-2022_1.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037377992-2022_3.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037386315-2022_4.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787037393861-2022_5.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impessionen aus dem Kreisjägertag 2022",
+      "downloads": []
+    },
+    {
+      "titel": "Wechsel bei den Kreisjägermeister",
+      "datum": "17.01.2023",
+      "jahr": "2023",
+      "kategorie": "Pressemitteilung",
+      "bild": "/images/1787036045772-kreisjaegermeister_17.01.2023.jpeg",
+      "text": "**Kreisjägermeister Klaus Rathje startet in  26. Ehrenamtsjahr – Norbert Sommer folgt auf  Hans-Hermann Schröder als neuer Stellvertreter **\n\nKreis Segeberg. 25 Jahre lang haben Klaus Rathje und Hans-Hermann Schröder  ehrenamtlich Seite an Seite gearbeitet – Rathje als Kreisjägermeister, Schröder als  dessen Stellvertreter. Der 73-jährige Rathje ist kürzlich für weitere fünf Jahre in  seinem Amt bestätigt worden. Gegenkandidaten gab es nicht. Schröder scheidet auf eigenen Wunsch als Stellvertreter aus; zu seinem Nachfolger wurde der 62-jährige  Norbert Sommer vorgeschlagen und gewählt. \n\nIm Rahmen einer kleinen Feierstunde hat Landrat Jan Peter Schröder sie jetzt die offiziellen Urkunden überreicht und Hans-Hermann Schröder für seinen  jahrzehntelangen Einsatz gedankt.  \n\nKlaus Rathje aus Groß Rönnau und Norbert Sommer aus Pronstorf-Strenglin beraten  die untere Jagdbehörde in jagdlichen Fragen und Angelegenheiten und nehmen  Außendiensttermine wahr. Dabei geht es unter anderem um Probleme mit  Jagdreviergrenzen, Abschussplanung, Jägerprüfungen und viele weitere Herausforderungen in jagdlichen Angelegenheiten. „Die Zusammenarbeit mit den Kreisjägermeistern läuft seit vielen Jahren auf einer sehr professionellen,  produktiven Ebene“, sagt Mike Albrecht vom Jagd- und Waffenwesen der  Kreisverwaltung. Er ist zuversichtlich, dass dies auch in den kommenden fünf Jahren  so weitergehen wird. Diese Einschätzung teilen Rathje und Sommer und freuen sich  auf ein weiterhin „gutes Miteinander“. (Mitteilung des Kreises Segeberg)\n\n ",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
+    {
+      "titel": "Kreisjägertages 2023 in Hartenholm",
+      "datum": "1.04.2023",
+      "jahr": "2023",
+      "kategorie": "Veranstaltung",
+      "bild": "/images/1787035342710-2023_1.jpg",
+      "text": "**Vereinsbericht 2023 ist hier hochgeladen**",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787035357133-2023_2.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035364884-2023_03.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035376172-2023_4.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035388061-2023_5.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035400882-2023_6.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787035414249-2023_7.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Impessionen aus dem Kreisjägertag 2023",
+      "downloads": [
+        {
+          "titel": "Vereinsbericht 2023",
+          "datei": "/downloads/1787035203692-vereinsbericht_2023.pdf",
+          "vorschau": ""
+        }
+      ]
+    },
+    {
+      "titel": "Kreisjägertages 2024 in Hartenholm",
+      "datum": "1.04.2024",
+      "jahr": "2024",
+      "kategorie": "Veranstaltung",
+      "bild": "/images/1787033876093-Kreis2024_3.jpeg",
+      "text": "Erstmals wurden mit dem Ehrenjagdmesser der Kreisjägerschaft Segeberg Rolf Borkenhagen aus Kisdorf, Wolfgang Harm aus Bad Segeberg, Klaus Rathje aus Groß Rönnau, Klaus-Dieter Schlüter aus Eilsdorf und Jörg Timmermann aus Kisdorf ausgezeichnet. Die Geehrten haben sich in den verschiedenen Funktionen seit vielen Jahren in die Vereinsarbeit eingebracht. \n\nDer Vereinsbricht ist da ",
+      "link": "",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787033876093-Kreis2024_3.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787033868041-kreis2024_2.jpeg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787033859645-Kreis2024_1.jpeg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": [
+        {
+          "titel": "Vereinsbericht 2024",
+          "datei": "/downloads/1787033928619-Vereinsbericht_2024.pdf",
+          "vorschau": ""
+        }
+      ]
+    },
+    {
+      "titel": "Papillomaviren bei Damhirschen",
+      "datum": "20.11.2024",
+      "jahr": "2024",
+      "kategorie": "Tierkrankheiten",
+      "bild": "/images/1787032077923-IMG-20241102-WA0025.jpg",
+      "text": "**Info 20. November 2024:**\n\nIn Bezug auf die anstehenden Drückjagden im Kreis Segeberg möchte ich Ihnen auf Bitte des hiesigen Veterinäramtes und in Absprache mit dem Landelabor noch gern folgenden Hinweis geben:\n\nEs wird gebeten, von Dam- und Rehwild jedes 4. Tier einer Strecke auf BTV3 zu beproben (EDTA-Blut). Die Proben können mit den bekannten Schwarzwild-Probenröhrchen (EDTA-Röhrchen)\n\ngenommen und mit dem angefügten Allgemeinen Probenbegleitschein des Landeslabors über die bekannten Kühlschränke in Hartenholm und Bad Segeberg oder direkt in NMS abgegeben werden.\n\nVon Einsendungen von Tierkörpern in die Pathologie ist bitte bis auf Weiteres abzusehen. Es sind bereits einige Proben mit der Fragestellung \"Papillomatose\"  im Landeslabor eingegangen und\n\nAbklärungsuntersuchungen eingeleitet. Die Bearbeitung nimmt aber wohl noch etwas Zeit in Anspruch. Das Landeslabor dankt für das Verständnis.\n\n**Formular: Untersuchung allgemein**\n\nJagdbehörde des Kreises Segeberg\n\n __________________________________________________________________________________________________________________________________\n \n**Info 12. November 2024: **\n\nMit Mail vom heutigen Tage hat mir das hiesige Veterinäramt mitgeteilt, dass das Tierseuchenreferat des Landwirtschaftsministeriums mitgeteilt hat, dass nunmehr aus 6 Landkreisen in Schleswig-Holstein Proben von Damhirschen zur Untersuchung in das Landeslabor eingesandt worden sind. Gleichzeitig wurde darum gebeten, dass keine weiteren Proben eingesandt werden, da nun zunächst die Untersuchungsergebnisse der eingesandten Proben abgewartet werden sollen. Demnach werden auch im Rahmen der Fleischuntersuchung keine Proben von Damhirschen mit den entsprechenden Veränderungen entnommen und zur Untersuchung eingesandt.\n\nJagdbehörde des Kreises Segeberg\n\n __________________________________________________________________________________________________________________________________\n\nI**nfo 8. November 2024:**\n\nNach weiteren vermehrten Rückfragen in Bezug auf das Papillomavirus übersende ich Ihnen weitere Informationen. \n\n### **Beprobung und Untersuchung**\n\n Das Landeslabor hat darum gebeten, dass eine Abstimmung mit dem Labor erfolgt, bevor Proben eingesandt werden. Das bedeutet, dass die Jäger bitte Kontakt mit dem Veterinäramt aufnehmen, wenn entsprechende Damhirsche erlegt worden sind. Das Veterinäramt stimmt dann mit dem Landeslabor ab, ob Proben eingesandt werden sollen oder nicht und gibt dem Jäger eine Rückmeldung. Im Fall, dass die Proben eingesandt werden können, sind diese im Veterinäramt in der Rosenstr. 28a in Bad Segeberg mit einem ausgefüllten Untersuchungsauftrag (Anlage) abzugeben. Verpackung der Proben erfolgt durch den Jäger. Die Nummer der Wildmarke, mit der das Stückgekennzeichnet ist, muss mit angegeben werden.\n\n### **Inverkehrbringen als Lebensmittel**\n\nWenn Damhirsche erlegt worden sind, die solche Veränderungen an der Brunftrute aufweisen und diese Damhirsche als Lebensmittel in den Verkehr gebracht werden sollen, muss das Stück zur amtlichen Fleischuntersuchung angemeldet werden. Die Anmeldung zur amtlichen Fleischuntersuchung kann unter der Telefonnummer 04551/9518353 oder 04551/9518354 zu den üblichen  Bürozeiten erfolgen.\n\nDie amtliche Fleischuntersuchung von freilebenden Wildwiederkäuern kostet aktuell 18,16€.\n\n### **Entsorgung über Firma Rendac**\n\nWenn Damhirsche entsorgt werden sollen, informiert der Jäger die Firma Rendac. Diese teilt dann auch mit wie hoch die Entsorgungskosten sind. Die Firma Rendac ist unter der folgenden Telefonnummer erreichbar: 0800-7793333.  \n\nIch begrüße die hohe Aufmerksamkeit der Kreisjägerschaft gegenüber solchen Veränderungen, die bei den Damhirschen am vergangenen Wochenende festgestellt worden sind sehr. Bisher ist kein Nachweis eines Papillomavirus bei Damhirschen erfolgt. Die Untersuchungen der eingesandten Proben dauern leider noch an.\n\n Veterinärbehörde und Jagdbehörde des Kreises Segeberg\n\n**Merkblatt zum Papillomavirus bei Damhirschen**\n\n ",
+      "link": "https://ljv-sh.de/damwild/",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": [
+        {
+          "titel": "2024.11_Merkblatt_Damwild_und_Papillomaviren",
+          "datei": "/downloads/1787031075747-2024.11_Merkblatt_Damwild_und_Papillomaviren.pdf",
+          "vorschau": ""
+        },
+        {
+          "titel": "Untersuchung_Allgemein",
+          "datei": "/downloads/1787031093238-Untersuchung_01_Allgemein.pdf",
+          "vorschau": ""
+        }
+      ]
+    },
+    {
+      "titel": "Myxomatose bei Feldhasen ",
+      "datum": "12.09.2025",
+      "jahr": "2025",
+      "kategorie": "Tierkrankheiten",
+      "bild": "/images/1787029894324-Bild-Landesjagdverband-NRW.png",
+      "text": "MMLLEV SH                                                                      Kiel, den 12.09.2025\n\nSehr geehrte Damen und Herren,\n\nin diesem Sommer wurde in Schleswig-Holstein erstmalig Myxomatose vom Toldeo-Stamm bei einem Feldhasen bestätigt. Dieser in Deutschland erstmals 2024 in Nordrhein-Westfalen und Niedersachsen aufgetretene Virusstamm ist an Feldhasen adaptiert und versursacht hier schwere Verläufe mit hoher Mortalität. Eine Betroffenheit von Kaninchen wurde in Schleswig-Holstein bislang nicht beobachtet.\n\nSeit dem ersten bestätigtem Fall Ende Juli im Kreis Dithmarschen, bei dem das Vorliegen des Toledo-Stammes bereits durch das FLI nachgewiesen wurde, liegen mittlerweile sechs weitere Pockenvirus-positive Befunde des LSH vor. Eine Differenzierung in Hinblick auf das Vorliegen des Toledo-Stamms am FLI steht hierbei noch aus. Die Nachweise stammen neben dem Kreis Dithmarschen aus den Kreisen Steinburg, Pinneberg, Segeberg, sowie Rensburg-Eckernförde. \n\nUm über das Vorkommen der Toledo-Variante der Myxomatose in Schleswig-Holstein einen Überblick zu erhalten, können bei vermehrter Sterblichkeit von Feldhasen in bislang nicht betroffenen Gebieten bis auf Weiteres je ein bis zwei Tierkörper an das LSH eingesendet werden. Um andere Krankheitsursachen ebenfalls abzuklären, wird hier neben der Myxomatose auch auf RHD, Tularämie und Brucellose untersucht. Die Untersuchungen, die über die Veterinärämter eingesendet werden, werden als amtliche Untersuchungen ohne Berechnung ausgeführt.\n\nBei der Übertragung der Myxomatose spielen Stechmücken und -fliegen eine große Rolle. Das Virus kann jedoch auch direkt von Tier zu Tier sowie auch indirekt über mit Pockenmaterial kontaminiertes Futter bspw. durch Pockenkrusten auf den Äsungsflächen übertragen werden. In Kadavern infizierter Tiere kann das Virus über eine Woche infektiös bleiben, in getrockneten Pockenkrusten und Fellen auch mehrere Monate. Eine Entfernung der Kadaver aus der Umwelt kann daher den Infektionsdruck reduzieren. Die Entsorgung der Kadaver von Feldhasen mit Krankheitsanzeichen über die Geflügelpest-Tonnen oder ASP-Sammelstellen unter Übernahme der Kosten durch das Land ist dabei nach Rücksprache mit Frau Strecker (giulia-elisabeth.strecker@mllev.landsh.de)  grundsätzlich möglich. Bei der Entsorgung ist auf den persönlichen Schutz, wie etwa das Tragen von Handschuhen, zwar nicht wegen der Myxomatose, aber anderer möglicher Erreger, zu achten. Neben Hygienemaßnahmen können auch ein Verzicht der Bejagung auf Feldhasen in akut betroffenen Revieren sowie ein dortiger Verzicht auf Hundearbeit Maßnahmen sein, Stress zu reduzieren und überlebenden Hasen eine Erholung der Populationen zu erleichtern.\n\nInformationen zur Myxomatose bei Feldhasen finden Sie beispielsweise auch als FAQ auf der Homepage des Landesamts für Verbraucherschutz und Ernährung Nordrhein-Westfalen:  FAQ Myxomatose beim Feldhasen | LAVE NRW\n\n\nMinisterium für Landwirtschaft,\nländliche Räume, Europa\nund Verbraucherschutz\nReferat Veterinärwesen\nIX 2610",
+      "link": "",
+      "archiviert": false,
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
+    },
     {
       "titel": "Jungwildrettung 2026 – Saison startet!",
       "datum": "1.04.2026",
       "kategorie": "Naturschutz",
       "bild": "/images/1781435792677-drohen.jpg",
-      "text": "Die Jungwildrettungssaison 2026 beginnt. Drohnenpiloten und Jäger koordinieren sich für den Einsatz in der Mähsaison. Interessierte können sich bei ihrem Hegering melden.",
+      "text": "Mit dem Start der Mähsaison beginnt auch die Jungwildrettungssaison 2026. Um Rehkitze und andere im hohen Gras versteckte Wildtiere vor dem Mähtod zu bewahren, koordinieren Drohnenpiloten und Jäger ihre Einsätze bereits in den frühen Morgenstunden.\n\nDurch den Einsatz moderner Wärmebilddrohnen können Rehkitze vor der Mahd lokalisiert und anschließend sicher aus den betroffenen Flächen gebracht werden. Diese Zusammenarbeit leistet einen wichtigen Beitrag zum Tier- und Naturschutz in unserer Region.\n\nWer die Kitzrettung aktiv unterstützen möchte, sei es als Drohnenpilot, Helfer bei den Einsätzen oder durch organisatorische Unterstützung, ist herzlich willkommen.\n\nInteressierte können sich bei der Kreisjägerschaft Segeberg unter\n**frank.huelser@kjs-segeberg.de** melden.\n\nGemeinsam retten wir Leben und leisten einen wertvollen Beitrag zum Schutz unserer heimischen Wildtiere",
       "link": "",
-      "archiviert": false
+      "archiviert": false,
+      "jahr": "2026",
+      "galerie": [],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
     },
     {
-      "titel": "Kreisjägertag 2025 – Anmeldung offen",
-      "datum": "15. April 2025",
-      "kategorie": "Veranstaltung",
-      "bild": "",
-      "text": "Der Kreisjägertag 2025 findet am 6. September auf dem Festplatz Bad Segeberg statt. Jetzt anmelden und dabei sein!",
-      "link": ""
+      "titel": "Landesjägertag LJV 2026: Neues Präsidium gewählt",
+      "datum": "18.04.2026",
+      "kategorie": "Pressemitteilung",
+      "bild": "/images/1787135164556-Hans-Woermcke-li.-folgt-auf-Wolfgang-Heins-Bild-LJV.jpg",
+      "text": "Bei der Delegiertenversammlung des Landesjagdverbandes Schleswig-Holstein (LJV) am 18. April 2026 in den Holstenhallen Neumünster haben die Delegierten ein neues Präsidium gewählt. Im Mittelpunkt standen neben jagdpolitischen Themen, Finanzen und Ehrungen insbesondere die Neuwahlen an der Verbandsspitze.\n\nDer bisherige Präsident Wolfgang Heins blickte auf aktuelle Herausforderungen für Jagd, Natur- und Artenschutz und betonte die gesellschaftliche Verantwortung der Jägerschaft. Auch Landwirtschaftsministerin Cornelia Schmachtenberg würdigte in ihrem Grußwort das ehrenamtliche Engagement der Jägerinnen und Jäger.\n\nZum neuen Präsidenten wurde Hans Wörmcke gewählt. Die Ämter der Vizepräsidenten übernehmen Jens Harder und Tobias Christer. Carmen Molt wurde als Schatzmeisterin bestätigt. Dem Präsidium gehören außerdem Marcel Zickermann, Lothar Brandt und der neu gewählte Jörg Höfer an.\n\nFür besondere Verdienste wurden Hans-Heinrich Jaacks mit der DJV-Verdienstnadel in Silber und Andreas-Peter Ehlers mit dem Ehrenmesser ausgezeichnet. Wolfgang Heins wurde zum Ehrenpräsidenten ernannt.\n\nMit der Wahl des neuen Präsidiums hat der Landesjagdverband wichtige Weichen für die zukünftige Verbandsarbeit gestellt.",
+      "link": "",
+      "jahr": "2026",
+      "archiviert": false,
+      "galerie": [
+        {
+          "bild": "/images/1787135301259-Hans-Woermcke-ist-neuer-Praesident-des-Landesjagdverbandes-Bild-LJV.jpg",
+          "titel": ""
+        },
+        {
+          "bild": "/images/1787135305218-Das-neue-Praesidium-Bild-LJV.jpg",
+          "titel": ""
+        }
+      ],
+      "galerie_titel": "Bildergalerie",
+      "downloads": []
     },
     {
       "titel": "Neue Schweißhundeführer ausgebildet",
-      "datum": "12. February 2026",
+      "datum": "12.02.2026",
       "kategorie": "Hundeausbildung",
       "bild": "/images/download-1-.jpg",
       "text": "Acht neue Schweißhundeführer haben ihre Prüfung erfolgreich abgeschlossen. Herzlichen Glückwunsch an alle Teilnehmerinnen und Teilnehmer!",

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Partner der Kreisjägerschaft Segeberg e.V.">
+  <title>Partner – Kreisjägerschaft Segeberg e.V.</title>
+  <link rel="stylesheet" href="../css/style.css">
+<script>
+  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    const r = document.documentElement.style;
+    if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
+    if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
+    if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
+    if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
+    if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
+    if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
+    if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
+    if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
+    if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
+  }).catch(()=>{});
+</script>
+</head>
+<body>
+
+<div id="siteHeader"></div>
+<script src="/js/components.js"></script>
+
+<div class="page-hero">
+  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="container">
+    <h1>Partner</h1>
+    <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
+  </div>
+</div>
+
+<div class="page-content full pn-overview-layout">
+  <div class="container">
+    <main class="main-content" id="pn-main">
+      <p style="font-size:1.05rem;color:var(--text-body);line-height:1.8;margin-bottom:2rem;">
+        Die Kreisjägerschaft Segeberg e.V. arbeitet mit einer Reihe von Partnern aus Jagd, Naturschutz und
+        Wirtschaft zusammen. Einen Überblick finden Sie hier – für weitere Informationen zu einem Partner
+        einfach auf die jeweilige Kachel klicken.
+      </p>
+
+      <div class="news__grid" id="partner-grid">
+        <p style="color:var(--text-muted);">Partner werden geladen …</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<footer class="site-footer" id="siteFooter"></footer>
+
+<script src="/js/main.js"></script>
+<script>
+(function() {
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toSrc(p) {
+    if (!p) return '';
+    return p.indexOf('/') === 0 ? '..' + p : '../' + p;
+  }
+
+  function renderKarte(p) {
+    var logoSrc = toSrc(p.logo);
+    var bildHtml = logoSrc
+      ? '<img class="news-card__img" src="' + logoSrc + '" alt="' + escHtml(p.name || '') + '" loading="lazy">'
+      : '<div class="pn-logo-placeholder"><img src="../images/logo.png" alt="KJS"></div>';
+    return '<article class="news-card">' +
+      '<a href="detail.html?id=' + encodeURIComponent(p.id) + '" style="text-decoration:none;color:inherit;">' +
+        '<div class="news-card__img-wrap">' + bildHtml + '</div>' +
+        '<div class="news-card__body">' +
+          '<h3 class="news-card__title">' + escHtml(p.name || '(Ohne Namen)') + '</h3>' +
+          (p.kurzbeschreibung ? '<p style="font-size:.86rem;color:var(--text-muted);text-align:center;margin:0;">' + escHtml(p.kurzbeschreibung) + '</p>' : '') +
+        '</div>' +
+      '</a>' +
+    '</article>';
+  }
+
+  var grid = document.getElementById('partner-grid');
+
+  fetch('../content/partner.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var liste = (data.partner || []).filter(function(p) { return p && p.aktiv !== false; });
+      if (!liste.length) {
+        grid.innerHTML = '<p style="color:var(--text-muted);">Aktuell sind keine Partner hinterlegt.</p>';
+        return;
+      }
+      grid.innerHTML = liste.map(renderKarte).join('');
+    })
+    .catch(function() {
+      grid.innerHTML = '<p style="color:var(--text-muted);">Die Partnerliste konnte nicht geladen werden.</p>';
+    });
+})();
+</script>
+
+</body>
+</html>

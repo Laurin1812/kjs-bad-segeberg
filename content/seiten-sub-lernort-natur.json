@@ -1,1 +1,10 @@
-{"seiten":[]}
+{
+  "seiten": [
+    {
+      "slug": "testseite",
+      "nav_label": "Test",
+      "in_navigation": true,
+      "veroeffentlicht": true
+    }
+  ]
+}

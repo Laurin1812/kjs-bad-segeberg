@@ -1,12 +1,102 @@
 {
   "titel": "Jungwildrettung",
-  "untertitel": "Jungwildrettung im Kreis Bad Segeberg",
-  "intro": "Jedes Jahr im Frühjahr droht zahlreichen Rehkitzen und anderen Bodenbrütern der Tod durch Mähmaschinen. Durch den koordinierten Einsatz von Wärmebilddrohnen können wir diese Tiere vor der Mahd aufspüren und sichern.",
-  "bild": "",
+  "untertitel": "<p>Jungwildrettung im Kreis Bad Segeberg</p>",
+  "intro": "",
+  "bild": "/images/1786867635606-16-08-_2026_10-06-48.png",
   "bild_alt": "",
-  "inhalt": "## Wie funktioniert die Jungwildrettung?\n\nIn den frühen Morgenstunden, wenn die Tiere noch die Wärme des Bodens speichern, fliegen wir die Felder mit Wärmebildkameras ab. Gefundene Kitze werden vorsichtig mit Handschuhen aufgenommen und nach der Mahd wieder ausgesetzt.\n\n## Unsere Ergebnisse 2024\n\n* 847 Drohneneinsätze\n* 118 Rehkitze gerettet\n* 23 Bodenbrüternester gesichert\n* 42 ehrenamtliche Helfer im Einsatz\n\n## Mitmachen und helfen\n\nWir freuen uns über Unterstützung – sowohl bei den Drohnenflügen als auch bei der Koordination mit Landwirten. Drohnenführerschein wird benötigt oder kann erworben werden.",
+  "inhalt": "<p>Jedes Jahr im Frühjahr droht zahlreichen Rehkitzen und anderen Bodenbrütern der Tod durch Mähmaschinen. Durch den koordinierten Einsatz von Wärmebilddrohnen können wir diese Tiere vor der Mahd aufspüren und sichern.</p><h2>Wie funktioniert die Jungwildrettung?</h2><p>Rehkitzrettung mit Wärmebilddrohnen</p><p>Jedes Jahr im Frühjahr beginnt für Rehkitze, Bodenbrüter und andere Wildtiere eine besonders gefährliche Zeit. Gerade in den Monaten Mai und Juni setzen Rehgeißen ihre Kitze bevorzugt in hohem Gras und auf Wiesen ab. Dort verharren die Jungtiere bei Gefahr regungslos am Boden, anstatt zu fliehen. Dieses natürliche Schutzverhalten bewahrt sie vor Fressfeinden, wird jedoch bei der Mahd oft zur tödlichen Falle.</p><p>Moderne Mähmaschinen können große Flächen in kurzer Zeit bearbeiten. Für die im Gras versteckten Tiere bleibt dabei häufig keine Möglichkeit zur Flucht. Jedes Jahr fallen zahlreiche Rehkitze, Junghasen und Gelege von Bodenbrütern den Mäharbeiten zum Opfer. Neben dem Tierleid entstehen für Landwirte durch verunreinigtes Mähgut oftmals zusätzliche Probleme.</p><img src=\"/images/1781435792677-drohen.jpg\" alt=\"1781435792677 drohen\" class=\"img-50 img-rechts\"><p>Um dies zu verhindern, setzt die Kreisjägerschaft Segeberg auf moderne Wärmebilddrohnentechnik. In den frühen Morgenstunden, wenn die Temperaturunterschiede zwischen den Tieren und ihrer Umgebung am größten sind, werden die Flächen mit speziell ausgestatteten Drohnen überflogen. Die Wärmebildkameras erkennen die versteckten Tiere zuverlässig, sodass diese vor Beginn der Mahd von geschulten Helferinnen und Helfern gesichert werden können.</p><p>Die geretteten Rehkitze werden dabei möglichst schonend aus dem Gefahrenbereich gebracht und nach Abschluss der Mäharbeiten wieder freigelassen. Die Muttertiere nehmen ihre Jungen anschließend in der Regel problemlos wieder an. Durch diese Vorgehensweise können jedes Jahr zahlreiche Wildtiere vor dem sicheren Mähtod bewahrt werden.</p><p>Der Erfolg der Rehkitzrettung beruht auf einer engen Zusammenarbeit zwischen Landwirten, Jägern, Drohnenpiloten und ehrenamtlichen Helfern. Nur wenn die Mähtermine frühzeitig abgestimmt werden, können die Einsätze rechtzeitig geplant und durchgeführt werden. Dieses gemeinsame Engagement leistet einen wichtigen Beitrag zum aktiven Natur- und Tierschutz in unserer Region.</p><h2>Mitmachen und helfen</h2><p>Landwirte bitten wir, geplante Mähtermine möglichst frühzeitig mitzuteilen. Dadurch können die Flächen rechtzeitig in die Einsatzplanung aufgenommen werden.</p><p>Jägerinnen und Jäger sowie ehrenamtliche Helferinnen und Helfer unterstützen uns bei der Suche und Sicherung der Tiere.</p><p>Förderer und Unterstützer helfen dabei, die Anschaffung und den Betrieb der modernen Drohnentechnik langfristig sicherzustellen.</p><p>Gemeinsam können wir dazu beitragen, dass Rehkitze und andere Wiesenbewohner eine Chance haben und die Mahd nicht zur tödlichen Gefahr wird.</p><p>Für Anfragen zur Rehkitzrettung und zur Anmeldung von Mähflächen stehen wir Ihnen gerne zur Verfügung.</p>",
   "kontakt_name": "",
-  "kontakt_email": "jungwild@kjs-bad-segeberg.de",
-  "hero_bild": "",
-  "downloads": []
+  "kontakt_email": "frank.huelser@kjs-bad-segeberg.de",
+  "hero_bild": "/images/1786866016612-111.jpg",
+  "downloads": [
+    {
+      "titel": "Jungwildrettung Kisdorf 2023 2026",
+      "datei": "/downloads/1786891941427-Jungwildrettung-2023-2026.pdf",
+      "vorschau": ""
+    }
+  ],
+  "bild_groesse": "img-50",
+  "galerie": [
+    {
+      "bild": "/images/1786866016612-111.jpg",
+      "titel": "test"
+    },
+    {
+      "bild": "/images/1787139524160-18.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138591284-2.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138594302-3.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138596956-6.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138599274-7.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138601711-8.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138605752-9.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138608954-10.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138613673-11.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138616938-12.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138620579-13.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138624439-19-08-_2026_13-06-08.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138628297-19-08-_2026_13-06-50.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138641337-19-08-_2026_13-09-59.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138651558-WhatsApp-Image-2026-06-22-at-05.29.45.jpeg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787138645724-19-08-_2026_13-10-38.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787139581916-16.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787139587583-17.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1787139599789-19.jpg",
+      "titel": ""
+    }
+  ],
+  "galerie_titel": "Impressionen Kitzrettung"
 }

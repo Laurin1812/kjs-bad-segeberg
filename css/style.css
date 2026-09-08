@@ -7,10 +7,49 @@
 :root {
   --green-dark:    #1e4620;
   --green-main:    #2e6b30;
-  --green-mid:     #2e6b30;
+  /* Frank-Feedback (Arbeitsblock 3, Farbvereinheitlichung, 04.09.2026):
+     es gab bisher zusätzlich eine Variable "--green-mid" mit identischem
+     Fallback-Wert (#2e6b30) wie
+     --green-main - offenbar aus Versehen als zweiter Name für dieselbe
+     Bedeutung entstanden. Das Laden der Admin-Farbe (design.json,
+     "farbe_gruen") setzt zur Laufzeit AUSSCHLIESSLICH --green-main, nie
+     --green-mid - seit Frank sein Hauptgrün im Admin dunkler eingestellt
+     hat, ist --green-mid dadurch beim alten Standardwert eingefroren
+     geblieben und an den 6 Stellen, die sie nutzten (Termine-Hover,
+     Formular-Fokusrahmen, Kartenplatzhalter, Footer-Listenpfeile,
+     Waffenbörse-Filter-Fokus), lief dort weiterhin das ALTE, hellere Grün,
+     während der Rest der Seite korrekt das neue dunklere Grün zeigt -
+     genau die Art von "Restfarbe" aus Franks Feedback. Variable entfernt,
+     alle bisherigen var(--green-mid)-Stellen nutzen jetzt var(--green-main)
+     - eine Bedeutung, eine Quelle, reagiert ab sofort korrekt auf die
+     Admin-Einstellung. */
   --green-light:   #e8f5e9;
   --gold:          #b8860b;
   --gold-light:    #f5e6c0;
+  /* Dunklere Gold-Töne für Hover-/Text-Zustände (Architektur-Audit Punkt 8,
+     31.08.2026): vorher als eigene Hex-Literale an mehreren Stellen
+     wiederholt (u.a. identisch in css/style.css und jaeger/hegeringe.html),
+     jetzt eine einzige Quelle. Bewusst eigene Variablen statt Ableitung aus
+     --gold, damit sich am gerenderten Farbton nichts ändert. */
+  --gold-dark:     #9a6e09;
+  --gold-darker:   #7a5900;
+  /* Fokus-Ring-Farbe von Formularfeldern (Architektur-Audit Punkt 8):
+     bisher als identisches rgba()-Literal an zwei Stellen dupliziert. */
+  --focus-ring:    rgba(61,139,64,.12);
+  /* Fehler-/Danger-Farben für Formularvalidierung (Arbeitsblock 3,
+     Farbvereinheitlichung, 04.09.2026): der rote Rahmen/Text (#c0392b) war
+     bereits überall identisch (Hundebörse- und Waffenbörse-Formulare), aber
+     die zugehörige helle Kasten-Hintergrundfarbe und der dunkle Kasten-Text
+     der Fehler-Zusammenfassung waren zwischen Hundebörse (#fdf3f2/#8c2c22)
+     und Waffenbörse (#fdecea/#7a2418) leicht auseinandergelaufen - beide
+     Formulare wurden laut Code-Kommentar bewusst "nach identischem Prinzip"
+     gebaut, nur eigenständig, wodurch sich die Werte unbemerkt
+     unterschieden haben. Auf den Hundebörse-Wert vereinheitlicht (das
+     Original, an das sich die Waffenbörse laut Kommentar ohnehin anlehnen
+     sollte) - eine Bedeutung, eine Quelle. */
+  --color-danger:      #c0392b;
+  --color-danger-bg:   #fdf3f2;
+  --color-danger-text: #8c2c22;
   --text-dark:     #1a1a1a;
   --text-body:     #3a3a3a;
   --text-muted:    #666666;
@@ -98,7 +137,7 @@ p  { margin-bottom: 1rem; }
 .btn-outline-green { background: transparent; color: var(--green-main); border-color: var(--green-main); }
 .btn-outline-green:hover { background: var(--green-main); color: #fff; }
 .btn-gold { background: var(--gold); color: #fff; border-color: var(--gold); }
-.btn-gold:hover { background: #9a6e09; border-color: #9a6e09; color: #fff; transform: translateY(-2px); }
+.btn-gold:hover { background: var(--gold-dark); border-color: var(--gold-dark); color: #fff; transform: translateY(-2px); }
 .btn-sm { padding: .45rem 1.1rem; font-size: .78rem; }
 .read-more {
   color: var(--green-main); font-weight: 600; font-size: .9rem;
@@ -115,7 +154,7 @@ p  { margin-bottom: 1rem; }
   background: var(--green-main);
   color: rgba(255,255,255,.82);
   font-size: .82rem;
-  padding: .45rem 0;
+  padding: .65rem 0;
 }
 .topbar .container { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .topbar a { color: rgba(255,255,255,.82); }
@@ -126,9 +165,19 @@ p  { margin-bottom: 1rem; }
 .topbar__social { display: flex; align-items: center; gap: .5rem; }
 .topbar__social a {
   width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: rgba(255,255,255,.12); transition: background var(--transition);
+  border-radius: 50%; transition: filter var(--transition); color: #fff;
 }
-.topbar__social a:hover { background: var(--green-mid); }
+/* Feste Marken-Badges (statt transparentem Icon auf grünem Kreis - wirkte
+   wie ein unklarer bunter Rand). Facebook-Blau + Instagram-Gradient als
+   Kreis-Hintergrund, weißes Icon oben drauf - wie die echten App-Icons. */
+.topbar__social a.topbar__social--facebook { background: #1877F2; }
+.topbar__social a.topbar__social--instagram {
+  background: linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%);
+}
+.topbar__social a:hover { filter: brightness(1.12); }
+.topbar__social a:focus-visible {
+  outline: 2px solid rgba(255,255,255,.85); outline-offset: 2px;
+}
 
 /* =========================================================
    HEADER & NAV
@@ -152,12 +201,17 @@ p  { margin-bottom: 1rem; }
 .site-logo__text { line-height: 1.2; }
 .site-logo__name { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: var(--green-dark); display: block; }
 .site-logo__sub   { font-size: .88rem; color: var(--text-muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
+/* "e.V." muss klein bleiben, auch wenn der Rest des Logo-Untertitels per
+   text-transform:uppercase großgeschrieben wird (Frank-Feedback 20.08.2026:
+   im Header stand bisher trotz korrektem HTML-Text "E.V." statt "e.V.",
+   weil CSS die Groß/Kleinschreibung beim Rendern überschreibt). */
+.site-logo__sub .no-caps { text-transform: none; }
 
 .main-nav { display: flex; align-items: center; gap: .15rem; }
 .main-nav > li { position: relative; }
 .main-nav > li > a {
   display: flex; align-items: center; gap: .3rem;
-  padding: .5rem .75rem; font-size: .87rem; font-weight: 600;
+  padding: .5rem .75rem; font-size: .95rem; font-weight: 600;
   color: var(--text-dark); white-space: nowrap;
   border-radius: var(--radius-sm);
   transition: color var(--transition), background var(--transition);
@@ -178,7 +232,8 @@ p  { margin-bottom: 1rem; }
 }
 /* Flyout: Hauptebene nur Kategorien */
 .dropdown--right { left: auto; right: 0; }
-.main-nav > li:hover > .dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
+.main-nav > li:hover > .dropdown,
+.main-nav > li.nav-open > .dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
 .dropdown li a {
   display: block; padding: .75rem 1.4rem; font-size: .86rem;
   color: var(--text-body); border-bottom: 1px solid var(--border);
@@ -208,7 +263,8 @@ p  { margin-bottom: 1rem; }
   transition: all var(--transition);
   max-height: calc(100vh - 90px); overflow-y: auto;
 }
-.has-sub:hover > .dropdown--sub { opacity: 1; pointer-events: all; transform: translateX(0); }
+.has-sub:hover > .dropdown--sub,
+.has-sub.nav-open > .dropdown--sub { opacity: 1; pointer-events: all; transform: translateX(0); }
 
 .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: .5rem; }
 .nav-toggle span { display: block; width: 26px; height: 2px; background: var(--text-dark); border-radius: 2px; transition: all var(--transition); }
@@ -245,9 +301,28 @@ p  { margin-bottom: 1rem; }
   background-image: url('../images/hero.jpg');
   background-size: cover; background-position: center 40%; opacity: .85;
 }
+/* Frank-Feedback (Arbeitsblock 3, Farbvereinheitlichung, 04.09.2026): der
+   grüne Verlauf über dem Hero-Foto auf der Startseite war fest auf
+   rgba(30,70,32, ...) verdrahtet - das ist exakt der ALTE Standard-Farbwert
+   von --green-dark (#1e4620), von BEVOR Frank sein Hauptgrün im Admin
+   dunkler eingestellt hat (aktuell #024511 über design.json/
+   "farbe_dunkelgruen"). Der Verlauf zeigte dadurch weiterhin das alte,
+   hellere Grün, während der Rest der Seite (Header, Buttons, Footer, ...)
+   korrekt das neue, dunklere Grün nutzt - eine der auffälligsten
+   "Restfarben" auf der gesamten Seite, da die Startseite als Erstes
+   auffällt. rgba() kann keine CSS-Variable direkt einfärben (Hex-Variablen
+   lassen sich nicht in einzelne r/g/b-Kanäle zerlegen), deshalb hier
+   color-mix() verwendet: färbt den Verlauf live mit dem tatsächlichen
+   --green-dark ein, reagiert also automatisch auf jede künftige
+   Admin-Änderung, ohne dass zusätzlich eine JS-Anpassung (die auf jeder
+   Seite separat dupliziert wäre) nötig wird. Erste Deklaration ist ein
+   Fallback mit dem AKTUELLEN korrekten Wert (#024511 = rgb(2,69,17)) für
+   die seltenen Browser ohne color-mix()-Unterstützung - diese sehen dann
+   wenigstens den heute richtigen Farbton statt des alten. */
 .hero__overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(30,70,32,.88) 0%, rgba(30,70,32,.55) 55%, rgba(0,0,0,.15) 100%);
+  background: linear-gradient(135deg, rgba(2,69,17,.88) 0%, rgba(2,69,17,.55) 55%, rgba(0,0,0,.15) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green-dark) 88%, transparent) 0%, color-mix(in srgb, var(--green-dark) 55%, transparent) 55%, rgba(0,0,0,.15) 100%);
 }
 .hero .container { position: relative; z-index: 1; padding-top: 2.5rem; }
 .hero__content { max-width: 680px; }
@@ -286,14 +361,21 @@ p  { margin-bottom: 1rem; }
 .quicklinks__item:last-child { border-right: none; }
 .quicklinks__item:hover { background: var(--green-dark); }
 .quicklinks__icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-.quicklinks__icon img {
-  width: 52px; height: 52px; object-fit: contain;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,.4)) drop-shadow(0 2px 6px rgba(0,0,0,.35));
-  transition: filter var(--transition);
-}
-.quicklinks__item:hover .quicklinks__icon img {
-  filter: drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 2px 8px rgba(0,0,0,.4));
-}
+/* Logo auf dunklem Grün (04.09.2026, Laurin-Feedback): frühere Versuche haben
+   hier mit CSS-Filtern gearbeitet (invert, dann ein weißes drop-shadow-Glühen,
+   zuletzt sogar zwei gestapelte drop-shadows) - das erzeugte genau den
+   unerwünschten dicken weißen Außenrand, den Frank zu Recht bemängelt hat,
+   ohne das eigentliche Problem zu lösen: die Geweih-Spitzen ragen im Original-
+   PNG über den Wappenschild hinaus in den transparenten Bereich und liegen
+   dort direkt auf dem sehr dunklen Grün (--green-main, via design.json auf
+   #024511 gesetzt) - schwarz auf fast-schwarz, dadurch "verschluckt". Deshalb
+   jetzt kein CSS-Filter mehr, sondern eine eigene, sehr dezent nachbearbeitete
+   Bilddatei (images/logo-dunkel.png, siehe dort): nur die Geweih-Spitzen
+   außerhalb des Schilds sind minimal aufgehellt (dunkles Grau statt reinem
+   Schwarz), alles andere (Wappen, Schild-Grün, Rand, Schrift, Schädel) ist
+   Pixel für Pixel identisch zum Original-Logo. Das Header-Logo bleibt
+   unverändert images/logo.png. */
+.quicklinks__icon img { width: 52px; height: 52px; object-fit: contain; }
 .quicklinks__logo { width: 40px; height: 40px; object-fit: contain; mix-blend-mode: screen; }
 .quicklinks__label { font-size: .78rem; color: rgba(255,255,255,.65); margin-bottom: .2rem; }
 .quicklinks__title { font-weight: 700; font-size: .92rem; line-height: 1.2; color: #fff; }
@@ -361,21 +443,303 @@ p  { margin-bottom: 1rem; }
 }
 .news-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .news-card__img-wrap { aspect-ratio: 16/10; overflow: hidden; }
-.news-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+/* object-position:top statt der object-fit-Standardeinstellung "center"
+   (Frank-Bug-Report 21.08.2026, Aktuelles-Übersicht): bei einem festen
+   16:10-Kachelraster wird jedes Bild, das nicht exakt dieses Seitenverhältnis
+   hat, oben UND unten beschnitten. Bei Personen-/Gruppenfotos sitzt der Kopf
+   meist im oberen Bilddrittel – eine mittige Beschneidung kappt ihn dann als
+   Erstes. "top" verankert stattdessen den oberen Bildrand, beschnitten wird
+   nur unten, Köpfe bleiben erhalten. Das Grid selbst bleibt einheitlich
+   (aspect-ratio bleibt bestehen), nur der sichtbare Ausschnitt ändert sich. */
+.news-card__img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .4s ease; }
 .news-card:hover .news-card__img { transform: scale(1.04); }
+/* Überschreibt die generische Markdown-Bilddarstellung (.main-content img),
+   falls eine Kachel-Übersicht (z.B. Jagdhundeschule) innerhalb von .main-content
+   liegt – sonst bekommen die Kachelbilder ungewollt Rand, Schatten und
+   Rundung der normalen Inhaltsbilder und passen nicht mehr ins Raster. */
+.main-content .news-card__img,
+#seite-inhalt .news-card__img,
+#page-inhalt .news-card__img {
+  width: 100%; height: 100%; margin: 0; border-radius: 0; box-shadow: none;
+  object-fit: cover; object-position: top; display: block;
+}
 .news-card__body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
-.news-card__meta { display: flex; gap: .75rem; align-items: center; margin-bottom: .75rem; }
+/* Badge immer über dem Datum (statt mal nebeneinander, mal untereinander,
+   je nach verfügbarer Breite) – bei typischen Kategorienamen ("Veranstaltung",
+   "Pressemitteilung") reicht der Platz neben dem Datum ohnehin fast nie,
+   das wechselnde Layout sah dadurch von Kachel zu Kachel uneinheitlich
+   ("versetzt") aus. Datum bekommt zusätzlich denselben Links-Einzug wie der
+   Badge-Text (padding-left des Badges), damit beide Zeilen bündig auf einer
+   Flucht stehen statt dass der Badge-Text durch sein Pill-Padding leicht
+   eingerückt wirkt. */
+.news-card__meta { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; margin-bottom: .75rem; }
 .news-card__cat {
   background: var(--green-light); color: var(--green-main);
   font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
   padding: .25rem .7rem; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0;
 }
+.news-card__date { margin-left: .7rem; }
 .news-card__date { font-size: .8rem; color: var(--text-muted); }
-.news-card__title { font-size: 1.02rem; font-weight: 700; color: var(--text-dark); margin-bottom: .5rem; line-height: 1.3; font-family: var(--font-sans); }
+/* Ebenfalls auf 2 Zeilen fest begrenzt (gleicher Grund wie bei
+   .news-card__excerpt) – ein sehr langer oder sehr kurzer Titel darf
+   "Weiterlesen" nicht zusätzlich nach oben/unten verschieben. */
+.news-card__title {
+  font-size: 1.02rem; font-weight: 700; color: var(--text-dark); margin-bottom: .5rem;
+  line-height: 1.3; font-family: var(--font-sans);
+  height: calc(2 * 1.3em); overflow: hidden;
+}
 .news-card__title a { color: inherit; }
 .news-card__title a:hover { color: var(--green-main); }
-.news-card__excerpt { font-size: .86rem; color: var(--text-muted); flex: 1; margin-bottom: 1rem; }
+/* Feste Zeilenzahl statt variabler Höhe: sonst steht "Weiterlesen" je nach
+   Textlänge unterschiedlich hoch (Frank-Wunsch: muss "auf einer Flucht"
+   stehen). flex:1 allein reicht nicht, weil das Grid nur INNERHALB einer
+   Zeile gleich hoch stretcht, nicht über die ganze Seite hinweg – line-clamp
+   erzwingt stattdessen für jede Karte exakt denselben Platz für den Text. */
+/* Klasse doppelt notiert (erhöht nur die Spezifität, ändert sonst nichts):
+   die generische Regel ".main-content p, #seite-inhalt p, #page-inhalt p"
+   (line-height 1.8 / overflow: visible, weiter unten in dieser Datei) hat
+   durch den zusätzlichen Element-Selektor "p" höhere Spezifität als ein
+   einzelner Klassenname und hat line-height/overflow bisher überschrieben –
+   der Text lief dadurch trotz gesetzter Höhe unten aus der Karte heraus und
+   überlappte "Weiterlesen". Container-unabhängig (Startseite hat kein
+   .main-content), daher hier bewusst nicht mit .main-content-Präfix gelöst. */
+.news-card__excerpt.news-card__excerpt {
+  font-size: .86rem; color: var(--text-muted); margin-bottom: 1rem;
+  line-height: 1.5em; height: calc(3 * 1.5em); overflow: hidden;
+}
 .news__more { text-align: center; margin-top: 3rem; }
+
+/* =========================================================
+   HUNDEBÖRSE (öffentlich, Phase 2)
+   Nutzt bewusst dieselben Bausteine wie der Rest der Seite: .news__grid/
+   .news-card für die Kachel-Übersicht (siehe NEWS oben), .galerie-grid/
+   .galerie-item für die Bildergalerie, .page-content/.sidebar-widget/
+   .contact-box für den Seitenrahmen. Nur die Detailseiten-Kopfzeile
+   (Bild links, Eckdaten rechts) und der Steckbrief-Kasten sind neu, beide
+   ausschließlich mit vorhandenen CSS-Variablen (Farben/Radius/Schatten). */
+.hb-detail-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: stretch; margin-bottom: 2rem; }
+@media (max-width: 900px) {
+  .hb-detail-top { grid-template-columns: 1fr; }
+}
+.hb-main-image {
+  display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+
+/* Eckdaten-Spalte rechts neben dem Bild (31.08.2026, Laurin-Wunsch "kompakter
+   Anzeigenkopf"): .hb-detail-top ist jetzt align-items:stretch, d.h. beide
+   Spalten sind so hoch wie die (i.d.R. höhere) Bild-Spalte. Damit dieser
+   zusätzliche Platz nicht einfach als Weißraum unter den kurzen Textzeilen
+   verpufft, ist .hb-eckdaten selbst eine Flex-Spalte mit space-between:
+   der Info-Block (__top) bleibt oben, der Kontakt-Button (__bottom) wird an
+   den unteren Rand der Bild-Spalte gezogen - beide Spalten wirken dadurch
+   wie ein gemeinsamer Anzeigenkopf, ganz ohne feste Höhen (funktioniert
+   unabhängig von Titellänge und Bildanzahl). Unter 900px greift die
+   .hb-detail-top-Regel oben (1 Spalte) - dort hat jede Zeile ohnehin ihre
+   eigene volle Höhe, sodass die Flex-Verteilung hier wirkungslos bleibt und
+   das bestehende, saubere Untereinander auf Mobil unverändert erhalten ist. */
+.hb-eckdaten { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+.hb-eckdaten__bottom { margin-top: 1rem; }
+
+/* Bildergalerie direkt am Hauptbild (29.08.2026, Laurin-Wunsch): Thumbnails
+   gehören jetzt unmittelbar zum Hauptbild statt in einen eigenen Abschnitt
+   weiter unten. .hb-gallery ist die gemeinsame Spalte aus Hauptbild +
+   Thumbnail-Reihe; flex-wrap statt horizontalem Scrollen, damit auf Mobil
+   nichts abgeschnitten wird, sondern die Reihe einfach umbricht - das
+   funktioniert unverändert für 2 wie für 10 Bilder. Bei nur einem Bild
+   wird #hb-thumbs gar nicht erst gerendert (siehe detail.html), damit kein
+   einzelnes, unnötiges Thumbnail unter dem Bild hängt. */
+.hb-gallery { display: flex; flex-direction: column; gap: .75rem; }
+.hb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.hb-thumb {
+  flex: 0 0 auto; width: 72px; height: 72px; padding: 0; overflow: hidden;
+  border: 2px solid transparent; border-radius: var(--radius-sm); background: none;
+  cursor: pointer; line-height: 0; transition: border-color .15s ease;
+}
+.hb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hb-thumb:hover { border-color: var(--green-main); }
+.hb-thumb.is-active { border-color: var(--green-dark); box-shadow: 0 0 0 2px var(--green-light); }
+@media (max-width: 600px) {
+  .hb-thumb { width: 58px; height: 58px; }
+}
+.steckbrief { background: var(--bg-light); border-radius: var(--radius-md); padding: 1.5rem; margin: 1rem 0 2rem; }
+.steckbrief dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem 2rem; margin: 0; }
+.steckbrief dt {
+  font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-muted); margin-bottom: .15rem;
+}
+.steckbrief dd { margin: 0; font-size: .95rem; color: var(--text-dark); font-weight: 600; }
+@media (max-width: 600px) {
+  .steckbrief dl { grid-template-columns: 1fr; }
+}
+
+/* Standort-Karte (31.08.2026, Laurin-Wunsch "interaktive Karte", Leaflet/
+   OpenStreetMap, siehe detail.html). Eine feste Höhe ist hier normal und
+   nötig (jede Karte braucht eine konkrete Pixelhöhe) - das ist etwas
+   anderes als die vermiedenen festen Höhen im Anzeigenkopf weiter oben, wo
+   es um variable Textmengen ging. */
+.hb-map {
+  width: 100%; height: 300px; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md); margin-top: .75rem; background: var(--bg-light);
+}
+@media (max-width: 600px) {
+  .hb-map { height: 220px; }
+}
+.hb-map-link { margin-top: .5rem; font-size: .85rem; }
+
+/* Hundebörse-Detailseite: Kontaktbereich am Ende des Hauptinhalts
+   (28.08.2026, Laurin/Frank-Feedback - ersetzt die vorherige doppelte
+   Kontaktführung aus CTA-Button + grüner Sidebar-Box mit nochmals
+   "Anfrage senden"). Bewusst helles Grün statt sattem Grün-auf-Weiß wie
+   die alte Sidebar-Box, damit .btn-primary/.btn-outline-green (grüner
+   Text/Rand auf hellem Grund) gut lesbar bleiben und keine der beiden
+   Aktionen den früheren ".btn-outline:hover{background:#fff}"-Weißblitz
+   wiederholt. */
+.hb-kontaktbereich {
+  background: var(--green-light); border: 1px solid var(--green-main);
+  border-radius: var(--radius-md); padding: 1.75rem 2rem; margin: 2rem 0 1rem;
+}
+.hb-kontaktbereich h2 { margin-top: 0; margin-bottom: 1.1rem; }
+.hb-kontaktbereich__info p { margin: 0 0 .55rem; font-size: .97rem; color: var(--text-dark); }
+.hb-kontaktbereich__info p strong { color: var(--green-dark); margin-right: .3rem; }
+.hb-kontaktbereich__info a { color: var(--green-dark); font-weight: 600; }
+.hb-kontaktbereich__actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-top: 1.25rem; }
+@media (max-width: 600px) {
+  .hb-kontaktbereich { padding: 1.4rem 1.25rem; }
+  .hb-kontaktbereich__actions { flex-direction: column; }
+  .hb-kontaktbereich__actions .btn { width: 100%; justify-content: center; }
+}
+
+/* Kachel-Übersicht: Preis + "Details ansehen" sollen bei jeder Karte einer
+   Reihe auf derselben Höhe sitzen (Laurin-Bug-Report 28.08.2026), auch wenn
+   die Infozeilen darüber (Rasse/Standort/Typ) je nach Anzeige unterschiedlich
+   viele Zeilen brauchen. Anders als bei .news-card__excerpt (Aktuelles, siehe
+   oben) lässt sich das hier nicht per fester Zeilenzahl lösen, weil die
+   Standort-Zeile ganz wegfallen kann. Deshalb Flexbox mit margin-top:auto auf
+   dem Footer – dafür muss die gesamte Kettenglied-Kette bis zur Karte hoch
+   ein Flex-Container sein: .news-card ist es schon (column), aber ihr
+   einziges Kind ist der verlinkende <a> (display:block) – ohne den auch zum
+   Flex-Container zu machen, bleibt .news-card__body{flex:1} wirkungslos.
+   Bewusst nur unter #hb-grid (Hundebörse-Übersicht) skopiert, damit die
+   Aktuelles-Kacheln (nutzen dieselben .news-card-Klassen) unangetastet
+   bleiben. */
+#hb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#hb-grid .hb-card-footer { margin-top: auto; }
+
+/* "Anbieter kontaktieren"-Button auf der Detailseite scrollt zur Anbieter-
+   Kontaktbox und hebt sie kurz optisch hervor, statt nur unauffällig
+   dorthin zu springen (Laurin-Bug-Report 28.08.2026).
+   Rückmeldung 28.08.2026: Der Klick-Handler feuert nachweislich zuverlässig
+   (per echtem Maus-Klick auf der deployten Staging-Seite geprüft), aber der
+   ursprüngliche Effekt (schneller, dünner werdender Ring, .65 Deckkraft) war
+   zu schwach/kurz, um zuverlässig aufzufallen - besonders wenn die Anbieter-
+   Box (z.B. auf Desktop direkt neben Preis/Button) ohnehin schon vollständig
+   sichtbar ist und scrollIntoView daher kaum sichtbar scrollt. Der einzige
+   Hinweis war dann ein kaum wahrnehmbarer, schnell verblassender Ring -
+   wirkte dadurch wie "nichts passiert". Jetzt: kräftigerer, deckender Ring,
+   der ca. 1s lang sichtbar STEHEN bleibt statt sofort zu verblassen, plus
+   ein leichtes Skalieren der Box für zusätzliche Aufmerksamkeit. Gesamtdauer
+   2s (JS-Timeout in hundeboerse/detail.html entsprechend angepasst). */
+.hb-kontakt-highlight { animation: hbKontaktPulse 2s ease-in-out; }
+@keyframes hbKontaktPulse {
+  /* rgba(184,134,11,x) entsprach exakt --gold (#b8860b) - jetzt über
+     color-mix() an die zentrale Variable gekoppelt (Architektur-Audit
+     Punkt 8), Optik unverändert. */
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); transform: scale(1); }
+  12%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 90%, transparent); transform: scale(1.015); }
+  55%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 90%, transparent); transform: scale(1.015); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); transform: scale(1); }
+}
+
+/* =========================================================
+   HUNDEBÖRSE: FORMULAR "HUND / WURF ANBIETEN" (Phase 3, 28.08.2026)
+   Nutzt bewusst dieselben Bausteine wie das bestehende Kontaktformular
+   (.kontakt-form/.form-group/.form-grid-2/.btn) statt einer neuen
+   Formular-Optik - hier nur ergänzt um das, was das Kontaktformular nicht
+   braucht: Typ-Umschalter, Fehler-Zustände, Bild-Upload-Vorschau/Reihenfolge,
+   Erfolgs-Box. Alles mit "hb-form-"/"hb-img-" Präfix skopiert, damit nichts
+   am bestehenden Kontaktformular oder der Hundebörse-Übersicht verändert wird. */
+.hb-form-section { margin-bottom: 1.5rem; }
+.hb-form-section h3 { margin-bottom: .4rem; color: var(--green-dark); }
+.hb-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.hb-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+
+/* Art der Anzeige: zwei große, klar auswählbare Kacheln statt normaler
+   Radiobuttons, da das die zentrale, alles andere steuernde Weichenstellung
+   des Formulars ist. */
+.hb-typ-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.hb-typ-option {
+  display: flex; align-items: center; gap: .6rem; cursor: pointer;
+  border: 2px solid var(--border); border-radius: var(--radius-md);
+  padding: 1rem 1.1rem; font-weight: 600; color: var(--text-dark);
+  background: #fff; transition: border-color var(--transition), background var(--transition);
+}
+.hb-typ-option input { width: auto; margin: 0; accent-color: var(--green-main); }
+.hb-typ-option:has(input:checked) { border-color: var(--green-main); background: var(--green-light); }
+.hb-typ-option.is-active { border-color: var(--green-main); background: var(--green-light); }
+@media (max-width: 600px) { .hb-typ-toggle { grid-template-columns: 1fr; } }
+
+/* Fehler-Zustände: eigene Klassen statt :invalid, weil die Validierung erst
+   beim Absenden läuft (novalidate) und wir Feld UND Fehlertext gemeinsam
+   steuern wollen. */
+.hb-field-error input, .hb-field-error select, .hb-field-error textarea {
+  border-color: var(--color-danger) !important; background: var(--color-danger-bg);
+}
+.hb-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: none; }
+.hb-field-error .hb-error-text { display: block; }
+.hb-error-summary {
+  display: none; background: var(--color-danger-bg); border: 1px solid var(--color-danger); border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; color: var(--color-danger-text);
+}
+.hb-error-summary.is-visible { display: block; }
+.hb-error-summary strong { display: block; margin-bottom: .5rem; }
+.hb-error-summary ul { margin: 0; padding-left: 1.2rem; }
+.hb-error-summary li { margin-bottom: .2rem; font-size: .88rem; }
+
+/* Bilder: Upload-Vorschau-Raster mit Drag&Drop-Umsortierung (nativ, keine
+   Library) und Entfernen-Button je Bild. */
+.hb-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: .85rem; margin-bottom: 1rem;
+}
+.hb-img-item {
+  position: relative; border-radius: var(--radius-md); overflow: hidden;
+  aspect-ratio: 1; background: var(--bg-light); border: 2px solid transparent;
+  cursor: grab;
+}
+.hb-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hb-img-item.hb-img-dragging { opacity: .4; }
+.hb-img-item.hb-img-dragover { border-color: var(--green-main); }
+.hb-img-item__main {
+  position: absolute; top: 0; left: 0; background: var(--green-main); color: #fff;
+  font-size: .68rem; font-weight: 700; padding: .25rem .55rem; border-radius: 0 0 var(--radius-sm) 0;
+}
+.hb-img-item__remove {
+  position: absolute; top: .3rem; right: .3rem; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; border: none; cursor: pointer; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+.hb-img-item__remove:hover { background: var(--color-danger); }
+.hb-img-add-label {
+  display: inline-flex; align-items: center; gap: .5rem; cursor: pointer;
+  border: 1px dashed var(--green-main); border-radius: var(--radius-sm);
+  padding: .7rem 1.1rem; font-size: .88rem; font-weight: 600; color: var(--green-dark);
+  background: var(--green-light); transition: opacity var(--transition);
+}
+.hb-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.hb-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+.hb-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
+.hb-img-limit-note.is-visible { display: block; }
+
+/* Erfolgs-Box nach bestandener Validierung (Phase 3: noch kein echter Versand) */
+.hb-success-box {
+  display: none; background: var(--green-light); border: 1px solid var(--green-main);
+  border-radius: var(--radius-md); padding: 1.5rem 1.75rem; margin-top: 1.5rem;
+}
+.hb-success-box.is-visible { display: block; }
+.hb-success-box h3 { color: var(--green-dark); margin-bottom: .5rem; }
+.hb-success-box p { margin: 0; color: var(--text-body); font-size: .92rem; line-height: 1.7; }
 
 /* =========================================================
    TESTIMONIALS
@@ -384,10 +748,15 @@ p  { margin-bottom: 1rem; }
 .testimonials .section-title { color: #fff; }
 .testimonials .section-subtitle { color: rgba(255,255,255,.65); }
 .testimonials .section-divider { background: var(--gold); }
-.testimonials__grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+/* flex statt grid (22.08.2026, Laurin-Wunsch): bei 1-2 Zitaten sollen die
+   Karten mittig stehen statt links ausgerichtet im Raster hängenzubleiben -
+   flex-wrap mit justify-content:center zentriert automatisch, egal wie
+   viele Zitate gerade vorhanden sind. */
+.testimonials__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; }
 .testimonial-card {
   background: rgba(255,255,255,.07); border-radius: var(--radius-md); padding: 2rem;
   border: 1px solid rgba(255,255,255,.1); position: relative;
+  flex: 1 1 320px; max-width: 380px;
 }
 .testimonial-card::before {
   content: '\201C'; position: absolute; top: .5rem; left: 1.2rem;
@@ -415,13 +784,16 @@ p  { margin-bottom: 1rem; }
   border-radius: var(--radius-md); padding: 1.2rem 1.5rem;
   box-shadow: var(--shadow-sm); transition: border-color var(--transition), box-shadow var(--transition);
 }
-.termine-item:hover { border-color: var(--green-mid); box-shadow: var(--shadow-md); }
+.termine-item:hover { border-color: var(--green-main); box-shadow: var(--shadow-md); }
 .termine-item__date { text-align: center; background: var(--green-main); color: #fff; border-radius: var(--radius-sm); padding: .6rem .4rem; }
 .termine-item__day   { font-size: 1.5rem; font-weight: 800; line-height: 1; display: block; }
 .termine-item__month { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
 .termine-item__title { font-weight: 700; font-size: .95rem; color: var(--text-dark); margin-bottom: .3rem; }
 .termine-item__info  { font-size: .82rem; color: var(--text-muted); display: flex; gap: .75rem; flex-wrap: wrap; }
 .termine-item__info span { display: flex; align-items: center; gap: .3rem; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Uhrzeit/Ort auf der Startseite
+   zeigten bisher 🕐/📍-Emojis statt der zentralen ICONS aus main.js. */
+.termine-item__info svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* =========================================================
    STATS
@@ -444,6 +816,22 @@ p  { margin-bottom: 1rem; }
 }
 .page-hero .container { position: relative; z-index: 1; }
 .page-hero h1 { color: #fff; margin-bottom: .5rem; }
+/* "← Zurück zu allen Themen" oben im weißen Seiteninhalt, direkt über der
+   Überschrift (Frank-Feedback 20.08.2026: NICHT im grünen Hero-Bereich,
+   sondern im weißen Content-Bereich - dafür größer/fetter als der alte
+   kleine Link). Aktuell z.B. auf den Jagdhundeschule-Kursseiten. */
+.content-back-link {
+  display: inline-flex; align-items: center; gap: .4rem;
+  color: var(--green-main); font-weight: 700; font-size: 1.05rem;
+  /* Frank-Feedback 23.08.2026: Link soll mit dem OBEREN RAND der ersten
+     Sidebar-Box (.sidebar-widget, grauer Kasten) fluchten, nicht mit deren
+     Überschriften-Text. margin-top:1.5rem (erster Versuch) hat das falsch
+     interpretiert und den Link stattdessen mit dem Text darin ausgerichtet -
+     dadurch stand er sichtbar TIEFER als der Kasten. Zurückgesetzt auf 0,
+     dafür per Feintuning unten an den echten Kasten-Rand angeglichen. */
+  margin-top: 0; margin-bottom: 1.5rem; text-decoration: none;
+}
+.content-back-link:hover { color: var(--green-dark); text-decoration: underline; }
 .breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: rgba(255,255,255,.65); margin-top: .6rem; flex-wrap: wrap; }
 .breadcrumb a { color: rgba(255,255,255,.65); }
 .breadcrumb a:hover { color: #fff; }
@@ -456,6 +844,47 @@ p  { margin-bottom: 1rem; }
 .page-content .container { display: grid; grid-template-columns: 1fr 290px; gap: 3rem; align-items: start; }
 .page-content.full .container { grid-template-columns: 1fr; max-width: 920px; }
 
+/* Hundebörse-Übersicht (hundeboerse/index.html) - eigenes Grid nur für diese
+   Seite (zusätzliche Klasse .hb-overview-layout auf demselben Element wie
+   .container, daher hier bewusst mit .container zusammen selektiert, um die
+   generische ".page-content .container"-Regel oben zuverlässig zu schlagen).
+   Ziel (Laurin/Frank-Feedback 31.08.2026): der grüne Geschäftsstelle-Kasten
+   rechts soll erst auf Höhe von "Aktuelle Hunde & Würfe" beginnen statt schon
+   auf Höhe des Einführungstextes. Über grid-template-areas statt festem
+   margin-top, damit es automatisch robust bleibt, egal wie lang der
+   Einführungstext ist: Zeile 1 (intro) nimmt volle Breite, Zeile 2 (main +
+   sidebar) beginnt für beide Spalten exakt an derselben Stelle. Andere Seiten
+   mit .page-content .container bleiben davon unberührt.
+   Row-Gap (Frank-Feedback 04.09.2026): der Bereich oben ("Hund / Wurf
+   anbieten"-Button direkt über "Aktuelle Hunde & Würfe") wirkte zu gedrängt,
+   weil die Zeile "intro" und die Zeile "main/sidebar" bislang mit Row-Gap 0
+   aneinanderstießen. Row-Gap auf 2.5rem angehoben, damit "Aktuelle Hunde &
+   Würfe" klar als eigener, nächster Abschnitt wirkt. Column-Gap (3rem)
+   unverändert, main/sidebar bleiben weiterhin in derselben Zeile und damit
+   auf gleicher Höhe - das 31.08.2026-Ausrichtungsziel ist davon nicht
+   betroffen. */
+.page-content .container.hb-overview-layout {
+  grid-template-columns: 1fr 290px;
+  grid-template-areas: "intro intro" "main sidebar";
+  gap: 2.5rem 3rem;
+}
+.hb-overview-layout .hb-overview-intro { grid-area: intro; }
+.hb-overview-layout .main-content { grid-area: main; }
+.hb-overview-layout .sidebar { grid-area: sidebar; }
+@media (max-width: 900px) {
+  .page-content .container.hb-overview-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "intro" "main" "sidebar";
+    /* row-gap zurück auf den ursprünglichen Seitenabstand (3rem, wie die
+       generische .page-content .container-Regel ihn für alle Seiten im
+       gestapelten Mobil-Layout nutzt) - die 0 oben ist nur für den
+       zweispaltigen Desktop-Fall gedacht (intro-Zeile direkt über
+       main/sidebar), auf Mobil sollen intro/main/sidebar weiterhin normal
+       auf Abstand stehen. */
+    gap: 3rem;
+  }
+}
+
 .main-content h2 { color: var(--green-dark); margin-bottom: 1rem; margin-top: 2rem; }
 .main-content h2:first-child { margin-top: 0; }
 .main-content h3 { color: var(--green-main); margin-bottom: .75rem; margin-top: 1.5rem; }
@@ -466,11 +895,82 @@ p  { margin-bottom: 1rem; }
   margin-bottom: 1rem;
   overflow: hidden;
 }
-.main-content li { margin-bottom: .4rem; color: var(--text-body); list-style: disc; }
+.main-content li { margin-bottom: .3rem; color: var(--text-body); list-style: disc; }
 .main-content ol li { list-style: decimal; }
+/* TipTap umschließt jeden Listenpunkt-Text mit einem <p> (<li><p>…</p></li>).
+   Ohne diesen Reset erbt dieses <p> die normale Absatz-Zeilenhöhe (1.8) und
+   sorgt für sehr große, unschöne Lücken zwischen einzelnen Listenpunkten
+   (Frank-Feedback 19.08.2026). Innerhalb von Listen daher enger setzen. */
+.main-content li p,
+#page-inhalt li p,
+#seite-inhalt li p { margin: 0; line-height: 1.5; }
 .main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
 .main-content a:not(.btn):hover { color: var(--green-dark); }
 .main-content strong { color: var(--green-dark); }
+/* Abstand: drei feste Stufen über die Editor-Toolbar-Buttons "Eng/Normal/
+   Weit" pro Absatz/Liste (Frank-Feedback 19.08.2026 – ersetzt einen
+   unzuverlässigen Umschalter durch drei eindeutige, feste Werte). */
+.main-content [data-spacing="compact"],
+#page-inhalt [data-spacing="compact"],
+#seite-inhalt [data-spacing="compact"] { margin-bottom: .15rem; }
+.main-content li[data-spacing="compact"] p,
+.main-content p[data-spacing="compact"],
+#page-inhalt li[data-spacing="compact"] p,
+#page-inhalt p[data-spacing="compact"],
+#seite-inhalt li[data-spacing="compact"] p,
+#seite-inhalt p[data-spacing="compact"] { line-height: 1.3; }
+.main-content [data-spacing="wide"],
+#page-inhalt [data-spacing="wide"],
+#seite-inhalt [data-spacing="wide"] { margin-bottom: 1.4rem; }
+.main-content li[data-spacing="wide"] p,
+.main-content p[data-spacing="wide"],
+#page-inhalt li[data-spacing="wide"] p,
+#page-inhalt p[data-spacing="wide"],
+#seite-inhalt li[data-spacing="wide"] p,
+#seite-inhalt p[data-spacing="wide"] { line-height: 2.1; }
+/* Die Abstand-Stufe landet über die Toolbar auf der GANZEN Liste (ul/ol),
+   nicht auf jedem einzelnen Listenpunkt. Ohne diese Regeln ändert "Eng"/"Weit"
+   daher nur den Abstand vor/nach der ganzen Liste, aber nicht den Abstand
+   zwischen den einzelnen Listenpunkten selbst (Frank-Feedback 20.08.2026 –
+   genau dieser Zwischenzeilen-Abstand soll steuerbar sein). */
+.main-content ul[data-spacing="compact"] li,
+.main-content ol[data-spacing="compact"] li,
+#page-inhalt ul[data-spacing="compact"] li,
+#page-inhalt ol[data-spacing="compact"] li,
+#seite-inhalt ul[data-spacing="compact"] li,
+#seite-inhalt ol[data-spacing="compact"] li { margin-bottom: .05rem; }
+.main-content ul[data-spacing="compact"] li p,
+.main-content ol[data-spacing="compact"] li p,
+#page-inhalt ul[data-spacing="compact"] li p,
+#page-inhalt ol[data-spacing="compact"] li p,
+#seite-inhalt ul[data-spacing="compact"] li p,
+#seite-inhalt ol[data-spacing="compact"] li p { line-height: 1.25; }
+.main-content ul[data-spacing="wide"] li,
+.main-content ol[data-spacing="wide"] li,
+#page-inhalt ul[data-spacing="wide"] li,
+#page-inhalt ol[data-spacing="wide"] li,
+#seite-inhalt ul[data-spacing="wide"] li,
+#seite-inhalt ol[data-spacing="wide"] li { margin-bottom: 1rem; }
+.main-content ul[data-spacing="wide"] li p,
+.main-content ol[data-spacing="wide"] li p,
+#page-inhalt ul[data-spacing="wide"] li p,
+#page-inhalt ol[data-spacing="wide"] li p,
+#seite-inhalt ul[data-spacing="wide"] li p,
+#seite-inhalt ol[data-spacing="wide"] li p { line-height: 2; }
+/* Video-Einbettung (YouTube, über den Textinhalt-Editor) – responsive statt
+   fester Breite/Höhe, damit es auf Handy nicht über den Rand läuft. */
+.main-content div[data-youtube-video],
+#page-inhalt div[data-youtube-video],
+#seite-inhalt div[data-youtube-video] { max-width: 100%; margin: 1.5rem 0; }
+.main-content div[data-youtube-video] iframe,
+#page-inhalt div[data-youtube-video] iframe,
+#seite-inhalt div[data-youtube-video] iframe,
+.main-content iframe,
+#page-inhalt iframe,
+#seite-inhalt iframe {
+  width: 100%; aspect-ratio: 16 / 9; height: auto;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: none;
+}
 /* Bilder im Markdown-Inhalt und dynamisch geladenen Seiten */
 .main-content img,
 #seite-inhalt img,
@@ -569,6 +1069,10 @@ p  { margin-bottom: 1rem; }
 .main-content img.img-50,  #seite-inhalt img.img-50,  #page-inhalt img.img-50  { width: 50%;  max-width: 50%; }
 .main-content img.img-75,  #seite-inhalt img.img-75,  #page-inhalt img.img-75  { width: 75%;  max-width: 75%; }
 .main-content img.img-100, #seite-inhalt img.img-100, #page-inhalt img.img-100 { width: 100%; max-width: 100%; }
+/* "Ohne Rahmen" – für Logos/Grafiken mit eigenem weißen Hintergrund: der
+   sonst überall gültige Schatten+Rundung erzeugt bei solchen Bildern einen
+   sichtbaren Kasten gegen die (ebenfalls weiße) Seite (Frank-Feedback). */
+.main-content img.img-flat, #seite-inhalt img.img-flat, #page-inhalt img.img-flat { box-shadow: none; border-radius: 0; }
 
 /* Clearfix nach gefloateten Bildern – verhindert, dass nachfolgender Text ins Bild fließt */
 .main-content::after,
@@ -579,16 +1083,25 @@ p  { margin-bottom: 1rem; }
 #seite-inhalt p,
 #page-inhalt p { overflow: visible; }
 
-/* PDF-Links mit 📄-Symbol (für alle Links auf .pdf-Dateien) */
-.main-content a[href$=".pdf"],
-#seite-inhalt a[href$=".pdf"],
-#page-inhalt a[href$=".pdf"] {
+/* PDF-Links mit 📄-Symbol (für alle Links auf .pdf-Dateien) - NICHT für die
+   Downloads-Kästen (.download-item__thumb/.download-action), die haben ihr
+   eigenes Icon/Layout. Ohne die :not()-Ausschlüsse hat diese Regel bisher
+   JEDEN Link auf eine .pdf-Datei getroffen, auch das Vorschaubild und die
+   Öffnen/Herunterladen-Buttons in den Downloads-Listen innerhalb von
+   #seite-inhalt (z.B. seiten/index.html) - das verschobene 📄-Symbol lag
+   dadurch über dem Vorschaubild und die padding-left hat es asymmetrisch
+   zusammengequetscht ("sieht katastrophal aus", Laurin-Meldung 23.08.2026).
+   Reines Layout-/Spezifitäts-Symptom war nur ein Teil des Bugs - das hier
+   war die eigentliche Ursache. */
+.main-content a[href$=".pdf"]:not(.download-item__thumb):not(.download-action),
+#seite-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action),
+#page-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action) {
   padding-left: 1.3em;
   position: relative;
 }
-.main-content a[href$=".pdf"]::before,
-#seite-inhalt a[href$=".pdf"]::before,
-#page-inhalt a[href$=".pdf"]::before {
+.main-content a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before,
+#seite-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before,
+#page-inhalt a[href$=".pdf"]:not(.download-item__thumb):not(.download-action)::before {
   content: "📄";
   position: absolute;
   left: 0;
@@ -613,16 +1126,103 @@ p  { margin-bottom: 1rem; }
    CSS-basierte Lösung ohne Abhängigkeit von Skript-Timing. */
 .main-content, #seite-inhalt, #page-inhalt { overflow-x: auto; }
 
-/* Tabellen im Markdown (und TipTap-HTML). min-width:max-content als
-   Sicherheitsnetz direkt an der Basis-Regel: verhindert, dass Spalten auf
-   schmalen Screens so eng gequetscht werden, dass in Kombination mit dem
-   word-break unten (siehe .main-content td) Wörter buchstabenweise
-   umbrechen. Die zusätzliche .content-table-wrap-Box (per JS gesetzt,
-   siehe main.js) sorgt zusätzlich für sauberes Scrollen statt Überlauf. */
-.main-content table { width: 100%; min-width: max-content; border-collapse: collapse; margin: 1.5rem 0; }
-.main-content th { background: var(--green-main); color: #fff; padding: .6rem 1rem; text-align: left; }
-.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); overflow-wrap: break-word; word-break: break-word; }
+/* Tabellen im Markdown (und TipTap-HTML). Kein min-width:max-content mehr
+   (siehe .content-table-wrap.is-stacked weiter unten) – main.js misst pro
+   Tabelle live, ob sie in ihrer natürlichen Breite passt, und wechselt bei
+   Bedarf ins Karten-Layout, statt Spalten zu quetschen oder seitlich
+   scrollen zu lassen. */
+.main-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+/* WICHTIG: word-break/overflow-wrap explizit auf "normal" zurückgesetzt
+   (nicht nur weggelassen!) – die weiter oben stehende Regel
+   ".main-content { overflow-wrap: break-word; word-break: break-word; }"
+   (Sicherheitsnetz für Fließtext) VERERBT sich sonst auch in th/td und lässt
+   den Browser bei der Tabellen-Spaltenberechnung auch kurze Wörter/Zahlen
+   mitten durchbrechen, sobald eine Spalte knapp wird ("2018" -> "201"+"8"),
+   selbst ganz ohne horizontalen Überlauf. Tabellenzellen brechen jetzt NUR
+   noch an normalen Wortgrenzen (Leerzeichen/Bindestrich) um. Passt eine
+   Spalte dadurch selbst so nicht mehr rein, erkennt main.js
+   (applyTableLayout) das über die Gesamtbreite der Tabelle und wechselt ins
+   Karten-Layout (.is-stacked) statt einzelne Wörter zu zerreißen. */
+.main-content th { background: var(--green-main); color: #fff; font-weight: 600; padding: .6rem 1rem; text-align: left; vertical-align: middle; word-break: normal; overflow-wrap: normal; }
+/* TipTap umschließt auch Tabellenkopf-Text mit einem <p> (<th><p>Mobil</p></th>).
+   Ohne diesen Reset gewinnt die generische Regel ".main-content p { color:
+   var(--text-body) }" weiter unten gegen die weiße Schrift oben, weil sie das
+   <p> direkt trifft statt nur zu erben - der Tabellenkopf-Text erschien dadurch
+   dunkel auf dunkelgrünem Grund und war kaum lesbar (Korrektur 02.09.2026).
+   "color: inherit" statt eines zweiten hartkodierten #fff, damit die
+   Kopfzeilen-Schriftfarbe automatisch der obigen th-Regel folgt. */
+.main-content th p { color: inherit; }
+/* Kurze Spaltenüberschriften wie "E-Mail" oder "Telefon" brechen sonst am
+   Bindestrich mitten im Wort um ("E-" / "Mail"), obwohl die Spalte gar nicht
+   zu schmal ist - Browser behandeln den Bindestrich als normale Umbruchstelle
+   (dasselbe Problem wie bei Rufnummern, siehe data-label-Regel weiter unten).
+   Zentral für alle normalen Content-Tabellen gelöst (über den von
+   wrapContentTables() gesetzten .content-table-wrap-Wrapper), nicht nur für
+   einzelne Spalten oder Seiten - gilt automatisch für jede aktuelle wie
+   künftige Tabelle. Die Termine-Tabelle nutzt bewusst einen eigenen Wrapper
+   (.termine-table-wrap) und ist hier absichtlich nicht betroffen. Kein
+   Freibrief gegen horizontales Überlaufen: applyTableLayout() misst die
+   tatsächliche (mit diesem nowrap bereits gerenderte) Breite und wechselt bei
+   Bedarf weiterhin automatisch ins Karten-Layout (.is-stacked). */
+.content-table-wrap th { white-space: nowrap; }
+.main-content td { padding: .55rem 1rem; border-bottom: 1px solid var(--border); word-break: normal; overflow-wrap: normal; }
 .main-content tr:nth-child(even) td { background: var(--bg-light); }
+/* Kontaktspalten (Telefon/Mobil): eine Rufnummer wie "0176-35496821" wird
+   sonst schon in der normalen (nicht gestapelten) Tabellenansicht mitten
+   im Bindestrich getrennt, weil ein Bindestrich für den Browser eine ganz
+   normale Umbruchstelle ist (auch ohne dass die Tabelle insgesamt zu breit
+   wäre und applyTableLayout() ins Karten-Layout wechseln würde). data-label
+   wird bereits von main.js (labelTableCells) aus der jeweiligen Kopfzeile
+   jeder Tabelle gesetzt - deckt so automatisch jede aktuelle wie künftige
+   Tabelle mit einer "Telefon"- oder "Mobil"-Spalte ab, ohne Sonderfall pro
+   Seite. Kein Freibrief gegen horizontalen Overflow: applyTableLayout()
+   misst die tatsächliche (mit diesem nowrap bereits gerenderte) Breite -
+   passt die Spalte dadurch nicht mehr, wechselt main.js automatisch ins
+   Karten-Layout (.is-stacked), dessen overflow-wrap:break-word weiter unten
+   als letztes Sicherheitsnetz greift. */
+.main-content td[data-label="Telefon"],
+.main-content td[data-label="Mobil"] { white-space: nowrap; }
+
+/* ── Kontakt-Tabellen: ausgewogene Spaltenbreiten statt Auto-Layout ───────
+   Ohne table-layout (Standard: "auto") bemisst der Browser jede Spalte an
+   ihrem längsten Inhalt. Bei Tabellen wie Hochwild/Niederwild sprengt die
+   "Leiter"-Spalte (Name + Adresse, oft 40+ Zeichen) dadurch weit über das
+   nötige Maß hinaus, während die (aktuell noch leere) "E-Mail"-Spalte kaum
+   Platz braucht - in Summe rutschen E-Mail/Mobil weit nach rechts, mit viel
+   Leerraum dazwischen (Korrektur 02.09.2026, Nachjustierung von Phase 4A).
+   Erkennung ausschließlich über die vorhandene Spalten-KOMBINATION
+   "E-Mail" + "Mobil" (data-label auf den th-Zellen, siehe labelTableCells()
+   in main.js) - kein Sonderfall pro Seite: trifft automatisch jede aktuelle
+   wie künftige Tabelle mit dieser Kombination (aktuell Hochwild/Niederwild),
+   lässt Tabellen mit anderer Spalten-Kombination (z.B. die
+   Jagdhundeschule-Tabellen ohne E-Mail-Spalte) und die separat gestylte
+   Termine-Tabelle unangetastet.
+   table-layout:fixed macht die Spaltenbreiten unabhängig vom Zelleninhalt -
+   sie kommen stattdessen ausschließlich aus den <col>-Breiten unten.
+   !important ist nötig, weil jede TipTap-Tabelle ihr eigenes <colgroup> mit
+   fest im Content-JSON gespeicherten min-width-Werten aus dem
+   Admin-Tabelleneditor mitbringt, das sonst weiterhin gewinnen würde.
+   Werte anhand der echten Inhalte kalibriert (längste vorkommende Leiter-
+   und Mobil-Werte auf Hochwild/Niederwild durchgemessen): Mobil und E-Mail
+   bekommen genug Raum, um typische Rufnummern bzw. eine spätere
+   E-Mail-Adresse ohne unnötigen Umbruch/Leerraum darzustellen, die ersten
+   beiden (je nach Tabelle unterschiedlich benannten) Spalten teilen sich
+   den Rest über :nth-child, da ihr Name nicht generisch bekannt ist.
+   Ausdrücklich nur ":not(.is-stacked)" - im Karten-Layout gibt es keine
+   Tabellenspalten mehr (jede Zelle wird zur eigenen Zeile), eine
+   Spaltenbreite ergäbe dort keinen Sinn und würde (wie beim ersten Versuch
+   dieser Korrektur festgestellt) sogar die per-Zelle verfügbare Breite auf
+   die schmale Desktop-Spaltenbreite zusammenquetschen, weil <col>-Breiten
+   vom Browser pro Spalte auf jede Zelle angewandt werden, unabhängig von
+   deren "display". Deshalb hier bewusst ausgeschlossen, statt es später per
+   Extra-Regel wieder zurücksetzen zu müssen. */
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) {
+  table-layout: fixed;
+}
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(1) { width: 24% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col:nth-child(2) { width: 32% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="E-Mail"] { width: 24% !important; }
+.content-table-wrap:not(.is-stacked) table:has(th[data-label="E-Mail"]):has(th[data-label="Mobil"]) col[data-label="Mobil"] { width: 20% !important; }
 /* Blockquote */
 .main-content blockquote { border-left: 4px solid var(--green-main); margin: 1.5rem 0; padding: .75rem 1.25rem; background: var(--bg-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); font-style: italic; }
 
@@ -635,12 +1235,46 @@ p  { margin-bottom: 1rem; }
 }
 .sidebar-nav li a::before { content: '›'; color: var(--green-main); font-size: 1.2rem; }
 .sidebar-nav li a:hover, .sidebar-nav li.active a { background: var(--green-light); color: var(--green-dark); padding-left: 1.1rem; }
+/* Unterseiten-"Kacheln" in der Sidebar (Verbraucher-Umbau 22.08.2026) -
+   klarer/deutlicher als eine reine Textlink-Liste, aber schmal genug für
+   die Sidebar-Spalte (im Gegensatz zum breiten Kachel-Grid auf der
+   Startseite, siehe .services__grid/.service-card). */
+.unterseiten-tiles { display: flex; flex-direction: column; gap: .6rem; }
+.unterseite-tile {
+  display: flex; align-items: center; gap: .7rem; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: .7rem .85rem; transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.unterseite-tile:hover { transform: translateX(3px); box-shadow: var(--shadow-sm); border-color: var(--green-main); }
+.unterseite-tile__icon {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); color: var(--green-main);
+  display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+}
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Größe für das neue Dokument-Icon
+   (ICONS.document aus main.js), das hier das bisherige 📄-Emoji ersetzt. */
+.unterseite-tile__icon svg { width: 18px; height: 18px; }
+.unterseite-tile__label { font-size: .87rem; font-weight: 600; color: var(--text-dark); }
 .contact-box { background: var(--green-main); color: #fff; border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; }
 .contact-box h4 { color: #fff; margin-bottom: 1rem; border-bottom-color: rgba(255,255,255,.2); font-family: var(--font-sans); font-size: .95rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(255,255,255,.2); }
 .contact-box p   { font-size: .87rem; color: rgba(255,255,255,.75); margin-bottom: .4rem; display: flex; align-items: flex-start; gap: .45rem; }
 .contact-box p > span.cb-icon { flex-shrink: 0; line-height: 1.5; }
+.contact-box p > span.cb-icon svg {
+  width: 16px; height: 16px; display: block; margin-top: .15rem;
+  stroke: rgba(255,255,255,.82);
+}
+.topbar__icon { display: flex; align-items: center; }
+.topbar__icon svg { width: 14px; height: 14px; display: block; }
 .contact-box a   { color: rgba(255,255,255,.88); }
 .contact-box a:hover { color: #fff; }
+/* Keine eigene Groß-/Kleinschreibung mehr für die Unterüberschrift – Frank hatte
+   bemängelt, dass "Adresse KJS" und "GESCHÄFTLICHE POSTADRESSE" uneinheitlich
+   wirkten. Beide Überschriften nutzen jetzt denselben Stil wie .contact-box h4. */
+.contact-box h4.contact-box__sub { margin-top: 1.1rem; font-size: .95rem; opacity: .9; }
+
+/* Hinweis: die frühere ".hb-anbieter-box" (grüne Sidebar-Kontaktbox auf der
+   Hundebörse-Detailseite) wurde am 28.08.2026 entfernt und durch den
+   Kontaktbereich ".hb-kontaktbereich" im Hauptinhalt ersetzt (siehe dort) -
+   die Box selbst wird nicht mehr erzeugt, ihre CSS-Regeln wurden entfernt. */
 
 /* =========================================================
    PERSON CARDS
@@ -661,9 +1295,16 @@ p  { margin-bottom: 1rem; }
   font-size: 3.5rem; color: var(--green-main); background: var(--green-light);
   width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
 }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Platzhalter ohne Foto zeigte
+   bisher ein 👤-Emoji statt ICONS.user aus main.js. Gilt für die
+   Vorstand/Obleute-Personenkarten (.person-card__avatar-placeholder) und
+   für den eigenständig aufgebauten Platzhalter auf der
+   Kreisjägermeister-Seite (.kjm-avatar-placeholder). */
+.person-card__avatar-placeholder svg,
+.kjm-avatar-placeholder svg { width: 42%; height: 42%; }
 .person-card__avatar { width: 100%; height: 100%; object-fit: cover; }
 .person-card__body { padding: 1.25rem; }
-.person-card__role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green-main); display: block; margin-bottom: .35rem; }
+.person-card__role { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green-main); display: block; margin-bottom: .35rem; line-height: 1.3; min-height: 2.6em; }
 .person-card__name { font-weight: 700; font-size: 1rem; color: var(--text-dark); margin-bottom: .5rem; font-family: var(--font-sans); }
 .person-card__contact { font-size: .82rem; color: var(--text-muted); }
 .person-card__contact a { color: var(--green-main); display: block; margin-bottom: .2rem; }
@@ -693,8 +1334,16 @@ p  { margin-bottom: 1rem; }
 .termine-table td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 .termine-table tr:hover td { background: var(--bg-light); }
 .termine-table tr:last-child td { border-bottom: none; }
+/* Feste, schmale Breiten für die kurzen Spalten (Frank-Feedback 20.08.2026:
+   Kategorie/Revier wirkten mit viel Leerraum "häkelig"), Veranstaltung/Ort
+   bekommen den übrigen Platz. Revier ist eine eigene Spalte statt Teil der
+   Ort-Zelle, damit Adresse und Revier optisch nicht mehr zusammenkleben. */
+.termine-table th:nth-child(1), .termine-table td:nth-child(1) { width: 6.5rem; }
+.termine-table th:nth-child(2), .termine-table td:nth-child(2) { width: 5.5rem; }
+.termine-table th:nth-child(5), .termine-table td:nth-child(5) { width: 9rem; }
+.termine-table th:nth-child(6), .termine-table td:nth-child(6) { width: 8rem; }
 .badge { display: inline-block; padding: .25rem .65rem; border-radius: 20px; font-size: .72rem; font-weight: 700; background: var(--green-light); color: var(--green-dark); }
-.badge--gold { background: var(--gold-light); color: #7a5900; }
+.badge--gold { background: var(--gold-light); color: var(--gold-darker); }
 .badge--gray { background: #eee; color: #555; }
 
 /* =========================================================
@@ -728,7 +1377,7 @@ p  { margin-bottom: 1rem; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-  outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(61,139,64,.12);
+  outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .form-group textarea { resize: vertical; min-height: 130px; }
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -739,7 +1388,7 @@ p  { margin-bottom: 1rem; }
 .kontakt-detail__label { font-weight: 700; font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: .2rem; }
 .kontakt-detail__value { font-size: .9rem; color: var(--text-dark); }
 .kontakt-detail__value a { color: var(--green-main); }
-.map-placeholder { width: 100%; height: 260px; background: var(--green-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; border: 2px dashed var(--green-mid); }
+.map-placeholder { width: 100%; height: 260px; background: var(--green-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-top: 2rem; border: 2px dashed var(--green-main); }
 
 /* =========================================================
    DOWNLOADS
@@ -753,11 +1402,176 @@ p  { margin-bottom: 1rem; }
 }
 .download-item:hover { border-color: var(--green-main); box-shadow: var(--shadow-md); }
 .download-item__icon { width: 44px; height: 44px; background: var(--green-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--green-main); flex-shrink: 0; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): einheitliches Dokument-Icon statt
+   der bisherigen, je nach Dateityp unterschiedlichen Emojis (📄/📝/📊/🗜️/📁). */
+.download-item__icon svg { width: 22px; height: 22px; }
 .download-item__meta { flex: 1; min-width: 0; }
 .download-item__name { font-weight: 700; font-size: .92rem; color: var(--text-dark); margin-bottom: .2rem; font-family: var(--font-sans); word-break: break-word; }
 .download-item__info { font-size: .78rem; color: var(--text-muted); }
 .download-item__actions { display: flex; gap: .4rem; flex-shrink: 0; }
-.download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); }
+/* clear:both nötig, nicht nur der Clearfix auf .main-content/#seite-inhalt/
+   #page-inhalt weiter oben: der Clearfix sorgt nur dafür, dass der
+   umschließende Container seine Höhe korrekt um gefloatete Bilder (img-links/
+   img-rechts) herum berechnet – er zwingt aber NICHT jeden einzelnen
+   nachfolgenden Block dazu, unterhalb eines Floats zu beginnen. Ohne eigenes
+   clear:both rutschte "Dokumente & Downloads" (wird per JS ans Seitenende
+   angehängt, siehe main.js) neben ein zu kurzes Float-Bild statt sauber
+   darunter zu stehen. */
+.download-section-title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .5rem; font-family: var(--font-sans); clear: both; }
+.downloads-list { clear: both; }
+
+/* =========================================================
+   SERVICE – Beiträge mit Kategorie (Akkordeon, Frank-Wunsch 21.08.2026)
+   ========================================================= */
+/* Jahr- und Kategorie-Filter nebeneinander (Frank-Wunsch 21.08.2026: "so wie
+   auf den anderen Seiten immer vom System ist") - Klasse umbenannt von
+   .service-jahr-filter-wrap, da jetzt auch das Kategorie-Dropdown drin sitzt. */
+.service-filter-wrap { display: flex; align-items: center; gap: .6rem; margin: 0 0 2rem; flex-wrap: wrap; }
+.service-filter-wrap label { font-size: .84rem; font-weight: 600; color: var(--text-dark); }
+.service-jahr-filter {
+  padding: .55rem .9rem; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: .88rem;
+  color: var(--text-dark); background: #fff; cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.service-jahr-filter:focus {
+  outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring);
+}
+/* Kategorien als aufklappbares Akkordeon (Frank-Wunsch #85) – gleiches
+   <details>/<summary>-Muster wie .faq-item auf der FAQ-Seite, nur eigene
+   Klassennamen, da Service inhaltlich etwas anderes zeigt (Beiträge statt
+   Frage/Antwort). */
+.service-kategorie { border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: .75rem; overflow: hidden; clear: both; }
+.service-kategorie summary.service-kategorie-titel {
+  padding: 1.1rem 1.5rem; font-weight: 700; font-size: 1.05rem; margin: 0;
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between;
+  align-items: center; background: var(--bg-white); transition: background var(--transition);
+  color: var(--green-dark); font-family: var(--font-heading);
+}
+.service-kategorie summary::-webkit-details-marker { display: none; }
+.service-kategorie summary:hover { background: var(--green-light); }
+.service-kategorie summary::after { content: '+'; font-size: 1.3rem; color: var(--green-main); flex-shrink: 0; margin-left: 1rem; }
+.service-kategorie[open] summary::after { content: '−'; }
+.service-kategorie[open] summary { background: var(--green-light); }
+.service-kategorie__body { padding: 1.5rem; border-top: 1px solid var(--border); background: var(--bg-white); }
+.service-beitrag { margin-bottom: 2rem; }
+.service-beitrag:last-child { margin-bottom: 0; }
+.service-beitrag__titel { font-weight: 700; font-size: 1rem; color: var(--text-dark); margin: 0 0 .5rem; }
+.service-beitrag__datum { font-weight: 400; font-size: .82rem; color: var(--text-muted); }
+.service-beitrag__text { font-size: .92rem; color: var(--text-dark); line-height: 1.7; margin: 0 0 1rem; }
+.service-beitrag__text p:last-child { margin-bottom: 0; }
+.service-beitrag iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: none; border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin: 0 0 1rem; display: block; }
+/* .download-item__thumb ist site-weit als schmale 60x80-Hochformat-Box
+   gedacht (z.B. Dokument-Scan-Vorschau in der Sidebar). Service-Vorschau-
+   bilder sind aber normale Querformat-Fotos (Frank-Feedback 21.08.2026:
+   "sieht katastrophal aus" - das Foto wurde auf einen schmalen Streifen
+   zusammengeschnitten). Eigene, breitere Querformat-Größe nur hier, damit
+   die Sidebar-Variante auf anderen Seiten unverändert bleibt. */
+.download-item__thumb.service-download-item__thumb { width: 110px; height: 74px; }
+/* In diesem tief verschachtelten Kontext (Akkordeon > Beitrag > Downloads-Liste)
+   löst der Browser "width:100%" auf dem <img> nicht auf die tatsächliche
+   Content-Box der Thumb-Box auf (Messung ergab konsequent ~87px statt 108px,
+   ein Layout-Rendering-Eigenheit, keine CSS-Spezifitätsfrage - feste Pixel
+   umgehen das zuverlässig, da 100%/height:100% hier nicht stabil greifen). */
+.download-item__thumb.service-download-item__thumb img { width: 108px; height: 72px; }
+.download-item__date { font-size: .78rem; color: var(--text-muted); }
+
+/* Titelbild eines Aktuelles-Beitrags (aktuelles/beitrag.html): stand vorher
+   auf voller Breite der Inhaltsspalte ohne Größenbegrenzung und wirkte laut
+   Frank "erschlagend". Keine Admin-Größenauswahl gewünscht – pauschal um
+   ca. 30-40% verkleinert und zentriert. Auf schmalen Bildschirmen (Sidebar
+   verschwindet, Inhaltsspalte wird selbst schon schmal) etwas größer, damit
+   es dort nicht unnötig winzig wirkt. */
+/* .main-content-Präfix nötig, damit das hier die generische
+   ".main-content img"-Regel (gleiche Datei, oben) schlägt – sonst gewinnt
+   deren "margin: 1.5rem 0" (höhere Spezifität durch zusätzlichen
+   Element-Selektor "img") und die Zentrierung (margin:auto) greift nicht. */
+/* Rueckgaengig gemacht (Frank-Feedback 20.08.2026): das feste 16:9-
+   Seitenverhaeltnis mit object-fit:cover hat bei hochformatigen Fotos
+   (Portraits) den Kopf abgeschnitten, da object-position:center bei
+   solchen Bildern oben und unten gleich viel wegschneidet. Titelbilder
+   werden daher wieder in ihrem natuerlichen Seitenverhaeltnis angezeigt -
+   nicht mehr einheitlich, dafuer nie mehr mit abgeschnittenen Motiven. */
+.main-content .beitrag-titelbild {
+  display: block; width: 65%; margin: 0 auto 2rem;
+  height: auto;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+@media (max-width: 768px) {
+  .main-content .beitrag-titelbild { width: 85%; }
+}
+
+/* "Bildergalerie" pro Seite (gleiches Baukasten-Prinzip wie Downloads) */
+.galerie-section { margin-top: 2rem; clear: both; }
+.galerie-section__title { font-weight: 700; color: var(--green-dark); font-size: 1rem; margin: 0 0 .75rem; font-family: var(--font-sans); }
+.galerie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+.galerie-item {
+  display: block; border-radius: var(--radius-md); overflow: hidden;
+  background: var(--bg-white); border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm); transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.galerie-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.galerie-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+/* Überschreibt .main-content/#seite-inhalt/#page-inhalt img (gleiche Spezifität,
+   aber dort weiter oben in der Datei) – ohne das hier bleiben deren margin/
+   border-radius/box-shadow am Galerie-Bild hängen (derselbe Bug wie bei den
+   Jagdhundeschule-Kacheln, siehe .news-card__img weiter unten). */
+.main-content .galerie-item img,
+#seite-inhalt .galerie-item img,
+#page-inhalt .galerie-item img {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.galerie-item__caption { padding: .55rem .75rem; font-size: .95rem; font-weight: 600; color: var(--text-dark); }
+@media (max-width: 640px) {
+  .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+
+/* Bildergalerie-Lightbox: Overlay statt eigener Bild-Seite, mit Vor/Zurück-
+   Navigation. Siehe js/main.js (Event-Delegation auf .galerie-item). */
+body.kjs-lightbox-lock { overflow: hidden; }
+.kjs-lightbox {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(20, 20, 15, .92);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity var(--transition);
+}
+.kjs-lightbox--open { opacity: 1; visibility: visible; }
+.kjs-lightbox__stage {
+  max-width: min(90vw, 1100px); max-height: 88vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.kjs-lightbox__img {
+  max-width: 90vw; max-height: 78vh; object-fit: contain;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  background: #000;
+}
+.kjs-lightbox__caption { color: #fff; font-size: 1.05rem; font-weight: 600; margin-top: .75rem; text-align: center; }
+.kjs-lightbox__counter { color: rgba(255,255,255,.6); font-size: .8rem; margin-top: .25rem; }
+.kjs-lightbox__close,
+.kjs-lightbox__prev,
+.kjs-lightbox__next {
+  position: absolute; background: rgba(255,255,255,.12); color: #fff;
+  border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+}
+.kjs-lightbox__close:hover,
+.kjs-lightbox__prev:hover,
+.kjs-lightbox__next:hover { background: rgba(255,255,255,.25); }
+.kjs-lightbox__close { top: 1.25rem; right: 1.25rem; width: 2.5rem; height: 2.5rem; font-size: 1.6rem; line-height: 1; }
+.kjs-lightbox__prev,
+.kjs-lightbox__next { top: 50%; transform: translateY(-50%); width: 3rem; height: 3rem; font-size: 1.2rem; }
+.kjs-lightbox__prev { left: 1rem; }
+.kjs-lightbox__next { right: 1rem; }
+@media (max-width: 640px) {
+  .kjs-lightbox__prev, .kjs-lightbox__next { width: 2.4rem; height: 2.4rem; font-size: 1rem; }
+  .kjs-lightbox__close { top: .75rem; right: .75rem; }
+  .kjs-lightbox__prev { left: .4rem; }
+  .kjs-lightbox__next { right: .4rem; }
+}
 
 /* "Dokumente & Downloads" als Sidebar-Karte (neben dem Geschäftsstelle-Block) */
 .sidebar-widget--downloads h4 {
@@ -783,7 +1597,10 @@ p  { margin-bottom: 1rem; }
   display: block; flex-shrink: 0; width: 60px; height: 80px;
   border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border);
 }
-.download-item__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.download-item__thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none; max-width: none;
+}
 .download-item--sidebar .download-item__name {
   flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-dark);
   font-family: var(--font-sans); word-break: break-word;
@@ -801,7 +1618,7 @@ p  { margin-bottom: 1rem; }
 /* =========================================================
    FOOTER
    ========================================================= */
-.site-footer { background: #2e6b30; color: rgba(255,255,255,.92); padding-top: 4.5rem; }
+.site-footer { background: var(--green-main); color: rgba(255,255,255,.92); padding-top: 4.5rem; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,.2); }
 .footer-logo-emblem {
   width: 58px; height: 58px; background: var(--green-main); border-radius: 50%;
@@ -815,9 +1632,16 @@ p  { margin-bottom: 1rem; }
 .footer-social a {
   width: 34px; height: 34px; background: rgba(255,255,255,.07); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,.65); transition: all var(--transition); font-size: .95rem;
+  color: #fff; transition: filter var(--transition); font-size: .95rem;
 }
-.footer-social a:hover { background: var(--green-main); color: #fff; }
+/* Gleiche feste Marken-Badges wie im Header (.topbar__social--facebook/
+   --instagram) statt des alten, einheitlich blassen Icon-Kreises -
+   Header und Footer sollen optisch "aus einem Guss" sein. */
+.footer-social a.footer-social--facebook { background: #1877F2; }
+.footer-social a.footer-social--instagram {
+  background: linear-gradient(45deg, #feda75 0%, #fa7e1e 25%, #d62976 50%, #962fbf 75%, #4f5bd5 100%);
+}
+.footer-social a:hover { filter: brightness(1.12); }
 .footer-col h5 {
   color: #fff; font-size: .82rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .12em; margin-bottom: 1.25rem; padding-bottom: .5rem;
@@ -825,7 +1649,7 @@ p  { margin-bottom: 1rem; }
 }
 .footer-col ul li { margin-bottom: .5rem; }
 .footer-col ul li a { color: rgba(255,255,255,.85); font-size: .86rem; transition: all var(--transition); display: flex; align-items: center; gap: .4rem; }
-.footer-col ul li a::before { content: '›'; color: var(--green-mid); }
+.footer-col ul li a::before { content: '›'; color: var(--green-main); }
 .footer-col ul li a:hover { color: #fff; padding-left: .35rem; }
 .footer-bottom {
   padding: 1.25rem 0; display: flex; justify-content: space-between;
@@ -854,6 +1678,43 @@ p  { margin-bottom: 1rem; }
 /* =========================================================
    RESPONSIVE
    ========================================================= */
+
+/* Hauptmenü: durch den neuen Punkt "Waffenbörse" (02.09.2026, 10. statt
+   bisher 9. Hauptpunkt) reichte der bisherige Abstand auf kleineren
+   Desktop-/Laptop-Breiten (u.a. den weit verbreiteten 1280px/1366px-
+   Auflösungen) nicht mehr aus - "Kontakt" ragte rechts über den Viewport
+   hinaus, ohne umzubrechen (kein flex-wrap). Statt dafür einen Menüpunkt zu
+   entfernen (Laurin-Vorgabe), wird das Hauptmenü in diesem Bereich (oberhalb
+   der 1200px-Grenze zum Handy-Menü, siehe Nachbesserung unten) etwas
+   kompakter dargestellt - Schriftgröße/Innenabstand pro Menüpunkt minimal
+   reduziert, sonst unverändert. */
+@media (max-width: 1400px) and (min-width: 1201px) {
+  .main-nav { gap: .05rem; }
+  .main-nav > li > a { padding: .5rem .5rem; font-size: .88rem; }
+}
+
+/* Nachbesserung 02.09.2026: Auch mit obiger Verdichtung reichte der Platz
+   im Bereich ca. 900-1200px (kleine Laptops/Tablets quer, u.a. 1024px/
+   1100px) nicht sicher aus - "Kontakt" wäre dort weiterhin abgeschnitten
+   gewesen bzw. hätte nur mit unleserlich kleiner Schrift gepasst. Das war
+   schon vor "Waffenbörse" grenzwertig und ist mit dem 10. Menüpunkt
+   endgültig zu eng geworden (gemessen: ab ca. 1140px beginnt echter,
+   unsichtbarer horizontaler Overflow, kein Umbruch, da .main-nav ohne
+   flex-wrap). Lösung nach Rücksprache: Statt die Schrift noch weiter zu
+   stauchen, greift das Hamburger-Menü ab hier bereits ab 1200px statt wie
+   bisher erst ab 900px - mit spürbarem Sicherheitsabstand zur gemessenen
+   1140px-Kippgrenze (Puffer für Schriftrendering-Unterschiede zwischen
+   Browsern/Systemen). Bewusst NUR .main-nav/.nav-toggle in einem eigenen
+   Breakpoint verschoben, nicht der gesamte 900px-Block darunter: Header-
+   Höhe, Hero, Grids etc. sind reine Telefon-/Schmalbildschirm-Anpassungen
+   und sollen im 901-1200px-Bereich (Tablet/kleiner Laptop, reichlich
+   Platz) unverändert im "Desktop-Layout" bleiben - nur die horizontale
+   Menüleiste wird dort durch den Hamburger-Button ersetzt. */
+@media (max-width: 1200px) {
+  .main-nav { display: none; }
+  .nav-toggle { display: flex; }
+}
+
 @media (max-width: 1100px) {
   .services__grid { grid-template-columns: repeat(3,1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
@@ -863,8 +1724,6 @@ p  { margin-bottom: 1rem; }
 
 @media (max-width: 900px) {
   :root { --header-h: 70px; }
-  .main-nav { display: none; }
-  .nav-toggle { display: flex; }
   .hero { min-height: 72vh; }
   .quicklinks__grid { grid-template-columns: repeat(2,1fr); }
   .quicklinks__item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.12); }
@@ -872,7 +1731,8 @@ p  { margin-bottom: 1rem; }
   .welcome__image { max-width: 560px; }
   .services__grid { grid-template-columns: repeat(2,1fr); }
   .news__grid { grid-template-columns: repeat(2,1fr); }
-  .testimonials__grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .testimonials__grid { gap: 1.25rem; }
+  .testimonial-card { flex-basis: 100%; max-width: 100%; }
   .stats__grid { gap: 2rem; }
   .page-content .container { grid-template-columns: 1fr; }
   .persons-grid { grid-template-columns: repeat(2,1fr); }
@@ -935,10 +1795,98 @@ p  { margin-bottom: 1rem; }
   margin: 1.5rem 0;
 }
 .content-table-wrap table {
-  width: max-content !important;
-  max-width: none !important;
-  min-width: 100% !important;
-  margin: 0 !important;
+  width: 100%;
+  margin: 0;
+}
+
+/* ── Tabellen: Karten-Layout statt horizontalem Scrollen ──────────────────
+   Frank-Wunsch (nach erstem Versuch mit einer festen Handy-Bildschirmgrenze
+   nochmal verschärft): "ob Handy, ob Bildschirm" – NIE mehr seitliches
+   Wischen, egal wie breit das Fenster ist. Ein fester @media-Breakpoint
+   reicht dafür nicht, weil eine Tabelle schon bei mittleren Fensterbreiten
+   (Tablet, schmaleres Laptop-Fenster) zu breit werden kann, obwohl das
+   Fenster größer als jeder sinnvolle Handy-Breakpoint ist.
+   Stattdessen misst main.js (applyTableLayout) für JEDE Tabelle live, ob
+   ihre natürliche Breite in den verfügbaren Platz passt, und setzt dann die
+   Klasse "is-stacked" auf die Wrapper-Box – unabhängig von der Bildschirm-
+   größe, läuft auch bei jedem Fenster-Resize erneut. Erst mit dieser Klasse
+   greifen die folgenden Regeln: Kopfzeile ausblenden, jede Datenzeile wird
+   zur eigenen Karte, jeder Wert bekommt seine Spaltenüberschrift (über das
+   per JS gesetzte data-label-Attribut) als Feldbezeichnung davor. */
+.content-table-wrap.is-stacked table,
+.termine-table-wrap.is-stacked .termine-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.content-table-wrap.is-stacked table thead,
+.termine-table-wrap.is-stacked .termine-table thead {
+  display: none;
+}
+/* Content-Tabellen aus TipTap haben nie ein echtes <thead> (siehe
+   labelTableCells() in main.js: ohne <thead> gilt die erste <tr> der
+   Tabelle als Kopfzeile) - die Regel oben griff dort deshalb nie, und die
+   Kopfzeile (erste <tr> mit <th>-Zellen) blieb im Karten-Layout in ihrer
+   ungestapelten Originalbreite stehen und lief seitlich aus dem schmalen
+   Wrapper heraus (Fund bei der Tabellenkopf-Korrektur 02.09.2026 - bestand
+   unabhaengig von der neuen weissen Schrift/dem nowrap bereits vorher,
+   wurde durch nowrap aber sichtbar schlimmer). Blendet die Kopfzeile hier
+   ebenso aus wie bei der Termine-Tabelle - die Feldbezeichnungen kommen im
+   Karten-Layout ohnehin bereits ueber data-label/::before pro Wert. */
+.content-table-wrap.is-stacked table tbody tr:first-child {
+  display: none;
+}
+
+.content-table-wrap.is-stacked table tbody tr,
+.termine-table-wrap.is-stacked .termine-table tbody tr {
+  display: block;
+  margin-bottom: .9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.content-table-wrap.is-stacked table tbody tr:nth-child(even),
+.termine-table-wrap.is-stacked .termine-table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
+
+.content-table-wrap.is-stacked table tbody td,
+.termine-table-wrap.is-stacked .termine-table tbody td {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: right;
+  padding: .55rem .85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-white);
+  /* Im Karten-Layout steht jedem Wert die volle Zeilenbreite zur Verfügung
+     (kein Spalten-Gedränge mehr) – hier darf overflow-wrap:break-word als
+     Notbremse für einen einzelnen, wirklich unteilbaren sehr langen Wert
+     (z.B. eine lange URL) wieder greifen, ohne das "2018"-Problem oben. */
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.content-table-wrap.is-stacked table tbody td:last-child,
+.termine-table-wrap.is-stacked .termine-table tbody td:last-child {
+  border-bottom: none;
+}
+.content-table-wrap.is-stacked table tbody td::before,
+.termine-table-wrap.is-stacked .termine-table tbody td::before {
+  content: attr(data-label);
+  font-weight: 700;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-align: left;
+  color: var(--green-dark);
+  margin-right: .75rem;
+  flex-shrink: 0;
+}
+/* Zellen ohne Label (z.B. eine reine Trennzeile) normal anzeigen */
+.content-table-wrap.is-stacked table tbody td:not([data-label])::before,
+.termine-table-wrap.is-stacked .termine-table tbody td:not([data-label])::before {
+  content: '';
+  margin: 0;
 }
 
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
@@ -957,8 +1905,7 @@ p  { margin-bottom: 1rem; }
 
 /* ── Header & Footer Logo-Größe ───────────────────────────────────── */
 .site-logo img    { height: 114px !important; width: auto; }
-.footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block;
-  filter: drop-shadow(0 0 6px rgba(255,255,255,.35)) drop-shadow(0 2px 8px rgba(0,0,0,.3)); }
+.footer-about img { height: 130px !important; width: auto; margin-bottom: 1.2rem; display: block; }
 
 /* Mobile: Logo kleiner */
 @media (max-width: 900px) {
@@ -999,3 +1946,718 @@ p  { margin-bottom: 1rem; }
 .hero__bg {
   opacity: .85 !important;
 }
+
+/* Hero-Diashow: mehrere Hintergrundbilder mit automatischem Wechsel
+   (Crossfade). Jedes Bild wird per JS als eigenes Layer eingefügt und
+   bekommt denselben Bildausschnitt wie das bisherige feste Hero-Bild
+   (background-size:cover; background-position:center 40%), unabhängig
+   von der ursprünglichen Bildgröße - kein manuelles Zuschneiden nötig. */
+.hero__bg--slide {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center 40%;
+  opacity: 0; transition: opacity 1.4s ease;
+}
+.hero__bg--slide.is-active { opacity: .85; }
+
+/* "Weiterführende Links"-Box (Wildfleisch-Seite) optisch hervorheben, damit
+   sie sich von den anderen (neutralen, hellgrauen) Sidebar-Boxen abhebt -
+   Laurin-Wunsch 23.08.2026, Vorbild war ein dunkelgrüner CTA-Kasten. */
+.sidebar-widget--highlight {
+  background: var(--green-dark);
+  border: 1px solid var(--green-dark);
+}
+.sidebar-widget--highlight h4 {
+  color: #fff;
+  border-bottom-color: var(--gold);
+}
+.sidebar-widget--highlight .sidebar-nav li a {
+  color: #fff;
+}
+.sidebar-widget--highlight .sidebar-nav li a::before {
+  color: var(--gold-light);
+}
+.sidebar-widget--highlight .sidebar-nav li a:hover,
+.sidebar-widget--highlight .sidebar-nav li.active a {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
+
+/* Hundebörse-Verweis in der Seitenleiste generischer Inhaltsseiten (z.B.
+   Hundevermittlung unter Jäger > Aufgaben der Kreisjägerschaft) - nutzt
+   bewusst dieselbe dunkelgrüne .sidebar-widget--highlight-Optik wie die
+   "Weiterführende Links"-Box, statt eine neue Kastenfarbe einzuführen
+   (Laurin-Wunsch 29.08.2026: vorhandene Sidebar-Strukturen wiederverwenden).
+   Titel/Text/Button sind über das normale Seiten-Formular im Admin
+   editierbar (seiten/index.html liest hundeboerse_cta_titel/_text/_button
+   aus der jeweiligen Seiten-JSON-Datei) - der Kasten erscheint nur,
+   wenn mindestens eines dieser Felder befüllt ist, betrifft also nur
+   Seiten, für die das im Admin gesetzt wurde. */
+.sidebar-widget--hundeboerse-cta p {
+  color: rgba(255,255,255,.92);
+  font-size: .88rem;
+  line-height: 1.6;
+  margin: 0 0 1.1rem;
+}
+.sidebar-widget--hundeboerse-cta .btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Downloads-Vorschaubild in "breiter" Darstellung (Seiten ohne Sidebar-Layout,
+   z.B. seiten/index.html) - Basis .download-item__thumb ist eine schmale
+   60x80-Hochformat-Box (gedacht für Dokument-Scan-Vorschauen in der
+   Sidebar-Variante), auf normalen Querformat-Fotos wirkte das wie ein
+   sinnlos zusammengeschnittener Streifen ("katastrophal", Laurin-Meldung
+   23.08.2026 - gleicher Bug-Typ wie schon bei .service-download-item__thumb
+   gelöst). Eigene, breitere Größe nur für diesen Kontext. */
+.download-item__thumb.download-item__thumb--breit { width: 110px; height: 74px; }
+/* Echte Ursache des "katastrophal"-Symptoms: #seite-inhalt img (ID-Selektor,
+   Spezifität 101) überstimmt .download-item__thumb img (Klassen-Selektor,
+   Spezifität 11) IMMER, unabhängig von Reihenfolge im Stylesheet - object-fit,
+   margin, border-radius, box-shadow, max-width und sogar height:auto wurden
+   dadurch von der generischen Content-Bild-Regel überschrieben. Gleiches
+   Bug-Muster wie schon bei .galerie-item img gelöst (siehe dort) - Fix per
+   ID-präfigierten Override-Selektoren, die die generische Regel zuverlässig
+   schlagen (Spezifität 111 > 101), statt nur auf Klassen zu setzen. */
+.main-content .download-item__thumb img,
+#seite-inhalt .download-item__thumb img,
+#page-inhalt .download-item__thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none; max-width: none;
+}
+
+/* =========================================================
+   WAFFENBÖRSE (Phase 1 Prototyp, 02.09.2026; Anzeigenkopf-Feinschliff
+   03.09.2026)
+   Übersicht/Detailseite bauen bewusst auf den bestehenden, bereits
+   ausgereiften Hundebörse-Bausteinen auf statt eigene Duplikate zu erzeugen:
+   .news__grid/.news-card (Kachelraster), .hb-overview-layout (Intro/Haupt-
+   inhalt/Sidebar-Grid), .steckbrief (Kerndaten-Tabelle),
+   .hb-kontaktbereich/.hb-kontakt-highlight (Anbieter-kontaktieren-Bereich) -
+   siehe waffenboerse/index.html und detail.html.
+   Der obere Anzeigenkopf der Detailseite (Bild links, Eckdaten rechts)
+   nutzte anfangs ebenfalls die Hundebörse-Klassen (.hb-detail-top/
+   .hb-gallery/.hb-thumbs/.hb-thumb/.hb-eckdaten). Seit dem Feinschliff vom
+   03.09.2026 hat er stattdessen eigene ".wb-detail-top/.wb-gallery/
+   .wb-thumbs/.wb-thumb/.wb-head"-Bausteine (weiter unten in diesem
+   Abschnitt) - Laurin wollte dort ein deutlich kompakteres, breiteres
+   Layout, das unabhängig von der Hundebörsen-Detailseite weiterentwickelt
+   werden kann, ohne diese zu berühren. Alle sonstigen, wirklich
+   waffenbörsenspezifischen Teile (Filterleiste, Kachel-Höhenausgleich unter
+   #wb-grid, Erwerbsberechtigungs-Hinweis) sind ebenfalls eigens "wb-"
+   präfigiert, damit sie klar von der Hundebörse abgegrenzt bleiben und
+   diese unangetastet lässt. */
+
+/* ── Anzeigenkopf Detailseite (03.09.2026, Laurin-Wunsch "kompakter
+   Anzeigenkopf"): Galerie links (~58%) + Eckdaten rechts (~42%) als ein
+   zusammengehöriger Block. Bewusst align-items:start statt (wie bei der
+   Hundebörse) stretch+space-between - genau dieses Stretchen war die
+   Ursache der bisherigen großen Leerflächen (die kurze Textspalte wurde
+   künstlich auf die Höhe des Bildes gezogen, der Kontaktbutton dadurch an
+   den unteren Bildrand statt direkt unter den Preis geschoben). Mit
+   align-items:start behält die Eckdaten-Spalte ihre natürliche, kompakte
+   Höhe. Bricht bereits bei 1024px auf eine Spalte um (früher als die
+   Hundebörse mit 900px) - siehe Kommentar an der main-image-Regel unten:
+   die rechte Spalte braucht neben der 290px-Sidebar spürbar mehr Breite als
+   bei der Hundebörse, damit Titel/Button auf typischen kleinen Laptop-
+   breiten (1024-1200px) nicht gequetscht wirken. */
+.wb-detail-top {
+  display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;
+  align-items: start; margin-bottom: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .wb-detail-top { grid-template-columns: 1fr; }
+}
+
+.wb-gallery { display: flex; flex-direction: column; gap: .6rem; }
+
+/* Hauptbild: bewusst object-fit:contain statt cover (Laurin-Vorgabe "keine
+   Bilder beschneiden, wenn dadurch wichtige Bildbereiche verloren gehen").
+   Waffen sind auf Fotos oft lang/querformatig, Anbieter fotografieren aber
+   auch hochkant - ein festes Seitenverhältnis mit "cover" hätte in beiden
+   Fällen zuverlässig Bildinhalt abgeschnitten. Mit "contain" auf einer
+   breiten 3:2-Fläche und neutralem Hintergrund (füllt bei abweichendem
+   Bildformat die Restfläche statt zu verzerren oder zu beschneiden) wirkt
+   das Bild trotzdem größer/breiter als vorher (die Spalte selbst ist durch
+   .wb-detail-top oben bereits breiter als die bisherige Hundebörse-Spalte),
+   ohne dass Hoch- oder Querformat-Anzeigenfotos leiden. Dünner Rahmen statt
+   nur Schatten, damit die Fläche bei hellen/freigestellten Fotos nicht mit
+   dem Seitenhintergrund verschwimmt. */
+/* ".wb-gallery "-Präfix (statt nur ".wb-main-image") nötig: die generische
+   Bild-Regel ".main-content img" weiter unten in dieser Datei hat dieselbe
+   Selektor-Spezifität wie ein einzelner Klassenname auf einem <img> und
+   setzt u.a. margin:1.5rem 0 und border:none - ohne den zusätzlichen
+   Klassen-Präfix hier würden diese beiden Eigenschaften das Hauptbild-Layout
+   durcheinanderbringen (entdeckt beim Nachbau: derselbe Effekt betrifft
+   bereits heute .hb-thumb img auf der Hundebörse, dort aber unangetastet
+   gelassen, siehe Abschlussbericht). */
+.wb-gallery .wb-main-image {
+  display: block; width: 100%; aspect-ratio: 3/2; object-fit: contain;
+  background: var(--bg-light); border: 1px solid var(--border); margin: 0;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+.wb-main-image--empty { display: flex; align-items: center; justify-content: center; }
+.wb-main-image--empty img { margin: 0; box-shadow: none; border-radius: 0; }
+.wb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.wb-thumb {
+  flex: 0 0 auto; width: 72px; height: 72px; padding: 0; overflow: hidden;
+  border: 2px solid transparent; border-radius: var(--radius-sm); background: none;
+  cursor: pointer; line-height: 0; transition: border-color .15s ease;
+}
+/* Alle vier Eigenschaften bewusst explizit gesetzt (nicht nur width/height/
+   object-fit/display): siehe Kommentar bei .wb-gallery .wb-main-image oben -
+   dieselbe generische ".main-content img"-Regel würde sonst margin/
+   border-radius/box-shadow in dieses 72px-Thumbnail hineinmischen. */
+.wb-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none;
+}
+.wb-thumb:hover { border-color: var(--green-main); }
+.wb-thumb.is-active { border-color: var(--green-dark); box-shadow: 0 0 0 2px var(--green-light); }
+@media (max-width: 600px) {
+  .wb-thumb { width: 58px; height: 58px; }
+}
+
+/* Eckdaten-Spalte: eine einzige Flex-Spalte mit "gap" statt einzeln
+   austarierter Margins pro Element (Titel/Hersteller/Standort/Preis/Badge/
+   Button kommen aus detail.html jetzt ohne eigene Inline-Abstände) - dadurch
+   entsteht der kompakte, gleichmäßige Rhythmus, den Laurin wollte, an genau
+   einer Stelle einstellbar. */
+.wb-head { display: flex; flex-direction: column; gap: .45rem; }
+.wb-head__cat { align-self: flex-start; }
+/* #wb-detail-inhalt-Präfix nötig, um die generischen ".main-content h2"/
+   ".main-content p"-Regeln (Farbe/margin-top/line-height weiter unten in
+   dieser Datei) zuverlässig zu schlagen - sonst gewinnen deren höhere
+   Selektor-Spezifität (Klasse+Element) gegen einen einzelnen Klassennamen
+   trotz späterer Reihenfolge im Stylesheet. */
+#wb-detail-inhalt .wb-head__title { margin: 0; }
+#wb-detail-inhalt .wb-head__meta { margin: 0; color: var(--text-muted); font-size: .95rem; }
+/* Arbeitsblock 4 (Icon-Audit, 04.09.2026): Standort-Zeile in Waffenbörse-
+   Übersicht und -Detail zeigte bisher ein 📍-Emoji statt ICONS.pin. */
+.wb-meta-icon { display: inline-flex; align-items: center; gap: .3rem; }
+.wb-meta-icon svg { width: 13px; height: 13px; flex-shrink: 0; }
+#wb-detail-inhalt .wb-head__price { margin: .15rem 0 0; font-size: 1.4rem; font-weight: 800; color: var(--green-dark); }
+.wb-head .wb-erwerb-badge { align-self: flex-start; margin-top: .1rem; }
+.wb-head__cta { margin-top: .6rem; }
+
+/* Kachel-Höhenausgleich, exakt dasselbe Muster wie #hb-grid oben (siehe
+   Kommentar dort) - bewusst separat unter #wb-grid skopiert statt die
+   bestehende #hb-grid-Regel zu erweitern, damit beide Börsen unabhängig
+   voneinander angepasst werden können. */
+#wb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#wb-grid .wb-card-footer { margin-top: auto; }
+
+/* Filterleiste auf der Übersicht: eigene, öffentliche Feld-Optik (die
+   admin-eigenen .field-input/.field-select-Klassen leben nur in admin.css
+   und stehen hier nicht zur Verfügung), angelehnt an die bestehende
+   .form-group-Optik von Kontakt-/Hundebörse-Anbieten-Formularen (gleiche
+   Border-/Radius-/Fokus-Werte), nur als kompakte horizontale Leiste statt
+   gestapelter Formularfelder. */
+.wb-filter-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem;
+  background: var(--bg-light); border-radius: var(--radius-md);
+  padding: 1.25rem; margin-bottom: 1.5rem;
+}
+.wb-filter-field { display: flex; flex-direction: column; gap: .35rem; min-width: 160px; }
+.wb-filter-field label { font-size: .78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.wb-filter-field select {
+  padding: .6rem .8rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font-sans); font-size: .88rem; color: var(--text-dark); background: #fff;
+}
+.wb-filter-field select:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring); }
+#wb-filter-bar .btn { align-self: flex-end; }
+@media (max-width: 600px) {
+  .wb-filter-bar { flex-direction: column; align-items: stretch; }
+  .wb-filter-field { min-width: 0; }
+}
+
+/* Erwerbsberechtigungs-Hinweis auf der Detailseite: auffällig genug, um
+   sicher wahrgenommen zu werden, aber bewusst in der Gold-Akzentfarbe der
+   Seite statt in aggressivem Rot (Laurin-Vorgabe Phase 1: "auffällig, aber
+   nicht aggressiv"). Seit 03.09.2026 ohne 🔒-Emoji (Laurin-Wunsch), daher
+   kein "gap" für Icon+Text mehr nötig; Bedingung, wann der Badge erscheint,
+   unverändert (a.erwerbsberechtigung_erforderlich in detail.html). */
+.wb-erwerb-badge {
+  display: inline-block;
+  background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
+  border-radius: var(--radius-sm); padding: .5rem .9rem;
+  font-size: .86rem; font-weight: 700;
+}
+/* Allgemeiner Rechtshinweis: immer sichtbar (unabhängig vom Erwerbsberechtigungs-
+   Status der einzelnen Anzeige), daher bewusst neutraler/zurückhaltender als
+   der Badge oben - reine Hintergrundfläche statt Rahmenfarbe. */
+.wb-rechtshinweis {
+  background: var(--bg-light); border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem; margin: 1.5rem 0; font-size: .85rem; color: var(--text-muted);
+}
+.wb-rechtshinweis p { margin: 0; line-height: 1.7; }
+
+/* =========================================================
+   WAFFENBÖRSE – ANZEIGE AUFGEBEN (Phase 2, 03.09.2026)
+   Öffentliches Einreichungsformular unter waffenboerse/anbieten.html.
+
+   Bewusst mit eigenem Präfix "wba-" (Waffenbörse-Anbieten) statt die
+   bestehenden "hb-"-Formular-Klassen von hundeboerse/anbieten.html
+   wiederzuverwenden (hb-form-section, hb-error-*, hb-typ-toggle,
+   hb-img-*, hb-success-box, …) - exakt dasselbe Entkopplungsprinzip wie
+   bei der Waffenbörse-Detailseite in Phase 1 (dort "wb-*" statt "hb-*"
+   für Galerie/Kopf): die Hundebörse darf laut Auftrag nicht angefasst
+   werden, und beide Formulare sollen sich unabhängig voneinander
+   weiterentwickeln lassen, ohne dass eine Änderung am einen Formular
+   Risiko für das andere birgt. Generische, seitenunabhängige Bausteine
+   (.kontakt-form/.form-group/.form-grid-2/.btn/.page-content.full/
+   .wb-rechtshinweis) werden dagegen ganz bewusst weiterverwendet - das
+   sind bereits mehrfach geteilte Layout-Grundbausteine, keine
+   Detailseiten-spezifische Optik. */
+.wba-form-section { margin-bottom: 1.5rem; }
+.wba-form-section h3 { margin-bottom: .4rem; color: var(--green-dark); }
+.wba-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.wba-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+
+/* Kaliber: eine Zeile pro Kaliber statt Komma-Trennfeld (Phase 2.1, Punkt 2,
+   03.09.2026) - Komma war als Trennzeichen ungeeignet, weil Kaliber selbst
+   Kommas enthalten können (z.B. "5,6x52R"). Bewusst einfache Zeilen statt
+   einer Tag-/Chip-Komponente. */
+.wba-kaliber-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .6rem; }
+.wba-kaliber-row { display: flex; gap: .6rem; align-items: center; }
+.wba-kaliber-row .wba-kaliber-input { flex: 1 1 auto; }
+.wba-kaliber-remove {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-light); border: 1px solid var(--border); color: var(--text-muted);
+  cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.wba-kaliber-remove:hover { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
+.wba-kaliber-add {
+  display: inline-block; padding: .55rem 1.1rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .85rem; font-weight: 600;
+  cursor: pointer; background: none; transition: all var(--transition);
+}
+.wba-kaliber-add:hover { border-color: var(--green-main); background: var(--green-light); }
+
+/* Ja/Nein-Auswahl (Erwerbsberechtigung, Versand möglich) als zwei
+   gleichwertige Buttons statt eines Toggle-Schalters: ein Toggle hat
+   immer einen sichtbaren Ausgangszustand (an/aus) - hier soll aber laut
+   Auftrag ("Erwerbsberechtigung muss bewusst ausgewählt werden") ganz
+   bewusst KEINE Option vorausgewählt sein, bis der Anbieter aktiv klickt.
+   Zwei separate Buttons können, anders als ein Toggle, sauber "weder
+   noch" als Ausgangszustand darstellen. */
+.wba-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.wba-toggle-option {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; font-size: .92rem; color: var(--text-dark); transition: all var(--transition);
+}
+.wba-toggle-option input { width: auto; margin: 0; accent-color: var(--green-main); }
+.wba-toggle-option:has(input:checked) { border-color: var(--green-main); background: var(--green-light); }
+.wba-toggle-option.is-active { border-color: var(--green-main); background: var(--green-light); }
+@media (max-width: 600px) { .wba-toggle { grid-template-columns: 1fr; } }
+
+/* Zusätzlicher Warnhinweis (Punkt 9 des Laurin-Briefs, 03.09.2026): wenn
+   eine "klassische Waffen-Kategorie" gewählt UND Erwerbsberechtigung =
+   Nein gesetzt wird - bewusst in derselben zurückhaltenden Gold-Optik
+   wie .wb-erwerb-badge auf der Detailseite (auffällig, aber nicht
+   aggressiv/rot), da es nur zum Prüfen auffordert, nicht rechtlich
+   entscheidet. */
+.wba-warn-hint {
+  display: none;
+  background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
+  border-radius: var(--radius-sm); padding: .75rem 1rem; margin-top: .75rem;
+  font-size: .85rem; line-height: 1.5;
+}
+.wba-warn-hint.is-visible { display: block; }
+
+/* Fehlerdarstellung: identisches Prinzip zu hundeboerse/anbieten.html
+   (roter Rahmen am betroffenen Feld + zusammenfassende Liste oben), aber
+   eigenständige Klassen (siehe Kommentar oben). */
+.wba-field-error input, .wba-field-error select, .wba-field-error textarea {
+  border-color: var(--color-danger) !important;
+}
+.wba-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: none; }
+.wba-field-error .wba-error-text { display: block; }
+.wba-error-summary {
+  display: none; background: var(--color-danger-bg); border: 1px solid var(--color-danger); color: var(--color-danger-text);
+  border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.wba-error-summary.is-visible { display: block; }
+.wba-error-summary strong { display: block; margin-bottom: .5rem; }
+.wba-error-summary ul { margin: 0; padding-left: 1.2rem; }
+.wba-error-summary li { margin-bottom: .2rem; font-size: .88rem; }
+
+/* Bilder-Upload: Vorschau-Raster mit Entfernen-Button + Drag&Drop-
+   Reihenfolge, gleiche UX wie bei der Hundebörse, eigenständig gebaut. */
+.wba-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem;
+  margin-bottom: 1rem;
+}
+.wba-img-item {
+  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+  border: 2px solid var(--border); background: var(--bg-light); cursor: grab;
+}
+.wba-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wba-img-item.wba-img-dragging { opacity: .4; }
+.wba-img-item.wba-img-dragover { border-color: var(--green-main); }
+.wba-img-item__main {
+  position: absolute; top: 0; left: 0; background: var(--green-main); color: #fff;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  padding: .2rem .5rem; border-radius: 0 0 var(--radius-sm) 0; z-index: 1;
+}
+.wba-img-item__remove {
+  position: absolute; top: .3rem; right: .3rem; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; line-height: 1;
+  font-size: .9rem; display: flex; align-items: center; justify-content: center; z-index: 1;
+}
+.wba-img-item__remove:hover { background: var(--color-danger); }
+.wba-img-add-label {
+  display: inline-block; padding: .6rem 1.2rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+}
+.wba-img-add-label:hover { border-color: var(--green-main); background: var(--green-light); }
+.wba-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.wba-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+.wba-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
+.wba-img-limit-note.is-visible { display: block; }
+
+/* Erfolgsansicht nach (simulierter) Einreichung - ersetzt das Formular
+   komplett (siehe JS), daher deutlich prominenter als eine reine Inline-
+   Box. */
+.wba-success { display: none; text-align: center; padding: 2.5rem 1.5rem; }
+.wba-success.is-visible { display: block; }
+.wba-success h2 { color: var(--green-dark); margin-bottom: .75rem; }
+.wba-success p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
+.wba-success__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* Entwicklungs-/Testmeldung (Phase 2.1, Punkt 1, 03.09.2026): erscheint
+   anstelle von .wba-success, solange submitWaffenboerseAnzeige() nur
+   simuliert (siehe JS-Kommentar in anbieten.html). Bewusst NICHT in der
+   grünen "Vielen Dank"-Optik von .wba-success, sondern neutral/gedeckt mit
+   deutlichem Rahmen-Akzent, damit auf keinen Fall der Eindruck einer
+   echten Bestätigung entsteht. */
+.wba-devnote { display: none; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-light); border-radius: var(--radius-md); border-left: 4px solid var(--text-muted); }
+.wba-devnote.is-visible { display: block; }
+.wba-devnote h2 { color: var(--text-dark); margin-bottom: .75rem; }
+.wba-devnote p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
+
+/* "+ Waffe anbieten"-Button im Intro-Bereich der Übersicht: reine
+   Flex-Anordnung, die Button-Optik selbst kommt seit 04.09.2026 über die
+   eigene ".wb-cta-btn"-Klasse weiter unten (vorher .btn-outline-green). */
+.wb-intro-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+}
+.wb-intro-row .btn { flex-shrink: 0; }
+@media (max-width: 700px) {
+  .wb-intro-row { flex-direction: column; }
+  .wb-intro-row .btn { align-self: flex-start; }
+}
+
+/* Primärer Waffenbörse-CTA ("+ Waffe anbieten", Frank-Feedback 04.09.2026):
+   soll bewusst ORANGE und optisch stärker hervorgehoben sein als die grünen
+   Standard-Buttons - jagdlich passend (angelehnt an Signal-/Blaze-Orange aus
+   der Jagdbekleidung), aber gedeckt statt grell, damit es seriös bleibt und
+   nicht wie ein Shop-"Kaufen"-Button wirkt. Bewusst NEUE, eigene, klar
+   begrenzte Klasse (".wb-cta-btn") statt .btn-primary/--gold zu verändern
+   oder wiederzuverwenden: .btn-primary ist grün und wird sitenweit u.a. auf
+   Hundebörse/Partner/anderen Seiten verwendet, --gold ist an anderer Stelle
+   bereits für den Erwerbsberechtigungs-Hinweis reserviert - keines von
+   beiden darf sich durch diese Änderung mitverfärben. Nur auf den einen,
+   primären CTA der Waffenbörse-Übersicht angewendet (die frühere zweite
+   CTA-Box in der Sidebar wurde entfernt, siehe Kommentar dort); die
+   sekundären "Waffe anbieten"-Links (Detail-Sidebar) bleiben bewusst als
+   dezente .btn-outline-green btn-sm, damit auf der Übersicht klar EIN
+   hervorgehobener CTA erkennbar bleibt. */
+.wb-cta-btn {
+  background: #c1611f; color: #fff; border-color: #c1611f;
+}
+.wb-cta-btn:hover {
+  background: #9c4e18; border-color: #9c4e18; color: #fff;
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
+}
+.wb-cta-btn:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px rgba(193,97,31,.3);
+}
+
+/* =========================================================
+   PARTNER (03.09.2026): Übersicht + Detailseite.
+   Kachel-Raster nutzt bewusst die bestehenden .news__grid/.news-card-
+   Bausteine (bereits von Aktuelles, Hundebörse UND Waffenbörse geteilt,
+   siehe dortige Kommentare) statt eines neuen Kachel-Systems - nur die
+   Bild-Darstellung wird über die #partner-grid-Scope-ID angepasst (Logos
+   statt Fotos: object-fit:contain auf hellem Grund statt object-fit:cover,
+   analog zum bereits bestehenden Muster #wb-grid/#hb-grid weiter oben in
+   dieser Datei für andere kleine, seiteneigene Abweichungen vom
+   gemeinsamen Grundmuster). Eigene "pn-"-Klassen nur dort, wo es wirklich
+   Partner-spezifisches Layout ist (Übersicht-Containerbreite, Detail-Kopf,
+   Logo-Platzhalter) - konsistent mit der wb-/hb-Namenstrennung. */
+.page-content.full.pn-overview-layout .container { max-width: 1200px; }
+
+#partner-grid .news-card__img-wrap { background: var(--bg-light); }
+#partner-grid .news-card__img { object-fit: contain; padding: 1.25rem; }
+#partner-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#partner-grid .news-card__title { text-align: center; }
+#partner-grid .news-card__meta { align-items: center; }
+
+/* Neutraler Platzhalter für Partner ohne hinterlegtes Logo (Punkt 7 des
+   Auftrags: kein Download/Nachbau fremder Logos, stattdessen KJS-eigenes
+   Logo stark abgeblendet - identisches Muster zum bestehenden Leerbild-
+   Fallback in waffenboerse/index.html renderKarte()/hundeboerse). */
+.pn-logo-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 160px; background: var(--bg-light);
+}
+.pn-logo-placeholder img { height: 56px; opacity: .3; }
+
+/* Frank-Feedback (04.09.2026, vierte Nachkorrektur): der rechte Kasten
+   ("Partner / Alle Partner ansehen") soll mit seiner Oberkante EXAKT auf
+   einer Flucht mit Logo und großer Partnerüberschrift stehen - beide bilden
+   zusammen den "Partner-Kopf" als gemeinsame erste Zeile. Das reine
+   Entfernen von margin-top (vorherige Runde) hat das nicht erreicht, weil
+   ".content-back-link" ("← Zurück zu allen Partnern") als erstes Kind
+   INNERHALB von .main-content über dem Kopf steht - main-content und der
+   Kasten (aside) starten dadurch zwar auf derselben Grid-Zeile, aber diese
+   Zeile beginnt bei "Zurück ...", nicht erst beim Logo. Kein margin-top auf
+   dem Kasten kann diese ca. 52px Differenz beheben, ohne wieder zu einem
+   Zufalls-Pixelwert zu werden.
+   Technisch sauberer Fix (analog zum bereits bestehenden Muster
+   ".hb-overview-layout" weiter oben in dieser Datei): eigene Klasse
+   ".pn-detail-layout" auf dem ".container"-Element dieser Seite, mit
+   grid-template-areas statt Margin-Aktivismus. ".main-content" bekommt
+   dabei "display:contents" - es erzeugt dadurch selbst keine eigene Box
+   mehr, seine Kinder (Zurück-Link, Kopf, unterer Contentblock) werden
+   direkte Grid-Kinder und können so einzeln benannten Grid-Bereichen
+   zugewiesen werden. Die ".main-content h2/p/..."-Regeln (Farbe, Abstände
+   für Kontakt/Weitere Informationen) greifen weiterhin normal, da sie über
+   die DOM-Abstammung matchen, nicht über die erzeugte Box. Row-Gap bewusst
+   auf 0 (siehe .pn-detail-layout unten) - jede Zeile bekommt ihren Abstand
+   weiterhin gezielt über die jeweils EIGENE Margin des Elements (Zurück-
+   Link: 1.5rem, Kopf→Content: 4rem über .pn-detail-body), damit sich beim
+   Umstieg auf echte Grid-Zeilen nichts an den bereits mit Frank abgestimmten
+   Abständen verdoppelt (Margins grenzender NORMALER Geschwister-Blöcke
+   kollabieren zum Max-Wert - Margins zwischen unterschiedlichen GRID-
+   Elementen dagegen nie, deshalb hier explizit einzeln über Gap=0 +
+   Element-Margins statt über Kollaps gesteuert). */
+.page-content .container.pn-detail-layout {
+  grid-template-columns: 1fr 290px;
+  grid-template-areas: "back ." "head sidebar" "body .";
+  gap: 0 3rem;
+}
+.pn-detail-layout .main-content { display: contents; }
+.pn-detail-layout .content-back-link { grid-area: back; }
+.pn-detail-layout .pn-detail-head { grid-area: head; }
+.pn-detail-layout .sidebar { grid-area: sidebar; }
+.pn-detail-layout .pn-detail-body { grid-area: body; }
+@media (max-width: 900px) {
+  .page-content .container.pn-detail-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "back" "head" "body" "sidebar";
+  }
+  /* Gestapelt (Mobile/Tablet) landet der Kasten wieder ganz unten, hinter
+     dem gesamten Inhalt - wie es die generische ".page-content .container"-
+     Regel für jede Detailseite ohnehin vorsieht. Dort fehlt ihm ohne
+     row-gap (bewusst 0, s.o.) jeglicher Abstand nach oben; 3rem stellt den
+     ursprünglichen, generischen Zeilenabstand gezielt nur für DIESEN einen
+     Übergang wieder her - betrifft nicht die Kopf-Ausrichtung oben. */
+  .pn-detail-layout .sidebar { margin-top: 3rem; }
+}
+
+/* Detail-Kopf: Logo links (fest, quadratisch), Name/Website rechts -
+   eigenständig statt .wb-head/.wb-detail-top wiederzuverwenden, da Partner
+   keine Galerie/Eckdaten-Liste hat, sondern nur ein einzelnes Logo.
+   margin-bottom bewusst 0 (Frank-Feedback 04.09.2026, vierte Nachkorrektur):
+   seit .pn-detail-head ein eigener Grid-Bereich ist (siehe .pn-detail-layout
+   oben), kommt der Abstand zum folgenden Contentblock ausschließlich von
+   dessen eigenem margin-top (.pn-detail-body, 4rem) - eine zusätzliche
+   margin-bottom hier würde sich nicht mehr wie vorher automatisch mit
+   diesem Wert zum Max kollabieren (das passiert nur zwischen normalen
+   Geschwister-Blöcken, nicht zwischen Grid-Elementen verschiedener Zeilen),
+   sondern sich schlicht dazu addieren und den bereits abgestimmten Abstand
+   unbeabsichtigt vergrößern. */
+.pn-detail-head {
+  display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 0; flex-wrap: wrap;
+}
+.pn-detail-head__logo {
+  width: 160px; height: 160px; flex-shrink: 0; border-radius: var(--radius-md);
+  background: var(--bg-light); display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.pn-detail-head__logo img { max-width: 80%; max-height: 80%; object-fit: contain; }
+.pn-detail-head__logo.pn-logo-placeholder img { max-width: none; height: 56px; }
+/* Laurin-Wunsch (05.09.2026): "Zur Website"-Button soll mit seiner
+   Unterkante exakt auf der Unterkante der Logo-Box (.pn-detail-head__logo,
+   160px) liegen - unabhängig davon, wie viel Text Titel/Kurzbeschreibung
+   brauchen. Technisch über Flexbox statt Pixel-Hack gelöst: dieser Container
+   wird selbst zur Flex-Spalte mit derselben festen Mindesthöhe wie die
+   Logo-Box (160px - identischer Wert wie .pn-detail-head__logo, siehe
+   Kommentar dort bei Änderungen mitziehen). Der Button bekommt weiter unten
+   "margin-top:auto" statt eines festen rem-Werts und wird dadurch an die
+   Unterkante dieser Spalte gedrückt - bei allen aktuellen Partnern ohne
+   Kurzbeschreibung (siehe content/partner.json) ist die Spalte durch
+   min-height fast nur durch die Logo-Höhe bestimmt, die Unterkanten fluchten
+   dadurch exakt. Nur auf Desktop/Tablet relevant (Kopf steht dort als Zeile
+   nebeneinander) - im Mobile-Breakpoint unten wird min-height bewusst wieder
+   auf 0 gesetzt und der Button behält dort seinen bisherigen festen Abstand. */
+.pn-detail-head__body { flex: 1; min-width: 220px; display: flex; flex-direction: column; min-height: 160px; }
+/* Frank-Feedback (04.09.2026, zweite Runde): die große Partner-Überschrift
+   wirkte leicht nach unten versetzt gegenüber der Logo-Box links (die Box
+   beginnt exakt an der Flex-Start-Linie, der Überschriften-Text lag durch
+   das normale Zeilenhöhen-"Leading" ein paar Pixel tiefer). margin-top:0
+   explizit (nicht nur über die zufällige :first-child-Kaskade) + engere
+   line-height nur für diese eine Überschrift, damit sie sauber auf einer
+   Flucht mit der Logo-Box-Oberkante sitzt. Betrifft nur diesen Titel, nicht
+   h2 generell. */
+.pn-detail-head__body h2 { color: var(--green-dark); margin-top: 0; margin-bottom: .5rem; line-height: 1.05; }
+@media (max-width: 560px) {
+  .pn-detail-head { flex-direction: column; align-items: center; text-align: center; }
+  /* min-height:0 (05.09.2026): die Logo-Unterkanten-Flucht (siehe Kommentar
+     an der Basisregel oben) ergibt hier keinen Sinn - Logo und Body stehen
+     im Mobile-Stack untereinander, nicht nebeneinander. Ohne dieses Reset
+     würde die 160px-Mindesthöhe eine unnötige Lücke unter dem Titel
+     aufreißen, bevor der Button (der auf Mobile seinen festen Abstand
+     zurückbekommt, siehe .pn-website-btn weiter unten) erscheint. */
+  .pn-detail-head__body { min-width: 0; min-height: 0; }
+}
+
+/* Frank-Feedback (04.09.2026): "Zur Website"-Button auf den Partner-
+   Detailseiten wirkte zu wuchtig - mittig statt linksbündig, ca. 20%
+   kompakter (Padding/Höhe) und leicht kleinere Schrift, aber weiterhin klar
+   als CTA erkennbar. Scoped auf .pn-website-btn statt die globale .btn-
+   Basisklasse zu verändern (die wird site-weit von jedem Button genutzt).
+   Zweite Runde (04.09.2026): Button saß zu dicht unter der Überschrift -
+   margin-top ergänzt (vorher 0 über die "margin: 0 auto"-Kurzschreibweise),
+   damit klar "Titel → Luft → Button" statt "Titel → Button" entsteht. Die
+   bereits vorgenommene Verkleinerung (Padding/Schriftgröße) bleibt unverändert.
+   Dritte Runde (04.09.2026, zweite Nachkorrektur): laut Frank immer noch
+   minimal zu dicht am Titel - bewusst nur ein kleiner weiterer Schritt
+   (1.5rem -> 2rem), keine drastische Verschiebung. Die fixe Logo-Höhe
+   (160px) im Kopfbereich bleibt dabei weiterhin der höhenbestimmende
+   Faktor (Titel+Button zusammen bleiben spürbar darunter).
+   Vierte Runde (04.09.2026, dritte Nachkorrektur): erneut nur ein kleiner,
+   bewusst zurückhaltender Schritt (2rem -> 2.25rem) - Frank wollte
+   ausdrücklich "nur leicht" mehr, keinen weiteren großen Sprung.
+   Fünfte Runde (05.09.2026, Laurin-Wunsch): der feste margin-top (2.25rem)
+   wich einem margin-top:auto, damit der Button innerhalb der jetzt als
+   Flex-Spalte aufgebauten .pn-detail-head__body (siehe dortigen Kommentar)
+   an deren Unterkante gedrückt wird - und diese Unterkante liegt dank der
+   dort gesetzten min-height exakt auf der Unterkante der Logo-Box.
+   Sechste Runde (05.09.2026, Laurin-Wunsch): die bisherige horizontale
+   Zentrierung kam vom mittleren "auto" in "margin: auto auto 0" (setzt
+   margin-left UND margin-right auf auto - der Button ist per width:
+   fit-content schmaler als die Spalte, dadurch zentriert dieses Auto-Paar
+   ihn quer zur Spalte). Auf Laurin-Wunsch jetzt links ausgerichtet:
+   margin-left/right von auto auf 0 - ohne eigene Quer-Ausrichtung greift
+   in der Flex-Spalte .pn-detail-head__body automatisch deren linke Kante
+   (dieselbe Kante, an der auch die Überschrift beginnt, da .pn-detail-
+   head__body keinerlei Padding hat). margin-top:auto (Unterkanten-Flucht
+   mit dem Logo) und margin-bottom:0 bleiben unverändert.
+   Auf Mobile (siehe Media-Query direkt darunter) bleibt bewusst weiterhin
+   der alte feste 2.25rem-Abstand MIT Zentrierung erhalten (dort stehen
+   Logo/Body gestapelt und zentriert, siehe .pn-detail-head im Mobile-
+   Breakpoint) - diese Regel wurde für diesen Task nicht angefasst. */
+.pn-website-btn {
+  display: flex; width: fit-content; margin: auto 0 0;
+  padding: .6rem 1.4rem; font-size: .8rem;
+}
+@media (max-width: 560px) { .pn-website-btn { margin: 2.25rem auto 0; } }
+
+/* Frank-Feedback (04.09.2026): Zwischenüberschrift "Über <Partner>" wirkte
+   zu groß (konkurrierte mit der großen Partner-Hauptüberschrift direkt
+   darüber) und der Beschreibungstext saß zu dicht darunter. Ca. 50% kleiner
+   als der bisherige h2-Standard, weiterhin fett. Bewusst nur auf diese eine
+   Überschrift beschränkt (Klasse statt ".main-content h2" zu überschreiben),
+   Kontakt/Weitere-Informationen-Überschriften sind von Frank nicht als zu
+   groß bemängelt worden.
+   Zweite Runde (04.09.2026): der große Abstand zum Kopf-Bereich kommt jetzt
+   zentral von der neuen ".pn-detail-body"-Wrapper-Klasse (siehe unten) statt
+   vom margin-top dieser Überschrift - deshalb hier auf einen kleinen Wert
+   reduziert, sonst würde sich der Abstand unnötig verdoppeln.
+   Dritte Runde (04.09.2026, Nachkorrektur): Frank empfand den Fließtext
+   direkt unter "Über X" weiterhin als zu dicht an der Überschrift. Die
+   Überschrift selbst soll an ihrer Position bleiben (margin-top weiterhin 0)
+   - der zusätzliche Abstand kommt daher bewusst über margin-bottom dieser
+   Überschrift (1.5rem -> 3rem), da der folgende Beschreibungstext ein
+   einfaches <p> ohne eigenes margin-top ist (globaler *-Reset setzt
+   margin:0, nur "p { margin-bottom: 1rem; }" ist gesetzt) - die einzige
+   Distanz zwischen Überschrift und Fließtext ist also exakt dieser
+   margin-bottom-Wert. Zentral über diese eine Klasse, gilt automatisch für
+   jeden Partner.
+   Wichtiger Bugfix in derselben Runde: Die reine Klasse ".pn-section-title"
+   (Spezifität 0,1,0) wurde bislang von der generischen Regel
+   ".main-content h2" (Zeile ~830, Spezifität 0,1,1 - Klasse + Elementtyp,
+   also höher) für margin-bottom überstimmt, unabhängig vom hier gesetzten
+   Wert. Dadurch hatte auch die vorherige Anpassung (1.5rem) im Live-Betrieb
+   nie sichtbar wirkt - der tatsächlich angezeigte Abstand war immer die
+   generischen 1rem von ".main-content h2". Deshalb hier auf den
+   nachfahrenbasierten Selektor ".pn-detail-body .pn-section-title"
+   (Spezifität 0,2,0) umgestellt, der die generische Regel zuverlässig
+   schlägt, unabhängig von der Reihenfolge im Stylesheet.
+   Finale Nachkorrektur (04.09.2026): der obere Partner-Kopf (Logo/Titel/
+   Website-Button/rechter Kasten) ist jetzt final und wird nicht mehr
+   angefasst. Hier nur noch ein letzter, bewusst kleiner Schritt (3rem ->
+   3.5rem) für etwas mehr Luft direkt vor dem Fließtext - deutlich
+   zurückhaltender als der vorherige große Sprung (1.5rem -> 3rem). Die
+   Überschrift selbst bleibt unverändert an ihrer Position (margin-top
+   weiterhin 0), nur ihr margin-bottom steuert diesen Abstand, da der
+   folgende Beschreibungstext ein einfaches <p> ohne eigenes margin-top ist
+   (globaler *-Reset). Keine weiteren Wrapper- oder Sidebar-Margins
+   angefasst - ausschließlich dieser eine Wert.
+   Korrektur (05.09.2026): 3.5rem hatte sich über die vorigen Runden zu groß
+   aufsummiert - zwischen "Über X" und dem Fließtext direkt darunter entstand
+   spürbar mehr Luft als zwischen einer normalen Überschrift und ihrem Text
+   üblich. Bewusst wieder auf einen normalen, angenehmen Wert zurückgesetzt
+   (3.5rem -> 1.25rem) statt eines neuen Overrides - Selektor, Kopf-Bereich
+   und alles andere an dieser Regel bleiben unverändert.
+   Feinkorrektur (05.09.2026, Folgetag): "Über X" sollte minimal (~8-12px)
+   höher sitzen - der Fließtext darunter darf sich dabei NICHT mitverschieben
+   und der Kopf-Bereich/Abstand darüber (.pn-detail-body, 2rem) bleibt
+   ebenfalls unangetastet. Eine Änderung von margin-top hätte über die
+   Kastenhöhe hinweg auch den Fließtext mit nach oben gezogen (margin-top
+   verschiebt die gesamte Box inkl. ihrer Unterkante, an der sich der
+   folgende Text orientiert). Stattdessen rein visueller Versatz über
+   position:relative + top:-10px auf genau dieser bestehenden Regel: die
+   Überschrift wird nur optisch angehoben, ihr Platzbedarf im Layout (und
+   damit die Position von allem danach) bleibt exakt wie zuvor. margin-top/
+   margin-bottom unverändert (0 / 1.25rem) - kein neuer Selektor, keine neue
+   Regel, nur diese zwei zusätzlichen Zeilen in der bestehenden Klasse. */
+.pn-detail-body .pn-section-title { font-size: 1rem; margin-top: 0; margin-bottom: 1.25rem; position: relative; top: -10px; }
+
+/* Frank-Feedback (04.09.2026, zweite Runde): der komplette Inhaltsbereich
+   unterhalb des Partnerkopfes (Über X, Beschreibung, Kontakt, Weitere
+   Informationen) begann zu früh/zu dicht am Kopf. Frank wollte hier "als
+   Block" mehr Luft, nicht nur eine einzelne Text-Margin. Zentraler Wrapper
+   ".pn-detail-body" (siehe partner/detail.html, wird um Über/Kontakt/
+   Weitere-Informationen gemeinsam gelegt) statt Einzel-Margins an mehreren
+   Stellen - wirkt automatisch für JEDEN Partner (LJV, Wildtierkataster, ...),
+   keine Sonderlösung pro Partner.
+   Korrektur (05.09.2026): 4rem erzeugte zusammen mit dem knapp darunter
+   liegenden margin-bottom von ".pn-section-title" (siehe unten, ebenfalls
+   heute reduziert) zu viel Leerraum zwischen Partnerkopf und "Über X" -
+   der Kopf-Bereich selbst (Logo/Titel/Button/rechter Kasten) bleibt dabei
+   unverändert, es wird ausschließlich dieser eine Wert angepasst (4rem ->
+   2rem), weiterhin deutlich sichtbar getrennt vom Kopf, aber spürbar
+   kompakter. */
+.pn-detail-body { margin-top: 2rem; }
+
+/* Frank-Feedback (04.09.2026, dritte Nachkorrektur): die beiden vorherigen
+   Versuche (erst ein kleiner 1.5rem-Nudge, danach ein großer 17.25rem-Wert,
+   der den Kasten bis auf Höhe von "Über X" hinuntergezogen hat) waren beide
+   ein Missverständnis. Frank will den rechten Kasten NICHT an den unteren
+   Beschreibungs-/Contentbereich koppeln, sondern er soll optisch weiterhin
+   zum Partner-KOPF gehören (Logo/Titel/Website-Button) - Kopf und Kasten
+   sollen zusammen "als Einheit" oben abschließen, der deutlich größere
+   Abstand zu "Über X" (siehe .pn-detail-body/.pn-section-title oben) soll
+   aber erhalten bleiben.
+   Der technisch sauberste Weg dahin ist, HIER GAR KEIN eigenes margin-top
+   mehr zu setzen: ".page-content .container" ist bereits "display:grid;
+   align-items:start" (Zeile ~786) - Hauptspalte (main) und Kasten (aside)
+   starten dadurch ohnehin auf derselben Zeile ganz oben. Der Kasten wächst
+   dabei nie mit der Höhe des Hauptinhalts mit (er hat keine eigene Höhe
+   jenseits seines eigenen Inhalts), bleibt also unabhängig davon, wie lang
+   Beschreibung/Kontakt/Weitere Informationen werden, immer oben beim Kopf
+   stehen - robuster als jeder fest verdrahtete Pixel-/Rem-Wert und ohne
+   Sonderfall für kürzere/längere Partnernamen oder Kurzbeschreibungen.
+   Die eigene Klasse ".pn-detail-sidebar" (siehe partner/detail.html) wurde
+   deshalb wieder von der <aside> entfernt - für die gewünschte Ausrichtung
+   wird keine eigene Regel mehr gebraucht, das ist die generische Grid-
+   Ausrichtung, die die Partner-Detailseite ohnehin schon von der Vorlage
+   ".page-content .container" erbt (unverändert, wird auch von anderen
+   Detailseiten genutzt). */
