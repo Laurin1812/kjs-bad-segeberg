@@ -6,5 +6,10 @@
 # ausliefern. Hier bewusst blockiert, damit auf dieser Umgebung nichts
 # Unbeabsichtigtes einsehbar ist (enthaelt keine Secrets, aber eben auch
 # nicht fuer den oeffentlichen Abruf gedacht).
-/api/*      /  404
-/vendor/*   /  404
+#
+# Wichtig: das "!" erzwingt die Regel auch dann, wenn unter dem Pfad
+# tatsaechlich eine Datei liegt - ohne "!" wuerde Netlify die vorhandene
+# Datei einfach direkt ausliefern und die Regel stillschweigend ignorieren
+# (genau das ist beim ersten Deploy passiert und wurde live geprueft).
+/api/*      /  404!
+/vendor/*   /  404!
