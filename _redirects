@@ -1,1 +1,22 @@
 /login    /login.html    200
+
+# Kontaktformular-Backend (api/contact.php, vendor/) laeuft nur auf einem
+# echten PHP-Host (siehe kjs.mysolution-webservice.de) - Netlify kann PHP
+# nicht ausfuehren und wuerde die Dateien sonst als reinen Text/Quellcode
+# ausliefern. Hier bewusst blockiert, damit auf dieser Umgebung nichts
+# Unbeabsichtigtes einsehbar ist (enthaelt keine Secrets, aber eben auch
+# nicht fuer den oeffentlichen Abruf gedacht).
+#
+# Wichtig: das "!" erzwingt die Regel auch dann, wenn unter dem Pfad
+# tatsaechlich eine Datei liegt - ohne "!" wuerde Netlify die vorhandene
+# Datei einfach direkt ausliefern und die Regel stillschweigend ignorieren
+# (genau das ist beim ersten Deploy passiert und wurde live geprueft).
+/api/*      /  404!
+/vendor/*   /  404!
+
+# Hundeboerse-/Waffenboerse-Backend (Punkt "Hundeboerse & Waffenboerse: PHP/
+# MySQL-Backend vorbereiten"): database/schema.sql enthaelt keine Secrets,
+# ist aber ein reines Server-/Setup-Artefakt und nicht fuer den oeffentlichen
+# Abruf gedacht - aus Konsistenz genauso wie /api/ und /vendor/ oben
+# geblockt.
+/database/* /  404!

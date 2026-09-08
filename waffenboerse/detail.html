@@ -112,8 +112,20 @@
 
   if (!wbId) { zeigeFehlermeldung(); return; }
 
-  fetch('../content/waffenboerse.json')
-    .then(function(r) { return r.json(); })
+  // API-first mit JSON-Fallback, identisches Prinzip wie in index.html.
+  function ladeWaffenboerseDaten() {
+    return fetch('/api/waffenboerse/anzeigen.php')
+      .then(function(r) { if (!r.ok) throw new Error('api_nicht_ok'); return r.json(); })
+      .then(function(data) {
+        if (!data || !Array.isArray(data.anzeigen)) throw new Error('unerwartete_antwort');
+        return data;
+      })
+      .catch(function() {
+        return fetch('../content/waffenboerse.json').then(function(r) { return r.json(); });
+      });
+  }
+
+  ladeWaffenboerseDaten()
     .then(function(data) {
       var anzeigen = data.anzeigen || [];
       var a = anzeigen.find(function(x) { return x.id === wbId; });

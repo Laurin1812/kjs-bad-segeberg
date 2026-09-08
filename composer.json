@@ -1,0 +1,13 @@
+{
+    "name": "kjs-segeberg/contact-mailer",
+    "description": "Serverseitiger Mailversand fuer das KJS-Kontaktformular (PHPMailer + SMTP). Siehe api/contact.php.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

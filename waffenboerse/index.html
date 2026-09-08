@@ -218,8 +218,26 @@
     grid.innerHTML = gefiltert.map(renderKarte).join('');
   }
 
-  fetch('../content/waffenboerse.json')
-    .then(function(r) { return r.json(); })
+  // API-first mit JSON-Fallback: identisches Prinzip wie in
+  // hundeboerse/index.html - api/waffenboerse/anzeigen.php liefert
+  // {anzeigen, kategorien} in derselben Form wie bisher content/
+  // waffenboerse.json, sodass die Rendering-/Filter-Logik unten unverändert
+  // bleibt. Ohne konfiguriertes MySQL (oder z.B. auf Netlify, wo /api/* laut
+  // _redirects nicht existiert) fällt dies transparent auf die statische
+  // Datei zurück.
+  function ladeWaffenboerseDaten() {
+    return fetch('/api/waffenboerse/anzeigen.php')
+      .then(function(r) { if (!r.ok) throw new Error('api_nicht_ok'); return r.json(); })
+      .then(function(data) {
+        if (!data || !Array.isArray(data.anzeigen)) throw new Error('unerwartete_antwort');
+        return data;
+      })
+      .catch(function() {
+        return fetch('../content/waffenboerse.json').then(function(r) { return r.json(); });
+      });
+  }
+
+  ladeWaffenboerseDaten()
     .then(function(data) {
       var anzeigen = data.anzeigen || [];
       alle = anzeigen.filter(function(a) { return a.status === 'published'; });

@@ -2,3 +2,22 @@
 .DS_Store
 .claude/
 .idea/
+
+# Kontaktformular (api/contact.php): echte SMTP-Zugangsdaten duerfen nie
+# committet werden. Vorlage ohne echte Werte liegt in config/mail.example.php.
+config/mail.local.php
+.env
+.env.local
+
+# Hundeboerse/Waffenboerse (api/hundeboerse/, api/waffenboerse/): echte
+# MySQL-Zugangsdaten und das Netlify-Identity-JWT-Secret duerfen nie
+# committet werden. Vorlagen ohne echte Werte liegen in
+# config/db.example.php und config/identity.example.php.
+config/db.local.php
+config/identity.local.php
+
+# Von Website-Besuchern hochgeladene Hundeboerse-/Waffenboerse-Bilder
+# (siehe api/lib/boerse_upload.php) - echte Nutzerdaten, gehoeren nicht ins
+# Repository. .gitkeep haelt die Ordnerstruktur im Repo sichtbar.
+uploads/boersen/*/*
+!uploads/boersen/*/.gitkeep

@@ -132,7 +132,7 @@
     return teile2.join(' · ');
   }
 
-  function renderKarte(a, i) {
+  function renderKarte(a) {
     var bild = (a.galerie && a.galerie[0] && a.galerie[0].bild) || '';
     var imgSrc = toSrc(bild);
     var standort = [a.postalCode, a.city].filter(Boolean).join(' ');
@@ -143,8 +143,12 @@
     // IMMER gegen externe CSS-Regeln, unabhängig von Spezifität. Deshalb
     // jetzt kein "display:block" mehr inline setzen; die Flex-Regel aus
     // css/style.css kommt dadurch tatsächlich zum Tragen.
+    // Verlinkung jetzt ueber die stabile Anzeigen-ID statt des Array-Index
+    // (?i=INDEX) - der Index war fragil, sobald eine API/DB-Quelle die
+    // Anzeigen in anderer Reihenfolge liefert als die alte JSON-Datei, siehe
+    // detail.html und api/hundeboerse/anzeigen.php.
     return '<article class="news-card">' +
-      '<a href="detail.html?i=' + i + '" style="text-decoration:none;color:inherit;">' +
+      '<a href="detail.html?id=' + encodeURIComponent(a.id) + '" style="text-decoration:none;color:inherit;">' +
         '<div class="news-card__img-wrap">' +
           (imgSrc
             ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.title || '') + '" loading="lazy">'
@@ -167,8 +171,27 @@
     '</article>';
   }
 
-  fetch('../content/hundeboerse.json')
-    .then(function(r) { return r.json(); })
+  // API-first mit JSON-Fallback: solange auf dem PHP-Host kein MySQL
+  // konfiguriert ist (oder diese Seite z.B. auf Netlify läuft, wo /api/*
+  // laut _redirects gar nicht existiert), liefert der API-Aufruf einen
+  // Fehler/kein Array und es wird transparent auf die bisherige statische
+  // Datei zurückgefallen - siehe api/hundeboerse/anzeigen.php-Kommentar
+  // ("Antwort in genau der Form, die diese Seite bisher direkt aus
+  // content/hundeboerse.json gelesen hat"). Die gesamte Rendering-Logik
+  // unten bleibt dadurch unverändert, egal welche Quelle geliefert hat.
+  function ladeHundeboerseDaten() {
+    return fetch('/api/hundeboerse/anzeigen.php')
+      .then(function(r) { if (!r.ok) throw new Error('api_nicht_ok'); return r.json(); })
+      .then(function(data) {
+        if (!data || !Array.isArray(data.anzeigen)) throw new Error('unerwartete_antwort');
+        return data;
+      })
+      .catch(function() {
+        return fetch('../content/hundeboerse.json').then(function(r) { return r.json(); });
+      });
+  }
+
+  ladeHundeboerseDaten()
     .then(function(data) {
       // Hero-Bild: im Admin unter Hundebörse konfigurierbar (Phase 3,
       // 28.08.2026). Ohne gesetztes Bild bleibt das bisherige Standardbild
@@ -177,10 +200,9 @@
         document.getElementById('hb-index-hero-bg').style.backgroundImage = "url('" + toSrc(data.hero_bild) + "')";
       }
       var alle = data.anzeigen || [];
-      var indexed = alle.map(function(a, i) { return { a: a, i: i }; });
-      var veroeffentlicht = indexed.filter(function(e) { return e.a.status === 'published'; });
+      var veroeffentlicht = alle.filter(function(a) { return a.status === 'published'; });
       veroeffentlicht.sort(function(x, y) {
-        var dx = x.a.createdAt || '', dy = y.a.createdAt || '';
+        var dx = x.createdAt || '', dy = y.createdAt || '';
         return dy.localeCompare(dx);
       });
 
@@ -192,7 +214,7 @@
         '</div>';
         return;
       }
-      grid.innerHTML = veroeffentlicht.map(function(e) { return renderKarte(e.a, e.i); }).join('');
+      grid.innerHTML = veroeffentlicht.map(renderKarte).join('');
     })
     .catch(function() {
       document.getElementById('hb-grid').innerHTML = '<p style="color:var(--text-muted);">Anzeigen konnten nicht geladen werden.</p>';

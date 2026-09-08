@@ -233,37 +233,22 @@
           <p class="wba-section-hint" style="margin-top:1rem;margin-bottom:0;">Ihre Anzeige wird erst nach Prüfung durch die Kreisjägerschaft veröffentlicht.</p>
         </div>
 
+        <!-- Honeypot: fuer Menschen unsichtbares Feld gegen automatisierten Spam,
+             siehe api/waffenboerse/anzeigen.php (identisches Muster wie im
+             Kontaktformular und in hundeboerse/anbieten.html). -->
+        <input type="text" id="wbaHoney" name="_honey" style="display:none;" tabindex="-1" autocomplete="off">
+
         <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
           Anzeige zur Prüfung einreichen
         </button>
       </form>
 
-      <!-- Echte Erfolgsansicht - erscheint erst, sobald submitWaffenboerseAnzeige()
-           eine echte (nicht simulierte) Server-Antwort mit ok:true liefert
-           (siehe JS weiter unten: result.mocked ist dann falsy). Bis dahin
-           bleibt dieser Block ungenutzt, aber vollständig fertig gebaut, damit
-           bei der Backend-Anbindung außer submitWaffenboerseAnzeige() selbst
-           nichts mehr geändert werden muss (Phase 2.1, Punkt 1). -->
+      <!-- Erfolgsansicht - erscheint, sobald POST /api/waffenboerse/anzeigen.php
+           eine Antwort mit ok:true liefert (siehe JS weiter unten). -->
       <div class="wba-success" id="wbaSuccess">
         <h2>Vielen Dank!</h2>
         <p>Ihre Anzeige wurde erfolgreich zur Prüfung eingereicht.<br>
         Die Anzeige ist noch nicht öffentlich sichtbar. Nach Prüfung durch die Kreisjägerschaft wird sie freigegeben oder bei Rückfragen entsprechend bearbeitet.</p>
-        <div class="wba-success__actions">
-          <a href="index.html" class="btn btn-outline-green">Zur Waffenbörse</a>
-          <button type="button" class="btn btn-primary wba-reset-btn">Weitere Anzeige aufgeben</button>
-        </div>
-      </div>
-
-      <!-- Entwicklungs-/Testmeldung (Phase 2.1, Punkt 1): erscheint aktuell
-           nach jeder erfolgreichen Frontend-Validierung, weil es noch keinen
-           echten Server-Endpunkt gibt - siehe submitWaffenboerseAnzeige()
-           weiter unten. Bewusst NICHT in Grün/"Vielen Dank"-Optik, damit sie
-           unter keinen Umständen mit einer echten Bestätigung verwechselt
-           werden kann. -->
-      <div class="wba-devnote" id="wbaDevNote">
-        <h2>Formular bereit</h2>
-        <p>Das Formular ist vollständig und technisch vorbereitet. Die tatsächliche Übermittlung wird mit der Server-Anbindung aktiviert.<br>
-        Es wurden noch keine Daten an die Kreisjägerschaft übermittelt.</p>
         <div class="wba-success__actions">
           <a href="index.html" class="btn btn-outline-green">Zur Waffenbörse</a>
           <button type="button" class="btn btn-primary wba-reset-btn">Weitere Anzeige aufgeben</button>
@@ -281,94 +266,24 @@
 <script src="/js/main.js"></script>
 
 <script>
-/* =========================================================
-   submitWaffenboerseAnzeige(payload) – zentraler Übergabepunkt für das
-   spätere Server-Backend (Punkt 14 des Laurin-Briefs, 03.09.2026).
-
-   IST-ZUSTAND / WARUM NOCH KEINE ECHTE PERSISTENZ:
-   Diese Website hat aktuell keinerlei Server-Backend - Inhalte liegen in
-   content/*.json-Dateien im Git-Repository, und die einzige Schreibroute
-   dorthin ist die Netlify-git-gateway-API (/.netlify/git/github/contents),
-   die einen gültigen Netlify-Identity-Bearer-Token voraussetzt (siehe
-   admin/admin.js, getToken()/netlifyIdentity). Dieser Token gehört zu
-   einem eingeloggten Admin-Konto. Ein anonymer Website-Besucher hat
-   diesen Token nicht und darf ihn aus Sicherheitsgründen auch niemals
-   bekommen - jeder Versuch, öffentliche Einreichungen direkt über diese
-   API zu speichern, würde bedeuten, entweder Admin-Zugangsdaten im
-   Browser offenzulegen oder Schreibzugriff auf das gesamte Repository für
-   jeden Besucher zu öffnen (Punkt 15 des Auftrags schließt genau das
-   ausdrücklich aus). Es existiert außerdem keine Netlify Function/kein
-   sonstiger serverseitiger Endpunkt in diesem Projekt (geprüft: kein
-   netlify/functions-Verzeichnis, keine Function-Konfiguration in
-   netlify.toml).
-
-   Diese Funktion ist deshalb bewusst als klar markierter, nicht
-   dauerhaft speichernder Platzhalter gebaut: sie validiert/protokolliert
-   den fertigen Payload (siehe console.info unten, zur Kontrolle durch
-   Entwickler/QA) und simuliert eine erfolgreiche Antwort, schreibt aber
-   NICHTS in content/waffenboerse.json und lädt keine Bilder hoch.
-
-   ERWARTETE SPÄTERE BACKEND-SCHNITTSTELLE (Vorschlag):
-     Endpoint:  POST /api/waffenboerse/anzeigen
-     Auth:      keine (öffentlicher Endpunkt, serverseitig gerate-limited)
-     Request:   multipart/form-data (wegen Bild-Uploads), Felder:
-                  - "daten": JSON-String mit exakt dem unten gebauten
-                    Payload (alle Felder aus content/waffenboerse.json,
-                    ohne id/status/erstellt_am/aktualisiert_am - diese
-                    setzt der Server)
-                  - "bilder": bis zu 10 Bilddateien (jpg/png/webp, ≤8 MB)
-     Serverseitige Aufgabe:
-                  - Payload serverseitig nachvalidieren (niemals nur der
-                    Client-Validierung vertrauen)
-                  - Bilder gegen Typ/Größe/Malware prüfen, in einen
-                    Bildspeicher legen (z.B. denselben, den admin.js
-                    heute per Git-Gateway-Upload nutzt, oder einen neuen
-                    MySQL-/Objektspeicher-gestützten Ablauf)
-                  - Neuen Eintrag mit id (Format wie admin.js: "wb-" +
-                    Date.now() oder DB-eigene ID), status:"pending",
-                    erstellt_am/aktualisiert_am (ISO-Datum) erzeugen und
-                    in content/waffenboerse.json (bzw. später die
-                    entsprechende MySQL-Tabelle) einfügen - Statuswerte
-                    sind bereits exakt durch admin.js festgelegt
-                    (pending/published/rejected/archived), keine neue
-                    Statuslogik nötig.
-     Response:  { "ok": true, "id": "wb-…" }  bzw.
-                { "ok": false, "error": "Für Menschen lesbare Meldung" }
-     Admin:     Ein so erzeugter Eintrag erscheint automatisch unter
-                Waffenbörse → "Wartet auf Freigabe" im bestehenden
-                Admin-Modul (admin.js liest weiterhin dieselbe
-                content/waffenboerse.json bzw. später dieselbe Tabelle) -
-                am bestehenden Admin-Workflow (prüfen/ändern/freigeben/
-                ablehnen) ändert sich nichts.
-
-   RÜCKGABE-VERTRAG (Phase 2.1, 03.09.2026 - wichtig für den späteren
-   Austausch): diese Funktion liefert ein Promise, das mit GENAU einer der
-   folgenden Formen auflöst - das aufrufende Formular (zweiter <script>-
-   Block unten) entscheidet allein anhand von "mocked", ob die echte
-   "Vielen Dank"-Erfolgsansicht (#wbaSuccess) oder die Entwicklungs-/
-   Testmeldung (#wbaDevNote, "Es wurden noch keine Daten übermittelt")
-   angezeigt wird:
-     - { ok: true,  mocked: true,  id: null }   → aktueller Simulations-
-       zustand: zeigt IMMER die Testmeldung, NIE die Erfolgsmeldung -
-       Punkt 1 des Phase-2.1-Auftrags verbietet ausdrücklich eine
-       vorgetäuschte Erfolgsmeldung, solange kein echter Endpunkt existiert.
-     - { ok: true,  id: "wb-…" }                → künftige echte,
-       erfolgreiche Server-Antwort (KEIN "mocked"-Feld, oder explizit
-       mocked:false) → zeigt die echte "Vielen Dank"-Erfolgsansicht.
-     - { ok: false, error: "…" }                → Server hat abgelehnt
-       (z.B. serverseitige Validierung fehlgeschlagen) → Formular bleibt
-       sichtbar, Fehlermeldung erscheint in der Zusammenfassung oben.
-   Austausch später: sobald der Endpoint existiert, muss ausschließlich
-   der Rumpf dieser einen Funktion ersetzt werden (echter fetch(...) statt
-   der Simulation unten, der die obige Rückgabeform exakt einhält) - das
-   aufrufende Formular selbst bleibt unverändert. */
-function submitWaffenboerseAnzeige(payload) {
-  console.info('[Waffenbörse-Formular] Simulierte Einreichung (noch kein Server-Backend vorhanden) – Payload:', payload);
-  return new Promise(function (resolve) {
-    setTimeout(function () {
-      resolve({ ok: true, mocked: true, id: null });
-    }, 400);
-  });
+/* submitWaffenboerseAnzeige(formData) - sendet die Einreichung an den
+   echten Server-Endpunkt POST /api/waffenboerse/anzeigen.php
+   (multipart/form-data: Feld "daten" = JSON-String der Nutzangaben,
+   Feld "bilder[]" = bis zu 10 Bilddateien). Antwortvertrag unveraendert
+   wie urspruenglich hier dokumentiert: { ok:true, id:"wb-…" } bzw.
+   { ok:false, error:"…" }. Ein neuer Eintrag erscheint serverseitig mit
+   status:"pending" und ist damit sofort im bestehenden Admin-Modul unter
+   Waffenbörse → "Wartet auf Freigabe" sichtbar (admin.js unveraendert). */
+function submitWaffenboerseAnzeige(formData) {
+  return fetch('/api/waffenboerse/anzeigen.php', { method: 'POST', body: formData })
+    .then(function(r) { return r.json().catch(function() { return {}; }); })
+    .then(function(result) {
+      if (result && typeof result.ok !== 'undefined') return result;
+      return { ok: false, error: 'Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.' };
+    })
+    .catch(function() {
+      return { ok: false, error: 'Einreichung derzeit vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut oder kontaktieren Sie uns direkt.' };
+    });
 }
 </script>
 
@@ -590,7 +505,6 @@ function submitWaffenboerseAnzeige(payload) {
   var errorSummary = document.getElementById('wbaErrorSummary');
   var errorList = document.getElementById('wbaErrorList');
   var successView = document.getElementById('wbaSuccess');
-  var devNoteView = document.getElementById('wbaDevNote');
 
   function clearErrors() {
     document.querySelectorAll('.wba-field-error').forEach(function(el) { el.classList.remove('wba-field-error'); });
@@ -705,25 +619,19 @@ function submitWaffenboerseAnzeige(payload) {
       return;
     }
 
-    // ── Payload exakt nach dem bestehenden Datenmodell (Punkt 6) -
-    // id/status/erstellt_am/aktualisiert_am werden technisch automatisch
-    // gesetzt (status hier bereits fest "pending" = derselbe interne
-    // Statuswert wie im Admin für "Wartet auf Freigabe", siehe admin.js
-    // WB_STATUS - keine zweite Statuslogik). Beschreibung: aus dem
-    // einfachen Textfeld heraus als sichere, minimale HTML-Struktur
-    // aufgebaut (Absätze), NICHT als rohes innerHTML des Nutzertexts -
-    // damit sind beliebige HTML-/Script-Eingaben ausgeschlossen (Punkt 12
-    // + Punkt 15), obwohl das gespeicherte Feld wie gewohnt HTML enthält
-    // und von detail.html unverändert dargestellt werden kann. ─────────
-    function alsSicheresHtml(text) {
-      return text.split(/\n{2,}/).map(function(absatz) {
-        return '<p>' + escHtml(absatz.trim()).replace(/\n/g, '<br>') + '</p>';
-      }).join('');
-    }
-
+    // ── Daten exakt nach dem bestehenden Datenmodell (Punkt 6) -
+    // id/status/erstellt_am/aktualisiert_am werden serverseitig gesetzt
+    // (status startet immer als "pending" = derselbe interne Statuswert wie
+    // im Admin für "Wartet auf Freigabe", siehe admin.js WB_STATUS - keine
+    // zweite Statuslogik). "beschreibung" wird bewusst als roher Freitext
+    // gesendet, NICHT als hier im Client vorgebautes HTML - die Umwandlung
+    // in sicheres Absatz-HTML passiert ausschließlich serverseitig
+    // (api/waffenboerse/anzeigen.php, kjs_wb_text_to_safe_html()), damit dem
+    // Client bei dieser sicherheitsrelevanten Umwandlung nie vertraut werden
+    // muss (Punkt 12 + Punkt 15 des Auftrags). ─────────────────────────────
     var versandMoeglich = document.getElementById('wba-versand-ja').checked;
 
-    var payload = {
+    var daten = {
       titel: document.getElementById('wba-titel').value.trim(),
       kategorie: document.getElementById('wba-kategorie').value,
       hersteller: document.getElementById('wba-hersteller').value.trim(),
@@ -737,47 +645,34 @@ function submitWaffenboerseAnzeige(payload) {
       plz: document.getElementById('wba-plz').value.trim(),
       ort: document.getElementById('wba-ort').value.trim(),
       erwerbsberechtigung_erforderlich: document.getElementById('wba-erwerb-ja').checked,
-      beschreibung: alsSicheresHtml(document.getElementById('wba-beschreibung').value.trim()),
-      // Bilddateien selbst sind Teil des noch fehlenden Server-Uploads
-      // (siehe Kommentar bei submitWaffenboerseAnzeige) - hier bereits im
-      // Zielformat {bild, titel} vorbereitet, "bild" ist bis zur echten
-      // Anbindung nur ein Platzhalter.
-      bilder: images.map(function(img) { return { bild: '(noch nicht hochgeladen – ' + img.file.name + ')', titel: img.titel || '' }; }),
+      beschreibung: document.getElementById('wba-beschreibung').value.trim(),
       anbieter_name: document.getElementById('wba-anbieter_name').value.trim(),
       anbieter_email: document.getElementById('wba-anbieter_email').value.trim(),
-      anbieter_telefon: document.getElementById('wba-anbieter_telefon').value.trim()
+      anbieter_telefon: document.getElementById('wba-anbieter_telefon').value.trim(),
+      // Honeypot: fuer Menschen unsichtbares Feld, siehe api/waffenboerse/anzeigen.php.
+      _honey: (document.getElementById('wbaHoney') || {}).value || ''
     };
+
+    var formData = new FormData();
+    formData.append('daten', JSON.stringify(daten));
+    images.forEach(function(img) {
+      if (img.file) formData.append('bilder[]', img.file, img.file.name || 'bild.jpg');
+    });
 
     submitBtn.disabled = true;
 
-    // Verzweigung nach dem oben bei submitWaffenboerseAnzeige()
-    // dokumentierten Rückgabe-Vertrag (Phase 2.1, Punkt 1): NUR eine echte,
-    // nicht simulierte Erfolgsantwort (ok:true ohne mocked:true) zeigt die
-    // "Vielen Dank"-Ansicht. Aktuell (mocked:true) erscheint stattdessen
-    // immer die Testmeldung - es wird nie eine erfolgreiche Übermittlung
-    // vorgetäuscht, solange kein echter Server-Endpunkt existiert.
-    submitWaffenboerseAnzeige(payload).then(function(result) {
-      if (result && result.ok && !result.mocked) {
+    submitWaffenboerseAnzeige(formData).then(function(result) {
+      if (result && result.ok) {
         form.style.display = 'none';
         errorSummary.classList.remove('is-visible');
         successView.classList.add('is-visible');
         successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (result && result.ok && result.mocked) {
-        form.style.display = 'none';
-        errorSummary.classList.remove('is-visible');
-        devNoteView.classList.add('is-visible');
-        devNoteView.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         submitBtn.disabled = false;
         errorList.innerHTML = '<li>' + escHtml((result && result.error) || 'Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.') + '</li>';
         errorSummary.classList.add('is-visible');
         errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }).catch(function() {
-      submitBtn.disabled = false;
-      errorList.innerHTML = '<li>Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.</li>';
-      errorSummary.classList.add('is-visible');
-      errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
@@ -792,7 +687,6 @@ function submitWaffenboerseAnzeige(payload) {
     clearErrors();
     submitBtn.disabled = false;
     successView.classList.remove('is-visible');
-    devNoteView.classList.remove('is-visible');
     form.style.display = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }

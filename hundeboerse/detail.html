@@ -59,11 +59,27 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- DOMPurify saeubert das von marked.parse() erzeugte HTML, bevor es per
+     innerHTML eingefuegt wird (Security-Finalisierung: marked.js selbst hat
+     seine eingebaute "sanitize"-Option in v4+ als unzuverlaessig entfernt;
+     die offizielle/aktuelle Empfehlung ist, die Ausgabe separat mit
+     DOMPurify zu bereinigen - siehe marked.js-Doku "Sanitization"). Ohne
+     dieses Sanitizing koennte eine Beschreibung mit eingebettetem rohen
+     HTML (z.B. Script-Tags, onerror-Attribute, javascript:-Links) beim
+     Rendern ausgefuehrt werden. -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function() {
+  // Adressierung ueber die stabile Anzeigen-ID (?id=...) statt des früheren
+  // Array-Index (?i=INDEX) - der Index war fragil, sobald eine API/DB-Quelle
+  // dieselben Anzeigen in anderer Reihenfolge liefert als die JSON-Datei
+  // (siehe auch index.html und api/hundeboerse/anzeigen.php). Aus
+  // Kompatibilität mit evtl. bereits verschickten/verlinkten alten ?i=-URLs
+  // wird, falls kein "id" vorhanden ist, weiterhin auf "i" zurückgefallen.
   var params = new URLSearchParams(window.location.search);
-  var idx = parseInt(params.get('i'), 10);
+  var anzeigeId = params.get('id');
+  var idx = anzeigeId ? NaN : parseInt(params.get('i'), 10);
 
   function escHtml(s) {
     return String(s == null ? '' : s)
@@ -122,13 +138,30 @@
     return '<dt>' + escHtml(label) + '</dt><dd>' + escHtml(wert) + '</dd>';
   }
 
-  if (isNaN(idx)) { zeigeFehlermeldung(); return; }
+  if (!anzeigeId && isNaN(idx)) { zeigeFehlermeldung(); return; }
 
-  fetch('../content/hundeboerse.json')
-    .then(function(r) { return r.json(); })
+  // API-first mit JSON-Fallback, identisches Prinzip wie in index.html -
+  // solange kein MySQL konfiguriert ist (oder auf Netlify, wo /api/* laut
+  // _redirects nicht existiert), fällt dies transparent auf die bisherige
+  // statische Datei zurück.
+  function ladeHundeboerseDaten() {
+    return fetch('/api/hundeboerse/anzeigen.php')
+      .then(function(r) { if (!r.ok) throw new Error('api_nicht_ok'); return r.json(); })
+      .then(function(data) {
+        if (!data || !Array.isArray(data.anzeigen)) throw new Error('unerwartete_antwort');
+        return data;
+      })
+      .catch(function() {
+        return fetch('../content/hundeboerse.json').then(function(r) { return r.json(); });
+      });
+  }
+
+  ladeHundeboerseDaten()
     .then(function(data) {
       var anzeigen = data.anzeigen || [];
-      var a = anzeigen[idx];
+      var a = anzeigeId
+        ? anzeigen.find(function(e) { return e.id === anzeigeId; })
+        : anzeigen[idx];
       if (!a || a.status !== 'published') { zeigeFehlermeldung(); return; }
 
       document.title = (a.title || 'Anzeige') + ' – Kreisjägerschaft Segeberg e.V.';
@@ -279,7 +312,17 @@
       // ── Beschreibung ──────────────────────────────────────────
       if (a.description) {
         html += '<h2>' + (a.type === 'litter' ? 'Über den Wurf' : 'Über den Hund') + '</h2>';
-        html += (typeof marked !== 'undefined' ? marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>');
+        // Markdown -> HTML (marked), danach zwingend durch DOMPurify bereinigen,
+        // bevor es per innerHTML in die Seite eingefügt wird (siehe Kommentar
+        // beim <script>-Import oben). Beide Bibliotheken müssen geladen sein;
+        // ist eine davon (z.B. wegen eines CDN-Ausfalls) nicht verfügbar, wird
+        // aus Sicherheitsgründen nur reiner, escapeter Text angezeigt statt
+        // ungesäubertes HTML zu riskieren.
+        if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+          html += DOMPurify.sanitize(marked.parse(a.description));
+        } else {
+          html += '<p>' + escHtml(a.description) + '</p>';
+        }
       }
 
       // ── Standort ──────────────────────────────────────────────

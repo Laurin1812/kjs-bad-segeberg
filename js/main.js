@@ -958,12 +958,24 @@ function splitPostadresse(raw) {
     .catch(function () { renderFooter(FALLBACK_FOOTER); });
 })();
 
-// Contact form handler (Formsubmit.co)
+// Contact form handler (eigener PHP-/SMTP-Endpunkt, siehe api/contact.php)
+//
+// 08.09.2026: Ersetzt den bisherigen Weg über formsubmit.co (externer
+// Drittanbieter, benötigte eine einmalige Empfänger-Aktivierung und bot
+// keine Kontrolle über Zustellung/Reply-To). Das Formular selbst (Felder,
+// Layout, Validierung im Browser) ist unverändert - nur das Ziel der
+// Anfrage hat sich geändert: von einer externen URL zu einem eigenen,
+// serverseitigen Endpunkt, der die Mail per SMTP verschickt. Der
+// Endpunkt braucht eine PHP-Laufzeitumgebung und läuft NICHT auf dieser
+// Netlify-Umgebung - der echte Versandtest erfolgt auf
+// https://kjs.mysolution-webservice.de.
 var contactForm = document.getElementById('contactForm');
 if (contactForm) {
   contactForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var btn = contactForm.querySelector('button[type="submit"]');
+    var btnLabelDefault = btn.getAttribute('data-label-default') || btn.textContent;
+    if (!btn.getAttribute('data-label-default')) btn.setAttribute('data-label-default', btnLabelDefault);
 
     // Pflichtfelder prüfen
     var required = contactForm.querySelectorAll('[required]');
@@ -974,36 +986,41 @@ if (contactForm) {
     });
     if (!valid) return;
 
+    var fallback = document.getElementById('contactFormFallback');
+    if (fallback) fallback.style.display = 'none';
+
     btn.textContent = 'Wird gesendet …';
     btn.disabled = true;
+    btn.style.background = '';
 
     var data = new FormData(contactForm);
-    var json = {
-      _subject: 'Neue Kontaktanfrage – KJS Segeberg',
-      _captcha: 'false'
-    };
-    data.forEach(function(val, key) {
-      if (!key.startsWith('_') && key !== '_honey') json[key] = val;
-    });
+    var json = {};
+    data.forEach(function(val, key) { json[key] = val; });
 
-    fetch('https://formsubmit.co/ajax/frank.huelser@kjs-segeberg.de', {
+    fetch('/api/contact.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(json)
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) { return r.json().catch(function() { return {}; }); })
     .then(function(res) {
-      if (res.success === 'true' || res.success === true) {
+      if (res && res.success) {
         btn.textContent = '✓ Nachricht gesendet!';
         btn.style.background = 'var(--green-main)';
         contactForm.reset();
-      } else { throw new Error(); }
+        setTimeout(function() {
+          btn.textContent = btnLabelDefault;
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 4000);
+      } else {
+        throw new Error((res && res.message) || 'send_failed');
+      }
     })
     .catch(function() {
       btn.textContent = 'Fehler – bitte erneut versuchen';
       btn.style.background = '#c0392b';
       btn.disabled = false;
-      var fallback = document.getElementById('contactFormFallback');
       if (fallback) fallback.style.display = '';
     });
   });

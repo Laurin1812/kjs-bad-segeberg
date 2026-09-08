@@ -1,0 +1,22 @@
+# Sperrt direkten Web-Zugriff auf diesen Ordner (Apache).
+# Schützt v.a. eine hier evtl. abgelegte mail.local.php mit echten SMTP-
+# Zugangsdaten, falls Environment-Variablen auf dem Hosting nicht verfügbar
+# sind. PHP-Dateien werden auf korrekt konfigurierten Servern zwar ohnehin
+# ausgeführt statt als Quelltext ausgeliefert - diese Regel ist eine
+# zusätzliche Absicherung für den Fall, dass das für diesen Ordner einmal
+# nicht zutrifft.
+#
+# Ohne Wirkung, falls der Server kein Apache ist (z.B. reines nginx) - dann
+# bitte config/ stattdessen auf Serverebene sperren oder ganz aus dem
+# öffentlich erreichbaren Webroot herausnehmen (siehe config/mail.example.php).
+
+# Apache >= 2.4
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache < 2.4 (Fallback für ältere Hosting-Umgebungen)
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
