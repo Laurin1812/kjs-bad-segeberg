@@ -2,3 +2,9 @@
 .DS_Store
 .claude/
 .idea/
+
+# Kontaktformular (api/contact.php): echte SMTP-Zugangsdaten duerfen nie
+# committet werden. Vorlage ohne echte Werte liegt in config/mail.example.php.
+config/mail.local.php
+.env
+.env.local

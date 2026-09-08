@@ -48,8 +48,10 @@
         <div class="kontakt-form">
           <h3>Nachricht senden</h3>
           <form id="contactForm" novalidate>
-            <input type="hidden" name="_subject" value="Neue Kontaktanfrage – KJS Segeberg">
-            <input type="hidden" name="_captcha" value="false">
+            <!-- Honeypot fuer den serverseitigen Endpunkt (api/contact.php):
+                 fuer Menschen unsichtbar, einfache Bots fuellen es trotzdem
+                 aus. Server verwirft die Anfrage dann still (ohne Fehler-
+                 meldung an den Absender). -->
             <input type="text" name="_honey" style="display:none;" tabindex="-1" autocomplete="off">
             <div class="form-grid-2">
               <div class="form-group">

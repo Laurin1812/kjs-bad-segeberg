@@ -1,1 +1,10 @@
 /login    /login.html    200
+
+# Kontaktformular-Backend (api/contact.php, vendor/) laeuft nur auf einem
+# echten PHP-Host (siehe kjs.mysolution-webservice.de) - Netlify kann PHP
+# nicht ausfuehren und wuerde die Dateien sonst als reinen Text/Quellcode
+# ausliefern. Hier bewusst blockiert, damit auf dieser Umgebung nichts
+# Unbeabsichtigtes einsehbar ist (enthaelt keine Secrets, aber eben auch
+# nicht fuer den oeffentlichen Abruf gedacht).
+/api/*      /  404
+/vendor/*   /  404
