@@ -942,7 +942,86 @@
     return user.jwt ? await user.jwt(!!forceRefresh) : (user.token && user.token.access_token);
   }
 
+  // Hundeboerse/Waffenboerse: PHP/MySQL-Backend (08.09.2026, "Hundeboerse &
+  // Waffenboerse: PHP/MySQL-Backend vollstaendig vorbereiten").
+  //
+  // Bisher gingen ALLE Admin-Speicherwege (auch fuer diese beiden Module)
+  // ueber apiGet()/apiPut() zu Netlifys git-gateway und schrieben
+  // content/hundeboerse.json bzw. content/waffenboerse.json direkt ins
+  // Repository. Diese beiden Dateien existieren als JSON weiterhin (Fallback
+  // fuer die oeffentlichen Seiten, siehe hundeboerse/index.html etc.) und
+  // werden hier bewusst NICHT mehr angefasst - Inhalte, die ueber den neuen
+  // PHP-Server laufen (Freigabe/Ablehnung/Bearbeitung durch Redakteure/Admins),
+  // landen jetzt in MySQL (api/hundeboerse/admin/{liste,speichern}.php bzw.
+  // api/waffenboerse/admin/{liste,speichern}.php).
+  //
+  // Statt renderHundeboerse/-Waffenboerse, deren Collect-Funktionen und die
+  // ganzen hundeboerseSave/-Freigeben/-Ablehnen/-Archivieren/-Delete-Aktionen
+  // (die alle unveraendert doSave(S.section.file, S.data, message) aufrufen)
+  // umzubauen, wird HIER an der einzigen Stelle abgezweigt, an der ALLE diese
+  // Wege ohnehin zusammenlaufen: den beiden Low-Level-Transportfunktionen
+  // apiGet()/apiPut(). Fuer genau diese zwei Dateipfade sprechen sie den
+  // neuen PHP-Endpunkt statt git-gateway an; jede andere Datei (alle übrigen
+  // Admin-Bereiche) verhält sich exakt wie bisher.
+  //
+  // Die vom PHP-Server gelieferte "version" (siehe hundeboerse_meta/
+  // waffenboerse_meta in database/schema.sql) ersetzt dabei die bisherige
+  // Git-SHA fuer die optimistische Konflikterkennung in doSave() weiter
+  // unten - verpackt als String "v<Nummer>", damit eine Version von 0 (ganz
+  // frische, leere Installation) nicht wie "keine SHA bekannt" behandelt
+  // wird (trackSha() betrachtet einen falsy-Wert als "nichts zu merken").
+  function boerseModulFuerDatei(path) {
+    if (path === 'content/hundeboerse.json') return 'hundeboerse';
+    if (path === 'content/waffenboerse.json') return 'waffenboerse';
+    return null;
+  }
+
+  async function apiGetBoerse(modul) {
+    var tok = await getToken();
+    var r = await fetch('/api/' + modul + '/admin/liste.php?_=' + Date.now(), {
+      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
+    var body = await r.json().catch(function() { return null; });
+    if (!r.ok || !body || body.success !== true) {
+      throw new Error((body && body.message) || ('HTTP ' + r.status + ' beim Laden von ' + modul));
+    }
+    // Form identisch zur bisherigen git-gateway-Antwort ({sha, content}),
+    // damit selectSectionImpl() (S.data = JSON.parse(fromBase64(resp.content)))
+    // unveraendert bleibt.
+    return { sha: 'v' + (body.version || 0), content: toBase64(JSON.stringify(body.data)) };
+  }
+
+  async function apiPutBoerse(modul, jsonData, sha) {
+    var tok = await getToken();
+    var expectedVersion = null;
+    if (typeof sha === 'string' && sha.charAt(0) === 'v') {
+      var parsed = parseInt(sha.slice(1), 10);
+      if (!isNaN(parsed)) expectedVersion = parsed;
+    }
+    var r = await fetch('/api/' + modul + '/admin/speichern.php', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: jsonData, expected_version: expectedVersion })
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      // Gleiches Fehlerformat wie die bisherige apiPut()-Fehlerbehandlung
+      // unten (Nachricht + " (" + Statuscode + ")") - doSave()'s bestehende
+      // 409-Konflikterkennung ("e.message.indexOf('409') !== -1") erkennt
+      // dadurch einen Speicherkonflikt aus speichern.php genauso wie bisher
+      // einen von GitHub, ohne dass doSave() selbst dafür geändert werden muss.
+      throw new Error(((body && (body.message || body.error)) || 'Fehler beim Speichern') + ' (' + r.status + ')');
+    }
+    // Form identisch zur bisherigen git-gateway-Antwort ({content:{sha}}),
+    // damit doSave()'s trackSha(filePath, result.content.sha) unveraendert
+    // funktioniert.
+    return { content: { sha: 'v' + (body.version || 0) } };
+  }
+
   async function apiGet(path) {
+    var boerseModul = boerseModulFuerDatei(path);
+    if (boerseModul) return apiGetBoerse(boerseModul);
+
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
     // Laden derselben Datei (z.B. nach dem Speichern einer neuen Reihenfolge)
@@ -960,6 +1039,9 @@
   }
 
   async function apiPut(path, jsonData, sha, message) {
+    var boerseModul = boerseModulFuerDatei(path);
+    if (boerseModul) return apiPutBoerse(boerseModul, jsonData, sha);
+
     var tok = await getToken();
     var content = toBase64(JSON.stringify(jsonData, null, 2));
     var body = { message: message || 'Admin: Inhalt gespeichert', content: content, branch: BRANCH };
@@ -6775,8 +6857,22 @@
   // wird - wie bisher - ohne Konfliktprüfung gespeichert; das entspricht dem
   // bestehenden Verhalten beim Neuanlegen von Dateien.
   async function doSave(filePath, data, message) {
-    // Fetch SHA with cache-busting to avoid git-gateway stale-cache 409s
+    // Fetch SHA with cache-busting to avoid git-gateway stale-cache 409s.
+    // Hundeboerse/Waffenboerse (08.09.2026): fuer die beiden per PHP/MySQL
+    // verwalteten Dateipfade gibt es keine Git-SHA - stattdessen wird hier
+    // dieselbe "v<Versionsnummer>"-Kennung wie in apiGetBoerse() oben erneut
+    // frisch abgefragt, damit die Konflikterkennung darunter unverändert
+    // funktioniert (siehe Kommentar bei boerseModulFuerDatei()).
     async function fetchFreshSha() {
+      var boerseModul = boerseModulFuerDatei(filePath);
+      if (boerseModul) {
+        try {
+          var boerseResp = await apiGetBoerse(boerseModul);
+          return boerseResp.sha || null;
+        } catch (e) {
+          return null;
+        }
+      }
       var tok = await getToken();
       var r = await fetch(GIT + '/' + filePath + '?ref=' + BRANCH + '&_=' + Date.now(), {
         headers: {

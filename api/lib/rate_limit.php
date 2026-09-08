@@ -13,13 +13,23 @@
  * wird): maximal 5 Anfragen pro 15 Minuten je IP, zusätzlich mindestens
  * 5 Sekunden Abstand zwischen zwei Anfragen derselben IP (bremst script-
  * gesteuerte Doppel-/Mehrfachsendungen ab).
+ *
+ * $bucket trennt die Zaehler verschiedener Formulare voneinander (z.B.
+ * "contact", "hb_submit", "wb_submit") - ohne das wuerde z.B. eine
+ * Kontaktanfrage direkt gefolgt von einer Hundeboerse-Einreichung von
+ * derselben IP faelschlich als "zu schnell hintereinander" desselben
+ * Formulars gewertet. Der Parameter ist optional (Default "default") und
+ * bricht damit den bestehenden Aufruf aus api/contact.php nicht.
  */
 
-function kjs_rate_limit_check(string $ip): bool
+function kjs_rate_limit_check(string $ip, string $bucket = 'default'): bool
 {
     $maxRequests   = 5;
     $windowSeconds = 15 * 60;
     $minGapSeconds = 5;
+
+    $safeBucket = preg_replace('/[^a-z0-9_-]/', '', strtolower($bucket));
+    if ($safeBucket === '') $safeBucket = 'default';
 
     $dir = sys_get_temp_dir() . '/kjs_contact_ratelimit';
     if (!is_dir($dir)) {
@@ -31,7 +41,7 @@ function kjs_rate_limit_check(string $ip): bool
         return true;
     }
 
-    $file = $dir . '/' . hash('sha256', $ip) . '.json';
+    $file = $dir . '/' . $safeBucket . '-' . hash('sha256', $ip) . '.json';
     $fh = @fopen($file, 'c+');
     if ($fh === false) {
         return true;

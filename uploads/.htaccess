@@ -1,0 +1,24 @@
+# Oeffentlich erreichbarer Bild-Upload-Ordner (api/lib/boerse_upload.php):
+# Bilder aus oeffentlichen Hundeboerse-/Waffenboerse-Einreichungen liegen
+# hier als echte Dateien (siehe database/schema.sql-Kommentar "Bilder nicht
+# als Base64 in MySQL"). Verteidigung in der Tiefe, falls trotz strenger
+# serverseitiger Pruefung (MIME-Erkennung per fileinfo, Zufallsdateiname,
+# getimagesize()-Plausibilitaetscheck) jemals eine unerwuenschte Datei
+# hierher gelangen sollte: PHP-Ausfuehrung in diesem Ordner ist komplett
+# deaktiviert, Verzeichnislisten sind aus.
+
+# Apache >= 2.4
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|php\d|phtml|phar)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+Options -Indexes -ExecCGI

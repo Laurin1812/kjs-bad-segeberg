@@ -293,13 +293,18 @@
           <p class="hb-section-hint" style="margin-top:1rem;margin-bottom:0;">Ihre Anzeige wird erst nach Prüfung durch die Kreisjägerschaft veröffentlicht.</p>
         </div>
 
+        <!-- Honeypot: fuer Menschen unsichtbares Feld gegen automatisierten Spam,
+             siehe api/hundeboerse/anzeigen.php (identisches Muster wie im
+             Kontaktformular unter kontakt/index.html). -->
+        <input type="text" id="hbHoney" name="_honey" style="display:none;" tabindex="-1" autocomplete="off">
+
         <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
           Anzeige zur Prüfung einreichen
         </button>
 
         <div class="hb-success-box" id="hbSuccessBox">
-          <h3>Formular erfolgreich geprüft</h3>
-          <p>Die technische Übermittlung der Anzeige wird aktuell vorbereitet. Ihre eingegebenen Daten wurden in diesem Test nicht versendet.</p>
+          <h3>Vielen Dank!</h3>
+          <p>Ihre Anzeige wurde erfolgreich zur Prüfung eingereicht. Sie ist noch nicht öffentlich sichtbar und wird nach Prüfung durch die Kreisjägerschaft freigegeben oder bei Rückfragen entsprechend bearbeitet.</p>
         </div>
       </form>
 
@@ -471,7 +476,7 @@
     var overflow = files.length > freeSlots;
     imgLimitNote.classList.toggle('is-visible', overflow);
     Promise.all(toAdd.map(compressImage)).then(function(results) {
-      results.forEach(function(r) { images.push({ url: r.url, name: '' }); });
+      results.forEach(function(r) { images.push({ url: r.url, blob: r.blob, name: '' }); });
       renderImages();
     });
     imgInput.value = '';
@@ -566,6 +571,9 @@
     return null;
   }
 
+  var submitBtn = form.querySelector('button[type="submit"]');
+  var submitBtnLabelDefault = submitBtn.textContent;
+
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     successBox.classList.remove('is-visible');
@@ -581,14 +589,12 @@
       return;
     }
 
-    // Phase 3: noch keine echte Übermittlung. Die Daten würden – sobald die
-    // Server-/API-Architektur geklärt ist – hier zusammengestellt und
-    // gesendet. Feldnamen orientieren sich bewusst schon an den Feldern in
-    // content/hundeboerse.json (siehe admin.js hundeboerseNeu()), damit eine
-    // spätere Anbindung ohne Umbenennungen möglich ist.
+    // Feldnamen entsprechen bewusst 1:1 den Feldern in
+    // content/hundeboerse.json (siehe admin.js hundeboerseNeu()) - der
+    // Server (api/hundeboerse/anzeigen.php) setzt id/status/Zeitstempel
+    // selbst und ignoriert alles andere ausserhalb dieser Feldliste.
     var typ = currentTyp();
-    var wuerdeGesendetWerden = {
-      status: 'pending',
+    var daten = {
       type: typ,
       title: document.getElementById('hb-title').value.trim(),
       breed: document.getElementById('hb-breed').value.trim(),
@@ -619,12 +625,47 @@
       email: document.getElementById('hb-email').value.trim(),
       phone: document.getElementById('hb-phone').value.trim(),
       contactNotes: document.getElementById('hb-contactNotes').value.trim(),
-      galerie: images.map(function(img) { return { bild: '(noch nicht hochgeladen – Testzustand)' }; })
+      // Honeypot: fuer Menschen unsichtbares Feld, siehe api/hundeboerse/anzeigen.php.
+      _honey: (document.getElementById('hbHoney') || {}).value || ''
     };
-    console.log('[Hundebörse-Formular] Testlauf – würde übermittelt werden (nicht gesendet):', wuerdeGesendetWerden);
 
-    successBox.classList.add('is-visible');
-    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var formData = new FormData();
+    formData.append('daten', JSON.stringify(daten));
+    images.forEach(function(img) {
+      if (img.blob) formData.append('bilder[]', img.blob, (img.name || 'bild') + '.jpg');
+    });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gesendet …';
+
+    fetch('/api/hundeboerse/anzeigen.php', { method: 'POST', body: formData })
+      .then(function(r) { return r.json().catch(function() { return {}; }); })
+      .then(function(result) {
+        if (result && result.ok) {
+          form.style.display = 'none';
+          errorSummary.classList.remove('is-visible');
+          successBox.classList.add('is-visible');
+          successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitBtnLabelDefault;
+          // textContent statt innerHTML, damit eine vom Server gelieferte
+          // Fehlermeldung niemals als HTML interpretiert werden kann.
+          var errLi = document.createElement('li');
+          errLi.textContent = (result && result.error) || 'Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es später erneut.';
+          errorList.innerHTML = '';
+          errorList.appendChild(errLi);
+          errorSummary.classList.add('is-visible');
+          errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      })
+      .catch(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = submitBtnLabelDefault;
+        errorList.innerHTML = '<li>Einreichung derzeit vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut oder kontaktieren Sie uns direkt.</li>';
+        errorSummary.classList.add('is-visible');
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
   });
 })();
 </script>
