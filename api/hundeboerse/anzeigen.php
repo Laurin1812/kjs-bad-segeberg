@@ -53,31 +53,42 @@ function kjs_hb_handle_list(): void
 {
     $pdo = kjs_boerse_require_db();
 
-    $stmt = $pdo->query(
-        "SELECT id, status, type, title, breed, color, coat, price_type, price,
-                postal_code, city, description, father, father_tests, mother,
-                mother_tests, hunting_tests, training_level, provider_name,
-                contact_person, email, phone, contact_notes, dog_name,
-                birth_date, gender, litter_date, male_count, female_count,
-                gallery_title, has_zuchtverband, zuchtverband, lat, lng,
-                created_at, updated_at
-         FROM hundeboerse_anzeigen
-         WHERE status = 'published'
-         ORDER BY created_at DESC"
-    );
-    $rows = $stmt->fetchAll();
+    // Security-Finalisierung ("Informationslecks"): unerwartete DB-Fehler
+    // (z.B. defekte Verbindung mitten in der Anfrage) duerfen dem Browser
+    // nie PHP-Stacktraces/SQL-Details anzeigen - siehe gleiches Muster in
+    // kjs_hb_handle_submit() weiter unten. Bei erfolgreichem Ablauf beendet
+    // kjs_boerse_json_response() das Skript per exit() und wird daher vom
+    // catch-Block hier nicht erfasst.
+    try {
+        $stmt = $pdo->query(
+            "SELECT id, status, type, title, breed, color, coat, price_type, price,
+                    postal_code, city, description, father, father_tests, mother,
+                    mother_tests, hunting_tests, training_level, provider_name,
+                    contact_person, email, phone, contact_notes, dog_name,
+                    birth_date, gender, litter_date, male_count, female_count,
+                    gallery_title, has_zuchtverband, zuchtverband, lat, lng,
+                    created_at, updated_at
+             FROM hundeboerse_anzeigen
+             WHERE status = 'published'
+             ORDER BY created_at DESC"
+        );
+        $rows = $stmt->fetchAll();
 
-    $imgStmt = $pdo->prepare('SELECT anzeige_id, pfad, titel FROM hundeboerse_bilder WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
+        $imgStmt = $pdo->prepare('SELECT anzeige_id, pfad, titel FROM hundeboerse_bilder WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
 
-    $anzeigen = [];
-    foreach ($rows as $row) {
-        $imgStmt->execute([$row['id']]);
-        $bilder = $imgStmt->fetchAll();
-        $anzeigen[] = kjs_hb_row_to_public($row, $bilder);
+        $anzeigen = [];
+        foreach ($rows as $row) {
+            $imgStmt->execute([$row['id']]);
+            $bilder = $imgStmt->fetchAll();
+            $anzeigen[] = kjs_hb_row_to_public($row, $bilder);
+        }
+
+        $zuchtverbaende = $pdo->query('SELECT name FROM hundeboerse_zuchtverbaende ORDER BY name ASC')->fetchAll(PDO::FETCH_COLUMN);
+        $heroBild = $pdo->query('SELECT hero_bild FROM hundeboerse_meta WHERE id = 1')->fetchColumn();
+    } catch (Throwable $e) {
+        error_log('KJS Hundeboerse: Laden der Liste fehlgeschlagen - ' . $e->getMessage());
+        kjs_boerse_json_response(500, ['success' => false, 'error' => 'server_error', 'message' => 'Die Anzeigen konnten nicht geladen werden. Bitte versuchen Sie es spaeter erneut.']);
     }
-
-    $zuchtverbaende = $pdo->query('SELECT name FROM hundeboerse_zuchtverbaende ORDER BY name ASC')->fetchAll(PDO::FETCH_COLUMN);
-    $heroBild = $pdo->query('SELECT hero_bild FROM hundeboerse_meta WHERE id = 1')->fetchColumn();
 
     kjs_boerse_json_response(200, [
         'hero_bild' => $heroBild ?: null,

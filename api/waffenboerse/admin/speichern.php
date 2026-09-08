@@ -12,6 +12,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../lib/response.php';
 require_once __DIR__ . '/../../lib/db.php';
 require_once __DIR__ . '/../../lib/identity_auth.php';
+require_once __DIR__ . '/../../lib/html_sanitize.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -76,12 +77,18 @@ foreach ($anzeigenIn as $i => $a) {
         'preis' => kjs_wb_admin_str($a['preis'] ?? '', 40),
         'preis_typ' => $preisTyp,
         'erwerb' => !empty($a['erwerbsberechtigung_erforderlich']) ? 1 : 0,
-        // Beschreibung kommt hier aus dem admin-eigenen TipTap-Editor
-        // (bereits vertrauenswuerdig, da nur authentifizierte Redakteure/
-        // Admins Zugriff auf dieses Panel haben) - anders als beim
-        // oeffentlichen Einreichungsformular wird sie hier unveraendert
-        // uebernommen, nicht zusaetzlich aus Freitext neu aufgebaut.
-        'beschreibung' => kjs_wb_admin_str($a['beschreibung'] ?? '', $maxLong),
+        // Beschreibung kommt aus dem admin-eigenen TipTap-Editor. WICHTIG
+        // (Security-Finalisierung): dieser Endpunkt ist ein normaler JSON-
+        // POST, den jeder Client mit gueltigem Bearer-Token und
+        // "waffenboerse"/"admin"-Berechtigung aufrufen kann - auch ohne die
+        // TipTap-Oberflaeche zu benutzen. "Kommt aus dem eigenen Editor"
+        // ist deshalb KEINE Sicherheitsgrenze; ein Redakteur-Account koennte
+        // sonst per direktem API-Aufruf rohes <script>/HTML einschleusen und
+        // im selben Request "status":"published" setzen. Daher wird die
+        // Beschreibung serverseitig durch eine DOM-basierte Allowlist
+        // (api/lib/html_sanitize.php) bereinigt - legitime Formatierung aus
+        // dem Editor bleibt erhalten, gefaehrliches HTML wird entfernt.
+        'beschreibung' => kjs_boerse_sanitize_rich_html(kjs_wb_admin_str($a['beschreibung'] ?? '', $maxLong)),
         'plz' => kjs_wb_admin_str($a['plz'] ?? '', 10),
         'ort' => kjs_wb_admin_str($a['ort'] ?? '', $maxShort),
         'versand' => !empty($a['versand_moeglich']) ? 1 : 0,

@@ -3130,7 +3130,7 @@
     if (a.city || a.postalCode) eckdaten.push('<strong>Standort:</strong> ' + escHtml([a.postalCode, a.city].filter(Boolean).join(' ')));
 
     var beschreibung = a.description
-      ? (window.marked && typeof window.marked.parse === 'function' ? window.marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>')
+      ? sanitizeRichHtmlForPreview(window.marked && typeof window.marked.parse === 'function' ? window.marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>')
       : '';
 
     var abstammung = [];
@@ -3754,7 +3754,7 @@
         ' <span class="item-badge">' + wbStatusLabel(a.status) + '</span></h3>' +
       (a.kategorie ? '<p class="item-badge" style="display:inline-block;margin-bottom:.5rem;">' + escHtml(a.kategorie) + '</p>' : '') +
       (eckdaten.length ? '<p style="line-height:1.8;">' + eckdaten.join('<br>') + '</p>' : '') +
-      (a.beschreibung ? '<div style="margin:1rem 0;">' + a.beschreibung + '</div>' : '') +
+      (a.beschreibung ? '<div style="margin:1rem 0;">' + sanitizeRichHtmlForPreview(a.beschreibung) + '</div>' : '') +
       (kontakt.length ? '<p style="margin-top:1rem;"><strong>Anbieter</strong><br>' + kontakt.join('<br>') + '</p>' : '');
 
     hbShowModal('Vorschau: ' + (a.titel || 'Anzeige'), body);
@@ -9303,6 +9303,23 @@
   }
   function escAttr(s) {
     return String(s || '').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+  }
+  // Security-Finalisierung: gemeinsamer Sanitizing-Helfer fuer die Hundeboerse-/
+  // Waffenboerse-Admin-Vorschau (hundeboerseVorschau()/waffenboerseVorschau()).
+  // Beide zeigen dort HTML (aus marked.parse() bzw. bereits gespeichertes
+  // "beschreibung"-HTML) per innerHTML an - das kann eine noch nicht
+  // freigegebene OEFFENTLICHE Einreichung sein, die ein Redakteur/Admin sich
+  // gerade zur Moderation ansieht. Ohne Sanitizing wuerde eingebettetes
+  // Schad-HTML direkt im authentifizierten Admin-Browser ausgefuehrt (noch
+  // vor jeder Freigabe). Ist DOMPurify aus irgendeinem Grund nicht geladen
+  // (z.B. CDN-Ausfall), wird aus Sicherheitsgruenden nur reiner, escapeter
+  // Text angezeigt statt ungesaeubertes HTML zu riskieren.
+  function sanitizeRichHtmlForPreview(html) {
+    if (!html) return '';
+    if (typeof DOMPurify !== 'undefined' && typeof DOMPurify.sanitize === 'function') {
+      return DOMPurify.sanitize(html);
+    }
+    return '<p>' + escHtml(html) + '</p>';
   }
 
   function makeSlug(str) {

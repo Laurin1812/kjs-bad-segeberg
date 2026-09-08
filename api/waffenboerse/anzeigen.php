@@ -33,29 +33,38 @@ function kjs_wb_handle_list(): void
 {
     $pdo = kjs_boerse_require_db();
 
-    $rows = $pdo->query(
-        "SELECT id, status, titel, kategorie, hersteller, modell, zustand, preis,
-                preis_typ, erwerbsberechtigung_erforderlich, beschreibung, plz, ort,
-                versand_moeglich, versandkosten, anbieter_name, anbieter_email,
-                anbieter_telefon, erstellt_am, aktualisiert_am
-         FROM waffenboerse_anzeigen
-         WHERE status = 'published'
-         ORDER BY erstellt_am DESC"
-    )->fetchAll();
+    // Security-Finalisierung ("Informationslecks"): siehe identischer
+    // Kommentar in api/hundeboerse/anzeigen.php::kjs_hb_handle_list() -
+    // unerwartete DB-Fehler duerfen nie als PHP-Stacktrace/SQL-Text im
+    // Browser landen.
+    try {
+        $rows = $pdo->query(
+            "SELECT id, status, titel, kategorie, hersteller, modell, zustand, preis,
+                    preis_typ, erwerbsberechtigung_erforderlich, beschreibung, plz, ort,
+                    versand_moeglich, versandkosten, anbieter_name, anbieter_email,
+                    anbieter_telefon, erstellt_am, aktualisiert_am
+             FROM waffenboerse_anzeigen
+             WHERE status = 'published'
+             ORDER BY erstellt_am DESC"
+        )->fetchAll();
 
-    $imgStmt = $pdo->prepare('SELECT pfad, titel FROM waffenboerse_bilder WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
-    $kalStmt = $pdo->prepare('SELECT kaliber FROM waffenboerse_kaliber WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
+        $imgStmt = $pdo->prepare('SELECT pfad, titel FROM waffenboerse_bilder WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
+        $kalStmt = $pdo->prepare('SELECT kaliber FROM waffenboerse_kaliber WHERE anzeige_id = ? ORDER BY sortierung ASC, id ASC');
 
-    $anzeigen = [];
-    foreach ($rows as $row) {
-        $imgStmt->execute([$row['id']]);
-        $bilder = $imgStmt->fetchAll();
-        $kalStmt->execute([$row['id']]);
-        $kaliber = $kalStmt->fetchAll(PDO::FETCH_COLUMN);
-        $anzeigen[] = kjs_wb_row_to_public($row, $bilder, $kaliber);
+        $anzeigen = [];
+        foreach ($rows as $row) {
+            $imgStmt->execute([$row['id']]);
+            $bilder = $imgStmt->fetchAll();
+            $kalStmt->execute([$row['id']]);
+            $kaliber = $kalStmt->fetchAll(PDO::FETCH_COLUMN);
+            $anzeigen[] = kjs_wb_row_to_public($row, $bilder, $kaliber);
+        }
+
+        $kategorien = $pdo->query('SELECT name FROM waffenboerse_kategorien ORDER BY sortierung ASC, name ASC')->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $e) {
+        error_log('KJS Waffenboerse: Laden der Liste fehlgeschlagen - ' . $e->getMessage());
+        kjs_boerse_json_response(500, ['success' => false, 'error' => 'server_error', 'message' => 'Die Anzeigen konnten nicht geladen werden. Bitte versuchen Sie es spaeter erneut.']);
     }
-
-    $kategorien = $pdo->query('SELECT name FROM waffenboerse_kategorien ORDER BY sortierung ASC, name ASC')->fetchAll(PDO::FETCH_COLUMN);
 
     kjs_boerse_json_response(200, [
         'anzeigen' => $anzeigen,
@@ -183,7 +192,17 @@ function kjs_wb_handle_submit(): void
     $errors = [];
     if ($titel === '') $errors[] = 'titel';
 
-    $bekannteKategorien = $pdo->query('SELECT name FROM waffenboerse_kategorien')->fetchAll(PDO::FETCH_COLUMN);
+    // Security-Finalisierung ("Informationslecks"): diese Abfrage lag bisher
+    // ausserhalb des weiter unten folgenden try/catch(Throwable)-Blocks der
+    // eigentlichen Transaktion - ein DB-Fehler genau hier haette also noch
+    // ungefangen einen PHP-Stacktrace/SQL-Text an den Browser ausliefern
+    // koennen. Eigener try/catch, gleiches Antwortmuster wie unten.
+    try {
+        $bekannteKategorien = $pdo->query('SELECT name FROM waffenboerse_kategorien')->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $e) {
+        error_log('KJS Waffenboerse: Kategorienabfrage fehlgeschlagen - ' . $e->getMessage());
+        kjs_boerse_json_response(500, ['ok' => false, 'error' => 'Die Einreichung ist technisch fehlgeschlagen. Bitte versuchen Sie es spaeter erneut.']);
+    }
     if ($kategorie === '' || !in_array($kategorie, $bekannteKategorien, true)) $errors[] = 'kategorie';
 
     if ($hersteller === '') $errors[] = 'hersteller';

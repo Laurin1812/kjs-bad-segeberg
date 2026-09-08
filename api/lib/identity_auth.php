@@ -58,12 +58,32 @@ if (!function_exists('kjs_boerse_jwt_b64url_decode')) {
 
 if (!function_exists('kjs_boerse_verify_identity_jwt')) {
     /**
-     * Prueft Signatur + Ablaufdatum eines HS256-JWT gegen das gegebene
+     * Prueft Signatur + Zeitgueltigkeit eines HS256-JWT gegen das gegebene
      * Secret. Gibt bei Erfolg das dekodierte Payload-Array zurueck, sonst
      * null. Es wird bewusst NUR "HS256" akzeptiert (Netlify-Identity-
      * Standard) - jeder andere/fehlende "alg"-Header (z.B. "none", was ein
      * Angreifer versuchen koennte, um die Signaturpruefung zu umgehen) wird
      * abgelehnt.
+     *
+     * Security-Finalisierung, Punkt "JWT-Pruefung" ("keine Scheinsicherheit"):
+     * - "exp" (Ablaufzeitpunkt) war bisher nur geprueft, WENN vorhanden -
+     *   ein Token ganz ohne "exp"-Claim waere also unbegrenzt gueltig
+     *   gewesen. Das ist jetzt ein Pflichtfeld: fehlt "exp" oder ist es kein
+     *   gueltiger Zeitstempel, wird das Token abgelehnt.
+     * - "nbf" ("not before") wurde bisher gar nicht geprueft. Netlify
+     *   Identity setzt diesen Claim standardmaessig nicht, aber falls er
+     *   doch vorkommt (z.B. durch eine kuenftige Netlify-Aenderung oder
+     *   einen frei konfigurierten Provider), MUSS ein noch nicht gueltiges
+     *   Token abgelehnt werden - alles andere waere eine bekannte,
+     *   vermeidbare Luecke.
+     * - "iss"/"aud" (Aussteller/Empfaenger) werden NUR geprueft, wenn Carsten
+     *   ueber die Environment-Variablen IDENTITY_JWT_ISSUER bzw.
+     *   IDENTITY_JWT_AUDIENCE einen erwarteten Wert konfiguriert. Es wird
+     *   hier bewusst KEIN Wert geraten/hartkodiert (die genaue "iss"/"aud"-
+     *   Struktur echter Netlify-Identity-Token dieser Site konnte ohne
+     *   Zugriff auf die echte Produktionsumgebung nicht verifiziert werden -
+     *   siehe Abschlussbericht). Ohne Konfiguration ist diese Pruefung ein
+     *   reines No-Op, verhaelt sich also exakt wie vorher.
      */
     function kjs_boerse_verify_identity_jwt(string $token, string $secret): ?array
     {
@@ -81,8 +101,37 @@ if (!function_exists('kjs_boerse_verify_identity_jwt')) {
         $payload = json_decode(kjs_boerse_jwt_b64url_decode($payloadB64), true);
         if (!is_array($payload)) return null;
 
-        if (isset($payload['exp']) && is_numeric($payload['exp']) && time() >= (int) $payload['exp']) {
+        // "exp" ist jetzt Pflicht (fail-closed statt "nur wenn vorhanden").
+        if (!isset($payload['exp']) || !is_numeric($payload['exp'])) {
+            return null;
+        }
+        if (time() >= (int) $payload['exp']) {
             return null; // abgelaufen
+        }
+
+        // "nbf": nur pruefen, wenn vorhanden - Netlify Identity setzt diesen
+        // Claim standardmaessig nicht, ein Token ohne "nbf" bleibt also wie
+        // bisher gueltig. Ist er vorhanden, muss er bereits erreicht sein.
+        if (isset($payload['nbf']) && is_numeric($payload['nbf']) && time() < (int) $payload['nbf']) {
+            return null; // noch nicht gueltig
+        }
+
+        // "iss"/"aud": nur pruefen, wenn Carsten einen erwarteten Wert
+        // konfiguriert hat (siehe Funktionskommentar) - sonst No-Op.
+        $expectedIssuer = kjs_boerse_env('IDENTITY_JWT_ISSUER');
+        if ($expectedIssuer !== null && $expectedIssuer !== '') {
+            if (!isset($payload['iss']) || !is_string($payload['iss']) || $payload['iss'] !== $expectedIssuer) {
+                return null;
+            }
+        }
+        $expectedAudience = kjs_boerse_env('IDENTITY_JWT_AUDIENCE');
+        if ($expectedAudience !== null && $expectedAudience !== '') {
+            $aud = $payload['aud'] ?? null;
+            $audMatches = (is_string($aud) && $aud === $expectedAudience)
+                || (is_array($aud) && in_array($expectedAudience, $aud, true));
+            if (!$audMatches) {
+                return null;
+            }
         }
 
         return $payload;

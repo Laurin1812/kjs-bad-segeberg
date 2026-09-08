@@ -59,6 +59,15 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- DOMPurify saeubert das von marked.parse() erzeugte HTML, bevor es per
+     innerHTML eingefuegt wird (Security-Finalisierung: marked.js selbst hat
+     seine eingebaute "sanitize"-Option in v4+ als unzuverlaessig entfernt;
+     die offizielle/aktuelle Empfehlung ist, die Ausgabe separat mit
+     DOMPurify zu bereinigen - siehe marked.js-Doku "Sanitization"). Ohne
+     dieses Sanitizing koennte eine Beschreibung mit eingebettetem rohen
+     HTML (z.B. Script-Tags, onerror-Attribute, javascript:-Links) beim
+     Rendern ausgefuehrt werden. -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function() {
@@ -303,7 +312,17 @@
       // ── Beschreibung ──────────────────────────────────────────
       if (a.description) {
         html += '<h2>' + (a.type === 'litter' ? 'Über den Wurf' : 'Über den Hund') + '</h2>';
-        html += (typeof marked !== 'undefined' ? marked.parse(a.description) : '<p>' + escHtml(a.description) + '</p>');
+        // Markdown -> HTML (marked), danach zwingend durch DOMPurify bereinigen,
+        // bevor es per innerHTML in die Seite eingefügt wird (siehe Kommentar
+        // beim <script>-Import oben). Beide Bibliotheken müssen geladen sein;
+        // ist eine davon (z.B. wegen eines CDN-Ausfalls) nicht verfügbar, wird
+        // aus Sicherheitsgründen nur reiner, escapeter Text angezeigt statt
+        // ungesäubertes HTML zu riskieren.
+        if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+          html += DOMPurify.sanitize(marked.parse(a.description));
+        } else {
+          html += '<p>' + escHtml(a.description) + '</p>';
+        }
       }
 
       // ── Standort ──────────────────────────────────────────────
