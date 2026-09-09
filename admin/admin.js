@@ -651,6 +651,13 @@
       { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'benutzer', label:'👥 Benutzerverwaltung', form:'benutzer' },
+      // Eigenständiger Bereich (09.09.2026, "Kontaktformular ausfallsicher
+      // machen"): kein file (Daten kommen nicht aus einer content/*.json,
+      // sondern per API aus MySQL - api/kontakt/admin/liste.php +
+      // status.php), gleiches Muster wie 'benutzer' oben. Eigene Permission
+      // 'kontaktanfragen' (siehe PERMISSIONS/PERM_BY_KEY unten) - bewusst
+      // NICHT an 'kontakt-stammdaten' gekoppelt (siehe dortiger Kommentar).
+      { key:'kontaktanfragen', label:'📬 Kontaktanfragen', form:'kontaktanfragen' },
     ]},
     // "🧪 Testseite" (content/test/testseite.json) 22.08.2026 aus dem Menü
     // entfernt (Laurin-Wunsch, Aufräumen) - war ursprünglich das Sandbox-
@@ -758,13 +765,20 @@
       { key: 'partner',      label: 'Partner' },
     ]},
     { group: 'Sonstiges', items: [
-      { key: 'service',       label: 'Service' },
-      { key: 'downloads',     label: 'Downloads' },
-      { key: 'faq',           label: 'FAQ' },
-      { key: 'footer',        label: 'Fußzeile' },
-      { key: 'impressum',     label: 'Impressum' },
-      { key: 'startseite',    label: 'Startseite' },
-      { key: 'ueber_uns',     label: 'Über uns' },
+      { key: 'service',          label: 'Service' },
+      { key: 'downloads',        label: 'Downloads' },
+      { key: 'faq',              label: 'FAQ' },
+      { key: 'footer',           label: 'Fußzeile' },
+      { key: 'impressum',        label: 'Impressum' },
+      { key: 'startseite',       label: 'Startseite' },
+      { key: 'ueber_uns',        label: 'Über uns' },
+      // Eigenständiges Recht (09.09.2026, "Kontaktformular ausfallsicher
+      // machen") - bewusst NICHT an "kontakt" ("Kontakt & Stammdaten")
+      // gekoppelt: "kontakt" steuert die ÖFFENTLICHE Kontaktseite (Adresse/
+      // Öffnungszeiten), "kontaktanfragen" den Zugriff auf die tatsächlich
+      // eingegangenen (teils personenbezogenen) Besucher-Nachrichten -
+      // fachlich getrennte Bereiche, unabhängig vergebbar.
+      { key: 'kontaktanfragen',  label: 'Kontaktanfragen (eingegangene Nachrichten)' },
       { key: 'inhaltsseiten', label: 'Alle bisherigen „Normalen Inhaltsseiten“ (Alt-Sammelrecht – deckt automatisch alle oben neu aufgeteilten Einzelseiten mit ab; für neue Redakteure künftig lieber gezielt einzelne Rechte vergeben)' },
     ]},
     { group: 'System', items: [
@@ -840,6 +854,11 @@
     'benutzer': null,
     'downloads': 'downloads',
     'medien': 'medien',
+    // 09.09.2026 ("Kontaktformular ausfallsicher machen"): eigene Permission,
+    // NICHT 'kontakt' (das steuert nur die öffentliche Kontaktseite/
+    // Stammdaten) - Admin hat ohnehin Vollzugriff (isAdminUser()), ein
+    // Redakteur braucht explizit 'kontaktanfragen'.
+    'kontaktanfragen': 'kontaktanfragen',
   };
 
   // Dynamisch nachgeladene Unterseiten (loadAllManifestItems/buildSearchIndex)
@@ -1880,6 +1899,11 @@
 
     if (def.form === 'benutzer') {
       renderBenutzer();
+      return;
+    }
+
+    if (def.form === 'kontaktanfragen') {
+      renderKontaktanfragen();
       return;
     }
 
@@ -6670,6 +6694,163 @@
       console.error('[Benutzerverwaltung] Fehler beim erneuten Einladen:', e);
       toast('❌ ' + e.message, 'err');
       benutzerLoad(); // UI auf tatsächlichen Serverstand zurücksetzen (z.B. falls DELETE klappte, POST aber fehlschlug)
+    }
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     KONTAKTANFRAGEN (09.09.2026, "Kontaktformular ausfallsicher machen")
+     ────────────────────────────────────────────────────────────
+     Eigener Admin-Bereich fuer die eingegangenen Kontaktanfragen
+     (kontakt/index.html -> api/contact.php -> MySQL-Tabelle
+     kontakt_anfragen). Kein content/*.json (form:'kontaktanfragen' ohne
+     "file" in der NAV, siehe selectSectionImpl()) - die Daten kommen per
+     API aus MySQL, analog zu Hundeboerse/Waffenboerse, aber als eigener,
+     einfacher Bereich (keine Freigabe/Ablehnung, nur Status neu/bearbeitet)
+     und deshalb - wie 'benutzer' oben - bewusst NICHT ueber
+     apiGetBoerse()/apiPutBoerse()/doSave() gefuehrt, sondern mit eigenen,
+     kleinen Fetch-Helfern (kaFetch) nach demselben Muster wie buFetch()
+     oben.
+     Eigene Permission 'kontaktanfragen' (PERMISSIONS weiter unten +
+     PERM_BY_KEY oben) - Admin hat ueber isAdminUser()/canAccessDef() ohnehin
+     Vollzugriff, ein Redakteur braucht explizit dieses Recht (Auftrag Punkt
+     7: NICHT automatisch an 'kontakt'/"Kontakt & Stammdaten" gekoppelt).
+     Sicherheit (Auftrag Punkt 8): die Nachricht wird ausschliesslich ueber
+     escHtml() dargestellt (niemals roh per innerHTML) - eine im Formular
+     eingegebene Nachricht wie "<img src=x onerror=alert(1)>" landet damit
+     im Admin nur als sichtbarer Text, nie als ausgefuehrtes HTML.
+  ──────────────────────────────────────────────────────────── */
+  var KA_ENDPOINT_LISTE  = '/api/kontakt/admin/liste.php';
+  var KA_ENDPOINT_STATUS = '/api/kontakt/admin/status.php';
+  var KA = { anfragen: [], openId: null }; // lokaler Zwischenstand der zuletzt geladenen Liste (fuer Detail-Auf-/Zuklappen ohne Neuladen)
+
+  function kaFehlerText(status, body) {
+    if (status === 401) return 'Sitzung abgelaufen. Bitte erneut anmelden.';
+    if (status === 403) return 'Keine Berechtigung fuer Kontaktanfragen.';
+    if (body && body.message) return body.message;
+    return 'Serverfehler – bitte spaeter erneut versuchen.';
+  }
+
+  async function kaFetch(method, url, bodyObj) {
+    var tok = await getToken(true);
+    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
+    if (bodyObj !== undefined) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(bodyObj);
+    }
+    var r = await fetch(url, opts);
+    var data = await r.json().catch(function() { return {}; });
+    if (!r.ok || data.success !== true) {
+      console.error('[Kontaktanfragen] ' + method + ' ' + url + ' → HTTP ' + r.status, data);
+      throw new Error(kaFehlerText(r.status, data));
+    }
+    return data;
+  }
+
+  function kaDatumAnzeige(iso) {
+    if (!iso) return '–';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '–';
+    return d.toLocaleDateString('de-DE') + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function kaStatusBadge(status) {
+    var istBearbeitet = status === 'bearbeitet';
+    return '<span class="bu-badge" style="background:' + (istBearbeitet ? 'var(--success-bg,#e6f4ea)' : 'var(--warning-bg,#fff4e5)') + ';color:' + (istBearbeitet ? 'var(--success,#1e7e34)' : 'var(--warning,#b45f06)') + ';">' +
+      (istBearbeitet ? '✅ Bearbeitet' : '🆕 Neu') + '</span>';
+  }
+
+  function renderKontaktanfragen() {
+    var main = id('admin-main');
+    // hideDefaultSave: wie bei renderBenutzer() gibt es hier kein zentrales
+    // Speichern - jede Statusaenderung wirkt sofort per eigenem Button.
+    main.innerHTML =
+      panelHeader('📬 Kontaktanfragen', null, true) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Eingegangene Anfragen</div>' +
+          '<p class="text-muted" style="margin-bottom:.75rem;">Nachricht anklicken für Details. Keine Anfrage kann hier gelöscht werden - erledigte Anfragen werden als „Bearbeitet" markiert.</p>' +
+          '<div id="ka-list"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+      '</div>';
+    kontaktanfragenLoad();
+  }
+
+  window.kontaktanfragenLoad = kontaktanfragenLoad;
+  async function kontaktanfragenLoad() {
+    var list = id('ka-list');
+    if (!list) return;
+    try {
+      var data = await kaFetch('GET', KA_ENDPOINT_LISTE + '?_=' + Date.now());
+      KA.anfragen = (data.data && data.data.anfragen) || [];
+      kontaktanfragenRenderListe();
+    } catch(e) {
+      console.error('[Kontaktanfragen] Fehler beim Laden:', e);
+      list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>' +
+        '<p class="mt-1"><button class="btn btn-outline btn-sm" onclick="kontaktanfragenLoad()">🔄 Erneut versuchen</button></p>';
+    }
+  }
+
+  function kontaktanfragenRenderListe() {
+    var list = id('ka-list');
+    if (!list) return;
+    if (!KA.anfragen.length) {
+      list.innerHTML = '<p style="color:var(--text-muted);">Keine Kontaktanfragen vorhanden.</p>';
+      return;
+    }
+    list.innerHTML = KA.anfragen.map(function(a) {
+      var offen = KA.openId === a.id;
+      var zeile =
+        '<div class="bu-user-row" id="ka-row-' + a.id + '">' +
+          '<div class="bu-user-info" style="cursor:pointer;" onclick="kontaktanfrageToggle(' + a.id + ')">' +
+            '<strong>' + escHtml(a.name || '(ohne Namen)') + '</strong>' +
+            ' <span class="bu-user-name">' + escHtml(a.email) + '</span>' +
+            ' — ' + escHtml(a.anliegen || '–') +
+            ' <span class="bu-badge">' + escHtml(kaDatumAnzeige(a.erstelltAm)) + '</span> ' +
+            kaStatusBadge(a.status) +
+            (a.mailVersendet ? '' : ' <span class="bu-badge" title="' + escAttr(a.mailFehler || 'Benachrichtigungs-E-Mail konnte nicht versendet werden') + '">✉️❌ Mail nicht versendet</span>') +
+          '</div>';
+      if (!offen) return zeile + '</div>';
+      // Detailansicht: vollstaendige Nachricht NUR ueber escHtml() (Auftrag
+      // Punkt 8: "keine HTML-Ausfuehrung aus Nachrichten") - white-space:pre-wrap
+      // erhaelt Zeilenumbrueche der Originalnachricht, ohne HTML zu interpretieren.
+      return zeile +
+          '<div class="bu-perm-wrap" style="display:block;">' +
+            '<p><strong>Telefon:</strong> ' + escHtml(a.telefon || '–') + '</p>' +
+            '<p><strong>E-Mail:</strong> ' + escHtml(a.email || '–') + '</p>' +
+            (a.bereitsJaeger ? '<p><strong>Bereits Jäger/in:</strong> ' + escHtml(a.bereitsJaeger) + '</p>' : '') +
+            (a.hegering ? '<p><strong>Hegering:</strong> ' + escHtml(a.hegering) + '</p>' : '') +
+            '<p><strong>Eingegangen:</strong> ' + escHtml(kaDatumAnzeige(a.erstelltAm)) + '</p>' +
+            (a.bearbeitetAm ? '<p><strong>Zuletzt bearbeitet:</strong> ' + escHtml(kaDatumAnzeige(a.bearbeitetAm)) + '</p>' : '') +
+            '<p><strong>Nachricht:</strong></p>' +
+            '<p style="white-space:pre-wrap;background:var(--bg-subtle,#f6f6f6);padding:.6rem .8rem;border-radius:6px;">' + escHtml(a.nachricht || '(keine Nachricht)') + '</p>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            (a.status === 'bearbeitet'
+              ? '<button class="btn btn-outline btn-sm" onclick="kontaktanfrageStatusSetzen(' + a.id + ',\'neu\')">↩️ Auf „Neu" zurücksetzen</button>'
+              : '<button class="btn btn-primary btn-sm" onclick="kontaktanfrageStatusSetzen(' + a.id + ',\'bearbeitet\')">✅ Als bearbeitet markieren</button>') +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  window.kontaktanfrageToggle = function(id_) {
+    KA.openId = (KA.openId === id_) ? null : id_;
+    kontaktanfragenRenderListe();
+  };
+
+  window.kontaktanfrageStatusSetzen = async function(id_, status) {
+    try {
+      var data = await kaFetch('POST', KA_ENDPOINT_STATUS, { id: id_, status: status });
+      // Lokale Liste direkt mit der vom Server bestaetigten Zeile aktualisieren
+      // (statt komplett neu zu laden) - fuehlt sich sofort/reaktionsschnell an
+      // und vermeidet einen unnoetigen zweiten Roundtrip.
+      var updated = data.anfrage;
+      KA.anfragen = KA.anfragen.map(function(a) { return a.id === updated.id ? updated : a; });
+      kontaktanfragenRenderListe();
+      toast(status === 'bearbeitet' ? '✅ Als bearbeitet markiert' : '↩️ Auf „Neu" zurückgesetzt', 'ok');
+    } catch(e) {
+      console.error('[Kontaktanfragen] Fehler beim Statuswechsel:', e);
+      toast('❌ ' + e.message, 'err');
     }
   };
 

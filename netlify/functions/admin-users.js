@@ -73,6 +73,7 @@ var PERMISSIONS_BEKANNT = [
   'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
   'infomobil', 'hundeboerse', 'waffenboerse', 'partner',
   'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite', 'ueber_uns',
+  'kontaktanfragen',
   'inhaltsseiten',
   'navigation', 'design'
 ];
