@@ -17,13 +17,8 @@
       "vorschau": "/images/1786866016612-111.jpg"
     }
   ],
-  "galerie": [
-    {
-      "bild": "/images/1787033859645-Kreis2024_1.jpeg",
-      "titel": "Test"
-    }
-  ],
-  "galerie_titel": "Test",
+  "galerie": [],
+  "galerie_titel": "Bildergalerie",
   "linkliste": [
     {
       "titel": "Test",
