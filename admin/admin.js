@@ -670,7 +670,7 @@
   ];
 
   /* ────────────────────────────────────────────────────────────
-     RECHTE / BERECHTIGUNGEN (05.09.2026)
+     RECHTE / BERECHTIGUNGEN (05.09.2026, vollständig granular seit 09.09.2026)
      Grobe Rollen: "admin" (immer Vollzugriff) und "redakteur" (nur die
      unten explizit freigegebenen Bereiche). Ein Admin braucht nie
      Permissions gepflegt zu bekommen - isAdminUser() schaltet überall
@@ -680,18 +680,23 @@
      PERMISSIONS ist die EINE zentrale Definition (Gruppen + Labels), die
      sowohl die Checkbox-UI in der Benutzerverwaltung als auch - über
      PERM_BY_KEY/PERM_BY_DIR - die eigentliche Zugriffskontrolle (Sidebar,
-     Suche, Panel-Öffnen, Speichern) speist. Aus Platzgründen NICHT für
-     jede einzelne der über 40 NAV-Unterseiten ein eigenes Recht: normale
-     Inhaltsseiten (Über uns, Mitglied werden, Niederwild, Hochwild,
-     Schießobleute, Satzung, Landesjagdverband, die Aufgaben-Unterseiten
-     außer Jagdhundeschule, die Verbraucher-Themenseiten, Service,
-     Downloads, Startseite, FAQ, Fußzeile, Impressum) teilen sich bewusst
-     das Recht "inhaltsseiten" - das entspricht genau der von Laurin
-     vorgegebenen Gruppe "normale Inhaltsseiten". Module, die Laurin
-     ausdrücklich einzeln genannt hat (Aktuelles, Termine, Vorstand,
-     Obleute, Hegeringe, Kreisjägermeister, Jagdhundeschule, Infomobil,
-     Hundebörse, Waffenbörse, Partner, Kontakt/Öffnungszeiten, Medien,
-     Navigation, Design), bekommen ein eigenes Recht.
+     Suche, Panel-Öffnen, Speichern) speist.
+
+     "Benutzerrechte vollständig granular machen" (09.09.2026): das
+     bisherige Sammelrecht "inhaltsseiten" ("Normale Inhaltsseiten", teilte
+     sich über 25 NAV-Unterseiten) wurde in einzelne Rechte pro echtem
+     Admin-Modul aufgeteilt (Gruppen "Mitgliedschaft/Jäger", "Aufgaben der
+     KJS", "Verbraucher", Teile von "Organisation"/"Sonstiges" unten) -
+     Frank kann Redakteuren jetzt jede dieser Seiten einzeln freischalten.
+     Der Schlüssel "inhaltsseiten" bleibt trotzdem als LEGACY-SAMMELRECHT
+     bestehen (siehe LEGACY_INHALTSSEITEN_KEYS + canAccessDef() weiter
+     unten): wer es bereits hatte (z.B. Nicole), behält dadurch automatisch
+     weiter Zugriff auf alle davon abgedeckten Seiten - ganz ohne dass am
+     Server (Netlify Identity) irgendein bestehender Benutzer-Datensatz
+     migriert/umgeschrieben werden müsste. Zusätzlich können jederzeit
+     gezielt einzelne der neuen Rechte vergeben werden; das Sammelrecht
+     lässt sich bei Bedarf später auch einfach wieder abwählen, sobald alle
+     benötigten Einzelrechte gesetzt sind.
 
      Benutzerverwaltung ist ABSICHTLICH KEINE Checkbox hier: sie bleibt
      hart an die Rolle "admin" gebunden (admin-users.js prüft die Rolle,
@@ -702,14 +707,17 @@
      netlify/functions/admin-users.js übereinstimmen. Es gibt (bewusst,
      kein Build-Prozess in diesem Projekt) keinen automatischen Sync
      zwischen Browser-Code und der Netlify Function - bei einer Änderung
-     hier IMMER auch dort nachziehen.
+     hier IMMER auch dort nachziehen. (Genau diese Art von Sync-Lücke -
+     ein Tab, der noch die alte Rechte-Liste im Speicher hat, während der
+     Server schon die neue kennt - ist die Ursache von Franks
+     Speicherfehler, siehe buFehlerText() weiter unten und Abschlussbericht.)
   ──────────────────────────────────────────────────────────── */
   var PERMISSIONS = [
     { group: 'Redaktion', items: [
-      { key: 'aktuelles',     label: 'Aktuelles' },
-      { key: 'termine',       label: 'Termine' },
-      { key: 'kontakt',       label: 'Kontakt & Stammdaten (Öffnungszeiten, Geschäftsstelle)' },
-      { key: 'inhaltsseiten', label: 'Normale Inhaltsseiten' },
+      { key: 'aktuelles', label: 'Aktuelles' },
+      { key: 'termine',   label: 'Termine' },
+      { key: 'kontakt',   label: 'Kontakt & Stammdaten (Öffnungszeiten, Geschäftsstelle)' },
+      { key: 'medien',    label: 'Medien & Bilder' },
     ]},
     { group: 'Organisation', items: [
       { key: 'vorstand',        label: 'Vorstand' },
@@ -717,15 +725,47 @@
       { key: 'hegeringe',       label: 'Hegeringe' },
       { key: 'kjm',             label: 'Kreisjägermeister' },
       { key: 'jagdhundeschule', label: 'Jagdhundeschule' },
+      { key: 'schiessobleute',  label: 'Schießobleute' },
+    ]},
+    { group: 'Mitgliedschaft/Jäger', items: [
+      { key: 'mitglied_werden',   label: 'Mitglied werden' },
+      { key: 'jaeger_werden',     label: 'Jäger/in werden' },
+      { key: 'niederwild',        label: 'Niederwild' },
+      { key: 'hochwild',          label: 'Hochwild' },
+      { key: 'satzung',           label: 'Satzung' },
+      { key: 'landesjagdverband', label: 'Landesjagdverband' },
+    ]},
+    { group: 'Aufgaben der KJS', items: [
+      { key: 'aufgaben_schiessen',       label: 'Schießwesen' },
+      { key: 'aufgaben_hundeausbildung', label: 'Hundeausbildung (Übersichtsseite)' },
+      { key: 'aufgaben_schweisshunde',   label: 'Schweißhundeführer' },
+      { key: 'aufgaben_jugend',          label: 'Jugendarbeit' },
+      { key: 'aufgaben_jagdhorn',        label: 'Jagdhornblasen' },
+      { key: 'aufgaben_natur',           label: 'Naturschutz' },
+      { key: 'aufgaben_jungwild',        label: 'Jungwildrettung' },
+      { key: 'aufgaben_sonstiges',       label: 'Sonstige Aufgaben-Unterseiten' },
+    ]},
+    { group: 'Verbraucher', items: [
+      { key: 'verbraucher_wildfleisch',           label: 'Wildfleisch' },
+      { key: 'verbraucher_lernort_natur',         label: 'Lernort Natur' },
+      { key: 'verbraucher_gruenes_klassenzimmer', label: 'Grünes Klassenzimmer' },
+      { key: 'verbraucher_waidmannssprache',      label: 'Waidmannssprache' },
     ]},
     { group: 'Angebote & Börsen', items: [
+      { key: 'infomobil',    label: 'Infomobil' },
       { key: 'hundeboerse',  label: 'Hundebörse' },
       { key: 'waffenboerse', label: 'Waffenbörse' },
       { key: 'partner',      label: 'Partner' },
-      { key: 'infomobil',    label: 'Infomobil' },
     ]},
-    { group: 'Medien', items: [
-      { key: 'medien', label: 'Medien & Bilder' },
+    { group: 'Sonstiges', items: [
+      { key: 'service',       label: 'Service' },
+      { key: 'downloads',     label: 'Downloads' },
+      { key: 'faq',           label: 'FAQ' },
+      { key: 'footer',        label: 'Fußzeile' },
+      { key: 'impressum',     label: 'Impressum' },
+      { key: 'startseite',    label: 'Startseite' },
+      { key: 'ueber_uns',     label: 'Über uns' },
+      { key: 'inhaltsseiten', label: 'Alle bisherigen „Normalen Inhaltsseiten“ (Alt-Sammelrecht – deckt automatisch alle oben neu aufgeteilten Einzelseiten mit ab; für neue Redakteure künftig lieber gezielt einzelne Rechte vergeben)' },
     ]},
     { group: 'System', items: [
       { key: 'navigation', label: 'Navigation (Hauptnavigation, Reihenfolge)' },
@@ -738,52 +778,67 @@
     return acc.concat(g.items.map(function(it) { return it.key; }));
   }, []);
 
+  // Welche der neuen Einzelrechte deckt das Alt-Sammelrecht "inhaltsseiten"
+  // weiterhin automatisch mit ab (siehe canAccessDef() weiter unten) - exakt
+  // die Module, die vor der Aufteilung (09.09.2026) gemeinsam unter
+  // "inhaltsseiten" liefen.
+  var LEGACY_INHALTSSEITEN_KEYS = [
+    'ueber_uns', 'mitglied_werden', 'jaeger_werden', 'niederwild', 'hochwild',
+    'schiessobleute', 'satzung', 'landesjagdverband',
+    'aufgaben_schiessen', 'aufgaben_hundeausbildung', 'aufgaben_schweisshunde',
+    'aufgaben_jugend', 'aufgaben_jagdhorn', 'aufgaben_natur', 'aufgaben_jungwild',
+    'aufgaben_sonstiges',
+    'verbraucher_wildfleisch', 'verbraucher_lernort_natur',
+    'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
+    'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite',
+  ];
+
   // NAV-key -> Permission-Schlüssel. "null" = ausdrücklich admin-only
   // (keine Permission kann das freischalten). Fehlt ein Key hier ganz,
   // wird der Zugriff für Nicht-Admins standardmäßig verweigert (fail-closed).
   var PERM_BY_KEY = {
-    'startseite': 'inhaltsseiten',
-    'jaeger-ueber-uns': 'inhaltsseiten', 'new-sub-ueber-uns': 'inhaltsseiten',
+    'startseite': 'startseite',
+    'jaeger-ueber-uns': 'ueber_uns', 'new-sub-ueber-uns': 'ueber_uns',
     'vorstand': 'vorstand',
     'obleute': 'obleute',
     'hegeringe': 'hegeringe',
-    'mitglied-werden': 'inhaltsseiten', 'new-sub-mitglied-werden': 'inhaltsseiten',
-    'jaeger-werden': 'inhaltsseiten', 'new-sub-jaeger-werden': 'inhaltsseiten',
-    'niederwild': 'inhaltsseiten', 'new-sub-niederwild': 'inhaltsseiten',
-    'hochwild': 'inhaltsseiten', 'new-sub-hochwild': 'inhaltsseiten',
-    'schiessobleute': 'inhaltsseiten', 'new-sub-schiessobleute': 'inhaltsseiten',
-    'satzung': 'inhaltsseiten', 'new-sub-satzung': 'inhaltsseiten',
-    'landesjagdverband': 'inhaltsseiten', 'new-sub-landesjagdverband': 'inhaltsseiten',
+    'mitglied-werden': 'mitglied_werden', 'new-sub-mitglied-werden': 'mitglied_werden',
+    'jaeger-werden': 'jaeger_werden', 'new-sub-jaeger-werden': 'jaeger_werden',
+    'niederwild': 'niederwild', 'new-sub-niederwild': 'niederwild',
+    'hochwild': 'hochwild', 'new-sub-hochwild': 'hochwild',
+    'schiessobleute': 'schiessobleute', 'new-sub-schiessobleute': 'schiessobleute',
+    'satzung': 'satzung', 'new-sub-satzung': 'satzung',
+    'landesjagdverband': 'landesjagdverband', 'new-sub-landesjagdverband': 'landesjagdverband',
     'kjm': 'kjm',
-    'auf-schiessen': 'inhaltsseiten', 'new-sub-schiessen': 'inhaltsseiten',
-    'auf-hunde-uebersicht': 'inhaltsseiten',
+    'auf-schiessen': 'aufgaben_schiessen', 'new-sub-schiessen': 'aufgaben_schiessen',
+    'auf-hunde-uebersicht': 'aufgaben_hundeausbildung',
     'jagdhundeschule-gruppe': 'jagdhundeschule', 'new-jagdhundeschule': 'jagdhundeschule',
-    'auf-schweiss': 'inhaltsseiten', 'new-sub-schweisshunde': 'inhaltsseiten',
-    'auf-jugend': 'inhaltsseiten', 'new-sub-jugend': 'inhaltsseiten',
-    'auf-jagdhorn': 'inhaltsseiten', 'new-sub-jagdhorn': 'inhaltsseiten',
-    'auf-natur': 'inhaltsseiten', 'new-sub-naturschutz': 'inhaltsseiten',
-    'auf-jungwild': 'inhaltsseiten', 'new-sub-jungwildrettung': 'inhaltsseiten',
-    'new-aufgaben': 'inhaltsseiten',
+    'auf-schweiss': 'aufgaben_schweisshunde', 'new-sub-schweisshunde': 'aufgaben_schweisshunde',
+    'auf-jugend': 'aufgaben_jugend', 'new-sub-jugend': 'aufgaben_jugend',
+    'auf-jagdhorn': 'aufgaben_jagdhorn', 'new-sub-jagdhorn': 'aufgaben_jagdhorn',
+    'auf-natur': 'aufgaben_natur', 'new-sub-naturschutz': 'aufgaben_natur',
+    'auf-jungwild': 'aufgaben_jungwild', 'new-sub-jungwildrettung': 'aufgaben_jungwild',
+    'new-aufgaben': 'aufgaben_sonstiges',
     'infomobil': 'infomobil',
     'partner': 'partner',
-    'verbraucher-wild': 'inhaltsseiten', 'new-sub-wild': 'inhaltsseiten',
-    'verbraucher-lernort': 'inhaltsseiten', 'new-sub-lernort': 'inhaltsseiten',
-    'verbraucher-gruen': 'inhaltsseiten', 'new-sub-gruen': 'inhaltsseiten',
-    'verbraucher-waidmannssprache': 'inhaltsseiten', 'new-sub-waidmannssprache': 'inhaltsseiten',
+    'verbraucher-wild': 'verbraucher_wildfleisch', 'new-sub-wild': 'verbraucher_wildfleisch',
+    'verbraucher-lernort': 'verbraucher_lernort_natur', 'new-sub-lernort': 'verbraucher_lernort_natur',
+    'verbraucher-gruen': 'verbraucher_gruenes_klassenzimmer', 'new-sub-gruen': 'verbraucher_gruenes_klassenzimmer',
+    'verbraucher-waidmannssprache': 'verbraucher_waidmannssprache', 'new-sub-waidmannssprache': 'verbraucher_waidmannssprache',
     'termine': 'termine',
     'aktuelles': 'aktuelles',
-    'service': 'inhaltsseiten',
+    'service': 'service',
     'hundeboerse': 'hundeboerse',
     'waffenboerse': 'waffenboerse',
     'kontakt-stammdaten': 'kontakt',
-    'faq': 'inhaltsseiten',
-    'footer': 'inhaltsseiten',
+    'faq': 'faq',
+    'footer': 'footer',
     'design': 'design',
-    'impressum': 'inhaltsseiten',
+    'impressum': 'impressum',
     'nav-extra': 'navigation',
     'nav-reihenfolge': 'navigation',
     'benutzer': null,
-    'downloads': 'inhaltsseiten',
+    'downloads': 'downloads',
     'medien': 'medien',
   };
 
@@ -791,25 +846,31 @@
   // tragen keinen festen NAV-key, sondern ein "dir" - hierüber wird ihre
   // Permission aufgelöst.
   var PERM_BY_DIR = {
-    'content/seiten-aufgaben': 'inhaltsseiten',
-    'content/seiten-sub-wildfleisch': 'inhaltsseiten',
-    'content/seiten-sub-lernort-natur': 'inhaltsseiten',
-    'content/seiten-sub-gruenes-klassenzimmer': 'inhaltsseiten',
+    'content/seiten-aufgaben': 'aufgaben_sonstiges',
+    'content/seiten-sub-wildfleisch': 'verbraucher_wildfleisch',
+    'content/seiten-sub-lernort-natur': 'verbraucher_lernort_natur',
+    'content/seiten-sub-gruenes-klassenzimmer': 'verbraucher_gruenes_klassenzimmer',
     'content/aufgaben/hundeausbildung': 'jagdhundeschule',
-    'content/seiten-sub-ueber-uns': 'inhaltsseiten',
-    'content/seiten-sub-mitglied-werden': 'inhaltsseiten',
-    'content/seiten-sub-jaeger-werden': 'inhaltsseiten',
-    'content/seiten-sub-niederwild': 'inhaltsseiten',
-    'content/seiten-sub-hochwild': 'inhaltsseiten',
-    'content/seiten-sub-schiessobleute': 'inhaltsseiten',
-    'content/seiten-sub-satzung': 'inhaltsseiten',
-    'content/seiten-sub-landesjagdverband': 'inhaltsseiten',
-    'content/seiten-sub-schiessen': 'inhaltsseiten',
-    'content/seiten-sub-schweisshunde': 'inhaltsseiten',
-    'content/seiten-sub-jugend': 'inhaltsseiten',
-    'content/seiten-sub-jagdhorn': 'inhaltsseiten',
-    'content/seiten-sub-naturschutz': 'inhaltsseiten',
-    'content/seiten-sub-jungwildrettung': 'inhaltsseiten',
+    'content/seiten-sub-ueber-uns': 'ueber_uns',
+    'content/seiten-sub-mitglied-werden': 'mitglied_werden',
+    'content/seiten-sub-jaeger-werden': 'jaeger_werden',
+    'content/seiten-sub-niederwild': 'niederwild',
+    'content/seiten-sub-hochwild': 'hochwild',
+    'content/seiten-sub-schiessobleute': 'schiessobleute',
+    'content/seiten-sub-satzung': 'satzung',
+    'content/seiten-sub-landesjagdverband': 'landesjagdverband',
+    'content/seiten-sub-schiessen': 'aufgaben_schiessen',
+    'content/seiten-sub-schweisshunde': 'aufgaben_schweisshunde',
+    'content/seiten-sub-jugend': 'aufgaben_jugend',
+    'content/seiten-sub-jagdhorn': 'aufgaben_jagdhorn',
+    'content/seiten-sub-naturschutz': 'aufgaben_natur',
+    'content/seiten-sub-jungwildrettung': 'aufgaben_jungwild',
+    // Beide unten sind historische/dynamische Pfade ohne aktiven NAV-Eintrag
+    // mehr (siehe Kommentare bei "Weitere Themen" bzw. der entfernten
+    // KJS-Übersicht weiter oben) - praktisch nie erreicht. Bewusst
+    // konservativ am Alt-Sammelrecht belassen statt eine neue Zuordnung zu
+    // raten, für den unwahrscheinlichen Fall, dass doch noch Altdaten
+    // darüber referenziert werden.
     'content/seiten-weitere': 'inhaltsseiten',
     'content/seiten-kjs': 'inhaltsseiten',
   };
@@ -838,7 +899,15 @@
     if (isAdminUser()) return true;
     var perm = permissionKeyForDef(def);
     if (!perm) return false; // null (admin-only) oder unbekannt -> verweigern
-    return hasPermission(perm);
+    if (hasPermission(perm)) return true;
+    // Legacy-Kompatibilität (09.09.2026, Granularisierung): das alte
+    // Sammelrecht "inhaltsseiten" deckt weiterhin alle Seiten ab, die
+    // früher darunter liefen (jetzt einzeln aufgeteilt) - siehe
+    // LEGACY_INHALTSSEITEN_KEYS weiter oben. So verlieren bestehende
+    // Redakteure (z.B. Nicole) keinen Zugriff, ohne dass am Server
+    // irgendetwas migriert werden musste.
+    if (LEGACY_INHALTSSEITEN_KEYS.indexOf(perm) !== -1 && hasPermission('inhaltsseiten')) return true;
+    return false;
   }
 
   // Verteidigung in der Tiefe für Speicherfunktionen: die eigentliche Sperre
@@ -6393,6 +6462,21 @@
   function buFehlerText(status, body) {
     if (status === 401) return 'Sitzung abgelaufen. Bitte erneut anmelden.';
     if (status === 403) return 'Keine Adminrechte.';
+    // "unknown_permission"/"unknown_role" (09.09.2026, Ursachenanalyse
+    // Franks Speicherfehler): admin.js ist eine langlebige Single-Page-
+    // Ansicht - die Rechte-Liste (PERMISSIONS/PERMISSION_KEYS) wird beim
+    // Laden der Seite einmal ins Browser-Gedächtnis geladen und bleibt dort
+    // unverändert, solange der Tab offen bleibt, auch wenn getToken(true)
+    // bei jedem Aufruf ein frisches Zugriffstoken holt. Der Server prüft
+    // dagegen immer gegen den GERADE deployten Stand von
+    // PERMISSIONS_BEKANNT. Wurde die Rechte-Struktur zwischenzeitlich
+    // geändert (wie mit diesem Umbau), meldet ein alter, seit dem Deploy
+    // nicht neu geladener Tab beim Speichern genau diesen Fehler - unabhängig
+    // vom Zugriffstoken. Ein einmaliges Neuladen der Seite behebt es.
+    if (body && (body.error === 'unknown_permission' || body.error === 'unknown_role')) {
+      return (body.message || 'Unbekanntes Recht/Rolle') +
+        ' – vermutlich läuft in diesem Tab noch ein alter Stand der Seite (die Rechte-Struktur wurde gerade aktualisiert). Bitte die Seite einmal neu laden (F5) und erneut versuchen.';
+    }
     if (body && body.message) return body.message;
     return 'Serverfehler – bitte später erneut versuchen.';
   }
