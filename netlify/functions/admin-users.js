@@ -75,7 +75,12 @@ var PERMISSIONS_BEKANNT = [
   'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite', 'ueber_uns',
   'kontaktanfragen',
   'inhaltsseiten',
-  'navigation', 'design'
+  // 'navigation_reihenfolge' (09.09.2026, "Rechteverwaltung exakt an
+  // Admin-Navigation angleichen"): 'navigation' deckte bis dahin ZWEI echte
+  // Admin-Seiten ab (Hauptnavigation erweitern + Navigation & Reihenfolge)
+  // - jetzt je ein eigenes Recht (siehe admin.js: PERM_BY_KEY,
+  // LEGACY_NAVIGATION_KEYS für Bestandsschutz bestehender Nutzer).
+  'navigation', 'navigation_reihenfolge', 'design'
 ];
 
 function json(statusCode, data) {

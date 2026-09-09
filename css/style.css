@@ -1183,6 +1183,28 @@ p  { margin-bottom: 1rem; }
 .main-content td[data-label="Telefon"],
 .main-content td[data-label="Mobil"] { white-space: nowrap; }
 
+/* E-Mail-Spalte: eine E-Mail-Adresse ohne Leerzeichen/Bindestrich (z.B.
+   "Hegering9kaltenkirchen@aol.com", Bug-Report Niederwild 09.09.2026,
+   "Rechteverwaltung exakt an Admin-Navigation angleichen + Tabellenfehler
+   Niederwild") ist für den Browser unter dem generischen
+   word-break:normal/overflow-wrap:normal weiter oben EIN einziges,
+   nicht umbrechbares "Wort" - in der festen Spaltenbreite (siehe
+   table-layout:fixed weiter unten) lief sie dadurch sichtbar über die
+   Spaltengrenze hinaus in die benachbarte Mobil-Spalte hinein, statt
+   innerhalb der eigenen Spalte umzubrechen.
+   Bewusst NUR für die E-Mail-Spalte zurückgesetzt (nicht generell für alle
+   td, siehe Kommentar bei ".main-content td" weiter oben) und bewusst
+   GEGENSÄTZLICH zu Telefon/Mobil direkt darüber: eine Rufnummer soll NIE
+   umbrechen (nowrap), eine lange E-Mail-Adresse dagegen SOLL bei Bedarf
+   innerhalb ihrer eigenen Spalte umbrechen, statt die Nachbarspalte zu
+   überdecken. "overflow-wrap: anywhere" erlaubt den Umbruch (nötigenfalls
+   mitten im Wort) nur dort, wo er tatsächlich gebraucht wird - kurze
+   Adressen bleiben einzeilig. Erkennung ausschließlich über das
+   data-label-Attribut (von labelTableCells() in main.js gesetzt) - gilt
+   damit automatisch für jede aktuelle wie künftige Tabelle mit einer
+   "E-Mail"-Spalte (aktuell Hochwild/Niederwild), kein Sonderfall pro Seite. */
+.main-content td[data-label="E-Mail"] { overflow-wrap: anywhere; word-break: break-word; }
+
 /* ── Kontakt-Tabellen: ausgewogene Spaltenbreiten statt Auto-Layout ───────
    Ohne table-layout (Standard: "auto") bemisst der Browser jede Spalte an
    ihrem längsten Inhalt. Bei Tabellen wie Hochwild/Niederwild sprengt die
@@ -1865,6 +1887,27 @@ body.kjs-lightbox-lock { overflow: hidden; }
      (z.B. eine lange URL) wieder greifen, ohne das "2018"-Problem oben. */
   overflow-wrap: break-word;
   min-width: 0;
+}
+/* Notbremse Teil 2 (Fund bei der Niederwild-Tabellenkorrektur 09.09.2026):
+   "overflow-wrap: break-word" oben allein reicht in einem Flex-Container
+   NICHT aus - Flex-Items (hier: das per TipTap erzeugte <p> mit dem
+   eigentlichen Wert, z.B. einer E-Mail-Adresse) haben per CSS-Spezifikation
+   einen impliziten "min-width: auto" und dürfen dadurch NIE unter ihre
+   eigene unumbrochene Inhaltsbreite schrumpfen, ganz gleich, was am
+   umschließenden Flex-Container (der <td> selbst) für ein overflow-wrap
+   steht. Eine lange E-Mail-Adresse lief dadurch im Karten-Layout sichtbar
+   über den rechten Kartenrand hinaus, statt (wie auf Desktop/Tablet bereits
+   korrekt) innerhalb der Karte umzubrechen. Erst "min-width: 0" auf dem
+   Wert-Element selbst erlaubt das nötige Schrumpfen, "overflow-wrap: anywhere"
+   sorgt danach für den eigentlichen Umbruch. Bewusst auf ALLE direkten
+   Kind-Elemente der Zelle (nicht nur <p>) angewendet, damit es unabhängig
+   vom genauen TipTap-Markup künftiger Tabellen funktioniert; die generierte
+   Label-Beschriftung (::before) ist kein echtes Kind-Element und bleibt
+   davon unberührt. */
+.content-table-wrap.is-stacked table tbody td > *,
+.termine-table-wrap.is-stacked .termine-table tbody td > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .content-table-wrap.is-stacked table tbody td:last-child,
 .termine-table-wrap.is-stacked .termine-table tbody td:last-child {

@@ -677,139 +677,83 @@
   ];
 
   /* ────────────────────────────────────────────────────────────
-     RECHTE / BERECHTIGUNGEN (05.09.2026, vollständig granular seit 09.09.2026)
+     RECHTE / BERECHTIGUNGEN (05.09.2026, vollständig granular seit 09.09.2026,
+     1:1 an die Admin-Navigation angeglichen seit 09.09.2026 "Rechteverwaltung
+     exakt an Admin-Navigation angleichen")
      Grobe Rollen: "admin" (immer Vollzugriff) und "redakteur" (nur die
      unten explizit freigegebenen Bereiche). Ein Admin braucht nie
      Permissions gepflegt zu bekommen - isAdminUser() schaltet überall
      zuerst frei. Ein Redakteur ohne "permissions" hat KEINEN Modulzugriff
      (fail-closed), bis ihm gezielt Rechte zugewiesen werden.
 
-     PERMISSIONS ist die EINE zentrale Definition (Gruppen + Labels), die
-     sowohl die Checkbox-UI in der Benutzerverwaltung als auch - über
-     PERM_BY_KEY/PERM_BY_DIR - die eigentliche Zugriffskontrolle (Sidebar,
-     Suche, Panel-Öffnen, Speichern) speist.
+     WICHTIGSTE ÄNDERUNG (09.09.2026): Die Checkbox-Liste in der Benutzer-
+     verwaltung (PERMISSIONS) wird jetzt NICHT MEHR von Hand als eigene,
+     parallele Struktur gepflegt (das führte genau zu der Beschwerde, dass
+     sie "weiterhin falsch strukturiert" war/aus dem Takt geriet), sondern
+     per buildPermissionsFromNav() automatisch aus der echten NAV-Struktur
+     oben abgeleitet: gleiche Hauptgruppen, gleiche Untergruppen, gleiche
+     Seitennamen, gleiche Reihenfolge, gleiche Hierarchie wie die linke
+     Admin-Navigation - Wort für Wort deren Labels (inkl. Icons), nicht neu
+     erfundene Kurzformen.
+     Die einzige weiterhin von Hand gepflegte Zuordnung ist PERM_BY_KEY
+     (NAV-Key -> Permission-Schlüssel) weiter unten - die gab es aber
+     ohnehin schon vorher (für die eigentliche Zugriffskontrolle), weil
+     Permission-Schlüssel aus historischen/Kompatibilitätsgründen andere
+     Namen tragen als die NAV-Keys. Neu ist: diese eine Zuordnung speist
+     jetzt AUCH die Checkbox-UI mit - eine neue Admin-Seite, die hier einen
+     PERM_BY_KEY-Eintrag bekommt, taucht automatisch an der richtigen Stelle
+     in der Rechteverwaltung auf, ohne dass PERMISSIONS separat gepflegt
+     werden müsste. Fehlt umgekehrt ein PERM_BY_KEY-Eintrag für eine echte
+     NAV-Seite, bleibt sie (wie schon bisher) für Redakteure gesperrt
+     (fail-closed) UND fehlt jetzt sichtbar auch in der Rechte-Checkbox-Liste
+     - das ist genau der Fall, den der Konsistenz-Test weiter unten
+     (npm-unabhängiges Script, siehe Abschlussbericht) programmatisch prüft.
 
-     "Benutzerrechte vollständig granular machen" (09.09.2026): das
-     bisherige Sammelrecht "inhaltsseiten" ("Normale Inhaltsseiten", teilte
-     sich über 25 NAV-Unterseiten) wurde in einzelne Rechte pro echtem
-     Admin-Modul aufgeteilt (Gruppen "Mitgliedschaft/Jäger", "Aufgaben der
-     KJS", "Verbraucher", Teile von "Organisation"/"Sonstiges" unten) -
-     Frank kann Redakteuren jetzt jede dieser Seiten einzeln freischalten.
-     Der Schlüssel "inhaltsseiten" bleibt trotzdem als LEGACY-SAMMELRECHT
-     bestehen (siehe LEGACY_INHALTSSEITEN_KEYS + canAccessDef() weiter
-     unten): wer es bereits hatte (z.B. Nicole), behält dadurch automatisch
-     weiter Zugriff auf alle davon abgedeckten Seiten - ganz ohne dass am
-     Server (Netlify Identity) irgendein bestehender Benutzer-Datensatz
-     migriert/umgeschrieben werden müsste. Zusätzlich können jederzeit
-     gezielt einzelne der neuen Rechte vergeben werden; das Sammelrecht
-     lässt sich bei Bedarf später auch einfach wieder abwählen, sobald alle
-     benötigten Einzelrechte gesetzt sind.
+     Zwei bewusste, minimale Ausnahmen von der automatischen Ableitung
+     (siehe PERM_UI_EXCLUDE_KEYS/PERM_UI_SYNTHETIC_LABELS unten):
+      - "benutzer" (Benutzerverwaltung) bleibt ABSICHTLICH KEINE Checkbox:
+        sie ist hart an die Rolle "admin" gebunden (admin-users.js prüft
+        die Rolle, nicht permissions) - ein Redakteur mit Zugriff auf die
+        Benutzerverwaltung könnte sich sonst selbst zum Admin machen oder
+        anderen Rechte entziehen. Sicherheitsentscheidung, keine Lücke.
+      - "new-aufgaben" (der Auffang-Button "➕ Neue Aufgaben-Unterseite" für
+        Aufgaben-Unterseiten ohne eines der 7 benannten Unterthemen) hängt in
+        der NAV als bloßer Aktions-Button direkt neben den benannten
+        Aufgaben-Seiten, ohne eigene benannte Elternseite - er bekommt daher
+        (anders als alle anderen "➕ Neue Unterseite"-Buttons, die am Recht
+        ihrer jeweiligen Seite hängen) eine eigene, von Hand vergebene
+        Beschriftung, weil sein NAV-Label ("➕ Neue Aufgaben-Unterseite") ein
+        Button-Text und kein Seitenname ist.
 
-     Benutzerverwaltung ist ABSICHTLICH KEINE Checkbox hier: sie bleibt
-     hart an die Rolle "admin" gebunden (admin-users.js prüft die Rolle,
-     nicht permissions) - siehe Abschlussbericht für den möglichen
-     nächsten Schritt, falls das später doch granular werden soll.
+     Alt-Sammelrecht "inhaltsseiten": deckte vor der Granularisierung
+     (09.09.2026) ~25 NAV-Unterseiten gemeinsam ab. Wird NICHT mehr aus der
+     NAV abgeleitet (es entspricht ja keiner echten NAV-Seite mehr), bleibt
+     aber als eigener, klar als Alt-Recht gekennzeichneter Block am Ende von
+     PERMISSIONS bestehen (siehe unten) - rein aus Bestandsschutz: wer es
+     bereits hatte (z.B. Nicole), muss es beim nächsten Speichern seines
+     Benutzerkontos weiterhin sehen und mit zurückschicken können, sonst
+     würde admin.js es beim nächsten Speichern durch Frank stillschweigend
+     aus ihren Rechten entfernen (die Checkbox-Sammlung beim Speichern liest
+     ausschließlich das, was tatsächlich als Checkbox gerendert wurde). Die
+     eigentliche Rückwärtskompatibilität läuft weiterhin über
+     LEGACY_INHALTSSEITEN_KEYS + canAccessDef() weiter unten.
 
-     WICHTIG: Diese Namen (Schlüssel) müssen mit PERMISSIONS_BEKANNT in
-     netlify/functions/admin-users.js übereinstimmen. Es gibt (bewusst,
-     kein Build-Prozess in diesem Projekt) keinen automatischen Sync
-     zwischen Browser-Code und der Netlify Function - bei einer Änderung
-     hier IMMER auch dort nachziehen. (Genau diese Art von Sync-Lücke -
-     ein Tab, der noch die alte Rechte-Liste im Speicher hat, während der
-     Server schon die neue kennt - ist die Ursache von Franks
-     Speicherfehler, siehe buFehlerText() weiter unten und Abschlussbericht.)
+     WICHTIG: Permission-Schlüssel (nicht die NAV-Struktur) müssen weiterhin
+     mit PERMISSIONS_BEKANNT in netlify/functions/admin-users.js
+     übereinstimmen - dafür gibt es (bewusst, kein Build-Prozess in diesem
+     Projekt) keinen automatischen Sync zwischen Browser-Code und der
+     Netlify Function. (Genau diese Art von Sync-Lücke - ein Tab, der noch
+     die alte Rechte-Liste im Speicher hat, während der Server schon die
+     neue kennt - ist die Ursache von Franks Speicherfehler, siehe
+     buFehlerText() weiter unten.)
   ──────────────────────────────────────────────────────────── */
-  var PERMISSIONS = [
-    { group: 'Redaktion', items: [
-      { key: 'aktuelles', label: 'Aktuelles' },
-      { key: 'termine',   label: 'Termine' },
-      { key: 'kontakt',   label: 'Kontakt & Stammdaten (Öffnungszeiten, Geschäftsstelle)' },
-      { key: 'medien',    label: 'Medien & Bilder' },
-    ]},
-    { group: 'Organisation', items: [
-      { key: 'vorstand',        label: 'Vorstand' },
-      { key: 'obleute',         label: 'Obleute' },
-      { key: 'hegeringe',       label: 'Hegeringe' },
-      { key: 'kjm',             label: 'Kreisjägermeister' },
-      { key: 'jagdhundeschule', label: 'Jagdhundeschule' },
-      { key: 'schiessobleute',  label: 'Schießobleute' },
-    ]},
-    { group: 'Mitgliedschaft/Jäger', items: [
-      { key: 'mitglied_werden',   label: 'Mitglied werden' },
-      { key: 'jaeger_werden',     label: 'Jäger/in werden' },
-      { key: 'niederwild',        label: 'Niederwild' },
-      { key: 'hochwild',          label: 'Hochwild' },
-      { key: 'satzung',           label: 'Satzung' },
-      { key: 'landesjagdverband', label: 'Landesjagdverband' },
-    ]},
-    { group: 'Aufgaben der KJS', items: [
-      { key: 'aufgaben_schiessen',       label: 'Schießwesen' },
-      { key: 'aufgaben_hundeausbildung', label: 'Hundeausbildung (Übersichtsseite)' },
-      { key: 'aufgaben_schweisshunde',   label: 'Schweißhundeführer' },
-      { key: 'aufgaben_jugend',          label: 'Jugendarbeit' },
-      { key: 'aufgaben_jagdhorn',        label: 'Jagdhornblasen' },
-      { key: 'aufgaben_natur',           label: 'Naturschutz' },
-      { key: 'aufgaben_jungwild',        label: 'Jungwildrettung' },
-      { key: 'aufgaben_sonstiges',       label: 'Sonstige Aufgaben-Unterseiten' },
-    ]},
-    { group: 'Verbraucher', items: [
-      { key: 'verbraucher_wildfleisch',           label: 'Wildfleisch' },
-      { key: 'verbraucher_lernort_natur',         label: 'Lernort Natur' },
-      { key: 'verbraucher_gruenes_klassenzimmer', label: 'Grünes Klassenzimmer' },
-      { key: 'verbraucher_waidmannssprache',      label: 'Waidmannssprache' },
-    ]},
-    { group: 'Angebote & Börsen', items: [
-      { key: 'infomobil',    label: 'Infomobil' },
-      { key: 'hundeboerse',  label: 'Hundebörse' },
-      { key: 'waffenboerse', label: 'Waffenbörse' },
-      { key: 'partner',      label: 'Partner' },
-    ]},
-    { group: 'Sonstiges', items: [
-      { key: 'service',          label: 'Service' },
-      { key: 'downloads',        label: 'Downloads' },
-      { key: 'faq',              label: 'FAQ' },
-      { key: 'footer',           label: 'Fußzeile' },
-      { key: 'impressum',        label: 'Impressum' },
-      { key: 'startseite',       label: 'Startseite' },
-      { key: 'ueber_uns',        label: 'Über uns' },
-      // Eigenständiges Recht (09.09.2026, "Kontaktformular ausfallsicher
-      // machen") - bewusst NICHT an "kontakt" ("Kontakt & Stammdaten")
-      // gekoppelt: "kontakt" steuert die ÖFFENTLICHE Kontaktseite (Adresse/
-      // Öffnungszeiten), "kontaktanfragen" den Zugriff auf die tatsächlich
-      // eingegangenen (teils personenbezogenen) Besucher-Nachrichten -
-      // fachlich getrennte Bereiche, unabhängig vergebbar.
-      { key: 'kontaktanfragen',  label: 'Kontaktanfragen (eingegangene Nachrichten)' },
-      { key: 'inhaltsseiten', label: 'Alle bisherigen „Normalen Inhaltsseiten“ (Alt-Sammelrecht – deckt automatisch alle oben neu aufgeteilten Einzelseiten mit ab; für neue Redakteure künftig lieber gezielt einzelne Rechte vergeben)' },
-    ]},
-    { group: 'System', items: [
-      { key: 'navigation', label: 'Navigation (Hauptnavigation, Reihenfolge)' },
-      { key: 'design',     label: 'Design & Farben' },
-    ]},
-  ];
-
-  // Flache Liste aller gültigen Permission-Schlüssel (für Validierung).
-  var PERMISSION_KEYS = PERMISSIONS.reduce(function(acc, g) {
-    return acc.concat(g.items.map(function(it) { return it.key; }));
-  }, []);
-
-  // Welche der neuen Einzelrechte deckt das Alt-Sammelrecht "inhaltsseiten"
-  // weiterhin automatisch mit ab (siehe canAccessDef() weiter unten) - exakt
-  // die Module, die vor der Aufteilung (09.09.2026) gemeinsam unter
-  // "inhaltsseiten" liefen.
-  var LEGACY_INHALTSSEITEN_KEYS = [
-    'ueber_uns', 'mitglied_werden', 'jaeger_werden', 'niederwild', 'hochwild',
-    'schiessobleute', 'satzung', 'landesjagdverband',
-    'aufgaben_schiessen', 'aufgaben_hundeausbildung', 'aufgaben_schweisshunde',
-    'aufgaben_jugend', 'aufgaben_jagdhorn', 'aufgaben_natur', 'aufgaben_jungwild',
-    'aufgaben_sonstiges',
-    'verbraucher_wildfleisch', 'verbraucher_lernort_natur',
-    'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
-    'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite',
-  ];
 
   // NAV-key -> Permission-Schlüssel. "null" = ausdrücklich admin-only
   // (keine Permission kann das freischalten). Fehlt ein Key hier ganz,
   // wird der Zugriff für Nicht-Admins standardmäßig verweigert (fail-closed).
+  // Diese Zuordnung ist jetzt die EINZIGE noch von Hand gepflegte Stelle -
+  // sie speist sowohl die Zugriffskontrolle als auch (über
+  // buildPermissionsFromNav() unten) die Checkbox-UI der Benutzerverwaltung.
   var PERM_BY_KEY = {
     'startseite': 'startseite',
     'jaeger-ueber-uns': 'ueber_uns', 'new-sub-ueber-uns': 'ueber_uns',
@@ -849,8 +793,16 @@
     'footer': 'footer',
     'design': 'design',
     'impressum': 'impressum',
+    // 'nav-extra'/'nav-reihenfolge' liefen bis 09.09.2026 unter EINEM
+    // kombinierten Recht 'navigation' ("Navigation (Hauptnavigation,
+    // Reihenfolge)") - genau das Sammelrecht-für-zwei-echte-Seiten-Muster,
+    // das mit "Rechteverwaltung exakt an Admin-Navigation angleichen"
+    // aufgelöst werden sollte ("Jede echte Seite aus der Admin-Navigation
+    // bekommt ein eigenes Recht"). Jetzt zwei eigene Rechte; wer vorher
+    // 'navigation' hatte, behält über LEGACY_NAVIGATION_KEYS weiter unten
+    // automatisch auch Zugriff auf 'navigation_reihenfolge'.
     'nav-extra': 'navigation',
-    'nav-reihenfolge': 'navigation',
+    'nav-reihenfolge': 'navigation_reihenfolge',
     'benutzer': null,
     'downloads': 'downloads',
     'medien': 'medien',
@@ -894,6 +846,137 @@
     'content/seiten-kjs': 'inhaltsseiten',
   };
 
+  // Die beiden einzigen manuellen Ausnahmen von der automatischen NAV->UI-
+  // Ableitung (siehe Kommentar oben). Bewusst als eigene, kleine, klar
+  // benannte Konstanten statt versteckter Sonderfälle mitten im Ableitungs-
+  // Code - hier findet man sie garantiert wieder.
+  var PERM_UI_EXCLUDE_KEYS = ['benutzer'];
+  var PERM_UI_SYNTHETIC_LABELS = { 'new-aufgaben': 'Sonstige Aufgaben-Unterseiten' };
+
+  // Wandelt einen einzelnen NAV-Knoten (samt Kindern) in 0..n Einträge für
+  // die Rechte-Checkbox-UI um: entweder eine einzelne Checkbox ({key,label})
+  // für eine echte Seite/ein echtes Modul, oder eine Untergruppe
+  // ({group,items}) für einen reinen Ordnerknoten wie "KJS Segeberg" oder
+  // "Hundeausbildung" - rekursiv, damit beliebig tief verschachtelte
+  // NAV-Gruppen (wie in der echten Navigation) 1:1 ankommen.
+  function navNodeToPermEntries(node) {
+    // "➕ Neue Unterseite/Seite"-Buttons sind keine eigenen Seiten, sondern
+    // hängen am Recht ihrer übergeordneten Seite (siehe PERM_BY_KEY:
+    // 'new-sub-*'/'new-jagdhundeschule' -> derselbe Key wie die Seite) -
+    // einzige Ausnahme: der in PERM_UI_SYNTHETIC_LABELS gelistete
+    // Auffang-Button ohne eigene Elternseite (siehe Kommentar oben).
+    if (node.isAdd && !Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key)) return [];
+    if (PERM_UI_EXCLUDE_KEYS.indexOf(node.key) !== -1) return [];
+
+    var permKey = Object.prototype.hasOwnProperty.call(PERM_BY_KEY, node.key) ? PERM_BY_KEY[node.key] : undefined;
+
+    // Ein Knoten OHNE eigene Datei/Formular, dessen einzige(s) Kind(er)
+    // "➕ Neue ..."-Buttons sind (z.B. "🐕 Jagdhundeschule (21 Seiten)"),
+    // verwaltet trotzdem ein eigenes, echtes Modul (eine Sammlung dynamisch
+    // angelegter Unterseiten) und braucht daher genau wie eine normale Seite
+    // eine eigene Checkbox - kein reiner Ordner wie "KJS Segeberg".
+    var onlyChildrenAreAdd = !!(node.children && node.children.length > 0) &&
+      node.children.every(function(c) { return c.isAdd; });
+
+    var isRealPage = !!(node.file || node.form) ||
+      Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key) ||
+      (onlyChildrenAreAdd && Object.prototype.hasOwnProperty.call(PERM_BY_KEY, node.key));
+
+    var childEntries = [];
+    (node.children || []).forEach(function(child) {
+      childEntries = childEntries.concat(navNodeToPermEntries(child));
+    });
+
+    if (isRealPage) {
+      var label = Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key)
+        ? PERM_UI_SYNTHETIC_LABELS[node.key]
+        : node.label;
+      var leaf = permKey ? [{ key: permKey, label: label }] : [];
+      // Sicherheitsnetz für den (in der echten NAV aktuell nicht
+      // vorkommenden) Fall, dass eine Seite zusätzlich echte, benannte
+      // Unterseiten hätte statt nur "➕ Neue Unterseite" - dann lieber
+      // zusätzlich anzeigen als stillschweigend verlieren.
+      return leaf.concat(childEntries);
+    }
+
+    // Reiner Ordner-/Gruppenknoten ohne eigenes Recht (z.B. "KJS Segeberg",
+    // "Aufgaben der KJS", "Hundeausbildung") - wird zur Untergruppe, wenn er
+    // etwas Sichtbares enthält.
+    if (childEntries.length > 0) {
+      return [{ group: node.label, items: childEntries }];
+    }
+    return [];
+  }
+
+  // Leitet die komplette Gruppen-/Checkbox-Struktur der Benutzerverwaltung
+  // direkt aus der echten NAV oben ab - siehe Blockkommentar oben für das
+  // "Warum". Jede oberste NAV-Gruppe (Dashboard/Organisation/Angebote &
+  // Börsen/Weitere Inhalte/Redaktion/Einstellungen) wird 1:1 zu einer
+  // obersten PERMISSIONS-Gruppe mit demselben Namen und derselben
+  // Reihenfolge.
+  function buildPermissionsFromNav(navTree) {
+    var out = [];
+    navTree.forEach(function(topGroup) {
+      var entries = [];
+      (topGroup.children || []).forEach(function(child) {
+        entries = entries.concat(navNodeToPermEntries(child));
+      });
+      if (entries.length > 0) {
+        out.push({ group: topGroup.label, items: entries });
+      }
+    });
+    return out;
+  }
+
+  var PERMISSIONS = buildPermissionsFromNav(NAV);
+
+  // Alt-Sammelrecht "inhaltsseiten" (siehe Blockkommentar oben) - bewusst
+  // NICHT aus der NAV abgeleitet (entspricht keiner echten NAV-Seite mehr),
+  // sondern als eigener, klar als Alt-Recht gekennzeichneter Block ans Ende
+  // angehängt, rein aus Bestandsschutz für Benutzer, die es bereits haben
+  // (z.B. Nicole) - siehe LEGACY_INHALTSSEITEN_KEYS/canAccessDef() weiter
+  // unten für den eigentlichen Kompatibilitäts-Mechanismus.
+  PERMISSIONS.push({
+    group: '⚠️ Alt-Sammelrecht (nur Bestandsschutz, keine echte NAV-Gruppe)',
+    items: [
+      { key: 'inhaltsseiten', label: 'Alle bisherigen „Normalen Inhaltsseiten“ (deckt automatisch alle oben einzeln aufgeführten Seiten mit ab; für neue Redakteure bitte gezielt einzelne Rechte oben vergeben statt dieses Sammelrechts)' },
+    ],
+  });
+
+  // Flache Liste aller gültigen Permission-Schlüssel (für Validierung) -
+  // sammelt rekursiv auch die Schlüssel aus verschachtelten Untergruppen ein.
+  function flattenPermissionKeys(items) {
+    return (items || []).reduce(function(acc, it) {
+      if (it.group) return acc.concat(flattenPermissionKeys(it.items));
+      return acc.concat([it.key]);
+    }, []);
+  }
+  var PERMISSION_KEYS = PERMISSIONS.reduce(function(acc, g) {
+    return acc.concat(flattenPermissionKeys(g.items));
+  }, []);
+
+  // Welche der neuen Einzelrechte deckt das Alt-Sammelrecht "inhaltsseiten"
+  // weiterhin automatisch mit ab (siehe canAccessDef() weiter unten) - exakt
+  // die Module, die vor der Aufteilung (09.09.2026) gemeinsam unter
+  // "inhaltsseiten" liefen.
+  var LEGACY_INHALTSSEITEN_KEYS = [
+    'ueber_uns', 'mitglied_werden', 'jaeger_werden', 'niederwild', 'hochwild',
+    'schiessobleute', 'satzung', 'landesjagdverband',
+    'aufgaben_schiessen', 'aufgaben_hundeausbildung', 'aufgaben_schweisshunde',
+    'aufgaben_jugend', 'aufgaben_jagdhorn', 'aufgaben_natur', 'aufgaben_jungwild',
+    'aufgaben_sonstiges',
+    'verbraucher_wildfleisch', 'verbraucher_lernort_natur',
+    'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
+    'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite',
+  ];
+
+  // Welche der neuen Einzelrechte deckt das alte kombinierte Recht
+  // 'navigation' weiterhin automatisch mit ab (09.09.2026, Aufteilung von
+  // 'navigation' in 'navigation' + 'navigation_reihenfolge' - siehe
+  // PERM_BY_KEY oben) - dasselbe Bestandsschutz-Muster wie
+  // LEGACY_INHALTSSEITEN_KEYS, nur für diesen einen Fall.
+  var LEGACY_NAVIGATION_KEYS = ['navigation_reihenfolge'];
+
   // Rolle(n)/Rechte des GERADE eingeloggten Benutzers - befüllt in onLogin()
   // aus dessen eigenem, von Netlify signierten Zugriffstoken. Das ist reine
   // UI-Steuerung (was zeigen/erlauben wir dieser Person im Admin); die
@@ -926,6 +1009,9 @@
     // Redakteure (z.B. Nicole) keinen Zugriff, ohne dass am Server
     // irgendetwas migriert werden musste.
     if (LEGACY_INHALTSSEITEN_KEYS.indexOf(perm) !== -1 && hasPermission('inhaltsseiten')) return true;
+    // Dieselbe Kompatibilität für die Aufteilung von 'navigation' in zwei
+    // Einzelrechte (siehe LEGACY_NAVIGATION_KEYS/PERM_BY_KEY oben).
+    if (LEGACY_NAVIGATION_KEYS.indexOf(perm) !== -1 && hasPermission('navigation')) return true;
     return false;
   }
 
@@ -6527,15 +6613,34 @@
     return PERMISSIONS.map(function(g) {
       return '<div class="bu-perm-group">' +
         '<div class="bu-perm-group-title">' + escHtml(g.group) + '</div>' +
-        g.items.map(function(it) {
-          var cid = 'bu-perm-' + uid + '-' + it.key;
-          var checked = perms.indexOf(it.key) !== -1 ? ' checked' : '';
-          return '<label class="bu-perm-item">' +
-            '<input type="checkbox" id="' + escAttr(cid) + '" data-perm-key="' + escAttr(it.key) + '"' + checked + '> ' +
-            escHtml(it.label) +
-          '</label>';
-        }).join('') +
+        buPermItemsHtml(uid, perms, g.items, 0) +
       '</div>';
+    }).join('');
+  }
+
+  // Rendert eine Liste von Rechte-Einträgen rekursiv - ein Eintrag ist
+  // entweder eine einzelne Checkbox ({key,label}) oder eine verschachtelte
+  // Untergruppe ({group,items}, spiegelt eine NAV-Untergruppe wie "KJS
+  // Segeberg"/"Hundeausbildung"), die optisch eingerückt und mit eigenem
+  // Untertitel dargestellt wird. laufender Zähler statt reinem Key im
+  // Element-id (mehrere Checkboxen können - wie schon bisher möglich -
+  // denselben data-perm-key tragen, z.B. wenn ein Legacy-Recht mehrere
+  // Module abdeckt) verhindert doppelte DOM-ids.
+  var _buPermCidSeq = 0;
+  function buPermItemsHtml(uid, perms, items, depth) {
+    return (items || []).map(function(it) {
+      if (it.group) {
+        return '<div class="bu-perm-subgroup" style="margin-left:' + ((depth + 1) * 14) + 'px;margin-top:.4rem;">' +
+          '<div class="bu-perm-subgroup-title" style="font-weight:600;font-size:.85rem;color:var(--text-muted);margin-bottom:.15rem;">' + escHtml(it.group) + '</div>' +
+          buPermItemsHtml(uid, perms, it.items, depth + 1) +
+        '</div>';
+      }
+      var cid = 'bu-perm-' + uid + '-' + it.key + '-' + (_buPermCidSeq++);
+      var checked = perms.indexOf(it.key) !== -1 ? ' checked' : '';
+      return '<label class="bu-perm-item" style="display:block;margin-left:' + (depth * 14) + 'px;">' +
+        '<input type="checkbox" id="' + escAttr(cid) + '" data-perm-key="' + escAttr(it.key) + '"' + checked + '> ' +
+        escHtml(it.label) +
+      '</label>';
     }).join('');
   }
 
