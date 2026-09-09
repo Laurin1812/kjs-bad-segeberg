@@ -1266,18 +1266,54 @@
     return true;
   }
 
-  async function apiUploadImage(filename, base64Data) {
+  // safeName EINMAL erzeugen und für Original + alle Vorschau-Varianten
+  // wiederverwenden (09.09.2026, "Echte Thumbnail-/Vorschaubilder wie
+  // Concrete5") - nur so tragen /images/<name>, /images/thumb/<name> und
+  // /images/card/<name> garantiert denselben Dateinamen, wodurch sich die
+  // Vorschau-Variante rein aus dem Original-Pfad ableiten lässt (siehe
+  // kjsThumbUrl()/kjsCardUrl() in js/main.js) - KEIN separates Feld in den
+  // content/*.json-Dateien nötig, keine doppelte Pflege.
+  function makeSafeImageName(filename) {
+    return Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
+  }
+
+  async function apiUploadImageToFolder(folder, safeName, base64Data) {
     var tok = await getToken();
-    var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
-    var body = { message: 'Bild hochgeladen: ' + safeName, content: base64Data, branch: BRANCH };
-    var r = await fetch(GIT + '/images/' + safeName, {
+    var body = { message: 'Bild hochgeladen: ' + folder + '/' + safeName, content: base64Data, branch: BRANCH };
+    var r = await fetch(GIT + '/' + folder + '/' + safeName, {
       method: 'PUT',
       headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error(await apiUploadErrorMessage(r));
-    return '/images/' + safeName;
+    return '/' + folder + '/' + safeName;
   }
+
+  async function apiUploadImage(filename, base64Data) {
+    return apiUploadImageToFolder('images', makeSafeImageName(filename), base64Data);
+  }
+
+  // Leitet die kleine Vorschau-Variante rein aus dem Original-Pfad ab (siehe
+  // Kommentar bei makeSafeImageName) - dieselbe Logik wie kjsThumbUrl() in
+  // js/main.js, hier separat, weil admin.js im Admin-Bereich läuft und
+  // js/main.js nicht einbindet. Genutzt für die admin-eigenen Bildergalerien
+  // (Medienbibliothek/Bildauswahl/Markdown-Bild-Einfügen) - vorher wurde dort
+  // bei JEDER Kachel das volle Original geladen ("Admin-Vorschauen" aus dem
+  // Auftrag), obwohl die Kacheln dort nur 110px breit sind.
+  function adminThumbUrl(url) {
+    if (!url) return url;
+    var i = url.lastIndexOf('/images/');
+    if (i === -1) return url;
+    return url.slice(0, i) + '/images/thumb/' + url.slice(i + '/images/'.length);
+  }
+  // onerror-Fallback fürs Attribut oben: fehlt die thumb-Variante (noch)
+  // - z.B. vor dieser Umstellung hochgeladenes Bild, bevor das
+  // Migrationsskript lief -, wird automatisch das Original nachgeladen.
+  window.adminImgFallback = function(imgEl) {
+    imgEl.onerror = null;
+    var full = imgEl.getAttribute('data-full');
+    if (full) imgEl.src = full;
+  };
 
   // Liest die eigentliche Fehlermeldung aus der GitHub-API-Antwort aus (statt
   // nur "Upload fehlgeschlagen" anzuzeigen) – z.B. "Content is too large" bei
@@ -2203,7 +2239,7 @@
       '<label class="field-label">' + escHtml(label) + '</label>' +
       '<div class="image-preview-wrap">' +
         '<div class="image-preview' + (hasImg ? '' : ' empty') + '" id="prev-' + id + '">' +
-          (hasImg ? '<img src="' + escAttr(val) + '" alt="">' : '') +
+          (hasImg ? '<img src="' + escAttr(adminThumbUrl(val)) + '" data-full="' + escAttr(val) + '" onerror="adminImgFallback(this)" alt="">' : '') +
         '</div>' +
         '<div class="image-field-btns">' +
           '<button type="button" class="btn btn-outline btn-sm" onclick="openImgPicker(\'' + id + '\')">📷 Bild wählen</button>' +
@@ -4561,6 +4597,18 @@
     var rows = list.map(renderTestimonialRow).join('');
     return '<div class="form-card">' +
       '<div class="form-card-title">💬 Stimmen ("Was unsere Jäger und Mitglieder sagen")</div>' +
+      // Ausblenden-Schalter (09.09.2026, "Testimonials-Block ausblenden"):
+      // blendet den KOMPLETTEN Abschnitt (Überschrift, Unterüberschrift,
+      // alle Zitat-Karten) auf der öffentlichen Startseite aus, OHNE die
+      // Inhalte zu löschen - genau wie beim bestehenden "Aktiv"-Schalter bei
+      // Partnern/Hundebörse/Waffenbörse (siehe fToggle('pn-aktiv', ...)).
+      // Titel/Untertitel/Zitate bleiben hier weiterhin editierbar, damit der
+      // Abschnitt jederzeit mit einem Klick wieder eingeschaltet werden kann.
+      // Fehlt das Feld (ältere/fremde Datensätze ohne diesen Schalter), gilt
+      // "sichtbar" als Standard (!== false), damit sich am bisherigen
+      // Verhalten nichts ändert.
+      fToggle('ts-sichtbar', 'Abschnitt auf der Startseite anzeigen', data.testimonials_sichtbar !== false) +
+      '<p class="field-hint" style="margin-top:-.35rem;">Bei „Nein" verschwindet der komplette Bereich inkl. Überschrift von der Startseite; Titel/Zitate bleiben hier gespeichert und editierbar.</p>' +
       fText('testimonials_titel', 'Überschrift', data.testimonials_titel, 'Was unsere Jäger und Mitglieder sagen') +
       fText('testimonials_untertitel', 'Unterüberschrift', data.testimonials_untertitel, 'Stimmen aus unserer Gemeinschaft') +
       '<p style="font-size:.84rem;color:var(--text-muted);margin:.5rem 0 .75rem;">' +
@@ -4625,6 +4673,7 @@
     data.testimonials_titel = gv('testimonials_titel');
     data.testimonials_untertitel = gv('testimonials_untertitel');
     data.testimonials = collectTestimonialsList();
+    data.testimonials_sichtbar = toggleVal('ts-sichtbar');
     return data;
   }
 
@@ -6099,8 +6148,7 @@
       var status = id('medien-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        await apiUploadImage(prepared.filename, prepared.base64);
+        await uploadImageWithVariants(file);
         status.textContent = '✅ Hochgeladen!';
         loadMedianGallery();
       } catch(e) {
@@ -6173,7 +6221,7 @@
       ? '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">♻️ Wiederherstellen</button>'
       : '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">📦 Archivieren</button>';
     return '<div class="gallery-img-wrap" data-path="' + escAttr(f.path) + '">' +
-      '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
+      '<img class="gallery-img" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" loading="lazy">' +
       '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
       '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
         archivBtn +
@@ -7378,7 +7426,7 @@
       gallery.innerHTML = imgs.map(function(f) {
         var url = '/images/' + f.name;
         return '<div class="gallery-img-wrap">' +
-          '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" ' +
+          '<img class="gallery-img" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" ' +
             'onclick="pickImg(\'' + escAttr(url) + '\')" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
         '</div>';
@@ -7396,7 +7444,7 @@
     if (el)   el.value = url;
     if (prev) {
       prev.classList.remove('empty');
-      prev.innerHTML = '<img src="' + escAttr(url) + '" alt="">';
+      prev.innerHTML = '<img src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="">';
     }
     if (el) markDirty(); // Setzt .value programmatisch - löst kein natives input/change-Event aus
     closeImgModal();
@@ -7411,8 +7459,7 @@
       var status = id('img-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        var url = await apiUploadImage(prepared.filename, prepared.base64);
+        var url = await uploadImageWithVariants(file);
         status.textContent = '✅ Hochgeladen';
         await loadGallery();
         // Auto-select the just uploaded image
@@ -7479,7 +7526,33 @@
   var IMG_JPEG_QUALITY = 0.85;  // konservativ: deutlich kleiner, ohne sichtbare Artefakte
   var IMG_SKIP_TYPES = /^image\/(gif|svg\+xml)$/i;
 
-  function prepareImageForUpload(file) {
+  // Echte Vorschau-/Kachelbilder (09.09.2026, "Echte Thumbnail-/Vorschaubilder
+  // wie Concrete5"): zwei zusätzliche, tatsächlich kleinere Dateivarianten
+  // neben dem Original - anhand der ECHTEN Rendergrößen im Projekt ermittelt
+  // (siehe Abschlussbericht), nicht blind übernommen:
+  //  - "thumb" (~480px): für sehr kleine Kacheln, bei denen selbst ein Bild in
+  //    Retina-Auflösung winzig bleibt - Admin-Bildauswahl/-Übersicht (110px),
+  //    Dokumenten-Vorschaubilder (60-110px), Hundebörse/Waffenbörse-
+  //    Miniaturstreifen auf der Detailseite (72px).
+  //  - "card" (~800px): für Kartenraster, die auf Desktop bei 2x/Retina real
+  //    bis zu ca. 750-800px breit werden - Aktuelles-Karten, Hundebörse-/
+  //    Waffenbörse-Übersicht, Partner-Logos, Vorstand/Obleute-Personenkarten,
+  //    generische Bildergalerie.
+  // Die großen Kontexte (Beitrags-Titelbild, Hundebörse/Waffenbörse-
+  // Hauptbild, Personen-Profilbild, Lightbox-Vollbild) nutzen weiterhin ganz
+  // bewusst das normale, bereits auf IMG_MAX_DIMENSION komprimierte Original -
+  // dafür braucht es keine dritte Stufe.
+  var THUMB_MAX_DIMENSION = 480;
+  var THUMB_JPEG_QUALITY = 0.72;
+  var CARD_MAX_DIMENSION = 800;
+  var CARD_JPEG_QUALITY = 0.78;
+
+  // Gemeinsame Skalier-/Recodier-Logik für Original UND Vorschau-Varianten -
+  // vorher (bis 09.09.2026) gab es das nur einmal fest verdrahtet für das
+  // Original; jetzt einmal implementiert, per (maxDimension, quality)
+  // parametrisiert, damit Original/Thumb/Card garantiert dieselbe Skalier-,
+  // Format- und Transparenz-Logik verwenden statt drei gepflegter Kopien.
+  function prepareImageVariant(file, maxDimension, quality) {
     // Fallback-Helfer: Original unverändert als Base64 zurückgeben, in genau
     // der Form, die alle Aufrufstellen erwarten ({base64, filename}).
     function original() {
@@ -7499,7 +7572,7 @@
       img.onload = function() {
         try {
           var w = img.naturalWidth, h = img.naturalHeight;
-          var scale = Math.min(1, IMG_MAX_DIMENSION / Math.max(w, h));
+          var scale = Math.min(1, maxDimension / Math.max(w, h));
           var tw = Math.max(1, Math.round(w * scale));
           var th = Math.max(1, Math.round(h * scale));
 
@@ -7524,7 +7597,7 @@
 
           var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
           var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
-          var quality = (outType === 'image/jpeg') ? IMG_JPEG_QUALITY : undefined;
+          var outQuality = (outType === 'image/jpeg') ? quality : undefined;
 
           canvas.toBlob(function(blob) {
             if (!blob || blob.size >= file.size) {
@@ -7539,7 +7612,7 @@
             };
             reader.onerror = function() { original().then(resolve, reject); };
             reader.readAsDataURL(blob);
-          }, outType, quality);
+          }, outType, outQuality);
         } catch (e) {
           URL.revokeObjectURL(objectUrl);
           original().then(resolve, reject); // nie den Upload wegen eines Verarbeitungsfehlers blockieren
@@ -7551,6 +7624,47 @@
       };
       img.src = objectUrl;
     });
+  }
+
+  function prepareImageForUpload(file) {
+    return prepareImageVariant(file, IMG_MAX_DIMENSION, IMG_JPEG_QUALITY);
+  }
+
+  // Für Thumb/Card (anders als beim Original): bei GIF/SVG wird bewusst GAR
+  // KEINE Variante erzeugt (kein sinnloses erneutes Hochladen derselben
+  // Animation/Vektorgrafik in einen "thumb"/"card"-Ordner) - null signalisiert
+  // "keine Variante hochladen", das Frontend fällt dann automatisch per
+  // onerror auf das Original zurück (siehe kjsImgFallback() in js/main.js).
+  function prepareThumbOrCardVariant(file, maxDimension, quality) {
+    if (!file || !/^image\//i.test(file.type) || IMG_SKIP_TYPES.test(file.type)) {
+      return Promise.resolve(null);
+    }
+    return prepareImageVariant(file, maxDimension, quality);
+  }
+
+  // Zentrale Upload-Funktion für ALLE drei Aufrufstellen (Medienbibliothek,
+  // Bildfeld-Picker, Markdown-Bild-Einfügen): lädt Original + thumb + card in
+  // EINEM Aufruf hoch, alle drei unter demselben Dateinamen (nur andere
+  // Ordner). Gibt wie bisher NUR die Original-URL zurück - der Aufrufer/die
+  // content/*.json-Datei merkt sich weiterhin exakt einen Pfad, unverändert
+  // gegenüber vor dieser Umstellung.
+  // Schlägt eine Vorschau-Variante fehl (z.B. Netzwerkfehler), bricht das
+  // NICHT den gesamten Upload ab - das Original ist zu diesem Zeitpunkt schon
+  // gespeichert und bleibt nutzbar; die Seite zeigt bis zum nächsten
+  // erfolgreichen Speichern/zur Migration einfach weiter das Original an.
+  async function uploadImageWithVariants(file) {
+    var prepared = await prepareImageForUpload(file);
+    var safeName = makeSafeImageName(prepared.filename);
+    var mainUrl = await apiUploadImageToFolder('images', safeName, prepared.base64);
+    try {
+      var t = await prepareThumbOrCardVariant(file, THUMB_MAX_DIMENSION, THUMB_JPEG_QUALITY);
+      if (t) await apiUploadImageToFolder('images/thumb', safeName, t.base64);
+    } catch (e) { console.warn('Thumbnail-Vorschau fehlgeschlagen (Original bleibt nutzbar):', e); }
+    try {
+      var c = await prepareThumbOrCardVariant(file, CARD_MAX_DIMENSION, CARD_JPEG_QUALITY);
+      if (c) await apiUploadImageToFolder('images/card', safeName, c.base64);
+    } catch (e) { console.warn('Card-Vorschau fehlgeschlagen (Original bleibt nutzbar):', e); }
+    return mainUrl;
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -7721,7 +7835,7 @@
       gallery.innerHTML = imgs.map(function(f) {
         var url = '/images/' + f.name;
         return '<div class="gallery-img-wrap">' +
-          '<img class="gallery-img" id="mdimg-thumb-' + escAttr(url) + '" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" ' +
+          '<img class="gallery-img" id="mdimg-thumb-' + escAttr(url) + '" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" ' +
             'onclick="mdImgPick(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
         '</div>';
@@ -7769,11 +7883,10 @@
       var status = id('mdimg-upload-status');
       if (status) status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        var url = await apiUploadImage(prepared.filename, prepared.base64);
+        var url = await uploadImageWithVariants(file);
         if (status) status.textContent = '✅ Hochgeladen';
         await loadMdImgGallery();
-        mdImgPick(url, prepared.filename);
+        mdImgPick(url, url.split('/').pop());
       } catch(e) {
         if (status) status.textContent = '❌ ' + e.message;
       }

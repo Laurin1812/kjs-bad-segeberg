@@ -159,7 +159,7 @@
           var src = g.bild.indexOf('/') === 0 ? '..' + g.bild : '../' + g.bild;
           var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + g.titel.trim() + '</div>' : '';
           html += '<a href="' + src + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
-            '<img src="' + src + '" alt="' + (g.titel || '') + '" loading="lazy">' + caption + '</a>';
+            '<img src="' + kjsCardUrl(src) + '" data-full="' + src + '" onerror="kjsImgFallback(this)" alt="' + (g.titel || '') + '" loading="lazy">' + caption + '</a>';
         });
         html += '</div></div>';
       }

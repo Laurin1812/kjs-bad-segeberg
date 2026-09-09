@@ -112,6 +112,17 @@
     return p.indexOf('/') === 0 ? '..' + p : '../' + p;
   }
 
+  // Echte Kachel-Vorschau (09.09.2026, "Echte Thumbnail-/Vorschaubilder wie
+  // Concrete5"): api/lib/boerse_upload.php legt beim Einreichen serverseitig
+  // (GD) automatisch eine "card"-Variante (~800px) unter .../card/<datei>
+  // neben dem Original ab, rein aus dem Dateinamen abgeleitet - kein
+  // zusätzliches Datenbankfeld. onerror-Fallback in js/main.js
+  // (kjsImgFallback) lädt automatisch das Original, falls die Variante
+  // (z.B. bei älteren, vor dieser Umstellung eingereichten Anzeigen) fehlt.
+  function boerseCardUrl(p) {
+    return p ? p.replace(/\/([^\/]+)$/, '/card/$1') : p;
+  }
+
   var ZUSTAND_LABEL = { neu: 'Neu', gebraucht: 'Gebraucht', vorfuehrwaffe: 'Vorführwaffe' };
   function zustandText(z) { return ZUSTAND_LABEL[z] || z || ''; }
 
@@ -137,13 +148,14 @@
   function renderKarte(a) {
     var bild = (a.bilder && a.bilder[0] && a.bilder[0].bild) || '';
     var imgSrc = toSrc(bild);
+    var imgCardSrc = toSrc(boerseCardUrl(bild));
     var standort = [a.plz, a.ort].filter(Boolean).join(' ');
     var herstellerModell = [a.hersteller, a.modell].filter(Boolean).join(' ');
     return '<article class="news-card">' +
       '<a href="detail.html?id=' + encodeURIComponent(a.id) + '" style="text-decoration:none;color:inherit;">' +
         '<div class="news-card__img-wrap">' +
           (imgSrc
-            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + escHtml(a.titel || '') + '" loading="lazy">'
+            ? '<img class="news-card__img" src="' + imgCardSrc + '" data-full="' + imgSrc + '" onerror="kjsImgFallback(this)" alt="' + escHtml(a.titel || '') + '" loading="lazy">'
             : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
         '</div>' +
         '<div class="news-card__body">' +

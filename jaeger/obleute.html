@@ -50,7 +50,7 @@
               <div class="person-card">
                 <div class="person-card__avatar-wrap">
                   ${m.bild
-                    ? `<img src="${m.bild}" alt="${m.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;">`
+                    ? `<img src="${kjsCardUrl(m.bild)}" data-full="${m.bild}" onerror="kjsImgFallback(this)" alt="${m.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;">`
                     : `<div class="person-card__avatar-placeholder">${ICONS.user}</div>`}
                 </div>
                 <div class="person-card__body">
