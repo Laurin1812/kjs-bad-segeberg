@@ -340,8 +340,9 @@
         }
         grid.innerHTML = beitraege.map(function(b){
           var i = alleBeitraege.indexOf(b);
+          var bildSrc = b.bild ? (b.bild.indexOf('/') === 0 ? '.' + b.bild : b.bild) : '';
           var imgHtml = b.bild
-            ? '<img class="news-card__img" src="' + (b.bild.indexOf('/') === 0 ? '.' + b.bild : b.bild) + '" alt="' + b.titel + '" loading="lazy">'
+            ? '<img class="news-card__img" src="' + kjsCardUrl(bildSrc) + '" data-full="' + bildSrc + '" onerror="kjsImgFallback(this)" alt="' + b.titel + '" loading="lazy">'
             : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;">' +
                 '<img src="images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>';
           return '<article class="news-card">' +
@@ -634,6 +635,16 @@
     // Beispiel-Zitate (Fantasienamen) - jetzt aus dem Admin-Feld befüllt.
     // Ohne gespeicherte Zitate bleiben die vorhandenen HTML-Karten als
     // Fallback stehen, damit der Bereich nicht leer wirkt.
+    // Ausblenden-Schalter (09.09.2026, "Testimonials-Block ausblenden"):
+    // testimonials_sichtbar === false blendet den KOMPLETTEN Abschnitt aus
+    // (natives hidden-Attribut statt CSS-Hack - entfernt die <section>
+    // vollständig aus dem Layout, kein Leerraum zum nachfolgenden CTA-
+    // Banner). Fehlt das Feld, bleibt der Bereich wie bisher sichtbar.
+    var tsSection = document.querySelector('.testimonials');
+    if (tsSection && d.testimonials_sichtbar === false) {
+      tsSection.hidden = true;
+      return;
+    }
     var tsTitelEl = document.getElementById('testimonials-titel');
     if (tsTitelEl && d.testimonials_titel) tsTitelEl.textContent = d.testimonials_titel;
     var tsUntertitelEl = document.getElementById('testimonials-untertitel');

@@ -30,6 +30,42 @@ function fetchContent(path) {
   return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
 }
 
+// ── Echte Thumbnail-/Vorschaubilder (09.09.2026, "Echte Thumbnail-/
+// Vorschaubilder wie Concrete5") ─────────────────────────────────────────
+// admin.js legt beim Bild-Upload seither automatisch zwei zusätzliche, echte
+// (kleinere) Dateivarianten neben dem Original ab: /images/thumb/<datei>
+// (~480px, für sehr kleine Kacheln wie Admin-Vorschauen, Dokumenten-
+// Vorschaubilder, Hundebörse/Waffenbörse-Miniaturstreifen) und
+// /images/card/<datei> (~800px, für Kartenraster wie Aktuelles/Hundebörse/
+// Waffenbörse/Partner/Personen). Beide werden AUSSCHLIESSLICH aus dem
+// bestehenden Original-Pfad abgeleitet (gleicher Dateiname, anderer Ordner) -
+// bewusst KEIN zusätzliches Feld in den content/*.json-Dateien, sonst müsste
+// jede bestehende Content-Datei migriert werden. Große Kontexte (Hero-
+// Diashow, Beitrags-Titelbild, Lightbox-Vollbild, Hundebörse/Waffenbörse-
+// Hauptbild) verwenden weiterhin ganz bewusst das normale Original.
+// Für Bilder, die vor dieser Umstellung hochgeladen wurden (noch keine
+// Variante vorhanden) oder deren Variante aus einem anderen Grund fehlt,
+// sorgt kjsImgFallback() (per onerror-Attribut) dafür, dass automatisch das
+// Original nachgeladen wird - bis das Migrationsskript
+// (scripts/generate-thumbnails.php) die fehlenden Varianten nachträglich
+// erzeugt hat.
+function kjsVariantUrl(url, folder) {
+  if (!url || typeof url !== 'string') return url;
+  var i = url.lastIndexOf('/images/');
+  if (i === -1) return url; // kein Bild aus /images/ (z.B. externe URL) - unverändert lassen
+  return url.slice(0, i) + '/images/' + folder + '/' + url.slice(i + '/images/'.length);
+}
+function kjsThumbUrl(url) { return kjsVariantUrl(url, 'thumb'); }
+function kjsCardUrl(url) { return kjsVariantUrl(url, 'card'); }
+// Für <img src="kleine Variante" data-full="Original" onerror="kjsImgFallback(this)">.
+// this.onerror=null verhindert eine Endlosschleife, falls auch das Original
+// nicht lädt (z.B. gelöschte Datei).
+window.kjsImgFallback = function(imgEl) {
+  imgEl.onerror = null;
+  var full = imgEl.getAttribute('data-full');
+  if (full) imgEl.src = full;
+};
+
 // ── Tabellen aus dem Admin/TipTap scrollbar machen (Desktop-Fallback) ────
 // Wichtig: die <table> selbst bleibt display:table (Spaltenberechnung des
 // Browsers funktioniert nur so korrekt) – nur eine umschließende Box
@@ -1124,7 +1160,7 @@ if (contactForm) {
         var datei = item.datei || item.url || item.pfad;
         var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
         var iconHtml = item.vorschau
-          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(kjsThumbUrl(item.vorschau)) + '" data-full="' + escHtml(item.vorschau) + '" onerror="kjsImgFallback(this)" alt="' + escHtml(name) + '" loading="lazy"></a>'
           : '<span class="download-item__icon">' + ICON_PDF + '</span>';
         return '<div class="download-item--sidebar">' +
           iconHtml +
@@ -1137,7 +1173,7 @@ if (contactForm) {
         var datei = item.datei || item.url || item.pfad;
         var name = item.titel && item.titel.trim() ? item.titel.trim() : datei.split('/').pop();
         var iconHtml = item.vorschau
-          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(item.vorschau) + '" alt="' + escHtml(name) + '" loading="lazy"></a>'
+          ? '<a href="' + escHtml(datei) + '" target="_blank" rel="noopener noreferrer" class="download-item__thumb"><img src="' + escHtml(kjsThumbUrl(item.vorschau)) + '" data-full="' + escHtml(item.vorschau) + '" onerror="kjsImgFallback(this)" alt="' + escHtml(name) + '" loading="lazy"></a>'
           : '<div class="download-item__icon">' + ICON_PDF + '</div>';
         return '<div class="download-item">' +
           iconHtml +
@@ -1227,7 +1263,7 @@ if (contactForm) {
       var cards = items.map(function (g) {
         var caption = g.titel && g.titel.trim() ? '<div class="galerie-item__caption">' + escHtml(g.titel.trim()) + '</div>' : '';
         return '<a href="' + escHtml(g.bild) + '" target="_blank" rel="noopener noreferrer" class="galerie-item">' +
-          '<img src="' + escHtml(g.bild) + '" alt="' + escHtml(g.titel || '') + '" loading="lazy">' +
+          '<img src="' + escHtml(kjsCardUrl(g.bild)) + '" data-full="' + escHtml(g.bild) + '" onerror="kjsImgFallback(this)" alt="' + escHtml(g.titel || '') + '" loading="lazy">' +
           caption +
         '</a>';
       }).join('');

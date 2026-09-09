@@ -651,6 +651,13 @@
       { key:'nav-reihenfolge', label:'🔀 Navigation & Reihenfolge', file:'content/navigation.json', form:'navReihenfolge' },
       { key:'design',    label:'Design & Farben',           file:'content/design.json',           form:'design' },
       { key:'benutzer', label:'👥 Benutzerverwaltung', form:'benutzer' },
+      // Eigenständiger Bereich (09.09.2026, "Kontaktformular ausfallsicher
+      // machen"): kein file (Daten kommen nicht aus einer content/*.json,
+      // sondern per API aus MySQL - api/kontakt/admin/liste.php +
+      // status.php), gleiches Muster wie 'benutzer' oben. Eigene Permission
+      // 'kontaktanfragen' (siehe PERMISSIONS/PERM_BY_KEY unten) - bewusst
+      // NICHT an 'kontakt-stammdaten' gekoppelt (siehe dortiger Kommentar).
+      { key:'kontaktanfragen', label:'📬 Kontaktanfragen', form:'kontaktanfragen' },
     ]},
     // "🧪 Testseite" (content/test/testseite.json) 22.08.2026 aus dem Menü
     // entfernt (Laurin-Wunsch, Aufräumen) - war ursprünglich das Sandbox-
@@ -670,149 +677,305 @@
   ];
 
   /* ────────────────────────────────────────────────────────────
-     RECHTE / BERECHTIGUNGEN (05.09.2026)
+     RECHTE / BERECHTIGUNGEN (05.09.2026, vollständig granular seit 09.09.2026,
+     1:1 an die Admin-Navigation angeglichen seit 09.09.2026 "Rechteverwaltung
+     exakt an Admin-Navigation angleichen")
      Grobe Rollen: "admin" (immer Vollzugriff) und "redakteur" (nur die
      unten explizit freigegebenen Bereiche). Ein Admin braucht nie
      Permissions gepflegt zu bekommen - isAdminUser() schaltet überall
      zuerst frei. Ein Redakteur ohne "permissions" hat KEINEN Modulzugriff
      (fail-closed), bis ihm gezielt Rechte zugewiesen werden.
 
-     PERMISSIONS ist die EINE zentrale Definition (Gruppen + Labels), die
-     sowohl die Checkbox-UI in der Benutzerverwaltung als auch - über
-     PERM_BY_KEY/PERM_BY_DIR - die eigentliche Zugriffskontrolle (Sidebar,
-     Suche, Panel-Öffnen, Speichern) speist. Aus Platzgründen NICHT für
-     jede einzelne der über 40 NAV-Unterseiten ein eigenes Recht: normale
-     Inhaltsseiten (Über uns, Mitglied werden, Niederwild, Hochwild,
-     Schießobleute, Satzung, Landesjagdverband, die Aufgaben-Unterseiten
-     außer Jagdhundeschule, die Verbraucher-Themenseiten, Service,
-     Downloads, Startseite, FAQ, Fußzeile, Impressum) teilen sich bewusst
-     das Recht "inhaltsseiten" - das entspricht genau der von Laurin
-     vorgegebenen Gruppe "normale Inhaltsseiten". Module, die Laurin
-     ausdrücklich einzeln genannt hat (Aktuelles, Termine, Vorstand,
-     Obleute, Hegeringe, Kreisjägermeister, Jagdhundeschule, Infomobil,
-     Hundebörse, Waffenbörse, Partner, Kontakt/Öffnungszeiten, Medien,
-     Navigation, Design), bekommen ein eigenes Recht.
+     WICHTIGSTE ÄNDERUNG (09.09.2026): Die Checkbox-Liste in der Benutzer-
+     verwaltung (PERMISSIONS) wird jetzt NICHT MEHR von Hand als eigene,
+     parallele Struktur gepflegt (das führte genau zu der Beschwerde, dass
+     sie "weiterhin falsch strukturiert" war/aus dem Takt geriet), sondern
+     per buildPermissionsFromNav() automatisch aus der echten NAV-Struktur
+     oben abgeleitet: gleiche Hauptgruppen, gleiche Untergruppen, gleiche
+     Seitennamen, gleiche Reihenfolge, gleiche Hierarchie wie die linke
+     Admin-Navigation - Wort für Wort deren Labels (inkl. Icons), nicht neu
+     erfundene Kurzformen.
+     Die einzige weiterhin von Hand gepflegte Zuordnung ist PERM_BY_KEY
+     (NAV-Key -> Permission-Schlüssel) weiter unten - die gab es aber
+     ohnehin schon vorher (für die eigentliche Zugriffskontrolle), weil
+     Permission-Schlüssel aus historischen/Kompatibilitätsgründen andere
+     Namen tragen als die NAV-Keys. Neu ist: diese eine Zuordnung speist
+     jetzt AUCH die Checkbox-UI mit - eine neue Admin-Seite, die hier einen
+     PERM_BY_KEY-Eintrag bekommt, taucht automatisch an der richtigen Stelle
+     in der Rechteverwaltung auf, ohne dass PERMISSIONS separat gepflegt
+     werden müsste. Fehlt umgekehrt ein PERM_BY_KEY-Eintrag für eine echte
+     NAV-Seite, bleibt sie (wie schon bisher) für Redakteure gesperrt
+     (fail-closed) UND fehlt jetzt sichtbar auch in der Rechte-Checkbox-Liste
+     - das ist genau der Fall, den der Konsistenz-Test weiter unten
+     (npm-unabhängiges Script, siehe Abschlussbericht) programmatisch prüft.
 
-     Benutzerverwaltung ist ABSICHTLICH KEINE Checkbox hier: sie bleibt
-     hart an die Rolle "admin" gebunden (admin-users.js prüft die Rolle,
-     nicht permissions) - siehe Abschlussbericht für den möglichen
-     nächsten Schritt, falls das später doch granular werden soll.
+     Zwei bewusste, minimale Ausnahmen von der automatischen Ableitung
+     (siehe PERM_UI_EXCLUDE_KEYS/PERM_UI_SYNTHETIC_LABELS unten):
+      - "benutzer" (Benutzerverwaltung) bleibt ABSICHTLICH KEINE Checkbox:
+        sie ist hart an die Rolle "admin" gebunden (admin-users.js prüft
+        die Rolle, nicht permissions) - ein Redakteur mit Zugriff auf die
+        Benutzerverwaltung könnte sich sonst selbst zum Admin machen oder
+        anderen Rechte entziehen. Sicherheitsentscheidung, keine Lücke.
+      - "new-aufgaben" (der Auffang-Button "➕ Neue Aufgaben-Unterseite" für
+        Aufgaben-Unterseiten ohne eines der 7 benannten Unterthemen) hängt in
+        der NAV als bloßer Aktions-Button direkt neben den benannten
+        Aufgaben-Seiten, ohne eigene benannte Elternseite - er bekommt daher
+        (anders als alle anderen "➕ Neue Unterseite"-Buttons, die am Recht
+        ihrer jeweiligen Seite hängen) eine eigene, von Hand vergebene
+        Beschriftung, weil sein NAV-Label ("➕ Neue Aufgaben-Unterseite") ein
+        Button-Text und kein Seitenname ist.
 
-     WICHTIG: Diese Namen (Schlüssel) müssen mit PERMISSIONS_BEKANNT in
-     netlify/functions/admin-users.js übereinstimmen. Es gibt (bewusst,
-     kein Build-Prozess in diesem Projekt) keinen automatischen Sync
-     zwischen Browser-Code und der Netlify Function - bei einer Änderung
-     hier IMMER auch dort nachziehen.
+     Alt-Sammelrecht "inhaltsseiten": deckte vor der Granularisierung
+     (09.09.2026) ~25 NAV-Unterseiten gemeinsam ab. Wird NICHT mehr aus der
+     NAV abgeleitet (es entspricht ja keiner echten NAV-Seite mehr), bleibt
+     aber als eigener, klar als Alt-Recht gekennzeichneter Block am Ende von
+     PERMISSIONS bestehen (siehe unten) - rein aus Bestandsschutz: wer es
+     bereits hatte (z.B. Nicole), muss es beim nächsten Speichern seines
+     Benutzerkontos weiterhin sehen und mit zurückschicken können, sonst
+     würde admin.js es beim nächsten Speichern durch Frank stillschweigend
+     aus ihren Rechten entfernen (die Checkbox-Sammlung beim Speichern liest
+     ausschließlich das, was tatsächlich als Checkbox gerendert wurde). Die
+     eigentliche Rückwärtskompatibilität läuft weiterhin über
+     LEGACY_INHALTSSEITEN_KEYS + canAccessDef() weiter unten.
+
+     WICHTIG: Permission-Schlüssel (nicht die NAV-Struktur) müssen weiterhin
+     mit PERMISSIONS_BEKANNT in netlify/functions/admin-users.js
+     übereinstimmen - dafür gibt es (bewusst, kein Build-Prozess in diesem
+     Projekt) keinen automatischen Sync zwischen Browser-Code und der
+     Netlify Function. (Genau diese Art von Sync-Lücke - ein Tab, der noch
+     die alte Rechte-Liste im Speicher hat, während der Server schon die
+     neue kennt - ist die Ursache von Franks Speicherfehler, siehe
+     buFehlerText() weiter unten.)
   ──────────────────────────────────────────────────────────── */
-  var PERMISSIONS = [
-    { group: 'Redaktion', items: [
-      { key: 'aktuelles',     label: 'Aktuelles' },
-      { key: 'termine',       label: 'Termine' },
-      { key: 'kontakt',       label: 'Kontakt & Stammdaten (Öffnungszeiten, Geschäftsstelle)' },
-      { key: 'inhaltsseiten', label: 'Normale Inhaltsseiten' },
-    ]},
-    { group: 'Organisation', items: [
-      { key: 'vorstand',        label: 'Vorstand' },
-      { key: 'obleute',         label: 'Obleute' },
-      { key: 'hegeringe',       label: 'Hegeringe' },
-      { key: 'kjm',             label: 'Kreisjägermeister' },
-      { key: 'jagdhundeschule', label: 'Jagdhundeschule' },
-    ]},
-    { group: 'Angebote & Börsen', items: [
-      { key: 'hundeboerse',  label: 'Hundebörse' },
-      { key: 'waffenboerse', label: 'Waffenbörse' },
-      { key: 'partner',      label: 'Partner' },
-      { key: 'infomobil',    label: 'Infomobil' },
-    ]},
-    { group: 'Medien', items: [
-      { key: 'medien', label: 'Medien & Bilder' },
-    ]},
-    { group: 'System', items: [
-      { key: 'navigation', label: 'Navigation (Hauptnavigation, Reihenfolge)' },
-      { key: 'design',     label: 'Design & Farben' },
-    ]},
-  ];
-
-  // Flache Liste aller gültigen Permission-Schlüssel (für Validierung).
-  var PERMISSION_KEYS = PERMISSIONS.reduce(function(acc, g) {
-    return acc.concat(g.items.map(function(it) { return it.key; }));
-  }, []);
 
   // NAV-key -> Permission-Schlüssel. "null" = ausdrücklich admin-only
   // (keine Permission kann das freischalten). Fehlt ein Key hier ganz,
   // wird der Zugriff für Nicht-Admins standardmäßig verweigert (fail-closed).
+  // Diese Zuordnung ist jetzt die EINZIGE noch von Hand gepflegte Stelle -
+  // sie speist sowohl die Zugriffskontrolle als auch (über
+  // buildPermissionsFromNav() unten) die Checkbox-UI der Benutzerverwaltung.
   var PERM_BY_KEY = {
-    'startseite': 'inhaltsseiten',
-    'jaeger-ueber-uns': 'inhaltsseiten', 'new-sub-ueber-uns': 'inhaltsseiten',
+    'startseite': 'startseite',
+    'jaeger-ueber-uns': 'ueber_uns', 'new-sub-ueber-uns': 'ueber_uns',
     'vorstand': 'vorstand',
     'obleute': 'obleute',
     'hegeringe': 'hegeringe',
-    'mitglied-werden': 'inhaltsseiten', 'new-sub-mitglied-werden': 'inhaltsseiten',
-    'jaeger-werden': 'inhaltsseiten', 'new-sub-jaeger-werden': 'inhaltsseiten',
-    'niederwild': 'inhaltsseiten', 'new-sub-niederwild': 'inhaltsseiten',
-    'hochwild': 'inhaltsseiten', 'new-sub-hochwild': 'inhaltsseiten',
-    'schiessobleute': 'inhaltsseiten', 'new-sub-schiessobleute': 'inhaltsseiten',
-    'satzung': 'inhaltsseiten', 'new-sub-satzung': 'inhaltsseiten',
-    'landesjagdverband': 'inhaltsseiten', 'new-sub-landesjagdverband': 'inhaltsseiten',
+    'mitglied-werden': 'mitglied_werden', 'new-sub-mitglied-werden': 'mitglied_werden',
+    'jaeger-werden': 'jaeger_werden', 'new-sub-jaeger-werden': 'jaeger_werden',
+    'niederwild': 'niederwild', 'new-sub-niederwild': 'niederwild',
+    'hochwild': 'hochwild', 'new-sub-hochwild': 'hochwild',
+    'schiessobleute': 'schiessobleute', 'new-sub-schiessobleute': 'schiessobleute',
+    'satzung': 'satzung', 'new-sub-satzung': 'satzung',
+    'landesjagdverband': 'landesjagdverband', 'new-sub-landesjagdverband': 'landesjagdverband',
     'kjm': 'kjm',
-    'auf-schiessen': 'inhaltsseiten', 'new-sub-schiessen': 'inhaltsseiten',
-    'auf-hunde-uebersicht': 'inhaltsseiten',
+    'auf-schiessen': 'aufgaben_schiessen', 'new-sub-schiessen': 'aufgaben_schiessen',
+    'auf-hunde-uebersicht': 'aufgaben_hundeausbildung',
     'jagdhundeschule-gruppe': 'jagdhundeschule', 'new-jagdhundeschule': 'jagdhundeschule',
-    'auf-schweiss': 'inhaltsseiten', 'new-sub-schweisshunde': 'inhaltsseiten',
-    'auf-jugend': 'inhaltsseiten', 'new-sub-jugend': 'inhaltsseiten',
-    'auf-jagdhorn': 'inhaltsseiten', 'new-sub-jagdhorn': 'inhaltsseiten',
-    'auf-natur': 'inhaltsseiten', 'new-sub-naturschutz': 'inhaltsseiten',
-    'auf-jungwild': 'inhaltsseiten', 'new-sub-jungwildrettung': 'inhaltsseiten',
-    'new-aufgaben': 'inhaltsseiten',
+    'auf-schweiss': 'aufgaben_schweisshunde', 'new-sub-schweisshunde': 'aufgaben_schweisshunde',
+    'auf-jugend': 'aufgaben_jugend', 'new-sub-jugend': 'aufgaben_jugend',
+    'auf-jagdhorn': 'aufgaben_jagdhorn', 'new-sub-jagdhorn': 'aufgaben_jagdhorn',
+    'auf-natur': 'aufgaben_natur', 'new-sub-naturschutz': 'aufgaben_natur',
+    'auf-jungwild': 'aufgaben_jungwild', 'new-sub-jungwildrettung': 'aufgaben_jungwild',
+    'new-aufgaben': 'aufgaben_sonstiges',
     'infomobil': 'infomobil',
     'partner': 'partner',
-    'verbraucher-wild': 'inhaltsseiten', 'new-sub-wild': 'inhaltsseiten',
-    'verbraucher-lernort': 'inhaltsseiten', 'new-sub-lernort': 'inhaltsseiten',
-    'verbraucher-gruen': 'inhaltsseiten', 'new-sub-gruen': 'inhaltsseiten',
-    'verbraucher-waidmannssprache': 'inhaltsseiten', 'new-sub-waidmannssprache': 'inhaltsseiten',
+    'verbraucher-wild': 'verbraucher_wildfleisch', 'new-sub-wild': 'verbraucher_wildfleisch',
+    'verbraucher-lernort': 'verbraucher_lernort_natur', 'new-sub-lernort': 'verbraucher_lernort_natur',
+    'verbraucher-gruen': 'verbraucher_gruenes_klassenzimmer', 'new-sub-gruen': 'verbraucher_gruenes_klassenzimmer',
+    'verbraucher-waidmannssprache': 'verbraucher_waidmannssprache', 'new-sub-waidmannssprache': 'verbraucher_waidmannssprache',
     'termine': 'termine',
     'aktuelles': 'aktuelles',
-    'service': 'inhaltsseiten',
+    'service': 'service',
     'hundeboerse': 'hundeboerse',
     'waffenboerse': 'waffenboerse',
     'kontakt-stammdaten': 'kontakt',
-    'faq': 'inhaltsseiten',
-    'footer': 'inhaltsseiten',
+    'faq': 'faq',
+    'footer': 'footer',
     'design': 'design',
-    'impressum': 'inhaltsseiten',
+    'impressum': 'impressum',
+    // 'nav-extra'/'nav-reihenfolge' liefen bis 09.09.2026 unter EINEM
+    // kombinierten Recht 'navigation' ("Navigation (Hauptnavigation,
+    // Reihenfolge)") - genau das Sammelrecht-für-zwei-echte-Seiten-Muster,
+    // das mit "Rechteverwaltung exakt an Admin-Navigation angleichen"
+    // aufgelöst werden sollte ("Jede echte Seite aus der Admin-Navigation
+    // bekommt ein eigenes Recht"). Jetzt zwei eigene Rechte; wer vorher
+    // 'navigation' hatte, behält über LEGACY_NAVIGATION_KEYS weiter unten
+    // automatisch auch Zugriff auf 'navigation_reihenfolge'.
     'nav-extra': 'navigation',
-    'nav-reihenfolge': 'navigation',
+    'nav-reihenfolge': 'navigation_reihenfolge',
     'benutzer': null,
-    'downloads': 'inhaltsseiten',
+    'downloads': 'downloads',
     'medien': 'medien',
+    // 09.09.2026 ("Kontaktformular ausfallsicher machen"): eigene Permission,
+    // NICHT 'kontakt' (das steuert nur die öffentliche Kontaktseite/
+    // Stammdaten) - Admin hat ohnehin Vollzugriff (isAdminUser()), ein
+    // Redakteur braucht explizit 'kontaktanfragen'.
+    'kontaktanfragen': 'kontaktanfragen',
   };
 
   // Dynamisch nachgeladene Unterseiten (loadAllManifestItems/buildSearchIndex)
   // tragen keinen festen NAV-key, sondern ein "dir" - hierüber wird ihre
   // Permission aufgelöst.
   var PERM_BY_DIR = {
-    'content/seiten-aufgaben': 'inhaltsseiten',
-    'content/seiten-sub-wildfleisch': 'inhaltsseiten',
-    'content/seiten-sub-lernort-natur': 'inhaltsseiten',
-    'content/seiten-sub-gruenes-klassenzimmer': 'inhaltsseiten',
+    'content/seiten-aufgaben': 'aufgaben_sonstiges',
+    'content/seiten-sub-wildfleisch': 'verbraucher_wildfleisch',
+    'content/seiten-sub-lernort-natur': 'verbraucher_lernort_natur',
+    'content/seiten-sub-gruenes-klassenzimmer': 'verbraucher_gruenes_klassenzimmer',
     'content/aufgaben/hundeausbildung': 'jagdhundeschule',
-    'content/seiten-sub-ueber-uns': 'inhaltsseiten',
-    'content/seiten-sub-mitglied-werden': 'inhaltsseiten',
-    'content/seiten-sub-jaeger-werden': 'inhaltsseiten',
-    'content/seiten-sub-niederwild': 'inhaltsseiten',
-    'content/seiten-sub-hochwild': 'inhaltsseiten',
-    'content/seiten-sub-schiessobleute': 'inhaltsseiten',
-    'content/seiten-sub-satzung': 'inhaltsseiten',
-    'content/seiten-sub-landesjagdverband': 'inhaltsseiten',
-    'content/seiten-sub-schiessen': 'inhaltsseiten',
-    'content/seiten-sub-schweisshunde': 'inhaltsseiten',
-    'content/seiten-sub-jugend': 'inhaltsseiten',
-    'content/seiten-sub-jagdhorn': 'inhaltsseiten',
-    'content/seiten-sub-naturschutz': 'inhaltsseiten',
-    'content/seiten-sub-jungwildrettung': 'inhaltsseiten',
+    'content/seiten-sub-ueber-uns': 'ueber_uns',
+    'content/seiten-sub-mitglied-werden': 'mitglied_werden',
+    'content/seiten-sub-jaeger-werden': 'jaeger_werden',
+    'content/seiten-sub-niederwild': 'niederwild',
+    'content/seiten-sub-hochwild': 'hochwild',
+    'content/seiten-sub-schiessobleute': 'schiessobleute',
+    'content/seiten-sub-satzung': 'satzung',
+    'content/seiten-sub-landesjagdverband': 'landesjagdverband',
+    'content/seiten-sub-schiessen': 'aufgaben_schiessen',
+    'content/seiten-sub-schweisshunde': 'aufgaben_schweisshunde',
+    'content/seiten-sub-jugend': 'aufgaben_jugend',
+    'content/seiten-sub-jagdhorn': 'aufgaben_jagdhorn',
+    'content/seiten-sub-naturschutz': 'aufgaben_natur',
+    'content/seiten-sub-jungwildrettung': 'aufgaben_jungwild',
+    // Beide unten sind historische/dynamische Pfade ohne aktiven NAV-Eintrag
+    // mehr (siehe Kommentare bei "Weitere Themen" bzw. der entfernten
+    // KJS-Übersicht weiter oben) - praktisch nie erreicht. Bewusst
+    // konservativ am Alt-Sammelrecht belassen statt eine neue Zuordnung zu
+    // raten, für den unwahrscheinlichen Fall, dass doch noch Altdaten
+    // darüber referenziert werden.
     'content/seiten-weitere': 'inhaltsseiten',
     'content/seiten-kjs': 'inhaltsseiten',
   };
+
+  // Die beiden einzigen manuellen Ausnahmen von der automatischen NAV->UI-
+  // Ableitung (siehe Kommentar oben). Bewusst als eigene, kleine, klar
+  // benannte Konstanten statt versteckter Sonderfälle mitten im Ableitungs-
+  // Code - hier findet man sie garantiert wieder.
+  var PERM_UI_EXCLUDE_KEYS = ['benutzer'];
+  var PERM_UI_SYNTHETIC_LABELS = { 'new-aufgaben': 'Sonstige Aufgaben-Unterseiten' };
+
+  // Wandelt einen einzelnen NAV-Knoten (samt Kindern) in 0..n Einträge für
+  // die Rechte-Checkbox-UI um: entweder eine einzelne Checkbox ({key,label})
+  // für eine echte Seite/ein echtes Modul, oder eine Untergruppe
+  // ({group,items}) für einen reinen Ordnerknoten wie "KJS Segeberg" oder
+  // "Hundeausbildung" - rekursiv, damit beliebig tief verschachtelte
+  // NAV-Gruppen (wie in der echten Navigation) 1:1 ankommen.
+  function navNodeToPermEntries(node) {
+    // "➕ Neue Unterseite/Seite"-Buttons sind keine eigenen Seiten, sondern
+    // hängen am Recht ihrer übergeordneten Seite (siehe PERM_BY_KEY:
+    // 'new-sub-*'/'new-jagdhundeschule' -> derselbe Key wie die Seite) -
+    // einzige Ausnahme: der in PERM_UI_SYNTHETIC_LABELS gelistete
+    // Auffang-Button ohne eigene Elternseite (siehe Kommentar oben).
+    if (node.isAdd && !Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key)) return [];
+    if (PERM_UI_EXCLUDE_KEYS.indexOf(node.key) !== -1) return [];
+
+    var permKey = Object.prototype.hasOwnProperty.call(PERM_BY_KEY, node.key) ? PERM_BY_KEY[node.key] : undefined;
+
+    // Ein Knoten OHNE eigene Datei/Formular, dessen einzige(s) Kind(er)
+    // "➕ Neue ..."-Buttons sind (z.B. "🐕 Jagdhundeschule (21 Seiten)"),
+    // verwaltet trotzdem ein eigenes, echtes Modul (eine Sammlung dynamisch
+    // angelegter Unterseiten) und braucht daher genau wie eine normale Seite
+    // eine eigene Checkbox - kein reiner Ordner wie "KJS Segeberg".
+    var onlyChildrenAreAdd = !!(node.children && node.children.length > 0) &&
+      node.children.every(function(c) { return c.isAdd; });
+
+    var isRealPage = !!(node.file || node.form) ||
+      Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key) ||
+      (onlyChildrenAreAdd && Object.prototype.hasOwnProperty.call(PERM_BY_KEY, node.key));
+
+    var childEntries = [];
+    (node.children || []).forEach(function(child) {
+      childEntries = childEntries.concat(navNodeToPermEntries(child));
+    });
+
+    if (isRealPage) {
+      var label = Object.prototype.hasOwnProperty.call(PERM_UI_SYNTHETIC_LABELS, node.key)
+        ? PERM_UI_SYNTHETIC_LABELS[node.key]
+        : node.label;
+      var leaf = permKey ? [{ key: permKey, label: label }] : [];
+      // Sicherheitsnetz für den (in der echten NAV aktuell nicht
+      // vorkommenden) Fall, dass eine Seite zusätzlich echte, benannte
+      // Unterseiten hätte statt nur "➕ Neue Unterseite" - dann lieber
+      // zusätzlich anzeigen als stillschweigend verlieren.
+      return leaf.concat(childEntries);
+    }
+
+    // Reiner Ordner-/Gruppenknoten ohne eigenes Recht (z.B. "KJS Segeberg",
+    // "Aufgaben der KJS", "Hundeausbildung") - wird zur Untergruppe, wenn er
+    // etwas Sichtbares enthält.
+    if (childEntries.length > 0) {
+      return [{ group: node.label, items: childEntries }];
+    }
+    return [];
+  }
+
+  // Leitet die komplette Gruppen-/Checkbox-Struktur der Benutzerverwaltung
+  // direkt aus der echten NAV oben ab - siehe Blockkommentar oben für das
+  // "Warum". Jede oberste NAV-Gruppe (Dashboard/Organisation/Angebote &
+  // Börsen/Weitere Inhalte/Redaktion/Einstellungen) wird 1:1 zu einer
+  // obersten PERMISSIONS-Gruppe mit demselben Namen und derselben
+  // Reihenfolge.
+  function buildPermissionsFromNav(navTree) {
+    var out = [];
+    navTree.forEach(function(topGroup) {
+      var entries = [];
+      (topGroup.children || []).forEach(function(child) {
+        entries = entries.concat(navNodeToPermEntries(child));
+      });
+      if (entries.length > 0) {
+        out.push({ group: topGroup.label, items: entries });
+      }
+    });
+    return out;
+  }
+
+  var PERMISSIONS = buildPermissionsFromNav(NAV);
+
+  // Alt-Sammelrecht "inhaltsseiten" (siehe Blockkommentar oben) - bewusst
+  // NICHT aus der NAV abgeleitet (entspricht keiner echten NAV-Seite mehr),
+  // sondern als eigener, klar als Alt-Recht gekennzeichneter Block ans Ende
+  // angehängt, rein aus Bestandsschutz für Benutzer, die es bereits haben
+  // (z.B. Nicole) - siehe LEGACY_INHALTSSEITEN_KEYS/canAccessDef() weiter
+  // unten für den eigentlichen Kompatibilitäts-Mechanismus.
+  PERMISSIONS.push({
+    group: '⚠️ Alt-Sammelrecht (nur Bestandsschutz, keine echte NAV-Gruppe)',
+    items: [
+      { key: 'inhaltsseiten', label: 'Alle bisherigen „Normalen Inhaltsseiten“ (deckt automatisch alle oben einzeln aufgeführten Seiten mit ab; für neue Redakteure bitte gezielt einzelne Rechte oben vergeben statt dieses Sammelrechts)' },
+    ],
+  });
+
+  // Flache Liste aller gültigen Permission-Schlüssel (für Validierung) -
+  // sammelt rekursiv auch die Schlüssel aus verschachtelten Untergruppen ein.
+  function flattenPermissionKeys(items) {
+    return (items || []).reduce(function(acc, it) {
+      if (it.group) return acc.concat(flattenPermissionKeys(it.items));
+      return acc.concat([it.key]);
+    }, []);
+  }
+  var PERMISSION_KEYS = PERMISSIONS.reduce(function(acc, g) {
+    return acc.concat(flattenPermissionKeys(g.items));
+  }, []);
+
+  // Welche der neuen Einzelrechte deckt das Alt-Sammelrecht "inhaltsseiten"
+  // weiterhin automatisch mit ab (siehe canAccessDef() weiter unten) - exakt
+  // die Module, die vor der Aufteilung (09.09.2026) gemeinsam unter
+  // "inhaltsseiten" liefen.
+  var LEGACY_INHALTSSEITEN_KEYS = [
+    'ueber_uns', 'mitglied_werden', 'jaeger_werden', 'niederwild', 'hochwild',
+    'schiessobleute', 'satzung', 'landesjagdverband',
+    'aufgaben_schiessen', 'aufgaben_hundeausbildung', 'aufgaben_schweisshunde',
+    'aufgaben_jugend', 'aufgaben_jagdhorn', 'aufgaben_natur', 'aufgaben_jungwild',
+    'aufgaben_sonstiges',
+    'verbraucher_wildfleisch', 'verbraucher_lernort_natur',
+    'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
+    'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite',
+  ];
+
+  // Welche der neuen Einzelrechte deckt das alte kombinierte Recht
+  // 'navigation' weiterhin automatisch mit ab (09.09.2026, Aufteilung von
+  // 'navigation' in 'navigation' + 'navigation_reihenfolge' - siehe
+  // PERM_BY_KEY oben) - dasselbe Bestandsschutz-Muster wie
+  // LEGACY_INHALTSSEITEN_KEYS, nur für diesen einen Fall.
+  var LEGACY_NAVIGATION_KEYS = ['navigation_reihenfolge'];
 
   // Rolle(n)/Rechte des GERADE eingeloggten Benutzers - befüllt in onLogin()
   // aus dessen eigenem, von Netlify signierten Zugriffstoken. Das ist reine
@@ -838,7 +1001,18 @@
     if (isAdminUser()) return true;
     var perm = permissionKeyForDef(def);
     if (!perm) return false; // null (admin-only) oder unbekannt -> verweigern
-    return hasPermission(perm);
+    if (hasPermission(perm)) return true;
+    // Legacy-Kompatibilität (09.09.2026, Granularisierung): das alte
+    // Sammelrecht "inhaltsseiten" deckt weiterhin alle Seiten ab, die
+    // früher darunter liefen (jetzt einzeln aufgeteilt) - siehe
+    // LEGACY_INHALTSSEITEN_KEYS weiter oben. So verlieren bestehende
+    // Redakteure (z.B. Nicole) keinen Zugriff, ohne dass am Server
+    // irgendetwas migriert werden musste.
+    if (LEGACY_INHALTSSEITEN_KEYS.indexOf(perm) !== -1 && hasPermission('inhaltsseiten')) return true;
+    // Dieselbe Kompatibilität für die Aufteilung von 'navigation' in zwei
+    // Einzelrechte (siehe LEGACY_NAVIGATION_KEYS/PERM_BY_KEY oben).
+    if (LEGACY_NAVIGATION_KEYS.indexOf(perm) !== -1 && hasPermission('navigation')) return true;
+    return false;
   }
 
   // Verteidigung in der Tiefe für Speicherfunktionen: die eigentliche Sperre
@@ -1092,18 +1266,54 @@
     return true;
   }
 
-  async function apiUploadImage(filename, base64Data) {
+  // safeName EINMAL erzeugen und für Original + alle Vorschau-Varianten
+  // wiederverwenden (09.09.2026, "Echte Thumbnail-/Vorschaubilder wie
+  // Concrete5") - nur so tragen /images/<name>, /images/thumb/<name> und
+  // /images/card/<name> garantiert denselben Dateinamen, wodurch sich die
+  // Vorschau-Variante rein aus dem Original-Pfad ableiten lässt (siehe
+  // kjsThumbUrl()/kjsCardUrl() in js/main.js) - KEIN separates Feld in den
+  // content/*.json-Dateien nötig, keine doppelte Pflege.
+  function makeSafeImageName(filename) {
+    return Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
+  }
+
+  async function apiUploadImageToFolder(folder, safeName, base64Data) {
     var tok = await getToken();
-    var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
-    var body = { message: 'Bild hochgeladen: ' + safeName, content: base64Data, branch: BRANCH };
-    var r = await fetch(GIT + '/images/' + safeName, {
+    var body = { message: 'Bild hochgeladen: ' + folder + '/' + safeName, content: base64Data, branch: BRANCH };
+    var r = await fetch(GIT + '/' + folder + '/' + safeName, {
       method: 'PUT',
       headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error(await apiUploadErrorMessage(r));
-    return '/images/' + safeName;
+    return '/' + folder + '/' + safeName;
   }
+
+  async function apiUploadImage(filename, base64Data) {
+    return apiUploadImageToFolder('images', makeSafeImageName(filename), base64Data);
+  }
+
+  // Leitet die kleine Vorschau-Variante rein aus dem Original-Pfad ab (siehe
+  // Kommentar bei makeSafeImageName) - dieselbe Logik wie kjsThumbUrl() in
+  // js/main.js, hier separat, weil admin.js im Admin-Bereich läuft und
+  // js/main.js nicht einbindet. Genutzt für die admin-eigenen Bildergalerien
+  // (Medienbibliothek/Bildauswahl/Markdown-Bild-Einfügen) - vorher wurde dort
+  // bei JEDER Kachel das volle Original geladen ("Admin-Vorschauen" aus dem
+  // Auftrag), obwohl die Kacheln dort nur 110px breit sind.
+  function adminThumbUrl(url) {
+    if (!url) return url;
+    var i = url.lastIndexOf('/images/');
+    if (i === -1) return url;
+    return url.slice(0, i) + '/images/thumb/' + url.slice(i + '/images/'.length);
+  }
+  // onerror-Fallback fürs Attribut oben: fehlt die thumb-Variante (noch)
+  // - z.B. vor dieser Umstellung hochgeladenes Bild, bevor das
+  // Migrationsskript lief -, wird automatisch das Original nachgeladen.
+  window.adminImgFallback = function(imgEl) {
+    imgEl.onerror = null;
+    var full = imgEl.getAttribute('data-full');
+    if (full) imgEl.src = full;
+  };
 
   // Liest die eigentliche Fehlermeldung aus der GitHub-API-Antwort aus (statt
   // nur "Upload fehlgeschlagen" anzuzeigen) – z.B. "Content is too large" bei
@@ -1814,6 +2024,11 @@
       return;
     }
 
+    if (def.form === 'kontaktanfragen') {
+      renderKontaktanfragen();
+      return;
+    }
+
     if (!def.file) return;
 
     showPanelLoading(def.label);
@@ -2024,7 +2239,7 @@
       '<label class="field-label">' + escHtml(label) + '</label>' +
       '<div class="image-preview-wrap">' +
         '<div class="image-preview' + (hasImg ? '' : ' empty') + '" id="prev-' + id + '">' +
-          (hasImg ? '<img src="' + escAttr(val) + '" alt="">' : '') +
+          (hasImg ? '<img src="' + escAttr(adminThumbUrl(val)) + '" data-full="' + escAttr(val) + '" onerror="adminImgFallback(this)" alt="">' : '') +
         '</div>' +
         '<div class="image-field-btns">' +
           '<button type="button" class="btn btn-outline btn-sm" onclick="openImgPicker(\'' + id + '\')">📷 Bild wählen</button>' +
@@ -4382,6 +4597,18 @@
     var rows = list.map(renderTestimonialRow).join('');
     return '<div class="form-card">' +
       '<div class="form-card-title">💬 Stimmen ("Was unsere Jäger und Mitglieder sagen")</div>' +
+      // Ausblenden-Schalter (09.09.2026, "Testimonials-Block ausblenden"):
+      // blendet den KOMPLETTEN Abschnitt (Überschrift, Unterüberschrift,
+      // alle Zitat-Karten) auf der öffentlichen Startseite aus, OHNE die
+      // Inhalte zu löschen - genau wie beim bestehenden "Aktiv"-Schalter bei
+      // Partnern/Hundebörse/Waffenbörse (siehe fToggle('pn-aktiv', ...)).
+      // Titel/Untertitel/Zitate bleiben hier weiterhin editierbar, damit der
+      // Abschnitt jederzeit mit einem Klick wieder eingeschaltet werden kann.
+      // Fehlt das Feld (ältere/fremde Datensätze ohne diesen Schalter), gilt
+      // "sichtbar" als Standard (!== false), damit sich am bisherigen
+      // Verhalten nichts ändert.
+      fToggle('ts-sichtbar', 'Abschnitt auf der Startseite anzeigen', data.testimonials_sichtbar !== false) +
+      '<p class="field-hint" style="margin-top:-.35rem;">Bei „Nein" verschwindet der komplette Bereich inkl. Überschrift von der Startseite; Titel/Zitate bleiben hier gespeichert und editierbar.</p>' +
       fText('testimonials_titel', 'Überschrift', data.testimonials_titel, 'Was unsere Jäger und Mitglieder sagen') +
       fText('testimonials_untertitel', 'Unterüberschrift', data.testimonials_untertitel, 'Stimmen aus unserer Gemeinschaft') +
       '<p style="font-size:.84rem;color:var(--text-muted);margin:.5rem 0 .75rem;">' +
@@ -4446,6 +4673,7 @@
     data.testimonials_titel = gv('testimonials_titel');
     data.testimonials_untertitel = gv('testimonials_untertitel');
     data.testimonials = collectTestimonialsList();
+    data.testimonials_sichtbar = toggleVal('ts-sichtbar');
     return data;
   }
 
@@ -5920,8 +6148,7 @@
       var status = id('medien-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        await apiUploadImage(prepared.filename, prepared.base64);
+        await uploadImageWithVariants(file);
         status.textContent = '✅ Hochgeladen!';
         loadMedianGallery();
       } catch(e) {
@@ -5994,7 +6221,7 @@
       ? '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">♻️ Wiederherstellen</button>'
       : '<button class="btn btn-sm btn-outline" onclick="medienArchivToggle(\'' + escAttr(f.name) + '\')">📦 Archivieren</button>';
     return '<div class="gallery-img-wrap" data-path="' + escAttr(f.path) + '">' +
-      '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" loading="lazy">' +
+      '<img class="gallery-img" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" loading="lazy">' +
       '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
       '<div style="text-align:center;margin-top:.25rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;">' +
         archivBtn +
@@ -6393,6 +6620,21 @@
   function buFehlerText(status, body) {
     if (status === 401) return 'Sitzung abgelaufen. Bitte erneut anmelden.';
     if (status === 403) return 'Keine Adminrechte.';
+    // "unknown_permission"/"unknown_role" (09.09.2026, Ursachenanalyse
+    // Franks Speicherfehler): admin.js ist eine langlebige Single-Page-
+    // Ansicht - die Rechte-Liste (PERMISSIONS/PERMISSION_KEYS) wird beim
+    // Laden der Seite einmal ins Browser-Gedächtnis geladen und bleibt dort
+    // unverändert, solange der Tab offen bleibt, auch wenn getToken(true)
+    // bei jedem Aufruf ein frisches Zugriffstoken holt. Der Server prüft
+    // dagegen immer gegen den GERADE deployten Stand von
+    // PERMISSIONS_BEKANNT. Wurde die Rechte-Struktur zwischenzeitlich
+    // geändert (wie mit diesem Umbau), meldet ein alter, seit dem Deploy
+    // nicht neu geladener Tab beim Speichern genau diesen Fehler - unabhängig
+    // vom Zugriffstoken. Ein einmaliges Neuladen der Seite behebt es.
+    if (body && (body.error === 'unknown_permission' || body.error === 'unknown_role')) {
+      return (body.message || 'Unbekanntes Recht/Rolle') +
+        ' – vermutlich läuft in diesem Tab noch ein alter Stand der Seite (die Rechte-Struktur wurde gerade aktualisiert). Bitte die Seite einmal neu laden (F5) und erneut versuchen.';
+    }
     if (body && body.message) return body.message;
     return 'Serverfehler – bitte später erneut versuchen.';
   }
@@ -6419,15 +6661,34 @@
     return PERMISSIONS.map(function(g) {
       return '<div class="bu-perm-group">' +
         '<div class="bu-perm-group-title">' + escHtml(g.group) + '</div>' +
-        g.items.map(function(it) {
-          var cid = 'bu-perm-' + uid + '-' + it.key;
-          var checked = perms.indexOf(it.key) !== -1 ? ' checked' : '';
-          return '<label class="bu-perm-item">' +
-            '<input type="checkbox" id="' + escAttr(cid) + '" data-perm-key="' + escAttr(it.key) + '"' + checked + '> ' +
-            escHtml(it.label) +
-          '</label>';
-        }).join('') +
+        buPermItemsHtml(uid, perms, g.items, 0) +
       '</div>';
+    }).join('');
+  }
+
+  // Rendert eine Liste von Rechte-Einträgen rekursiv - ein Eintrag ist
+  // entweder eine einzelne Checkbox ({key,label}) oder eine verschachtelte
+  // Untergruppe ({group,items}, spiegelt eine NAV-Untergruppe wie "KJS
+  // Segeberg"/"Hundeausbildung"), die optisch eingerückt und mit eigenem
+  // Untertitel dargestellt wird. laufender Zähler statt reinem Key im
+  // Element-id (mehrere Checkboxen können - wie schon bisher möglich -
+  // denselben data-perm-key tragen, z.B. wenn ein Legacy-Recht mehrere
+  // Module abdeckt) verhindert doppelte DOM-ids.
+  var _buPermCidSeq = 0;
+  function buPermItemsHtml(uid, perms, items, depth) {
+    return (items || []).map(function(it) {
+      if (it.group) {
+        return '<div class="bu-perm-subgroup" style="margin-left:' + ((depth + 1) * 14) + 'px;margin-top:.4rem;">' +
+          '<div class="bu-perm-subgroup-title" style="font-weight:600;font-size:.85rem;color:var(--text-muted);margin-bottom:.15rem;">' + escHtml(it.group) + '</div>' +
+          buPermItemsHtml(uid, perms, it.items, depth + 1) +
+        '</div>';
+      }
+      var cid = 'bu-perm-' + uid + '-' + it.key + '-' + (_buPermCidSeq++);
+      var checked = perms.indexOf(it.key) !== -1 ? ' checked' : '';
+      return '<label class="bu-perm-item" style="display:block;margin-left:' + (depth * 14) + 'px;">' +
+        '<input type="checkbox" id="' + escAttr(cid) + '" data-perm-key="' + escAttr(it.key) + '"' + checked + '> ' +
+        escHtml(it.label) +
+      '</label>';
     }).join('');
   }
 
@@ -6586,6 +6847,163 @@
       console.error('[Benutzerverwaltung] Fehler beim erneuten Einladen:', e);
       toast('❌ ' + e.message, 'err');
       benutzerLoad(); // UI auf tatsächlichen Serverstand zurücksetzen (z.B. falls DELETE klappte, POST aber fehlschlug)
+    }
+  };
+
+  /* ────────────────────────────────────────────────────────────
+     KONTAKTANFRAGEN (09.09.2026, "Kontaktformular ausfallsicher machen")
+     ────────────────────────────────────────────────────────────
+     Eigener Admin-Bereich fuer die eingegangenen Kontaktanfragen
+     (kontakt/index.html -> api/contact.php -> MySQL-Tabelle
+     kontakt_anfragen). Kein content/*.json (form:'kontaktanfragen' ohne
+     "file" in der NAV, siehe selectSectionImpl()) - die Daten kommen per
+     API aus MySQL, analog zu Hundeboerse/Waffenboerse, aber als eigener,
+     einfacher Bereich (keine Freigabe/Ablehnung, nur Status neu/bearbeitet)
+     und deshalb - wie 'benutzer' oben - bewusst NICHT ueber
+     apiGetBoerse()/apiPutBoerse()/doSave() gefuehrt, sondern mit eigenen,
+     kleinen Fetch-Helfern (kaFetch) nach demselben Muster wie buFetch()
+     oben.
+     Eigene Permission 'kontaktanfragen' (PERMISSIONS weiter unten +
+     PERM_BY_KEY oben) - Admin hat ueber isAdminUser()/canAccessDef() ohnehin
+     Vollzugriff, ein Redakteur braucht explizit dieses Recht (Auftrag Punkt
+     7: NICHT automatisch an 'kontakt'/"Kontakt & Stammdaten" gekoppelt).
+     Sicherheit (Auftrag Punkt 8): die Nachricht wird ausschliesslich ueber
+     escHtml() dargestellt (niemals roh per innerHTML) - eine im Formular
+     eingegebene Nachricht wie "<img src=x onerror=alert(1)>" landet damit
+     im Admin nur als sichtbarer Text, nie als ausgefuehrtes HTML.
+  ──────────────────────────────────────────────────────────── */
+  var KA_ENDPOINT_LISTE  = '/api/kontakt/admin/liste.php';
+  var KA_ENDPOINT_STATUS = '/api/kontakt/admin/status.php';
+  var KA = { anfragen: [], openId: null }; // lokaler Zwischenstand der zuletzt geladenen Liste (fuer Detail-Auf-/Zuklappen ohne Neuladen)
+
+  function kaFehlerText(status, body) {
+    if (status === 401) return 'Sitzung abgelaufen. Bitte erneut anmelden.';
+    if (status === 403) return 'Keine Berechtigung fuer Kontaktanfragen.';
+    if (body && body.message) return body.message;
+    return 'Serverfehler – bitte spaeter erneut versuchen.';
+  }
+
+  async function kaFetch(method, url, bodyObj) {
+    var tok = await getToken(true);
+    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
+    if (bodyObj !== undefined) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(bodyObj);
+    }
+    var r = await fetch(url, opts);
+    var data = await r.json().catch(function() { return {}; });
+    if (!r.ok || data.success !== true) {
+      console.error('[Kontaktanfragen] ' + method + ' ' + url + ' → HTTP ' + r.status, data);
+      throw new Error(kaFehlerText(r.status, data));
+    }
+    return data;
+  }
+
+  function kaDatumAnzeige(iso) {
+    if (!iso) return '–';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '–';
+    return d.toLocaleDateString('de-DE') + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function kaStatusBadge(status) {
+    var istBearbeitet = status === 'bearbeitet';
+    return '<span class="bu-badge" style="background:' + (istBearbeitet ? 'var(--success-bg,#e6f4ea)' : 'var(--warning-bg,#fff4e5)') + ';color:' + (istBearbeitet ? 'var(--success,#1e7e34)' : 'var(--warning,#b45f06)') + ';">' +
+      (istBearbeitet ? '✅ Bearbeitet' : '🆕 Neu') + '</span>';
+  }
+
+  function renderKontaktanfragen() {
+    var main = id('admin-main');
+    // hideDefaultSave: wie bei renderBenutzer() gibt es hier kein zentrales
+    // Speichern - jede Statusaenderung wirkt sofort per eigenem Button.
+    main.innerHTML =
+      panelHeader('📬 Kontaktanfragen', null, true) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          '<div class="form-card-title">Eingegangene Anfragen</div>' +
+          '<p class="text-muted" style="margin-bottom:.75rem;">Nachricht anklicken für Details. Keine Anfrage kann hier gelöscht werden - erledigte Anfragen werden als „Bearbeitet" markiert.</p>' +
+          '<div id="ka-list"><div class="gallery-loading">Wird geladen…</div></div>' +
+        '</div>' +
+      '</div>';
+    kontaktanfragenLoad();
+  }
+
+  window.kontaktanfragenLoad = kontaktanfragenLoad;
+  async function kontaktanfragenLoad() {
+    var list = id('ka-list');
+    if (!list) return;
+    try {
+      var data = await kaFetch('GET', KA_ENDPOINT_LISTE + '?_=' + Date.now());
+      KA.anfragen = (data.data && data.data.anfragen) || [];
+      kontaktanfragenRenderListe();
+    } catch(e) {
+      console.error('[Kontaktanfragen] Fehler beim Laden:', e);
+      list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>' +
+        '<p class="mt-1"><button class="btn btn-outline btn-sm" onclick="kontaktanfragenLoad()">🔄 Erneut versuchen</button></p>';
+    }
+  }
+
+  function kontaktanfragenRenderListe() {
+    var list = id('ka-list');
+    if (!list) return;
+    if (!KA.anfragen.length) {
+      list.innerHTML = '<p style="color:var(--text-muted);">Keine Kontaktanfragen vorhanden.</p>';
+      return;
+    }
+    list.innerHTML = KA.anfragen.map(function(a) {
+      var offen = KA.openId === a.id;
+      var zeile =
+        '<div class="bu-user-row" id="ka-row-' + a.id + '">' +
+          '<div class="bu-user-info" style="cursor:pointer;" onclick="kontaktanfrageToggle(' + a.id + ')">' +
+            '<strong>' + escHtml(a.name || '(ohne Namen)') + '</strong>' +
+            ' <span class="bu-user-name">' + escHtml(a.email) + '</span>' +
+            ' — ' + escHtml(a.anliegen || '–') +
+            ' <span class="bu-badge">' + escHtml(kaDatumAnzeige(a.erstelltAm)) + '</span> ' +
+            kaStatusBadge(a.status) +
+            (a.mailVersendet ? '' : ' <span class="bu-badge" title="' + escAttr(a.mailFehler || 'Benachrichtigungs-E-Mail konnte nicht versendet werden') + '">✉️❌ Mail nicht versendet</span>') +
+          '</div>';
+      if (!offen) return zeile + '</div>';
+      // Detailansicht: vollstaendige Nachricht NUR ueber escHtml() (Auftrag
+      // Punkt 8: "keine HTML-Ausfuehrung aus Nachrichten") - white-space:pre-wrap
+      // erhaelt Zeilenumbrueche der Originalnachricht, ohne HTML zu interpretieren.
+      return zeile +
+          '<div class="bu-perm-wrap" style="display:block;">' +
+            '<p><strong>Telefon:</strong> ' + escHtml(a.telefon || '–') + '</p>' +
+            '<p><strong>E-Mail:</strong> ' + escHtml(a.email || '–') + '</p>' +
+            (a.bereitsJaeger ? '<p><strong>Bereits Jäger/in:</strong> ' + escHtml(a.bereitsJaeger) + '</p>' : '') +
+            (a.hegering ? '<p><strong>Hegering:</strong> ' + escHtml(a.hegering) + '</p>' : '') +
+            '<p><strong>Eingegangen:</strong> ' + escHtml(kaDatumAnzeige(a.erstelltAm)) + '</p>' +
+            (a.bearbeitetAm ? '<p><strong>Zuletzt bearbeitet:</strong> ' + escHtml(kaDatumAnzeige(a.bearbeitetAm)) + '</p>' : '') +
+            '<p><strong>Nachricht:</strong></p>' +
+            '<p style="white-space:pre-wrap;background:var(--bg-subtle,#f6f6f6);padding:.6rem .8rem;border-radius:6px;">' + escHtml(a.nachricht || '(keine Nachricht)') + '</p>' +
+          '</div>' +
+          '<div class="form-actions">' +
+            (a.status === 'bearbeitet'
+              ? '<button class="btn btn-outline btn-sm" onclick="kontaktanfrageStatusSetzen(' + a.id + ',\'neu\')">↩️ Auf „Neu" zurücksetzen</button>'
+              : '<button class="btn btn-primary btn-sm" onclick="kontaktanfrageStatusSetzen(' + a.id + ',\'bearbeitet\')">✅ Als bearbeitet markieren</button>') +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  window.kontaktanfrageToggle = function(id_) {
+    KA.openId = (KA.openId === id_) ? null : id_;
+    kontaktanfragenRenderListe();
+  };
+
+  window.kontaktanfrageStatusSetzen = async function(id_, status) {
+    try {
+      var data = await kaFetch('POST', KA_ENDPOINT_STATUS, { id: id_, status: status });
+      // Lokale Liste direkt mit der vom Server bestaetigten Zeile aktualisieren
+      // (statt komplett neu zu laden) - fuehlt sich sofort/reaktionsschnell an
+      // und vermeidet einen unnoetigen zweiten Roundtrip.
+      var updated = data.anfrage;
+      KA.anfragen = KA.anfragen.map(function(a) { return a.id === updated.id ? updated : a; });
+      kontaktanfragenRenderListe();
+      toast(status === 'bearbeitet' ? '✅ Als bearbeitet markiert' : '↩️ Auf „Neu" zurückgesetzt', 'ok');
+    } catch(e) {
+      console.error('[Kontaktanfragen] Fehler beim Statuswechsel:', e);
+      toast('❌ ' + e.message, 'err');
     }
   };
 
@@ -7008,7 +7426,7 @@
       gallery.innerHTML = imgs.map(function(f) {
         var url = '/images/' + f.name;
         return '<div class="gallery-img-wrap">' +
-          '<img class="gallery-img" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" ' +
+          '<img class="gallery-img" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" ' +
             'onclick="pickImg(\'' + escAttr(url) + '\')" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
         '</div>';
@@ -7026,7 +7444,7 @@
     if (el)   el.value = url;
     if (prev) {
       prev.classList.remove('empty');
-      prev.innerHTML = '<img src="' + escAttr(url) + '" alt="">';
+      prev.innerHTML = '<img src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="">';
     }
     if (el) markDirty(); // Setzt .value programmatisch - löst kein natives input/change-Event aus
     closeImgModal();
@@ -7041,8 +7459,7 @@
       var status = id('img-upload-status');
       status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        var url = await apiUploadImage(prepared.filename, prepared.base64);
+        var url = await uploadImageWithVariants(file);
         status.textContent = '✅ Hochgeladen';
         await loadGallery();
         // Auto-select the just uploaded image
@@ -7109,7 +7526,33 @@
   var IMG_JPEG_QUALITY = 0.85;  // konservativ: deutlich kleiner, ohne sichtbare Artefakte
   var IMG_SKIP_TYPES = /^image\/(gif|svg\+xml)$/i;
 
-  function prepareImageForUpload(file) {
+  // Echte Vorschau-/Kachelbilder (09.09.2026, "Echte Thumbnail-/Vorschaubilder
+  // wie Concrete5"): zwei zusätzliche, tatsächlich kleinere Dateivarianten
+  // neben dem Original - anhand der ECHTEN Rendergrößen im Projekt ermittelt
+  // (siehe Abschlussbericht), nicht blind übernommen:
+  //  - "thumb" (~480px): für sehr kleine Kacheln, bei denen selbst ein Bild in
+  //    Retina-Auflösung winzig bleibt - Admin-Bildauswahl/-Übersicht (110px),
+  //    Dokumenten-Vorschaubilder (60-110px), Hundebörse/Waffenbörse-
+  //    Miniaturstreifen auf der Detailseite (72px).
+  //  - "card" (~800px): für Kartenraster, die auf Desktop bei 2x/Retina real
+  //    bis zu ca. 750-800px breit werden - Aktuelles-Karten, Hundebörse-/
+  //    Waffenbörse-Übersicht, Partner-Logos, Vorstand/Obleute-Personenkarten,
+  //    generische Bildergalerie.
+  // Die großen Kontexte (Beitrags-Titelbild, Hundebörse/Waffenbörse-
+  // Hauptbild, Personen-Profilbild, Lightbox-Vollbild) nutzen weiterhin ganz
+  // bewusst das normale, bereits auf IMG_MAX_DIMENSION komprimierte Original -
+  // dafür braucht es keine dritte Stufe.
+  var THUMB_MAX_DIMENSION = 480;
+  var THUMB_JPEG_QUALITY = 0.72;
+  var CARD_MAX_DIMENSION = 800;
+  var CARD_JPEG_QUALITY = 0.78;
+
+  // Gemeinsame Skalier-/Recodier-Logik für Original UND Vorschau-Varianten -
+  // vorher (bis 09.09.2026) gab es das nur einmal fest verdrahtet für das
+  // Original; jetzt einmal implementiert, per (maxDimension, quality)
+  // parametrisiert, damit Original/Thumb/Card garantiert dieselbe Skalier-,
+  // Format- und Transparenz-Logik verwenden statt drei gepflegter Kopien.
+  function prepareImageVariant(file, maxDimension, quality) {
     // Fallback-Helfer: Original unverändert als Base64 zurückgeben, in genau
     // der Form, die alle Aufrufstellen erwarten ({base64, filename}).
     function original() {
@@ -7129,7 +7572,7 @@
       img.onload = function() {
         try {
           var w = img.naturalWidth, h = img.naturalHeight;
-          var scale = Math.min(1, IMG_MAX_DIMENSION / Math.max(w, h));
+          var scale = Math.min(1, maxDimension / Math.max(w, h));
           var tw = Math.max(1, Math.round(w * scale));
           var th = Math.max(1, Math.round(h * scale));
 
@@ -7154,7 +7597,7 @@
 
           var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
           var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
-          var quality = (outType === 'image/jpeg') ? IMG_JPEG_QUALITY : undefined;
+          var outQuality = (outType === 'image/jpeg') ? quality : undefined;
 
           canvas.toBlob(function(blob) {
             if (!blob || blob.size >= file.size) {
@@ -7169,7 +7612,7 @@
             };
             reader.onerror = function() { original().then(resolve, reject); };
             reader.readAsDataURL(blob);
-          }, outType, quality);
+          }, outType, outQuality);
         } catch (e) {
           URL.revokeObjectURL(objectUrl);
           original().then(resolve, reject); // nie den Upload wegen eines Verarbeitungsfehlers blockieren
@@ -7181,6 +7624,47 @@
       };
       img.src = objectUrl;
     });
+  }
+
+  function prepareImageForUpload(file) {
+    return prepareImageVariant(file, IMG_MAX_DIMENSION, IMG_JPEG_QUALITY);
+  }
+
+  // Für Thumb/Card (anders als beim Original): bei GIF/SVG wird bewusst GAR
+  // KEINE Variante erzeugt (kein sinnloses erneutes Hochladen derselben
+  // Animation/Vektorgrafik in einen "thumb"/"card"-Ordner) - null signalisiert
+  // "keine Variante hochladen", das Frontend fällt dann automatisch per
+  // onerror auf das Original zurück (siehe kjsImgFallback() in js/main.js).
+  function prepareThumbOrCardVariant(file, maxDimension, quality) {
+    if (!file || !/^image\//i.test(file.type) || IMG_SKIP_TYPES.test(file.type)) {
+      return Promise.resolve(null);
+    }
+    return prepareImageVariant(file, maxDimension, quality);
+  }
+
+  // Zentrale Upload-Funktion für ALLE drei Aufrufstellen (Medienbibliothek,
+  // Bildfeld-Picker, Markdown-Bild-Einfügen): lädt Original + thumb + card in
+  // EINEM Aufruf hoch, alle drei unter demselben Dateinamen (nur andere
+  // Ordner). Gibt wie bisher NUR die Original-URL zurück - der Aufrufer/die
+  // content/*.json-Datei merkt sich weiterhin exakt einen Pfad, unverändert
+  // gegenüber vor dieser Umstellung.
+  // Schlägt eine Vorschau-Variante fehl (z.B. Netzwerkfehler), bricht das
+  // NICHT den gesamten Upload ab - das Original ist zu diesem Zeitpunkt schon
+  // gespeichert und bleibt nutzbar; die Seite zeigt bis zum nächsten
+  // erfolgreichen Speichern/zur Migration einfach weiter das Original an.
+  async function uploadImageWithVariants(file) {
+    var prepared = await prepareImageForUpload(file);
+    var safeName = makeSafeImageName(prepared.filename);
+    var mainUrl = await apiUploadImageToFolder('images', safeName, prepared.base64);
+    try {
+      var t = await prepareThumbOrCardVariant(file, THUMB_MAX_DIMENSION, THUMB_JPEG_QUALITY);
+      if (t) await apiUploadImageToFolder('images/thumb', safeName, t.base64);
+    } catch (e) { console.warn('Thumbnail-Vorschau fehlgeschlagen (Original bleibt nutzbar):', e); }
+    try {
+      var c = await prepareThumbOrCardVariant(file, CARD_MAX_DIMENSION, CARD_JPEG_QUALITY);
+      if (c) await apiUploadImageToFolder('images/card', safeName, c.base64);
+    } catch (e) { console.warn('Card-Vorschau fehlgeschlagen (Original bleibt nutzbar):', e); }
+    return mainUrl;
   }
 
   /* ────────────────────────────────────────────────────────────
@@ -7351,7 +7835,7 @@
       gallery.innerHTML = imgs.map(function(f) {
         var url = '/images/' + f.name;
         return '<div class="gallery-img-wrap">' +
-          '<img class="gallery-img" id="mdimg-thumb-' + escAttr(url) + '" src="' + escAttr(url) + '" alt="' + escAttr(f.name) + '" ' +
+          '<img class="gallery-img" id="mdimg-thumb-' + escAttr(url) + '" src="' + escAttr(adminThumbUrl(url)) + '" data-full="' + escAttr(url) + '" onerror="adminImgFallback(this)" alt="' + escAttr(f.name) + '" ' +
             'onclick="mdImgPick(\'' + escAttr(url) + '\',\'' + escAttr(f.name) + '\')" loading="lazy">' +
           '<div class="gallery-img-name">' + escHtml(f.name) + '</div>' +
         '</div>';
@@ -7399,11 +7883,10 @@
       var status = id('mdimg-upload-status');
       if (status) status.textContent = '⏳ Wird hochgeladen…';
       try {
-        var prepared = await prepareImageForUpload(file);
-        var url = await apiUploadImage(prepared.filename, prepared.base64);
+        var url = await uploadImageWithVariants(file);
         if (status) status.textContent = '✅ Hochgeladen';
         await loadMdImgGallery();
-        mdImgPick(url, prepared.filename);
+        mdImgPick(url, url.split('/').pop());
       } catch(e) {
         if (status) status.textContent = '❌ ' + e.message;
       }

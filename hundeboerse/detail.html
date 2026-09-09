@@ -91,6 +91,17 @@
     return p.indexOf('/') === 0 ? '..' + p : '../' + p;
   }
 
+  // Echte Vorschau statt Original in klein (09.09.2026, "Echte Thumbnail-/
+  // Vorschaubilder wie Concrete5"): der Thumbnail-Streifen unter dem
+  // Hauptbild zeigt jedes Bild nur 72px (58px mobil) groß an - api/lib/
+  // boerse_upload.php legt dafür serverseitig automatisch eine "thumb"-
+  // Variante (~480px) neben dem Original ab. onerror-Fallback
+  // (kjsImgFallback, js/main.js) lädt bei fehlender Variante automatisch das
+  // Original.
+  function boerseThumbUrl(p) {
+    return p ? p.replace(/\/([^\/]+)$/, '/thumb/$1') : p;
+  }
+
   function formatDatum(raw) {
     if (!raw) return '';
     var mon = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -216,7 +227,7 @@
               var gSrc = toSrc(g.bild);
               var gAlt = escHtml(g.titel || a.title || '');
               return '<button type="button" class="hb-thumb' + (gi === 0 ? ' is-active' : '') + '" data-src="' + gSrc + '" data-alt="' + gAlt + '" aria-label="Bild ' + (gi + 1) + ' von ' + galerie.length + ' anzeigen">' +
-                '<img src="' + gSrc + '" alt="' + gAlt + '" loading="lazy">' +
+                '<img src="' + toSrc(boerseThumbUrl(g.bild)) + '" data-full="' + gSrc + '" onerror="kjsImgFallback(this)" alt="' + gAlt + '" loading="lazy">' +
               '</button>';
             }).join('') +
           '</div>';

@@ -117,7 +117,7 @@
       '<a href="beitrag.html?i=' + i + '" style="text-decoration:none;color:inherit;display:block;">' +
         '<div class="news-card__img-wrap">' +
           (imgSrc
-            ? '<img class="news-card__img" src="' + imgSrc + '" alt="' + b.titel.replace(/"/g,'') + '" loading="lazy">'
+            ? '<img class="news-card__img" src="' + kjsCardUrl(imgSrc) + '" data-full="' + imgSrc + '" onerror="kjsImgFallback(this)" alt="' + b.titel.replace(/"/g,'') + '" loading="lazy">'
             : '<div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:180px;"><img src="../images/logo.png" alt="KJS" style="height:64px;opacity:.3;"></div>') +
         '</div>' +
         '<div class="news-card__body">' +

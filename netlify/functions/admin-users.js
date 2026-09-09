@@ -46,7 +46,9 @@
 
 var ROLES_BEKANNT = ['admin', 'redakteur'];
 
-// Granulare Bereichsrechte (05.09.2026, "Benutzerrechte granular pro Bereich").
+// Granulare Bereichsrechte (05.09.2026, "Benutzerrechte granular pro
+// Bereich"; vollständig granular seit 09.09.2026, "Benutzerrechte
+// vollständig granular machen").
 // WICHTIG - MANUELLER SYNC: Diese Liste MUSS exakt den Keys aus
 // PERMISSION_KEYS in admin/admin.js entsprechen (dort die einzige
 // sichtbare/gruppierte Quelle für Label + Gruppierung im Admin-UI). Es gibt
@@ -54,12 +56,31 @@ var ROLES_BEKANNT = ['admin', 'redakteur'];
 // gemeinsamen Quelle generieren könnte - beim Hinzufügen/Umbenennen eines
 // Rechts IMMER beide Stellen anpassen, sonst werden hier vergebene Rechte
 // vom Admin-UI ignoriert bzw. dort definierte Rechte hier abgelehnt.
+//
+// "inhaltsseiten" bleibt als Alt-Sammelrecht in dieser Liste erhalten,
+// obwohl admin.js es nicht mehr für neue Einzelseiten vergibt - bestehende
+// Benutzer (z.B. Nicole), die es bereits in ihrem app_metadata.permissions
+// gespeichert haben, dürfen es beim nächsten Speichern weiterhin
+// zurückschicken, ohne dass der Server es mit "unknown_permission" ablehnt
+// (siehe admin.js: LEGACY_INHALTSSEITEN_KEYS + canAccessDef()).
 var PERMISSIONS_BEKANNT = [
-  'aktuelles', 'termine', 'kontakt', 'inhaltsseiten',
-  'vorstand', 'obleute', 'hegeringe', 'kjm', 'jagdhundeschule',
-  'hundeboerse', 'waffenboerse', 'partner', 'infomobil',
-  'medien',
-  'navigation', 'design'
+  'aktuelles', 'termine', 'kontakt', 'medien',
+  'vorstand', 'obleute', 'hegeringe', 'kjm', 'jagdhundeschule', 'schiessobleute',
+  'mitglied_werden', 'jaeger_werden', 'niederwild', 'hochwild', 'satzung', 'landesjagdverband',
+  'aufgaben_schiessen', 'aufgaben_hundeausbildung', 'aufgaben_schweisshunde',
+  'aufgaben_jugend', 'aufgaben_jagdhorn', 'aufgaben_natur', 'aufgaben_jungwild', 'aufgaben_sonstiges',
+  'verbraucher_wildfleisch', 'verbraucher_lernort_natur',
+  'verbraucher_gruenes_klassenzimmer', 'verbraucher_waidmannssprache',
+  'infomobil', 'hundeboerse', 'waffenboerse', 'partner',
+  'service', 'downloads', 'faq', 'footer', 'impressum', 'startseite', 'ueber_uns',
+  'kontaktanfragen',
+  'inhaltsseiten',
+  // 'navigation_reihenfolge' (09.09.2026, "Rechteverwaltung exakt an
+  // Admin-Navigation angleichen"): 'navigation' deckte bis dahin ZWEI echte
+  // Admin-Seiten ab (Hauptnavigation erweitern + Navigation & Reihenfolge)
+  // - jetzt je ein eigenes Recht (siehe admin.js: PERM_BY_KEY,
+  // LEGACY_NAVIGATION_KEYS für Bestandsschutz bestehender Nutzer).
+  'navigation', 'navigation_reihenfolge', 'design'
 ];
 
 function json(statusCode, data) {

@@ -68,7 +68,7 @@
   function renderKarte(p) {
     var logoSrc = toSrc(p.logo);
     var bildHtml = logoSrc
-      ? '<img class="news-card__img" src="' + logoSrc + '" alt="' + escHtml(p.name || '') + '" loading="lazy">'
+      ? '<img class="news-card__img" src="' + kjsCardUrl(logoSrc) + '" data-full="' + logoSrc + '" onerror="kjsImgFallback(this)" alt="' + escHtml(p.name || '') + '" loading="lazy">'
       : '<div class="pn-logo-placeholder"><img src="../images/logo.png" alt="KJS"></div>';
     return '<article class="news-card">' +
       '<a href="detail.html?id=' + encodeURIComponent(p.id) + '" style="text-decoration:none;color:inherit;">' +

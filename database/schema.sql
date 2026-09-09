@@ -206,4 +206,48 @@ INSERT INTO waffenboerse_meta (id, version)
   VALUES (1, 0)
   ON DUPLICATE KEY UPDATE id = id;
 
+-- ============================================================================
+-- KONTAKTFORMULAR (09.09.2026, "Kontaktformular ausfallsicher machen")
+-- ============================================================================
+--
+-- Ziel: keine Kontaktanfrage darf verloren gehen, auch wenn SMTP (noch)
+-- nicht konfiguriert ist oder gerade ausfaellt (siehe api/contact.php: die
+-- Anfrage wird IMMER zuerst hier gespeichert, der Mailversand ist danach
+-- eine zusaetzliche, vom Speichern unabhaengige Benachrichtigung).
+--
+-- Nutzt dieselbe Datenbank/Verbindung wie die Hundeboerse/Waffenboerse
+-- (api/lib/db.php, DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS bzw.
+-- config/db.local.php) - bewusst keine zweite Datenbankarchitektur.
+--
+-- Speichert bewusst mehr als die im Auftrag genannten Mindestfelder
+-- (zusaetzlich bereits_jaeger/hegering): beide werden im bestehenden
+-- Formular (kontakt/index.html) bereits abgefragt und von api/contact.php
+-- bereits eingelesen - sie ebenfalls zu verwerfen wuerde dem eigentlichen
+-- Ziel ("keine Anfrage darf verloren gehen") widersprechen.
+CREATE TABLE IF NOT EXISTS kontakt_anfragen (
+  id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name            VARCHAR(190)    NOT NULL DEFAULT '',
+  email           VARCHAR(190)    NOT NULL DEFAULT '',
+  telefon         VARCHAR(60)     NOT NULL DEFAULT '',
+  anliegen        VARCHAR(190)    NOT NULL DEFAULT '',
+  bereits_jaeger  VARCHAR(20)     NOT NULL DEFAULT '',
+  hegering        VARCHAR(190)    NOT NULL DEFAULT '',
+  nachricht       MEDIUMTEXT      NULL,
+  status          ENUM('neu','bearbeitet') NOT NULL DEFAULT 'neu',
+  -- Ob/warum der Benachrichtigungs-Mailversand (zusaetzlich zur hier immer
+  -- erfolgten Speicherung) fehlgeschlagen ist - siehe api/contact.php.
+  -- mail_fehler enthaelt bewusst nur eine kurze, interne Fehlerkategorie
+  -- (z.B. "server_not_configured"/"send_failed"), NIE die rohe SMTP-
+  -- Fehlermeldung (koennte Zugangsdaten/Serverdetails enthalten).
+  mail_versendet  TINYINT(1)      NOT NULL DEFAULT 0,
+  mail_fehler     VARCHAR(190)    NULL,
+  erstellt_am     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  -- Zeitpunkt der letzten Statusaenderung durch einen Admin/Redakteur
+  -- (siehe api/kontakt/admin/status.php) - NULL, solange nur "neu".
+  bearbeitet_am   DATETIME(3)     NULL,
+  PRIMARY KEY (id),
+  KEY idx_ka_status (status),
+  KEY idx_ka_erstellt (erstellt_am)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
