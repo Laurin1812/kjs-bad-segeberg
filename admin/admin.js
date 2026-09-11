@@ -16,6 +16,28 @@
   // Knopf hier im Admin (bewusst, um kurz vor Go-Live kein Risiko einzubauen).
   var BRANCH = 'staging';
 
+  // Hotfix (11.09.2026, "Hundeboerse/Waffenboerse 404 im Admin"): das in
+  // 4a88410 vorbereitete PHP/MySQL-Backend fuer Hundeboerse/Waffenboerse
+  // (siehe boerseModulFuerDatei() weiter unten) ruft /api/<modul>/admin/
+  // liste.php bzw. speichern.php auf. Dieser Pfad existiert nur auf dem
+  // spaeteren, echten PHP-Host - auf Netlify (sowohl staging als auch die
+  // spaetere Live-Domain) blockt die bewusste Security-Regel "/api/* / 404!"
+  // in _redirects (siehe dortiger Kommentar, Commit 2355da3) jeden Zugriff
+  // auf /api/*, unabhaengig vom Pfad dahinter - das ist RICHTIG so und bleibt
+  // unangetastet, denn Netlify koennte die PHP-Dateien sonst nur als
+  // Klartext-Quellcode ausliefern (nie ausfuehren). Live-Beweis: GET
+  // /api/hundeboerse/admin/liste.php auf staging liefert HTTP 404.
+  // IS_PHP_HOST erkennt anhand des Hostnamens, ob wir (noch) auf Netlify
+  // laufen (dann false). Nur wenn NICHT, spricht boerseModulFuerDatei() den
+  // PHP-Pfad tatsaechlich an - sonst faellt apiGet()/apiPut() automatisch auf
+  // den bestehenden, unveraenderten Git-/JSON-Weg (git-gateway) fuer
+  // content/hundeboerse.json bzw. content/waffenboerse.json zurueck, genau
+  // wie vor 4a88410. Sobald der echte PHP-Host unter eigener Domain laeuft,
+  // greift die dort fertige PHP-Anbindung automatisch, ohne dass hier etwas
+  // geaendert werden muss - das PHP/MySQL-Backend selbst (api/*.php,
+  // database/schema.sql) bleibt vollstaendig unangetastet.
+  var IS_PHP_HOST = !/\.netlify\.app$/i.test(location.hostname);
+
   var KAT_NEWS    = ['Allgemein','Naturschutz','Jagd','Jungwildrettung','Hundeausbildung','Schießwesen','Jugend','Jagdhornblasen','Veranstaltung','Pressemitteilung'];
   var KAT_TERMINE = ['Vorstand','Schießwesen','Hundeausbildung','Jagdhornblasen','Jugend','Hegering','Naturschutz','Ausbildung','Kreisveranstaltung','Hauptversammlung','Tradition'];
   var KAT_SERVICE = ['Umweltschutz','Förderung','Merkblätter','Formulare','Allgemein'];
@@ -1145,6 +1167,10 @@
   // frische, leere Installation) nicht wie "keine SHA bekannt" behandelt
   // wird (trackSha() betrachtet einen falsy-Wert als "nichts zu merken").
   function boerseModulFuerDatei(path) {
+    // Siehe IS_PHP_HOST-Kommentar oben: auf Netlify (aktuell IMMER, siehe
+    // dort) bleibt dieser Pfad deaktiviert, damit apiGet()/apiPut() fuer
+    // diese beiden Dateien unveraendert ueber git-gateway laufen.
+    if (!IS_PHP_HOST) return null;
     if (path === 'content/hundeboerse.json') return 'hundeboerse';
     if (path === 'content/waffenboerse.json') return 'waffenboerse';
     return null;
