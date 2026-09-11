@@ -1,0 +1,113 @@
+# Root-Schutzregeln fuer einen echten Apache-Webserver (Security-/
+# Datenschutz-Hardening, Pass 2, 11.09.2026).
+#
+# WICHTIG: Diese Datei wirkt NUR auf Apache mit aktiviertem AllowOverride
+# fuer diesen Ordner. Auf Netlify hat sie GAR KEINE Wirkung (Netlify wertet
+# .htaccess nicht aus) - der Schutz fuer die Netlify-Umgebung laeuft
+# ausschliesslich ueber die Datei "_redirects" im selben Ordner. Beide
+# Dateien decken bewusst denselben Zweck fuer die jeweils andere Umgebung ab
+# und muessen bei neuen sensiblen Pfaden BEIDE gepflegt werden.
+#
+# Diese Datei ergaenzt die bereits bestehenden Ordner-eigenen .htaccess-
+# Dateien (config/, database/, vendor/, api/lib/, uploads/) um Regeln, die
+# NICHT an einen einzelnen Ordner gebunden sind, sondern ueberall im
+# Webroot greifen sollen (z.B. eine versehentlich falsch abgelegte .sql-
+# oder .env-Datei, ganz gleich in welchem Unterordner).
+#
+# Carsten (siehe Abschlussbericht fuer die vollstaendige Liste): bitte vor
+# dem Go-Live pruefen, ob der echte Hosting-Server (kjs.mysolution-
+# webservice.de) tatsaechlich Apache mit mod_rewrite/mod_authz_core ist und
+# ob AllowOverride fuer den Webroot aktiv ist - sonst hat diese Datei keine
+# Wirkung und der Schutz muss aequivalent in der zentralen vHost-/Server-
+# Konfiguration (oder, bei nginx, per "location"-Bloecken) nachgebaut
+# werden. Eine vorbereitete nginx-Variante steht als Kommentar am Ende
+# dieser Datei.
+
+# ── .git/ (Versionskontrolle, kann komplette Historie inkl. evtl. frueher
+#    versehentlich committeter Secrets offenlegen) - rekursiv blockiert,
+#    unabhaengig davon, in welchem Ordner ein .git/ jemals landen sollte ──
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} (^|/)\.git(/|$) [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+# Fallback ohne mod_rewrite: zumindest das .git-Verzeichnis im Webroot direkt sperren.
+<IfModule !mod_rewrite.c>
+    <IfModule mod_authz_core.c>
+        <DirectoryMatch "(^|/)\.git(/|$)">
+            Require all denied
+        </DirectoryMatch>
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        <DirectoryMatch "(^|/)\.git(/|$)">
+            Order deny,allow
+            Deny from all
+        </DirectoryMatch>
+    </IfModule>
+</IfModule>
+
+# ── Sonstige "unsichtbare" Dateien (.env, .htpasswd, .DS_Store, ...) ──
+# .htaccess selbst ist bei Apache >= 2.4 standardmaessig bereits geschuetzt
+# (AccessFileName-Konvention); diese Regel sperrt zusaetzlich alle anderen
+# punktbeginnenden Dateien, insbesondere .env, das laut .gitignore zwar nie
+# committet werden soll, aber direkt auf dem Server abgelegt sein koennte.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Datenbank-Dumps, Logs, lokale Konfigurationsdateien mit echten
+#    Zugangsdaten, Backup-/Editor-Restdateien, interne Planungsnotizen ──
+# *.md ist bewusst mit dabei: auf dieser Seite gibt es aktuell keine
+# einzige Seite, die eine .md-Datei per HTTP direkt anzeigt (Inhalte laufen
+# ausschliesslich ueber die content/*.json-Dateien) - alle vorhandenen
+# .md-Dateien im Repo-Wurzelverzeichnis sind interne Planungsnotizen bzw.
+# ein verwaister Test-Datensatz (content/seiten-kjs/verbraucher.md), keine
+# fuer Besucher gedachten Inhalte.
+<FilesMatch "\.(sql|log|local\.php|bak|backup|old|orig|swp|md)$|~$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Einmalige Entwickler-/Migrationsskripte im Repo-Wurzelverzeichnis
+#    (fix_nav.py, fix_flyout_nav.py) - fuer den PHP-Host ohnehin nicht
+#    ausfuehrbar, sollen aber auch nicht als Quelltext abrufbar sein ──
+<FilesMatch "\.py$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Verzeichnislisten global aus - falls fuer einen Ordner kein eigener
+#    "index.html"/"index.php" existiert, soll kein Datei-Listing erscheinen ──
+Options -Indexes
+
+# ──────────────────────────────────────────────────────────────────────
+# NUR ALS VORLAGE, falls der echte Host statt Apache doch nginx ist (oder
+# Apache als reiner nginx-Reverse-Proxy-Client ohne AllowOverride laeuft):
+# diese Datei haette dann GAR KEINE Wirkung. Carsten muesste in diesem Fall
+# sinngemaess folgende "location"-Bloecke in der echten nginx-Server-
+# Konfiguration ergaenzen (Platzhalter, nicht wortwoertlich uebernehmbar -
+# haengt vom tatsaechlichen server{}-Block der Domain ab):
+#
+#   location ~ (^|/)\.git(/|$)                { deny all; return 404; }
+#   location ~ ^/\.                            { deny all; return 404; }
+#   location ~ \.(sql|log|bak|backup|old|orig|swp|md|py)$ { deny all; return 404; }
+#   location ~ \.local\.php$                   { deny all; return 404; }
+#   location ~ ^/(config|database|vendor)/     { deny all; return 404; }
+#   autoindex off;
+# ──────────────────────────────────────────────────────────────────────

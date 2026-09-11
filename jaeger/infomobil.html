@@ -5,7 +5,7 @@
   <meta name="description" content="Infomobil – Kreisjägerschaft Segeberg e.V.">
   <title>Infomobil – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/js/vendor/marked.min.js"></script>
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
@@ -26,7 +26,7 @@
 <script src="/js/components.js"></script>
 
 <div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="page-hero__bg" style="background-image: url('/images/stock/hero-default.jpg')"></div>
   <div class="container">
     <h1>Infomobil</h1>
     <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
@@ -139,12 +139,18 @@
       var container = document.getElementById('kalender-container');
       if (!container || !settings.google_kalender_url) return;
       var titel = settings.google_kalender_titel || 'Terminbuchung';
+      // Aus Datenschutzgruenden wird der iframe nicht automatisch geladen,
+      // sondern erst nach einem aktiven Klick des Besuchers (siehe
+      // kjsEmbedPlaceholder() in js/main.js).
       container.innerHTML =
         '<div style="margin-top:2rem;">' +
           '<h3 style="margin-bottom:1rem;">' + titel + '</h3>' +
-          '<div style="border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-md);">' +
-            '<iframe src="' + settings.google_kalender_url + '" style="width:100%;height:650px;border:none;display:block;" frameborder="0" scrolling="no" title="Google Kalender – Terminbuchung"></iframe>' +
-          '</div>' +
+          kjsEmbedPlaceholder(settings.google_kalender_url, {
+            label: '📅 Kalender anzeigen',
+            hint: 'Beim Klick wird der Kalender von Google geladen. Dabei können Daten an Google übertragen werden.',
+            aspect: 'auto',
+            minHeight: '650px'
+          }) +
           '<p style="font-size:.8rem;color:var(--text-muted);margin-top:.75rem;">Dieser Kalender wird von Google bereitgestellt. ' +
             '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Datenschutzhinweise von Google</a></p>' +
         '</div>';

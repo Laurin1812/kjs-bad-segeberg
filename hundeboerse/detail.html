@@ -9,7 +9,7 @@
   <!-- Leaflet/OpenStreetMap für die Standort-Karte weiter unten (31.08.2026,
        Laurin-Wunsch). Etablierte Open-Source-Lösung ohne Tracking, per CDN
        geladen wie das bereits vorhandene marked.js weiter unten im Body. -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/css/vendor/leaflet.css">
 <script>
   fetch('/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
@@ -31,7 +31,7 @@
 <script src="/js/components.js"></script>
 
 <div class="page-hero" id="hb-hero">
-  <div class="page-hero__bg" id="hb-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=50')"></div>
+  <div class="page-hero__bg" id="hb-hero-bg" style="background-image: url('/images/stock/hero-bergpanorama.jpg')"></div>
   <div class="container">
     <h1 id="hb-detail-titel">Wird geladen …</h1>
     <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
@@ -58,7 +58,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/js/vendor/marked.min.js"></script>
 <!-- DOMPurify saeubert das von marked.parse() erzeugte HTML, bevor es per
      innerHTML eingefuegt wird (Security-Finalisierung: marked.js selbst hat
      seine eingebaute "sanitize"-Option in v4+ als unzuverlaessig entfernt;
@@ -67,8 +67,8 @@
      dieses Sanitizing koennte eine Beschreibung mit eingebettetem rohen
      HTML (z.B. Script-Tags, onerror-Attribute, javascript:-Links) beim
      Rendern ausgefuehrt werden. -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/vendor/purify.min.js"></script>
+<script src="/js/vendor/leaflet.js"></script>
 <script>
 (function() {
   // Adressierung ueber die stabile Anzeigen-ID (?id=...) statt des früheren
@@ -349,7 +349,23 @@
           (hatKoordinaten ? '' : ' Für diese Anzeige liegt aktuell keine Kartenansicht vor.') +
           '</span></p>';
         if (hatKoordinaten) {
-          html += '<div id="hb-map" class="hb-map" aria-label="Karte: ungefährer Standort ' + escHtml(standort) + '"></div>' +
+          // Datenschutz-Hardening (Pass 2, 11.09.2026): die Karte lud bisher
+          // beim Öffnen jeder Anzeige automatisch Kacheln von
+          // tile.openstreetmap.org nach - unabhängig davon, ob der Besucher
+          // die Karte überhaupt sehen wollte. OpenStreetMap selbst trackt
+          // zwar nicht wie Google, ist aber trotzdem ein externer
+          // Drittanbieter-Request beim reinen Seitenaufruf. Jetzt: Platzhalter
+          // im gleichen Stil wie die anderen Klick-Aktivierungen
+          // (kjsEmbedPlaceholder in js/main.js), echte Karte erst nach Klick.
+          html += '<div id="hb-map-placeholder" class="kjs-embed-placeholder" ' +
+              'style="position:relative;aspect-ratio:auto;min-height:220px;' +
+              'background:var(--green-light,#eef3ec);border-radius:var(--radius-md,8px);' +
+              'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+              'gap:.6rem;overflow:hidden;text-align:center;padding:1rem;" ' +
+              'aria-label="Karte: ungefährer Standort ' + escHtml(standort) + '">' +
+            '<button type="button" class="btn btn-outline-green" id="hb-map-activate-btn">🗺️ Karte anzeigen</button>' +
+            '<p style="margin:0;font-size:.78rem;color:var(--text-muted,#666);max-width:26rem;">Beim Klick wird eine Karte von OpenStreetMap geladen.</p>' +
+          '</div>' +
             '<p class="hb-map-link"><a href="https://www.openstreetmap.org/?mlat=' + encodeURIComponent(a.lat) + '&amp;mlon=' + encodeURIComponent(a.lng) + '#map=12/' + encodeURIComponent(a.lat) + '/' + encodeURIComponent(a.lng) + '" target="_blank" rel="noopener">In Karte öffnen ↗</a></p>';
         }
       }
@@ -417,30 +433,43 @@
       // aus --green-main gelesen, damit eine über das Admin-Design geänderte
       // Vereinsfarbe (siehe Farb-Skript ganz oben im <head>) automatisch
       // übernommen wird.
-      var mapEl = document.getElementById('hb-map');
-      if (mapEl && typeof L !== 'undefined' && hatKoordinaten) {
-        try {
-          var mapAccent = getComputedStyle(document.documentElement).getPropertyValue('--green-main').trim() || '#2e6b30';
-          var hbMap = L.map(mapEl, { scrollWheelZoom: false }).setView([a.lat, a.lng], 12);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 17,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende'
-          }).addTo(hbMap);
-          L.circle([a.lat, a.lng], {
-            radius: 2000,
-            color: mapAccent,
-            weight: 2,
-            fillColor: mapAccent,
-            fillOpacity: 0.18
-          }).addTo(hbMap);
-          mapEl.addEventListener('click', function aktivieren() {
-            hbMap.scrollWheelZoom.enable();
-            mapEl.removeEventListener('click', aktivieren);
-          });
-        } catch (e) {
-          // Karte konnte nicht aufgebaut werden (z.B. Leaflet nicht
-          // geladen) - der Standort-Text darüber bleibt trotzdem sichtbar.
-        }
+      // Klick-Aktivierung: die Karte (und damit der Request an
+      // tile.openstreetmap.org) wird erst aufgebaut, wenn der Besucher aktiv
+      // auf den Platzhalter-Button klickt (siehe Kommentar oben bei
+      // hb-map-placeholder).
+      var mapPlaceholderBtn = document.getElementById('hb-map-activate-btn');
+      if (mapPlaceholderBtn && typeof L !== 'undefined' && hatKoordinaten) {
+        mapPlaceholderBtn.addEventListener('click', function aktivierenKarte() {
+          var placeholder = document.getElementById('hb-map-placeholder');
+          if (!placeholder) return;
+          var mapEl = document.createElement('div');
+          mapEl.id = 'hb-map';
+          mapEl.className = 'hb-map';
+          mapEl.setAttribute('aria-label', 'Karte: ungefährer Standort ' + escHtml(standort));
+          placeholder.replaceWith(mapEl);
+          try {
+            var mapAccent = getComputedStyle(document.documentElement).getPropertyValue('--green-main').trim() || '#2e6b30';
+            var hbMap = L.map(mapEl, { scrollWheelZoom: false }).setView([a.lat, a.lng], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 17,
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende'
+            }).addTo(hbMap);
+            L.circle([a.lat, a.lng], {
+              radius: 2000,
+              color: mapAccent,
+              weight: 2,
+              fillColor: mapAccent,
+              fillOpacity: 0.18
+            }).addTo(hbMap);
+            mapEl.addEventListener('click', function aktivieren() {
+              hbMap.scrollWheelZoom.enable();
+              mapEl.removeEventListener('click', aktivieren);
+            });
+          } catch (e) {
+            // Karte konnte nicht aufgebaut werden (z.B. Leaflet nicht
+            // geladen) - der Standort-Text darüber bleibt trotzdem sichtbar.
+          }
+        });
       }
 
       // ── "Anbieter kontaktieren"-Button (oben) ─────────────────

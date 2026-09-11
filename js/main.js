@@ -66,6 +66,55 @@ window.kjsImgFallback = function(imgEl) {
   if (full) imgEl.src = full;
 };
 
+// ── Datenschutzfreundliche Zwei-Klick-Einbindung für Drittanbieter-Embeds
+// (11.09.2026, Security-/Datenschutz-Hardening-Pass) ─────────────────────
+// Google Maps (Kontaktseite) und YouTube-Videos (Service-Seite) wurden
+// bisher als normales <iframe> gerendert und haben dadurch bei JEDEM
+// Seitenaufruf automatisch einen Request an den jeweiligen Drittanbieter
+// ausgelöst - unabhängig davon, ob der Besucher die Karte/das Video
+// überhaupt sehen wollte. kjsEmbedPlaceholder() liefert stattdessen einen
+// dezenten Platzhalter mit Button; erst ein aktiver Klick (kjsActivateEmbed)
+// baut das echte <iframe> und damit den externen Request. Bewusst als
+// generische, kleine Helper-Funktion statt Einzellösung pro Seite, damit
+// künftige weitere Embeds (weitere iframes) dasselbe Muster nutzen können,
+// ohne Zwei-Klick-Logik erneut zu implementieren.
+function kjsEscHtmlG(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function kjsEmbedPlaceholder(src, opts) {
+  opts = opts || {};
+  var label = opts.label || 'Externen Inhalt laden';
+  var hint = opts.hint || '';
+  var aspect = opts.aspect || '16/9';
+  var minHeight = opts.minHeight ? ('min-height:' + opts.minHeight + ';') : '';
+  return (
+    '<div class="kjs-embed-placeholder" data-embed-src="' + kjsEscHtmlG(src) + '" ' +
+      'style="position:relative;aspect-ratio:' + aspect + ';' + minHeight +
+      'background:var(--green-light,#eef3ec);border-radius:var(--radius-md,8px);' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'gap:.6rem;overflow:hidden;text-align:center;padding:1rem;">' +
+      '<button type="button" class="btn btn-outline-green" onclick="kjsActivateEmbed(this)">' +
+        kjsEscHtmlG(label) +
+      '</button>' +
+      (hint ? '<p style="margin:0;font-size:.78rem;color:var(--text-muted,#666);max-width:26rem;">' + kjsEscHtmlG(hint) + '</p>' : '') +
+    '</div>'
+  );
+}
+window.kjsActivateEmbed = function(btn) {
+  var wrap = btn.closest('.kjs-embed-placeholder');
+  if (!wrap) return;
+  var src = wrap.getAttribute('data-embed-src');
+  if (!src) return;
+  var iframe = document.createElement('iframe');
+  iframe.src = src;
+  iframe.setAttribute('allowfullscreen', '');
+  iframe.loading = 'lazy';
+  iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
+  wrap.innerHTML = '';
+  wrap.appendChild(iframe);
+};
+
 // ── Tabellen aus dem Admin/TipTap scrollbar machen (Desktop-Fallback) ────
 // Wichtig: die <table> selbst bleibt display:table (Spaltenberechnung des
 // Browsers funktioniert nur so korrekt) – nur eine umschließende Box

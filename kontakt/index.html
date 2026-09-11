@@ -27,7 +27,7 @@
 <script src="/js/components.js"></script>
 
 <div class="page-hero">
-  <div class="page-hero__bg" style="background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=50')"></div>
+  <div class="page-hero__bg" style="background-image: url('/images/stock/hero-default.jpg')"></div>
   <div class="container">
     <h1>Kontakt</h1>
     <nav class="breadcrumb" aria-label="Breadcrumb" id="siteBreadcrumb"></nav>
@@ -297,11 +297,10 @@
                 </div>
 
                 <div style="margin-top:1.5rem; border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-sm);">
-                  <iframe
-                    src="https://maps.google.com/maps?q=Am+Schie%C3%9Fstand+1%2C+24640+Hasenmoor&output=embed&z=15&hl=de"
-                    width="100%" height="280" style="border:0;display:block;"
-                    allowfullscreen="" loading="lazy"
-                    title="Standort Kreisjägerschaft Segeberg"></iframe>
+                  ${kjsEmbedPlaceholder(
+                    'https://maps.google.com/maps?q=Am+Schie%C3%9Fstand+1%2C+24640+Hasenmoor&output=embed&z=15&hl=de',
+                    { label: '🗺️ Karte anzeigen', hint: 'Beim Klick wird eine Karte von Google Maps geladen. Dabei können Daten an Google übertragen werden.', aspect: 'auto', minHeight: '280px' }
+                  )}
                 </div>`;
             })
             .catch(() => {

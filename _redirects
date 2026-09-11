@@ -20,3 +20,57 @@
 # Abruf gedacht - aus Konsistenz genauso wie /api/ und /vendor/ oben
 # geblockt.
 /database/* /  404!
+
+# Security-/Datenschutz-Hardening (11.09.2026): config/*.example.php-Dateien
+# enthalten keine echten Zugangsdaten (nur Platzhalter "CHANGE-ME", echte
+# Werte liegen ausschliesslich in den nie committeten config/*.local.php -
+# siehe .gitignore), wurden aber bislang von Netlify direkt als Klartext
+# ausgeliefert (live geprueft: HTTP 200 auf z.B. /config/db.example.php).
+# config/.htaccess wirkt nur auf einem echten Apache-Server, nicht auf
+# Netlify - deshalb hier zusaetzlich, aus Konsistenz mit /api/, /vendor/,
+# /database/, geblockt.
+/config/*   /  404!
+
+# Interne Projekt-/Planungsnotizen und einmalige Entwickler-Hilfsskripte im
+# Repo-Wurzelverzeichnis (u.a. mit unredigierten internen Gespraechsnotizen
+# und Personenerwaehnungen) wurden bislang ebenfalls direkt ausgeliefert
+# (live geprueft: HTTP 200). Nicht fuer den oeffentlichen Abruf gedacht -
+# Impressum/Datenschutz (oeffentliche Rechtsseiten) bleiben bewusst
+# unberuehrt. Empfehlung fuer einen spaeteren Schritt: diese Dateien
+# perspektivisch ganz aus dem von Netlify veroeffentlichten Verzeichnis
+# herausnehmen statt nur per Redirect zu blocken.
+/CLAUDE.md                          /  404!
+/COWORK-KONTEXT.md                  /  404!
+/GESPRAECH-FRANK-2026-08-02.md      /  404!
+/NAECHSTE-SCHRITTE-GO-LIVE.md       /  404!
+/STRUKTUR-ANALYSE.md                /  404!
+/fix_nav.py                         /  404!
+/fix_flyout_nav.py                  /  404!
+
+# Security-/Datenschutz-Hardening, Pass 2 (11.09.2026): weitere beim
+# projektweiten Audit gefundene, live per HTTP 200 abrufbare Dateien ohne
+# Secrets, aber ebenfalls nicht fuer den oeffentlichen Abruf gedacht.
+# README.md ist praktisch leer, wird aber aus Konsistenz mit den anderen
+# .md-Dateien trotzdem geblockt. content/seiten-kjs/verbraucher.md ist ein
+# verwaister Test-Datensatz ("Laurin Test") aus einer frueheren Content-
+# Struktur - wird von keiner Seite mehr abgerufen (aktuelle Logik laedt
+# ausschliesslich .json aus diesem Ordner, siehe seiten/index.html), aber
+# war live einsehbar.
+/README.md                                /  404!
+/content/seiten-kjs/verbraucher.md        /  404!
+
+# scripts/generate-thumbnails.php ist ein einmaliges CLI-Migrationsskript
+# (siehe Datei-Kommentar dort) und enthaelt keine Secrets, wurde aber von
+# Netlify als reiner PHP-Quelltext ausgeliefert (Netlify kann PHP nicht
+# ausfuehren) - analog zu /api/ oben geblockt.
+/scripts/*  /  404!
+
+# netlify/functions/admin-users.js ist der Quelltext der serverseitigen
+# Admin-Benutzerverwaltungs-Function. Die eigentliche Function laeuft unter
+# der GANZ ANDEREN, von Netlify selbst bereitgestellten Route
+# "/.netlify/functions/admin-users" (siehe BU_ENDPOINT in admin.js) - dieser
+# Redirect blockiert NUR den direkten Abruf der Quelltextdatei im Repo-Pfad
+# "netlify/", die Funktion selbst bleibt dadurch unveraendert erreichbar.
+# Kein Secret im Code, aber die Autorisierungslogik einer Admin-Funktion
+# muss nicht fuer jeden Besucher als Klartext einsehbar sein.
+/netlify/*  /  404!

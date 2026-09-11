@@ -1,0 +1,23 @@
+# Sperrt direkten Web-Zugriff auf diesen Ordner (Apache).
+# generate-thumbnails.php ist ein einmaliges CLI-Migrationsskript (siehe
+# Datei-Kommentar dort), nicht fuer den Aufruf per Browser/HTTP gedacht.
+# Es hat selbst KEINEN eigenen Schutz gegen HTTP-Aufrufe (kein PHP_SAPI-
+# Check wie database/import_json_to_mysql.php) - falls dieser Ordner jemals
+# mit auf einen echten PHP-Server uebertragen wird, verhindert diese Regel
+# den direkten Aufruf. Verteidigung in der Tiefe, analog zu config/.htaccess,
+# database/.htaccess und vendor/.htaccess.
+#
+# Ohne Wirkung, falls der Server kein Apache ist (z.B. reines nginx) - dann
+# bitte scripts/ stattdessen auf Serverebene sperren oder ganz aus dem
+# oeffentlich erreichbaren Webroot herausnehmen.
+
+# Apache >= 2.4
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache < 2.4 (Fallback für ältere Hosting-Umgebungen)
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

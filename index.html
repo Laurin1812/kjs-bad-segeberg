@@ -670,27 +670,40 @@
     }
   }).catch(function(){});
 </script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", function(user) {
-      if (!user) {
-        window.netlifyIdentity.on("login", function(loggedInUser) {
-          var roles = loggedInUser.app_metadata && loggedInUser.app_metadata.roles;
-          var isEditor = roles && roles.some(function(r){ return r.toLowerCase()==='editor'||r.toLowerCase()==='redakteur'; });
-          document.location.href = isEditor ? "/redaktion/" : "/admin/";
+  // Datenschutz-/Security-Hardening (11.09.2026): Netlify Identity wurde
+  // bisher auf JEDEM Aufruf der öffentlichen Startseite automatisch nachgeladen
+  // (Request an identity.netlify.com für jeden Besucher), obwohl die einzige
+  // tatsächliche Aufgabe dieses Codes ist, einen Einladungs-/Bestätigungs-/
+  // Reset-Link zu bedienen, der zufällig auf der Startseite landet (Hash mit
+  // invite_token/confirmation_token/recovery_token). Das Script wird jetzt nur
+  // noch dynamisch nachgeladen, wenn genau dieser Fall vorliegt - für alle
+  // anderen Besucher entfällt der externe Request komplett. Funktional
+  // unverändert: Login läuft weiterhin über /login bzw. /admin, die das
+  // Widget regulär (statisch) laden.
+  var kjsIdentityHash = window.location.hash;
+  if (kjsIdentityHash && (
+    kjsIdentityHash.includes('invite_token') ||
+    kjsIdentityHash.includes('confirmation_token') ||
+    kjsIdentityHash.includes('recovery_token')
+  )) {
+    var kjsIdentityScript = document.createElement('script');
+    kjsIdentityScript.src = 'https://identity.netlify.com/v1/netlify-identity-widget.js';
+    kjsIdentityScript.onload = function() {
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", function(user) {
+          if (!user) {
+            window.netlifyIdentity.on("login", function(loggedInUser) {
+              var roles = loggedInUser.app_metadata && loggedInUser.app_metadata.roles;
+              var isEditor = roles && roles.some(function(r){ return r.toLowerCase()==='editor'||r.toLowerCase()==='redakteur'; });
+              document.location.href = isEditor ? "/redaktion/" : "/admin/";
+            });
+          }
+          window.netlifyIdentity.open();
         });
       }
-      // Einladungs- / Reset-Token im URL → Modal direkt öffnen
-      var hash = window.location.hash;
-      if (hash && (
-        hash.includes('invite_token') ||
-        hash.includes('confirmation_token') ||
-        hash.includes('recovery_token')
-      )) {
-        window.netlifyIdentity.open();
-      }
-    });
+    };
+    document.head.appendChild(kjsIdentityScript);
   }
 </script>
 </body>
