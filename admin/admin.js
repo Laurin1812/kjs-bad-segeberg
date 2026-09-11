@@ -6668,7 +6668,7 @@
     if (!iso) return 'Noch kein Login erfasst';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return 'Noch kein Login erfasst';
-    var datum = d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' });
+    var datum = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' });
     var zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' });
     return datum + ', ' + zeit + ' Uhr';
   }
