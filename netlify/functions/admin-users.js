@@ -107,19 +107,6 @@ function mapUser(u) {
   };
 }
 
-// TEMPORÄR (11.09.2026) - nur zur einmaligen Verifikation, ob GoTrue einen
-// Letzter-Login-Zeitstempel liefert. Wird nach der Prüfung sofort wieder
-// entfernt bzw. durch die endgültige Implementierung ersetzt.
-function debugRaw(u) {
-  return {
-    email: u.email,
-    keys: Object.keys(u),
-    last_sign_in_at: u.last_sign_in_at || null,
-    last_login_at: u.last_login_at || null,
-    last_signin_at: u.last_signin_at || null
-  };
-}
-
 exports.handler = async function (event, context) {
   var clientContext = context.clientContext || {};
   var identity = clientContext.identity;
@@ -155,9 +142,7 @@ exports.handler = async function (event, context) {
         return json(502, { error: 'upstream_error', message: 'Benutzerliste konnte nicht geladen werden.' });
       }
       var users = (body.users || []).map(mapUser);
-      // TEMPORÄR: Rohdaten-Debug-Feld zur einmaligen Prüfung des Letzter-
-      // Login-Feldes, siehe debugRaw() oben. Wird danach sofort entfernt.
-      return json(200, { users: users, _debug: (body.users || []).map(debugRaw) });
+      return json(200, { users: users });
     }
 
     if (event.httpMethod === 'POST') {
