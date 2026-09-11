@@ -1341,6 +1341,25 @@
   /* ────────────────────────────────────────────────────────────
      AUTH
   ──────────────────────────────────────────────────────────── */
+  // "Letzter Login" (11.09.2026): schreibt bei jedem erfolgreichen Login den
+  // eigenen Zeitstempel über netlify/functions/record-last-login.js (siehe
+  // dortiger Kommentar für Details/Sicherheit). Bewusst nur beim "login"-
+  // Event (echte Anmeldung), nicht beim "init"-Event (das bei jedem
+  // Seitenaufruf mit noch gültiger Sitzung feuert) - sonst würde jedes
+  // Neuladen der Seite fälschlich als neuer Login gezählt. Ein Fehlschlag
+  // (z.B. kurzzeitiger Netzwerkfehler) darf den Login selbst nie blockieren
+  // oder stören, daher nur Konsolen-Logging, keine UI-Meldung.
+  function recordLastLogin() {
+    getToken(true).then(function(tok) {
+      return fetch('/.netlify/functions/record-last-login', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok }
+      });
+    }).catch(function(e) {
+      console.error('[Letzter Login] Konnte nicht gespeichert werden:', e);
+    });
+  }
+
   function initAuth() {
     netlifyIdentity.on('init', function(user) {
       if (user) onLogin(user); else onLogout();
@@ -1348,6 +1367,7 @@
     netlifyIdentity.on('login', function(user) {
       netlifyIdentity.close();
       onLogin(user);
+      recordLastLogin();
     });
     netlifyIdentity.on('logout', onLogout);
     netlifyIdentity.init();
@@ -6639,6 +6659,20 @@
     return 'Serverfehler – bitte später erneut versuchen.';
   }
 
+  // "Letzter Login" (11.09.2026): deutsches Datum/Uhrzeit-Format, siehe
+  // admin-users.js (mapUser: last_login) für die Herkunft des Werts. Absicht-
+  // lich "Noch kein Login erfasst" statt "Noch nie angemeldet" - ältere
+  // Logins vor Einführung dieser Funktion wurden nicht rückwirkend erfasst,
+  // daher wäre "nie" hier irreführend. Kein roher ISO-Zeitstempel im UI.
+  function buLetzterLoginAnzeige(iso) {
+    if (!iso) return 'Noch kein Login erfasst';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return 'Noch kein Login erfasst';
+    var datum = d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' });
+    var zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' });
+    return datum + ', ' + zeit + ' Uhr';
+  }
+
   async function buFetch(method, pathSuffix, bodyObj) {
     var tok = await getToken(true);
     var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
@@ -6718,6 +6752,7 @@
             '<strong>' + escHtml(u.email) + '</strong>' +
             (u.full_name ? ' <span class="bu-user-name">(' + escHtml(u.full_name) + ')</span>' : '') +
             ' <span class="bu-badge">' + escHtml(statusLabel) + '</span>' +
+            '<div class="bu-user-lastlogin" style="font-size:.8rem;color:var(--text-muted);margin-top:.15rem;">🕒 Letzter Login: ' + escHtml(buLetzterLoginAnzeige(u.last_login)) + '</div>' +
           '</div>' +
           '<div class="bu-user-controls">' +
             '<select class="field-input" style="width:auto;" id="bu-role-' + escAttr(u.id) + '" onchange="benutzerRoleChanged(\'' + escAttr(u.id) + '\')">' + roleOptions + '</select>' +
