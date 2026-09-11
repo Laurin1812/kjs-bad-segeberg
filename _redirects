@@ -46,3 +46,31 @@
 /STRUKTUR-ANALYSE.md                /  404!
 /fix_nav.py                         /  404!
 /fix_flyout_nav.py                  /  404!
+
+# Security-/Datenschutz-Hardening, Pass 2 (11.09.2026): weitere beim
+# projektweiten Audit gefundene, live per HTTP 200 abrufbare Dateien ohne
+# Secrets, aber ebenfalls nicht fuer den oeffentlichen Abruf gedacht.
+# README.md ist praktisch leer, wird aber aus Konsistenz mit den anderen
+# .md-Dateien trotzdem geblockt. content/seiten-kjs/verbraucher.md ist ein
+# verwaister Test-Datensatz ("Laurin Test") aus einer frueheren Content-
+# Struktur - wird von keiner Seite mehr abgerufen (aktuelle Logik laedt
+# ausschliesslich .json aus diesem Ordner, siehe seiten/index.html), aber
+# war live einsehbar.
+/README.md                                /  404!
+/content/seiten-kjs/verbraucher.md        /  404!
+
+# scripts/generate-thumbnails.php ist ein einmaliges CLI-Migrationsskript
+# (siehe Datei-Kommentar dort) und enthaelt keine Secrets, wurde aber von
+# Netlify als reiner PHP-Quelltext ausgeliefert (Netlify kann PHP nicht
+# ausfuehren) - analog zu /api/ oben geblockt.
+/scripts/*  /  404!
+
+# netlify/functions/admin-users.js ist der Quelltext der serverseitigen
+# Admin-Benutzerverwaltungs-Function. Die eigentliche Function laeuft unter
+# der GANZ ANDEREN, von Netlify selbst bereitgestellten Route
+# "/.netlify/functions/admin-users" (siehe BU_ENDPOINT in admin.js) - dieser
+# Redirect blockiert NUR den direkten Abruf der Quelltextdatei im Repo-Pfad
+# "netlify/", die Funktion selbst bleibt dadurch unveraendert erreichbar.
+# Kein Secret im Code, aber die Autorisierungslogik einer Admin-Funktion
+# muss nicht fuer jeden Besucher als Klartext einsehbar sein.
+/netlify/*  /  404!
