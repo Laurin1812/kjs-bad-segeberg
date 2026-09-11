@@ -103,7 +103,16 @@ function mapUser(u) {
     roles: (u.app_metadata && u.app_metadata.roles) || [],
     permissions: (u.app_metadata && u.app_metadata.permissions) || [],
     status: u.confirmed_at ? 'bestaetigt' : 'eingeladen',
-    created_at: u.created_at || null
+    created_at: u.created_at || null,
+    // "Letzter Login" (11.09.2026): Netlify Identity/GoTrue liefert für diese
+    // Site KEINEN eigenen last_sign_in_at-Zeitstempel (empirisch geprüft -
+    // die rohen Benutzerobjekte enthalten kein solches Feld). Der Wert wird
+    // daher von netlify/functions/record-last-login.js bei jedem
+    // erfolgreichen Login selbst in user_metadata.last_login geschrieben und
+    // hier lediglich unverändert durchgereicht (ISO-String oder null, wenn
+    // noch nie erfasst). Keine IP/Geräte-/Historien-Daten, kein separater
+    // Speicher - nur dieser eine Zeitstempel in Netlify Identity selbst.
+    last_login: (u.user_metadata && u.user_metadata.last_login) || null
   };
 }
 

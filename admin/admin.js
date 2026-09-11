@@ -16,6 +16,28 @@
   // Knopf hier im Admin (bewusst, um kurz vor Go-Live kein Risiko einzubauen).
   var BRANCH = 'staging';
 
+  // Hotfix (11.09.2026, "Hundeboerse/Waffenboerse 404 im Admin"): das in
+  // 4a88410 vorbereitete PHP/MySQL-Backend fuer Hundeboerse/Waffenboerse
+  // (siehe boerseModulFuerDatei() weiter unten) ruft /api/<modul>/admin/
+  // liste.php bzw. speichern.php auf. Dieser Pfad existiert nur auf dem
+  // spaeteren, echten PHP-Host - auf Netlify (sowohl staging als auch die
+  // spaetere Live-Domain) blockt die bewusste Security-Regel "/api/* / 404!"
+  // in _redirects (siehe dortiger Kommentar, Commit 2355da3) jeden Zugriff
+  // auf /api/*, unabhaengig vom Pfad dahinter - das ist RICHTIG so und bleibt
+  // unangetastet, denn Netlify koennte die PHP-Dateien sonst nur als
+  // Klartext-Quellcode ausliefern (nie ausfuehren). Live-Beweis: GET
+  // /api/hundeboerse/admin/liste.php auf staging liefert HTTP 404.
+  // IS_PHP_HOST erkennt anhand des Hostnamens, ob wir (noch) auf Netlify
+  // laufen (dann false). Nur wenn NICHT, spricht boerseModulFuerDatei() den
+  // PHP-Pfad tatsaechlich an - sonst faellt apiGet()/apiPut() automatisch auf
+  // den bestehenden, unveraenderten Git-/JSON-Weg (git-gateway) fuer
+  // content/hundeboerse.json bzw. content/waffenboerse.json zurueck, genau
+  // wie vor 4a88410. Sobald der echte PHP-Host unter eigener Domain laeuft,
+  // greift die dort fertige PHP-Anbindung automatisch, ohne dass hier etwas
+  // geaendert werden muss - das PHP/MySQL-Backend selbst (api/*.php,
+  // database/schema.sql) bleibt vollstaendig unangetastet.
+  var IS_PHP_HOST = !/\.netlify\.app$/i.test(location.hostname);
+
   var KAT_NEWS    = ['Allgemein','Naturschutz','Jagd','Jungwildrettung','Hundeausbildung','Schießwesen','Jugend','Jagdhornblasen','Veranstaltung','Pressemitteilung'];
   var KAT_TERMINE = ['Vorstand','Schießwesen','Hundeausbildung','Jagdhornblasen','Jugend','Hegering','Naturschutz','Ausbildung','Kreisveranstaltung','Hauptversammlung','Tradition'];
   var KAT_SERVICE = ['Umweltschutz','Förderung','Merkblätter','Formulare','Allgemein'];
@@ -1145,6 +1167,10 @@
   // frische, leere Installation) nicht wie "keine SHA bekannt" behandelt
   // wird (trackSha() betrachtet einen falsy-Wert als "nichts zu merken").
   function boerseModulFuerDatei(path) {
+    // Siehe IS_PHP_HOST-Kommentar oben: auf Netlify (aktuell IMMER, siehe
+    // dort) bleibt dieser Pfad deaktiviert, damit apiGet()/apiPut() fuer
+    // diese beiden Dateien unveraendert ueber git-gateway laufen.
+    if (!IS_PHP_HOST) return null;
     if (path === 'content/hundeboerse.json') return 'hundeboerse';
     if (path === 'content/waffenboerse.json') return 'waffenboerse';
     return null;
@@ -1341,6 +1367,25 @@
   /* ────────────────────────────────────────────────────────────
      AUTH
   ──────────────────────────────────────────────────────────── */
+  // "Letzter Login" (11.09.2026): schreibt bei jedem erfolgreichen Login den
+  // eigenen Zeitstempel über netlify/functions/record-last-login.js (siehe
+  // dortiger Kommentar für Details/Sicherheit). Bewusst nur beim "login"-
+  // Event (echte Anmeldung), nicht beim "init"-Event (das bei jedem
+  // Seitenaufruf mit noch gültiger Sitzung feuert) - sonst würde jedes
+  // Neuladen der Seite fälschlich als neuer Login gezählt. Ein Fehlschlag
+  // (z.B. kurzzeitiger Netzwerkfehler) darf den Login selbst nie blockieren
+  // oder stören, daher nur Konsolen-Logging, keine UI-Meldung.
+  function recordLastLogin() {
+    getToken(true).then(function(tok) {
+      return fetch('/.netlify/functions/record-last-login', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + tok }
+      });
+    }).catch(function(e) {
+      console.error('[Letzter Login] Konnte nicht gespeichert werden:', e);
+    });
+  }
+
   function initAuth() {
     netlifyIdentity.on('init', function(user) {
       if (user) onLogin(user); else onLogout();
@@ -1348,6 +1393,7 @@
     netlifyIdentity.on('login', function(user) {
       netlifyIdentity.close();
       onLogin(user);
+      recordLastLogin();
     });
     netlifyIdentity.on('logout', onLogout);
     netlifyIdentity.init();
@@ -6639,6 +6685,20 @@
     return 'Serverfehler – bitte später erneut versuchen.';
   }
 
+  // "Letzter Login" (11.09.2026): deutsches Datum/Uhrzeit-Format, siehe
+  // admin-users.js (mapUser: last_login) für die Herkunft des Werts. Absicht-
+  // lich "Noch kein Login erfasst" statt "Noch nie angemeldet" - ältere
+  // Logins vor Einführung dieser Funktion wurden nicht rückwirkend erfasst,
+  // daher wäre "nie" hier irreführend. Kein roher ISO-Zeitstempel im UI.
+  function buLetzterLoginAnzeige(iso) {
+    if (!iso) return 'Noch kein Login erfasst';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return 'Noch kein Login erfasst';
+    var datum = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' });
+    var zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' });
+    return datum + ', ' + zeit + ' Uhr';
+  }
+
   async function buFetch(method, pathSuffix, bodyObj) {
     var tok = await getToken(true);
     var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
@@ -6718,6 +6778,7 @@
             '<strong>' + escHtml(u.email) + '</strong>' +
             (u.full_name ? ' <span class="bu-user-name">(' + escHtml(u.full_name) + ')</span>' : '') +
             ' <span class="bu-badge">' + escHtml(statusLabel) + '</span>' +
+            '<div class="bu-user-lastlogin" style="font-size:.8rem;color:var(--text-muted);margin-top:.15rem;">🕒 Letzter Login: ' + escHtml(buLetzterLoginAnzeige(u.last_login)) + '</div>' +
           '</div>' +
           '<div class="bu-user-controls">' +
             '<select class="field-input" style="width:auto;" id="bu-role-' + escAttr(u.id) + '" onchange="benutzerRoleChanged(\'' + escAttr(u.id) + '\')">' + roleOptions + '</select>' +
