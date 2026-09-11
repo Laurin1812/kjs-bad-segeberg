@@ -1,0 +1,19 @@
+# Sperrt direkten Web-Zugriff auf diesen Ordner (Apache).
+# Composer-Abhaengigkeiten (aktuell PHPMailer) sind nur zum require/include
+# aus api/contact.php gedacht, nicht fuer den direkten Aufruf per URL.
+# Verteidigung in der Tiefe, analog zu config/.htaccess und api/lib/.htaccess.
+#
+# Ohne Wirkung, falls der Server kein Apache ist (z.B. reines nginx) - dann
+# bitte vendor/ stattdessen auf Serverebene sperren oder ganz aus dem
+# oeffentlich erreichbaren Webroot herausnehmen.
+
+# Apache >= 2.4
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache < 2.4 (Fallback für ältere Hosting-Umgebungen)
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

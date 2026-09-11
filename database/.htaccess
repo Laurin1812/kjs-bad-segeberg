@@ -1,0 +1,20 @@
+# Sperrt direkten Web-Zugriff auf diesen Ordner (Apache).
+# database/import_json_to_mysql.php schuetzt sich zwar bereits selbst gegen
+# HTTP-Aufrufe (PHP_SAPI-Check, siehe Datei-Kommentar dort), database/
+# schema.sql ist aber eine reine Textdatei ohne eigenen Schutz. Verteidigung
+# in der Tiefe, analog zu config/.htaccess und api/lib/.htaccess.
+#
+# Ohne Wirkung, falls der Server kein Apache ist (z.B. reines nginx) - dann
+# bitte database/ stattdessen auf Serverebene sperren oder ganz aus dem
+# oeffentlich erreichbaren Webroot herausnehmen.
+
+# Apache >= 2.4
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache < 2.4 (Fallback für ältere Hosting-Umgebungen)
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

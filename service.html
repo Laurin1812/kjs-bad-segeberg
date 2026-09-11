@@ -44,7 +44,7 @@
 
 <footer class="site-footer" id="siteFooter"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/js/vendor/marked.min.js"></script>
 <script src="/js/main.js"></script>
 <script>
   // Service-Seite: Beiträge mit Kategorie (Frank-Wunsch 21.08.2026: Admin-
@@ -161,7 +161,7 @@
           (b.datum ? ' <span class="service-beitrag__datum">' + escHtml(formatDatum(b.datum)) + '</span>' : '') +
         '</div>' +
         (b.text ? '<div class="service-beitrag__text">' + marked.parse(b.text) + '</div>' : '') +
-        (ytId ? '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '" title="' + escHtml(b.titel||'Video') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>' : '') +
+        (ytId ? kjsEmbedPlaceholder('https://www.youtube-nocookie.com/embed/' + ytId, { label: '▶ Video laden', hint: 'Beim Klick wird das Video von YouTube geladen. Dabei können Daten an YouTube/Google übertragen werden.' }) : '') +
         (downloads.length ? '<div class="downloads-list">' + downloads.map(buildDownloadItem).join('') + '</div>' : '') +
       '</div>';
     }
