@@ -155,20 +155,33 @@
   }
 
   /* Das Widget erzeugt sein Iframe erst beim ersten Öffnen/Init, nicht
-     beim reinen Laden des Scripts. Deshalb: falls es schon existiert,
-     sofort behandeln; ansonsten auf sein Erscheinen warten. */
-  function aufIframeWarten() {
-    var bestehenderIframe = document.getElementById('netlify-identity-widget');
-    if (bestehenderIframe && bestehenderIframe.contentDocument) {
-      widgetDokumentBehandeln(bestehenderIframe.contentDocument);
-      return;
+     beim reinen Laden des Scripts. WICHTIG (live auf staging entdeckt,
+     12.09.2026): es kann im DOM gleichzeitig MEHRERE <iframe
+     id="netlify-identity-widget"> geben (z.B. ein verwaistes/verstecktes
+     von einer früheren init()/open()-Runde neben dem aktuell sichtbaren)
+     - beide tragen dieselbe id. Ein einfaches getElementById() liefert
+     nur das erste DOM-Element und kann dadurch am tatsächlich sichtbaren,
+     neuen Iframe komplett vorbeigreifen. Deshalb werden hier IMMER ALLE
+     passenden Iframes verarbeitet, bereits behandelte über ein WeakSet
+     übersprungen, damit auch ein nachträglich hinzugekommenes Iframe
+     zuverlässig erfasst wird. */
+  var behandelteIframes = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+
+  function alleWidgetIframesBehandeln() {
+    var iframes = document.querySelectorAll('iframe#netlify-identity-widget');
+    for (var i = 0; i < iframes.length; i++) {
+      var iframe = iframes[i];
+      if (behandelteIframes && behandelteIframes.has(iframe)) continue;
+      if (!iframe.contentDocument) continue;
+      if (behandelteIframes) behandelteIframes.add(iframe);
+      widgetDokumentBehandeln(iframe.contentDocument);
     }
+  }
+
+  function aufIframeWarten() {
+    alleWidgetIframesBehandeln();
     var beobachter = new MutationObserver(function () {
-      var iframe = document.getElementById('netlify-identity-widget');
-      if (iframe && iframe.contentDocument) {
-        beobachter.disconnect();
-        widgetDokumentBehandeln(iframe.contentDocument);
-      }
+      alleWidgetIframesBehandeln();
     });
     beobachter.observe(document.body, { childList: true, subtree: true });
   }
