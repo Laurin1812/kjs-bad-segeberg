@@ -25,6 +25,7 @@
 
 <div id="siteHeader"></div>
 <script src="/js/components.js"></script>
+<script src="/js/vendor/marked.min.js"></script>
 
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('../images/schweisshunde.jpg')"></div>
@@ -87,9 +88,9 @@
           if (d.inhalt) {
             var el = document.getElementById('page-inhalt');
             if (el) {
-              el.innerHTML = typeof marked !== 'undefined'
-                ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt))
-                : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>');
+              el.innerHTML = /<[a-z][\s\S]*>/i.test(d.inhalt)
+                ? d.inhalt
+                : (typeof marked !== 'undefined' ? marked.parse(d.inhalt) : d.inhalt.replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n\n').join('</p><p>').split('\n').join('<br>'));
             }
           }
         })
@@ -140,7 +141,6 @@
 </div>
 
 <footer class="site-footer" id="siteFooter"></footer>
-<script src="/js/vendor/marked.min.js"></script>
 <script src="/js/main.js"></script>
 </body>
 </html>

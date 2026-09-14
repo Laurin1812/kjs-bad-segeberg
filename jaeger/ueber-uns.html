@@ -23,6 +23,7 @@
 <body>
 <div id="siteHeader"></div>
 <script src="/js/components.js"></script>
+<script src="/js/vendor/marked.min.js"></script>
 <div class="page-hero">
   <div class="page-hero__bg" style="background-image: url('/images/stock/hero-default.jpg')"></div>
   <div class="container">
@@ -59,7 +60,7 @@
         }
         const bild = d.bild ? `<img src="${d.bild}" alt="${d.bild_alt||''}" class="${(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse:(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50':'img-100')}" style="border-radius:8px;margin-bottom:1.5rem;" onerror="this.style.display='none'">` : '';
         let inhalt = '';
-        if(d.inhalt){ inhalt = typeof marked !== 'undefined' ? (/<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : marked.parse(d.inhalt)) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'; }
+        if(d.inhalt){ inhalt = /<[a-z][\s\S]*>/i.test(d.inhalt) ? d.inhalt : (typeof marked !== 'undefined' ? marked.parse(d.inhalt) : '<p>' + d.inhalt.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>') + '</p>'); }
         document.getElementById('page-inhalt').innerHTML =
           (d.untertitel ? '<h2>' + d.untertitel + '</h2>' : '') +
           (d.intro ? '<p>' + d.intro + '</p>' : '') +
@@ -110,7 +111,6 @@
   </div>
 </div>
 <footer class="site-footer" id="siteFooter"></footer>
-<script src="/js/vendor/marked.min.js"></script>
 <script src="/js/main.js"></script>
 </body>
 </html>

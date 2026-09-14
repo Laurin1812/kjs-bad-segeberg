@@ -173,11 +173,20 @@ function renderTermine(termine) {
   }
   tbody.innerHTML = gefiltert.map(t => {
     const gold = goldKategorien.includes(t.kategorie) ? ' badge--gold' : '';
+    // Jeder Zellenwert bekommt ein umschließendes <span> (auch reiner Text
+    // ohne eigenes Element wie Uhrzeit/Veranstaltung/Ort) - Korrektur
+    // 14.09.2026: die Karten-Layout-Regel ".termine-table-wrap.is-stacked
+    // .termine-table tbody td > *" (style.css) greift nur bei einem echten
+    // Kind-ELEMENT der Zelle, nicht bei einem nackten Text-Knoten. Ohne
+    // eigenes Element hatten diese drei Spalten auf schmalen Bildschirmen
+    // kein greifbares "min-width:0", schrumpften daher nicht mit und liefen
+    // stattdessen breit über die Karte hinaus ("Veranstaltung/Ort nehmen
+    // große Breiten ein" aus der Fehlermeldung).
     return `<tr>
       <td><strong>${formatDatum(t.datum)}</strong></td>
-      <td>${escHtml(t.uhrzeit)}</td>
-      <td>${escHtml(t.veranstaltung)}</td>
-      <td>${formatOrt(t)}</td>
+      <td><span>${escHtml(t.uhrzeit)}</span></td>
+      <td><span>${escHtml(t.veranstaltung)}</span></td>
+      <td><span>${formatOrt(t)}</span></td>
       <td>${t.revier ? '<span class="badge badge--gray">' + escHtml(t.revier) + '</span>' : ''}</td>
       <td><span class="badge${gold}">${escHtml(t.kategorie)}</span></td>
     </tr>`;
