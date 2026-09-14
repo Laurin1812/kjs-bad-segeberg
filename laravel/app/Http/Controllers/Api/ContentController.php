@@ -346,7 +346,10 @@ class ContentController extends Controller
             'grußwort' => $page->grusswort ?? '',
             'downloads' => self::embeddedDownloads($page),
             'galerie' => self::embeddedGalerie($page),
-            'galerie_titel' => '',
+            // Bugfix (kjs:compare-content, Werte-Vergleich): war hier fest
+            // auf "" verdrahtet statt $page->galerie_titel auszulesen -
+            // hat den Wert unabhaengig vom Import immer verschluckt.
+            'galerie_titel' => $page->galerie_titel ?? '',
         ]);
     }
 }

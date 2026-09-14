@@ -28,6 +28,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'gruppe',
     'linkliste_titel', 'hundeboerse_cta_titel', 'hundeboerse_cta_text',
     'hundeboerse_cta_button', 'bild_flat', 'in_navigation', 'veroeffentlicht',
+    // Bugfix (kjs:compare-content, Werte-Vergleich): getrennt vom
+    // Seiten-eigenen "veroeffentlicht" - siehe Migration
+    // 2026_09_16_000004 und ImportContent::importWeitere().
+    'registry_veroeffentlicht',
     'sortierung',
 ])]
 class Page extends Model
@@ -37,6 +41,7 @@ class Page extends Model
         return [
             'in_navigation' => 'boolean',
             'veroeffentlicht' => 'boolean',
+            'registry_veroeffentlicht' => 'boolean',
             'bild_flat' => 'boolean',
             'sortierung' => 'integer',
         ];

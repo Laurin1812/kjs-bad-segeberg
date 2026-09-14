@@ -860,8 +860,13 @@ class ImportContent extends Command
                 'uhrzeit' => (string) ($item['uhrzeit'] ?? '') ?: null,
                 'veranstaltung' => (string) ($item['veranstaltung'] ?? ''),
                 'strasse' => (string) ($item['strasse'] ?? '') ?: null,
-                'plz' => trim((string) ($item['plz'] ?? '')) ?: null,
-                'ort' => trim((string) ($item['ort'] ?? '')) ?: null,
+                // Bugfix (kjs:compare-content, Werte-Vergleich): trim() hier
+                // entfernte bei mind. einem echten Termin ein tatsaechlich
+                // vorhandenes Leerzeichen am Ende ("24568 "/"Kattendorf ")
+                // und verletzte damit das 1:1-Kompatibilitaetsprinzip -
+                // bewusst NICHT mehr trimmen, das Original ist Referenz.
+                'plz' => (string) ($item['plz'] ?? '') ?: null,
+                'ort' => (string) ($item['ort'] ?? '') ?: null,
                 'revier' => (string) ($item['revier'] ?? '') ?: null,
                 'kategorie' => (string) ($item['kategorie'] ?? '') ?: null,
                 'archiviert' => $this->toBool($item['archiviert'] ?? null, false),
@@ -1122,6 +1127,13 @@ class ImportContent extends Command
             'bild' => (string) ($data['bild'] ?? '') ?: null,
             'inhalt' => $aufgaben !== '' ? $aufgaben : null,
             'grusswort' => $gruszwort !== '' ? $gruszwort : null,
+            // Bugfix (kjs:compare-content, Werte-Vergleich): fehlte hier
+            // komplett, obwohl content/kreisjjaegermeister.json real
+            // "galerie_titel": "Bildergalerie" fuehrt - dieser Import nutzt
+            // sein eigenes Page::create() statt createPageFromFields() und
+            // hatte den Phase-3-Fix fuer galerie_titel deshalb nicht
+            // automatisch mitbekommen.
+            'galerie_titel' => (string) ($data['galerie_titel'] ?? '') ?: null,
             'in_navigation' => true,
             'veroeffentlicht' => true,
             'sortierung' => 0,
@@ -1324,7 +1336,18 @@ class ImportContent extends Command
             ]);
 
             try {
-                $this->createPageFromFields('weitere', null, $slug, $merged, $i);
+                $page = $this->createPageFromFields('weitere', null, $slug, $merged, $i);
+                // Bugfix (kjs:compare-content, Werte-Vergleich): Registry
+                // und Seite selbst koennen bei "veroeffentlicht"
+                // widerspruechlich sein (siehe Warnung oben) -
+                // "veroeffentlicht" speichert bewusst den Seiten-eigenen
+                // Wert (fuer /api/content/seiten-weitere/{slug}.json),
+                // "registry_veroeffentlicht" zusaetzlich den
+                // Registry-eigenen Wert (fuer
+                // /api/content/seiten-weitere.json) - siehe Migration
+                // 2026_09_16_000004 und PageContentController::
+                // registryEntry().
+                $page->update(['registry_veroeffentlicht' => $registryVeroeffentlicht]);
                 $target++;
             } catch (Throwable $e) {
                 $errors++;

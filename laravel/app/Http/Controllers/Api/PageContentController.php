@@ -92,7 +92,18 @@ class PageContentController extends Controller
             'nav_label' => $page->nav_label ?: ($page->titel ?? ''),
             'titel' => $page->titel ?? '',
             'in_navigation' => (bool) $page->in_navigation,
-            'veroeffentlicht' => (bool) $page->veroeffentlicht,
+            // Bugfix (kjs:compare-content, Werte-Vergleich): Registry und
+            // Seite selbst koennen einen widerspruechlichen
+            // "veroeffentlicht"-Wert fuehren (siehe ImportContent::
+            // importWeitere()) - hier bewusst den Registry-eigenen Wert
+            // bevorzugen (registry_veroeffentlicht), da dieser Endpunkt
+            // genau die Registry-Datei nachbildet; nur wenn keiner
+            // hinterlegt ist (z.B. feste Vorlagen-Seiten ohne echten
+            // Registry-Widerspruch), auf den Seiten-eigenen Wert
+            // zurueckfallen.
+            'veroeffentlicht' => $page->registry_veroeffentlicht !== null
+                ? (bool) $page->registry_veroeffentlicht
+                : (bool) $page->veroeffentlicht,
         ];
     }
 
