@@ -945,6 +945,10 @@ class ImportContent extends Command
                 continue;
             }
             $partner = Partner::create([
+                // Phase-3-Fix: "id" aus content/partner.json 1:1 uebernehmen
+                // (siehe Migration 2026_09_16_000002) - wird fuer die
+                // Partner-Detailseiten-Verlinkung im Frontend benoetigt.
+                'external_id' => isset($item['id']) ? (string) $item['id'] : null,
                 'name' => (string) ($item['name'] ?? ''),
                 'logo' => (string) ($item['logo'] ?? '') ?: null,
                 'kurzbeschreibung' => (string) ($item['kurzbeschreibung'] ?? '') ?: null,
@@ -1422,7 +1426,15 @@ class ImportContent extends Command
             'kontakt_name' => (string) ($data['kontakt_name'] ?? '') ?: null,
             'kontakt_email' => (string) ($data['kontakt_email'] ?? '') ?: null,
             'kontakt_telefon' => (string) ($data['kontakt_telefon'] ?? '') ?: null,
+            // Phase-3-Fix (siehe Migration 2026_09_16_000003): bislang nur
+            // bei content/jaeger/mitglied-werden.json real vorhanden
+            // (Button-Link zum externen Online-Mitgliedsantrag).
+            'antrag_url' => (string) ($data['antrag_url'] ?? '') ?: null,
             'unterseiten_titel' => (string) ($data['unterseiten_titel'] ?? '') ?: null,
+            // Phase-3-Fix (siehe Migration 2026_09_16_000003): war schon in
+            // PageContentController::pageToJson() vorgesehen, hatte aber nie
+            // eine Spalte - bislang stiller Datenverlust bei 31 Seiten.
+            'galerie_titel' => (string) ($data['galerie_titel'] ?? '') ?: null,
             'gruppe' => (string) ($data['gruppe'] ?? '') ?: null,
             'linkliste_titel' => (string) ($data['linkliste_titel'] ?? '') ?: null,
             // Phase 3 Nachtrag (siehe Migration 2026_09_16_000001): nur bei

@@ -235,6 +235,11 @@ class ContentController extends Controller
                 $vorteile = $p->vorteile->pluck('text')->values()->all();
 
                 return [
+                    // Phase-3-Fix: urspruengliches "id"-Feld (siehe Migration
+                    // 2026_09_16_000002 + ImportContent::importPartner()) -
+                    // wird von partner/index.html und partner/detail.html
+                    // fuer die Detailseiten-Verlinkung benoetigt.
+                    'id' => $p->external_id ?? '',
                     'name' => $p->name,
                     'logo' => $p->logo ?? '',
                     'kurzbeschreibung' => $p->kurzbeschreibung ?? '',

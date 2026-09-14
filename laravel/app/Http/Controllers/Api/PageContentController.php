@@ -56,6 +56,10 @@ class PageContentController extends Controller
             'kontakt_name' => $page->kontakt_name ?? '',
             'kontakt_email' => $page->kontakt_email ?? '',
             'kontakt_telefon' => $page->kontakt_telefon ?? '',
+            // Phase-3-Fix: siehe Migration 2026_09_16_000003 - bislang nur
+            // bei jaeger/mitglied-werden real vorhanden, fuer alle anderen
+            // Seiten bleibt es "" (Superset-Strategie, no-op).
+            'antrag_url' => $page->antrag_url ?? '',
             'unterseiten_titel' => $page->unterseiten_titel ?? '',
             'gruppe' => $page->gruppe ?? '',
             'linkliste_titel' => $page->linkliste_titel ?? '',

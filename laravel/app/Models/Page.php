@@ -15,7 +15,17 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'section', 'parent_id', 'slug', 'titel', 'untertitel', 'nav_label',
     'intro', 'inhalt', 'grusswort', 'hero_bild', 'bild', 'bild_alt',
     'vorschaubild', 'kurzbeschreibung', 'bild_groesse', 'kontakt_name',
-    'kontakt_email', 'kontakt_telefon', 'unterseiten_titel', 'gruppe',
+    'kontakt_email', 'kontakt_telefon',
+    // Phase-3-Fix: nur bei content/jaeger/mitglied-werden.json real
+    // vorhanden (Button-Link zum externen Online-Mitgliedsantrag), siehe
+    // Migration 2026_09_16_000003.
+    'antrag_url',
+    'unterseiten_titel',
+    // Phase-3-Fix: PageContentController::pageToJson() las dieses Feld
+    // schon vorher aus, ohne dass die Spalte existierte (stiller
+    // Datenverlust bei 31 Seiten) - siehe Migration 2026_09_16_000003.
+    'galerie_titel',
+    'gruppe',
     'linkliste_titel', 'hundeboerse_cta_titel', 'hundeboerse_cta_text',
     'hundeboerse_cta_button', 'bild_flat', 'in_navigation', 'veroeffentlicht',
     'sortierung',

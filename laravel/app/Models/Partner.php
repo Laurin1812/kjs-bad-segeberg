@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
+    // Phase-3-Fix: "external_id" = das urspruengliche "id"-Feld aus
+    // content/partner.json ("pn-<timestamp>") - wird fuer die
+    // Partner-Detailseiten-Verlinkung (partner/index.html -> detail.html?id=)
+    // 1:1 benoetigt, siehe Migration 2026_09_16_000002.
+    'external_id',
     'name', 'logo', 'kurzbeschreibung', 'beschreibung', 'ansprechpartner',
     'telefon', 'email', 'website', 'rahmenvertrag', 'weitere_infos', 'aktiv',
     'sortierung',
