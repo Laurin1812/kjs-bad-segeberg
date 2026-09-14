@@ -63,9 +63,14 @@ return [
     | will be used by the PHP date and date-time functions. The timezone
     | is set to "UTC" by default as it is suitable for most use cases.
     |
+    | KJS Bad Segeberg (Laravel-Migration, Phase 1): auf Europe/Berlin gesetzt,
+    | da alle Termine/Zeitstempel (Aktuelles, Termine, Kontaktanfragen etc.)
+    | in mitteleuropäischer Zeit angezeigt werden sollen - über APP_TIMEZONE
+    | in .env überschreibbar, falls das je nötig werden sollte.
+    |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Europe/Berlin'),
 
     /*
     |--------------------------------------------------------------------------
