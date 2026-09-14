@@ -13,8 +13,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 // "Datei liegt im Unterverzeichnis der Registry" ausgedrueckt wird.
 #[Fillable([
     'section', 'parent_id', 'slug', 'titel', 'untertitel', 'nav_label',
-    'intro', 'inhalt', 'hero_bild', 'bild', 'bild_alt', 'bild_groesse',
-    'kontakt_name', 'kontakt_email', 'unterseiten_titel', 'linkliste_titel',
+    'intro', 'inhalt', 'hero_bild', 'bild', 'bild_alt', 'vorschaubild',
+    'kurzbeschreibung', 'bild_groesse', 'kontakt_name', 'kontakt_email',
+    'kontakt_telefon', 'unterseiten_titel', 'gruppe', 'linkliste_titel',
     'in_navigation', 'veroeffentlicht', 'sortierung',
 ])]
 class Page extends Model

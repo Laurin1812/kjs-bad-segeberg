@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 // Ersetzt content/aktuelles.json -> "beitraege" sowie content/service.json ->
 // "beitraege" ("typ" unterscheidet beide Bereiche).
 #[Fillable([
-    'typ', 'slug', 'titel', 'datum', 'jahr', 'kategorie_id', 'bild', 'text',
-    'link', 'galerie_titel', 'archiviert', 'sortierung',
+    'typ', 'slug', 'legacy_index', 'titel', 'datum', 'jahr', 'kategorie_id',
+    'bild', 'text', 'link', 'galerie_titel', 'archiviert', 'sortierung',
 ])]
 class Beitrag extends Model
 {
@@ -20,6 +20,7 @@ class Beitrag extends Model
         return [
             'datum' => 'date',
             'jahr' => 'integer',
+            'legacy_index' => 'integer',
             'archiviert' => 'boolean',
             'sortierung' => 'integer',
         ];
