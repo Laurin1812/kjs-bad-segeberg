@@ -95,6 +95,16 @@ class ContentController extends Controller
             ->orderBy('legacy_index')
             ->get()
             ->map(fn (Beitrag $b) => [
+                // Phase 4 (Admin-Schreibweg): zusaetzliches, im Original nie
+                // vorhandenes Feld (harmlose "Superset"-Erweiterung, siehe
+                // PageContentController::pageToJson()-Kommentar) - admin.js
+                // reicht diesen Wert beim Speichern unveraendert durch
+                // (siehe AdminListController::aktuelles()), damit ein
+                // bearbeiteter/verschobener Beitrag serverseitig ZWEIFELSFREI
+                // seiner bestehenden Zeile (und damit seinem unveraenderlichen
+                // "legacy_index" fuer beitrag.html?i=<n>) zugeordnet werden
+                // kann, statt (falsch) anhand der neuen Array-Position.
+                'legacy_index' => $b->legacy_index,
                 'titel' => $b->titel,
                 // Datum bewusst als ISO-String (Y-m-d) statt zurueck ins
                 // urspruengliche TT.MM.JJJJ konvertiert: js/content.js'
@@ -142,6 +152,13 @@ class ContentController extends Controller
         $termine = Termin::orderBy('id')
             ->get()
             ->map(fn (Termin $t) => [
+                // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                // aktuelles()/legacy_index - "termine" hat keinen eigenen
+                // externen Schluessel, daher hier die DB-eigene ID als
+                // harmlose Zusatz-Erweiterung, damit AdminListController::
+                // termine() bestehende Zeilen beim Speichern zweifelsfrei
+                // wiederfindet statt sie blind zu loeschen/neu anzulegen.
+                '_id' => $t->id,
                 'datum' => $t->datum?->toDateString() ?? '',
                 'uhrzeit' => $t->uhrzeit ?? '',
                 'veranstaltung' => $t->veranstaltung,
@@ -170,6 +187,9 @@ class ContentController extends Controller
             ->orderBy('sortierung')
             ->get()
             ->map(fn (Person $p) => [
+                // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                // termine()/'_id'.
+                '_id' => $p->id,
                 'rolle' => $p->rolle,
                 'name' => $p->name,
                 'email' => $p->email ?? '',
@@ -195,6 +215,9 @@ class ContentController extends Controller
         $items = Hegering::orderBy('sortierung')
             ->get()
             ->map(fn (Hegering $h) => [
+                // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                // termine()/'_id'.
+                '_id' => $h->id,
                 'nummer' => $h->nummer,
                 'name' => $h->name,
                 'obmann' => $h->obmann ?? '',
@@ -240,6 +263,12 @@ class ContentController extends Controller
                     // wird von partner/index.html und partner/detail.html
                     // fuer die Detailseiten-Verlinkung benoetigt.
                     'id' => $p->external_id ?? '',
+                    // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                    // termine()/'_id' - unabhaengig von "id"/external_id
+                    // (das bei einem neu im Admin angelegten Partner anfangs
+                    // fehlt), damit AdminListController::partner() jeden
+                    // Partner-Datensatz zweifelsfrei wiederfindet.
+                    '_id' => $p->id,
                     'name' => $p->name,
                     'logo' => $p->logo ?? '',
                     'kurzbeschreibung' => $p->kurzbeschreibung ?? '',
@@ -266,10 +295,13 @@ class ContentController extends Controller
             ->orderBy('sortierung')
             ->get()
             ->map(fn (FaqKategorie $k) => [
+                // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                // termine()/'_id'.
+                '_id' => $k->id,
                 'titel' => $k->titel,
                 'fragen' => $k->fragen
                     ->sortBy('sortierung')
-                    ->map(fn ($f) => ['frage' => $f->frage, 'antwort' => $f->antwort ?? ''])
+                    ->map(fn ($f) => ['_id' => $f->id, 'frage' => $f->frage, 'antwort' => $f->antwort ?? ''])
                     ->values()
                     ->all(),
             ])
@@ -294,9 +326,13 @@ class ContentController extends Controller
             ->orderBy('sortierung')
             ->get()
             ->map(fn (DownloadKategorie $k) => [
+                // Phase 4 (Admin-Schreibweg): siehe Kommentar bei
+                // termine()/'_id'.
+                '_id' => $k->id,
                 'titel' => $k->titel,
                 'downloads' => $k->downloads
                     ->map(fn (Download $d) => [
+                        '_id' => $d->id,
                         'name' => $d->titel,
                         'beschreibung' => $d->beschreibung ?? '',
                         'url' => $d->pfad,

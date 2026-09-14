@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminListController;
+use App\Http\Controllers\Api\Admin\AdminPageController;
+use App\Http\Controllers\Api\Admin\AdminSettingsController;
+use App\Http\Controllers\Api\Admin\AdminVersionController;
 use App\Http\Controllers\Api\ContentController;
 use App\Http\Controllers\Api\PageContentController;
 use App\Http\Controllers\Api\SettingsContentController;
@@ -81,4 +85,80 @@ Route::prefix('content')->group(function () {
     //    literalen "aufgaben/hundeausbildung*"-Routen oben stehen) --------
     Route::get('{section}/{slug}.json', [PageContentController::class, 'festeSeite'])
         ->where('section', 'jaeger|aufgaben|verbraucher');
+});
+
+/*
+|--------------------------------------------------------------------------
+| KJS Bad Segeberg - Phase 4 Admin-Schreib-API
+|--------------------------------------------------------------------------
+|
+| Schreib-Gegenstueck zur Read-API oben (Admin-Schreibweg Git/JSON ->
+| Laravel/MySQL, siehe Auftrag Phase 4). Jede Route ist per
+| "identity.permission:<key>" serverseitig gegen das jeweilige Netlify-
+| Identity-Zugriffstoken abgesichert (siehe App\Http\Middleware\
+| EnsureIdentityPermission) - <key> entspricht 1:1 den Werten aus admin.js'
+| PERM_BY_KEY. "__admin__" verlangt immer die Rolle "admin" (siehe dortiger
+| Sonderwert-Kommentar in EnsureIdentityPermission).
+|
+| Unter "admin/content/*" registriert (statt unter "content/*" wie die
+| Read-API oben), damit dieselben Datei-"Namen" (design.json, footer.json,
+| ...) nicht mit den GET-Routen kollidieren - admin.js spricht GET weiterhin
+| die oeffentliche Read-API oben an (siehe laravelModulFuerDatei()/
+| apiGetLaravel() in admin.js) und nur PUT/POST hier.
+|
+*/
+Route::prefix('admin')->group(function () {
+    Route::get('version/{section}', [AdminVersionController::class, 'show'])
+        ->where('section', '.*');
+
+    // -- Settings-Familie --------------------------------------------------
+    Route::put('content/design.json', [AdminSettingsController::class, 'design'])
+        ->middleware('identity.permission:design');
+    Route::put('content/einstellungen.json', [AdminSettingsController::class, 'einstellungen'])
+        ->middleware('identity.permission:kontakt');
+    Route::put('content/footer.json', [AdminSettingsController::class, 'footer'])
+        ->middleware('identity.permission:footer');
+    Route::put('content/impressum.json', [AdminSettingsController::class, 'impressum'])
+        ->middleware('identity.permission:impressum');
+    Route::put('content/navigation.json', [AdminSettingsController::class, 'navigation'])
+        ->middleware('identity.permission:navigation_reihenfolge');
+    Route::put('content/navigation-extra.json', [AdminSettingsController::class, 'navigationExtra'])
+        ->middleware('identity.permission:navigation');
+    Route::put('content/startseite.json', [AdminSettingsController::class, 'startseite'])
+        ->middleware('identity.permission:startseite');
+
+    // -- Flache Content-Listen ----------------------------------------------
+    Route::put('content/aktuelles.json', [AdminListController::class, 'aktuelles'])
+        ->middleware('identity.permission:aktuelles');
+    Route::put('content/termine.json', [AdminListController::class, 'termine'])
+        ->middleware('identity.permission:termine');
+    Route::put('content/vorstand.json', [AdminListController::class, 'vorstand'])
+        ->middleware('identity.permission:vorstand');
+    Route::put('content/obleute.json', [AdminListController::class, 'obleute'])
+        ->middleware('identity.permission:obleute');
+    Route::put('content/hegeringe.json', [AdminListController::class, 'hegeringe'])
+        ->middleware('identity.permission:hegeringe');
+    Route::put('content/partner.json', [AdminListController::class, 'partner'])
+        ->middleware('identity.permission:partner');
+    Route::put('content/faq.json', [AdminListController::class, 'faq'])
+        ->middleware('identity.permission:faq');
+    Route::put('content/downloads.json', [AdminListController::class, 'downloads'])
+        ->middleware('identity.permission:downloads');
+    Route::put('content/kreisjjaegermeister.json', [AdminListController::class, 'kreisjaegermeister'])
+        ->middleware('identity.permission:kjm');
+
+    // -- Pages (Bearbeiten bestehender Seiten, admin-only) - siehe
+    //    Klassenkommentar in AdminPageController fuer die Begruendung, warum
+    //    hier (noch) nicht granular pro Seite geprueft wird. -------------
+    Route::middleware('identity.permission:__admin__')->group(function () {
+        Route::put('content/aufgaben/hundeausbildung.json', [AdminPageController::class, 'hundeausbildungHub']);
+        Route::put('content/aufgaben/hundeausbildung/{slug}.json', [AdminPageController::class, 'hundeausbildungKurs']);
+        Route::put('content/seiten-kjs/{slug}.json', [AdminPageController::class, 'registrierteSeiteKjs']);
+        Route::put('content/seiten-aufgaben/{slug}.json', [AdminPageController::class, 'registrierteSeiteAufgaben']);
+        Route::put('content/seiten-verbraucher/{slug}.json', [AdminPageController::class, 'registrierteSeiteVerbraucher']);
+        Route::put('content/seiten-weitere/{slug}.json', [AdminPageController::class, 'weitereSeite']);
+        Route::put('content/seiten-sub-{parentSlug}/{childSlug}.json', [AdminPageController::class, 'subSeite']);
+        Route::put('content/{section}/{slug}.json', [AdminPageController::class, 'festeSeite'])
+            ->where('section', 'jaeger|aufgaben|verbraucher');
+    });
 });

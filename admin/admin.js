@@ -1176,6 +1176,94 @@
     return null;
   }
 
+  // Phase 4 (Admin-Schreibweg Git/JSON -> Laravel/MySQL, 17.09.2026): exakt
+  // dasselbe Abzweig-Muster wie boerseModulFuerDatei()/apiGetBoerse()/
+  // apiPutBoerse() oben (dort fuer Hundeboerse/Waffenboerse) - hier fuer die
+  // per Laravel/MySQL verwalteten "flachen" Content-Module (Settings-
+  // Familie + flache Listen, siehe AdminSettingsController/
+  // AdminListController). "IS_PHP_HOST" wird bewusst WIEDERVERWENDET (kein
+  // neuer Host-Erkennungscode noetig): lokal (php artisan serve/router.php)
+  // UND auf der spaeteren echten Produktionsdomain ist das bereits heute
+  // "true", auf Netlify (Vorschau-Branches) bleibt es "false" - Admin-
+  // Speicherungen auf Netlify-Vorschauen laufen also unveraendert weiter
+  // ueber git-gateway, bis eine bewusste Go-Live-Entscheidung ansteht.
+  //
+  // Seiten (content/jaeger/*.json, content/seiten-*/*.json, Hundeausbildung)
+  // sind ABSICHTLICH NICHT in dieser Tabelle - siehe Abschlussbericht
+  // "offene Punkte": AdminPageController existiert bereits serverseitig,
+  // ist aber noch nicht an admin.js angebunden (granulare Seiten-Rechte
+  // pro Slug, siehe dortiger Klassenkommentar). Seiten speichern daher
+  // vorerst weiterhin unveraendert ueber git-gateway.
+  var LARAVEL_WRITE_MODULES = {
+    'content/design.json': { get: '/api/content/design.json', put: '/api/admin/content/design.json', section: 'design' },
+    'content/einstellungen.json': { get: '/api/content/einstellungen.json', put: '/api/admin/content/einstellungen.json', section: 'einstellungen' },
+    'content/footer.json': { get: '/api/content/footer.json', put: '/api/admin/content/footer.json', section: 'footer' },
+    'content/impressum.json': { get: '/api/content/impressum.json', put: '/api/admin/content/impressum.json', section: 'impressum' },
+    'content/navigation.json': { get: '/api/content/navigation.json', put: '/api/admin/content/navigation.json', section: 'navigation' },
+    'content/navigation-extra.json': { get: '/api/content/navigation-extra.json', put: '/api/admin/content/navigation-extra.json', section: 'navigation-extra' },
+    'content/startseite.json': { get: '/api/content/startseite.json', put: '/api/admin/content/startseite.json', section: 'startseite' },
+    'content/aktuelles.json': { get: '/api/content/aktuelles.json', put: '/api/admin/content/aktuelles.json', section: 'aktuelles' },
+    'content/termine.json': { get: '/api/content/termine.json', put: '/api/admin/content/termine.json', section: 'termine' },
+    'content/vorstand.json': { get: '/api/content/vorstand.json', put: '/api/admin/content/vorstand.json', section: 'vorstand' },
+    'content/obleute.json': { get: '/api/content/obleute.json', put: '/api/admin/content/obleute.json', section: 'obleute' },
+    'content/hegeringe.json': { get: '/api/content/hegeringe.json', put: '/api/admin/content/hegeringe.json', section: 'hegeringe' },
+    'content/partner.json': { get: '/api/content/partner.json', put: '/api/admin/content/partner.json', section: 'partner' },
+    'content/faq.json': { get: '/api/content/faq.json', put: '/api/admin/content/faq.json', section: 'faq' },
+    'content/downloads.json': { get: '/api/content/downloads.json', put: '/api/admin/content/downloads.json', section: 'downloads' },
+    'content/kreisjjaegermeister.json': { get: '/api/content/kreisjjaegermeister.json', put: '/api/admin/content/kreisjjaegermeister.json', section: 'kreisjaegermeister' }
+  };
+
+  function laravelModulFuerDatei(path) {
+    if (!IS_PHP_HOST) return null;
+    return Object.prototype.hasOwnProperty.call(LARAVEL_WRITE_MODULES, path) ? LARAVEL_WRITE_MODULES[path] : null;
+  }
+
+  async function apiGetLaravel(cfg) {
+    var tok = await getToken();
+    var r = await fetch(cfg.get + '?_=' + Date.now(), {
+      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' beim Laden von ' + cfg.get);
+    var content = await r.json();
+
+    // Versionsnummer separat holen (siehe AdminVersionController) - die
+    // oeffentliche Read-API bleibt dadurch unveraendert 1:1 kompatibel
+    // (kein zusaetzliches Feld in ihrer Antwort noetig).
+    var version = 0;
+    try {
+      var vr = await fetch('/api/admin/version/' + encodeURIComponent(cfg.section) + '?_=' + Date.now(), {
+        headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
+      var vBody = await vr.json().catch(function() { return null; });
+      if (vBody && typeof vBody.version === 'number') version = vBody.version;
+    } catch (e) { /* Version unbekannt -> wie bisher ohne Konfliktpruefung speichern */ }
+
+    // Form identisch zur bisherigen git-gateway-Antwort ({sha, content}),
+    // damit selectSectionImpl() unveraendert bleibt (siehe apiGetBoerse()).
+    return { sha: 'v' + version, content: toBase64(JSON.stringify(content)) };
+  }
+
+  async function apiPutLaravel(cfg, jsonData, sha) {
+    var tok = await getToken();
+    var expectedVersion = null;
+    if (typeof sha === 'string' && sha.charAt(0) === 'v') {
+      var parsed = parseInt(sha.slice(1), 10);
+      if (!isNaN(parsed)) expectedVersion = parsed;
+    }
+    var r = await fetch(cfg.put, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: jsonData, expected_version: expectedVersion })
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      // Gleiches Fehlerformat wie apiPutBoerse() - doSave()'s bestehende
+      // 409-Konflikterkennung funktioniert dadurch unveraendert.
+      throw new Error(((body && (body.message || body.error)) || 'Fehler beim Speichern') + ' (' + r.status + ')');
+    }
+    return { content: { sha: 'v' + (body.version || 0) } };
+  }
+
   async function apiGetBoerse(modul) {
     var tok = await getToken();
     var r = await fetch('/api/' + modul + '/admin/liste.php?_=' + Date.now(), {
@@ -1221,6 +1309,8 @@
   async function apiGet(path) {
     var boerseModul = boerseModulFuerDatei(path);
     if (boerseModul) return apiGetBoerse(boerseModul);
+    var laravelModul = laravelModulFuerDatei(path);
+    if (laravelModul) return apiGetLaravel(laravelModul);
 
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
@@ -1241,6 +1331,8 @@
   async function apiPut(path, jsonData, sha, message) {
     var boerseModul = boerseModulFuerDatei(path);
     if (boerseModul) return apiPutBoerse(boerseModul, jsonData, sha);
+    var laravelModul = laravelModulFuerDatei(path);
+    if (laravelModul) return apiPutLaravel(laravelModul, jsonData, sha);
 
     var tok = await getToken();
     var content = toBase64(JSON.stringify(jsonData, null, 2));
@@ -7353,6 +7445,15 @@
         try {
           var boerseResp = await apiGetBoerse(boerseModul);
           return boerseResp.sha || null;
+        } catch (e) {
+          return null;
+        }
+      }
+      var laravelModul = laravelModulFuerDatei(filePath);
+      if (laravelModul) {
+        try {
+          var laravelResp = await apiGetLaravel(laravelModul);
+          return laravelResp.sha || null;
         } catch (e) {
           return null;
         }

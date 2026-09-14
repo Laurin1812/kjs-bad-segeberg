@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureIdentityPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Phase 4 (Admin-Schreibweg Git/JSON -> Laravel/MySQL): serverseitige
+        // Modul-Rechtepruefung fuer die neuen Admin-Schreib-Endpunkte, siehe
+        // App\Http\Middleware\EnsureIdentityPermission und deren Verwendung
+        // in routes/api.php ("identity.permission:<key>").
+        $middleware->alias([
+            'identity.permission' => EnsureIdentityPermission::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
