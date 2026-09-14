@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Termin extends Model
 {
+    // Deutscher Plural "termine" statt der von Laravel automatisch
+    // abgeleiteten (falschen) Form "termins".
+    protected $table = 'termine';
+
     protected function casts(): array
     {
         return [

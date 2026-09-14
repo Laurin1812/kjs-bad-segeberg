@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['typ', 'name', 'sortierung'])]
 class BeitragKategorie extends Model
 {
+    // s.u. Beitrag - deutscher Plural "beitrag_kategorien" statt der von
+    // Laravel automatisch abgeleiteten (falschen) Form.
+    protected $table = 'beitrag_kategorien';
+
     protected function casts(): array
     {
         return [

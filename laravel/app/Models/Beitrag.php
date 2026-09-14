@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 ])]
 class Beitrag extends Model
 {
+    // Laravels automatische Tabellennamen-Ableitung kennt nur englische
+    // Pluralregeln (Beitrag -> "beitrags") - explizit gesetzt, da die
+    // Migration bewusst den echten deutschen Plural "beitraege" verwendet.
+    protected $table = 'beitraege';
+
     protected function casts(): array
     {
         return [

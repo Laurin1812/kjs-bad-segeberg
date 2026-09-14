@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['titel', 'sortierung'])]
 class FaqKategorie extends Model
 {
+    // Deutscher Plural "faq_kategorien" statt der von Laravel automatisch
+    // abgeleiteten (falschen) Form "faq_kategories".
+    protected $table = 'faq_kategorien';
+
     protected function casts(): array
     {
         return [

@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Partner extends Model
 {
+    // "Partner" ist im Deutschen in Singular und Plural identisch - Laravel
+    // wuerde automatisch "partners" ableiten (englische Regel), die
+    // Migration nutzt aber bewusst "partner".
+    protected $table = 'partner';
+
     protected function casts(): array
     {
         return [

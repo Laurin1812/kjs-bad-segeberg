@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 #[Fillable(['owner_type', 'owner_id', 'pfad', 'titel', 'sortierung'])]
 class GalerieBild extends Model
 {
+    // Deutscher Plural "galerie_bilder" statt der von Laravel automatisch
+    // abgeleiteten (falschen) Form "galerie_bilds".
+    protected $table = 'galerie_bilder';
+
     protected function casts(): array
     {
         return [
