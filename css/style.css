@@ -1359,11 +1359,27 @@ p  { margin-bottom: 1rem; }
 /* Feste, schmale Breiten für die kurzen Spalten (Frank-Feedback 20.08.2026:
    Kategorie/Revier wirkten mit viel Leerraum "häkelig"), Veranstaltung/Ort
    bekommen den übrigen Platz. Revier ist eine eigene Spalte statt Teil der
-   Ort-Zelle, damit Adresse und Revier optisch nicht mehr zusammenkleben. */
-.termine-table th:nth-child(1), .termine-table td:nth-child(1) { width: 6.5rem; }
-.termine-table th:nth-child(2), .termine-table td:nth-child(2) { width: 5.5rem; }
-.termine-table th:nth-child(5), .termine-table td:nth-child(5) { width: 9rem; }
-.termine-table th:nth-child(6), .termine-table td:nth-child(6) { width: 8rem; }
+   Ort-Zelle, damit Adresse und Revier optisch nicht mehr zusammenkleben.
+   Ausdrücklich nur ":not(.is-stacked)" (Korrektur 14.09.2026, Teil der
+   Mobile-Buchstabenumbruch-Fehlerbehebung): diese Breiten sind für die
+   normale, nebeneinander stehende Desktop-/Tablet-Spaltenansicht gedacht.
+   Ohne dieses Scoping griffen sie unverändert auch im gestapelten
+   Karten-Layout (.is-stacked) weiter - dort ist <td> aber kein Tabellen-
+   Spalten-Slot mehr, sondern die ganze Karte in voller Breite, und eine
+   Desktop-Spaltenbreite wie "8rem" (Kategorie) presste den Wert auf einen
+   Bruchteil der eigentlich verfügbaren Kartenbreite zusammen - genau das
+   ließ selbst nach der flex-wrap-Korrektur weiter oben lange Werte wie
+   "Hundeausbildung" noch mitten im Wort umbrechen, obwohl auf der eigenen
+   Zeile längst genug Platz gewesen wäre. Gleiches Muster wie bereits bei
+   den Kontakt-Tabellen (E-Mail/Mobil, siehe weiter unten) etabliert. */
+.termine-table-wrap:not(.is-stacked) .termine-table th:nth-child(1),
+.termine-table-wrap:not(.is-stacked) .termine-table td:nth-child(1) { width: 6.5rem; }
+.termine-table-wrap:not(.is-stacked) .termine-table th:nth-child(2),
+.termine-table-wrap:not(.is-stacked) .termine-table td:nth-child(2) { width: 5.5rem; }
+.termine-table-wrap:not(.is-stacked) .termine-table th:nth-child(5),
+.termine-table-wrap:not(.is-stacked) .termine-table td:nth-child(5) { width: 9rem; }
+.termine-table-wrap:not(.is-stacked) .termine-table th:nth-child(6),
+.termine-table-wrap:not(.is-stacked) .termine-table td:nth-child(6) { width: 8rem; }
 .badge { display: inline-block; padding: .25rem .65rem; border-radius: 20px; font-size: .72rem; font-weight: 700; background: var(--green-light); color: var(--green-dark); }
 .badge--gold { background: var(--gold-light); color: var(--gold-darker); }
 .badge--gray { background: #eee; color: #555; }
@@ -1874,6 +1890,21 @@ body.kjs-lightbox-lock { overflow: hidden; }
 .content-table-wrap.is-stacked table tbody td,
 .termine-table-wrap.is-stacked .termine-table tbody td {
   display: flex;
+  /* Korrektur 14.09.2026 (Frank/Laurin-Meldung "Termine auf Mobile
+     buchstabenweise umgebrochen"): OHNE flex-wrap mussten Label (::before)
+     und Wert zwingend auf EINER Zeile nebeneinander Platz finden, da eine
+     Flex-Zeile per Default nicht umbricht. Passten beide nicht nebeneinander
+     (z.B. Label "REVIER" + ein kurzer Wert wie "Kisdorf" auf 390px), wurde
+     bisher nur der WERT zusammengequetscht (siehe "Notbremse" weiter unten,
+     vorher "overflow-wrap: anywhere") - und das reduziert bei kurzen,
+     bindestrich-/leerzeichenlosen Werten (Datum, Kategorie, Revier-Badge)
+     die minimale Breite bis auf ein einzelnes Zeichen, statt den Wert auf
+     eine eigene Zeile umzubrechen. "flex-wrap: wrap" lässt den Wert bei
+     Platzmangel stattdessen auf eine eigene Zeile unter das Label
+     ausweichen, wo er die volle Kartenbreite zur Verfügung hat - echtes
+     Buchstabe-für-Buchstabe-Umbrechen bleibt dadurch die absolute
+     Ausnahme (siehe Notbremse). */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
@@ -1897,17 +1928,28 @@ body.kjs-lightbox-lock { overflow: hidden; }
    umschließenden Flex-Container (der <td> selbst) für ein overflow-wrap
    steht. Eine lange E-Mail-Adresse lief dadurch im Karten-Layout sichtbar
    über den rechten Kartenrand hinaus, statt (wie auf Desktop/Tablet bereits
-   korrekt) innerhalb der Karte umzubrechen. Erst "min-width: 0" auf dem
-   Wert-Element selbst erlaubt das nötige Schrumpfen, "overflow-wrap: anywhere"
-   sorgt danach für den eigentlichen Umbruch. Bewusst auf ALLE direkten
-   Kind-Elemente der Zelle (nicht nur <p>) angewendet, damit es unabhängig
-   vom genauen TipTap-Markup künftiger Tabellen funktioniert; die generierte
-   Label-Beschriftung (::before) ist kein echtes Kind-Element und bleibt
-   davon unberührt. */
+   korrekt) innerhalb der Karte umzubrechen. "flex: 1 1 auto" lässt den Wert
+   auf seiner eigenen Zeile (nach dem obigen flex-wrap) die volle
+   Kartenbreite ausfüllen, "min-width: 0" erlaubt das nötige Schrumpfen.
+   WICHTIG (Korrektur 14.09.2026): "overflow-wrap: anywhere" wurde hier
+   bewusst durch "overflow-wrap: break-word" ersetzt. Der Unterschied ist
+   fuer die Buchstaben-Umbruch-Korrektur oben entscheidend: "anywhere"
+   verkleinert bereits die MIN-CONTENT-Breite eines Werts (das erlaubt dem
+   Flex-Algorithmus, den Wert beliebig schmal zu quetschen statt ihn per
+   flex-wrap umbrechen zu lassen - exakt der "2018"/"Kisdorf"-Bug), waehrend
+   "break-word" die Zeilenumbruch-Berechnung NICHT beeinflusst und nur als
+   echte letzte Notbremse beim tatsaechlichen Rendern greift, wenn ein Wert
+   selbst auf eigener, voller Kartenbreite noch zu lang ist (z.B. eine lange
+   URL/E-Mail ohne Leerzeichen) - das ist der einzige Fall, fuer den diese
+   Regel gedacht war. Bewusst auf ALLE direkten Kind-Elemente der Zelle
+   (nicht nur <p>) angewendet, damit es unabhängig vom genauen TipTap-Markup
+   künftiger Tabellen funktioniert; die generierte Label-Beschriftung
+   (::before) ist kein echtes Kind-Element und bleibt davon unberührt. */
 .content-table-wrap.is-stacked table tbody td > *,
 .termine-table-wrap.is-stacked .termine-table tbody td > * {
+  flex: 1 1 auto;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .content-table-wrap.is-stacked table tbody td:last-child,
 .termine-table-wrap.is-stacked .termine-table tbody td:last-child {
