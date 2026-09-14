@@ -5,7 +5,7 @@
   <title>Datenschutz – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -38,7 +38,7 @@
       <p id="ds-verantwortlicher">Kreisjägerschaft Segeberg e.V.<br>
       Wird geladen …</p>
       <script>
-        fetch('content/einstellungen.json')
+        fetch('api/content/einstellungen.json')
           .then(r => r.json())
           .then(d => {
             var adresseHtml = d.adresse ? d.adresse.trim().split('\n').join('<br>') : '';

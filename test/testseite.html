@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="/js/vendor/marked.min.js"></script>
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -107,7 +107,7 @@
         if (el) el.innerHTML = renderField(d.inhalt);
       }
       // Google Kalender nach Seiteninhalt einfügen
-      return fetch('/content/einstellungen.json');
+      return fetch('/api/content/einstellungen.json');
     })
     .then(function(r) { return r.json(); })
     .then(function(d) {

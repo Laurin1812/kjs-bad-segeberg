@@ -13,7 +13,7 @@
        #2e6b30), unabhängig davon was Frank im Admin einstellt. Hier wird
        derselbe Lade-Mechanismus wie auf allen anderen Seiten ergänzt, damit
        Hintergrund/Überschrift/Button live Franks aktuelle Grüntöne zeigen. */
-    fetch('/content/design.json').then(r=>r.json()).then(d=>{
+    fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
       const r = document.documentElement.style;
       if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
       if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);

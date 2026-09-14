@@ -13,10 +13,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 // "Datei liegt im Unterverzeichnis der Registry" ausgedrueckt wird.
 #[Fillable([
     'section', 'parent_id', 'slug', 'titel', 'untertitel', 'nav_label',
-    'intro', 'inhalt', 'hero_bild', 'bild', 'bild_alt', 'vorschaubild',
-    'kurzbeschreibung', 'bild_groesse', 'kontakt_name', 'kontakt_email',
-    'kontakt_telefon', 'unterseiten_titel', 'gruppe', 'linkliste_titel',
-    'in_navigation', 'veroeffentlicht', 'sortierung',
+    'intro', 'inhalt', 'grusswort', 'hero_bild', 'bild', 'bild_alt',
+    'vorschaubild', 'kurzbeschreibung', 'bild_groesse', 'kontakt_name',
+    'kontakt_email', 'kontakt_telefon', 'unterseiten_titel', 'gruppe',
+    'linkliste_titel', 'hundeboerse_cta_titel', 'hundeboerse_cta_text',
+    'hundeboerse_cta_button', 'bild_flat', 'in_navigation', 'veroeffentlicht',
+    'sortierung',
 ])]
 class Page extends Model
 {
@@ -25,6 +27,7 @@ class Page extends Model
         return [
             'in_navigation' => 'boolean',
             'veroeffentlicht' => 'boolean',
+            'bild_flat' => 'boolean',
             'sortierung' => 'integer',
         ];
     }

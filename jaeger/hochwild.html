@@ -6,7 +6,7 @@
   <title>Hochwild – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -36,7 +36,7 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('../content/jaeger/hochwild.json').then(r=>r.json()).then(d=>{
+      fetch('../api/content/jaeger/hochwild.json').then(r=>r.json()).then(d=>{
         if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
         if (Array.isArray(d.linkliste) && d.linkliste.length) {
           const lnNav = document.getElementById('linkliste-nav');
@@ -84,7 +84,7 @@
         <h4 id="sub-seiten-titel">Unterseiten zu Hochwild</h4>
         <ul class="unterseiten-tiles" id="sub-seiten-nav"></ul>
         <script>
-          fetch('/content/seiten-sub-hochwild.json').then(function(r){return r.json();}).then(function(d){
+          fetch('/api/content/seiten-sub-hochwild.json').then(function(r){return r.json();}).then(function(d){
             var nav = document.getElementById('sub-seiten-nav');
             var widget = document.getElementById('sub-seiten-widget');
             if (!nav) return;

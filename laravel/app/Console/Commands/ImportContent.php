@@ -579,10 +579,20 @@ class ImportContent extends Command
      * "testimonials" + "testimonials_sichtbar" -> eigene Tabelle;
      * "downloads"/"galerie" sind laut Analyse in den echten Daten immer
      * leer - werden dennoch defensiv behandelt, falls sich das aendert.
+     *
+     * Phase-3-Korrektur: "galerie_titel" stand bisher (wie "galerie"
+     * selbst) auf der Ausschlussliste, obwohl es ein ganz normales
+     * Fliesstext-Feld ist ("Bildergalerie") - beim Aufbau der Phase-3-
+     * Read-API aufgefallen. Da js/index.html "galerie"/"galerie_titel" auf
+     * der Startseite nachweislich nirgends ausliest (beide Felder sind
+     * schon im Frontend tot), aendert diese Korrektur am sichtbaren
+     * Verhalten nichts - sie verhindert nur, dass die Read-API dieses an
+     * sich vorhandene Feld faelschlich als "nicht vorhanden" ausgeben
+     * wuerde. Keine Migration noetig, landet ganz normal in "settings".
      */
     private function importStartseite(): void
     {
-        $exclude = ['hero_slides', 'testimonials', 'testimonials_sichtbar', 'downloads', 'galerie', 'galerie_titel'];
+        $exclude = ['hero_slides', 'testimonials', 'testimonials_sichtbar', 'downloads', 'galerie'];
         $this->importScalarSettings('startseite.json', 'startseite', $exclude);
 
         $data = $this->loadJson('startseite.json');
@@ -701,6 +711,28 @@ class ImportContent extends Command
             $this->addStat('aktuelles', 0, 0, 0, 0, 'Datei fehlt oder leer.');
 
             return;
+        }
+
+        // Phase-3-Nachtrag: "hauptseite_anzahl" (aktiv genutzt von
+        // js/content.js, KJSContent.Aktuelles.standardAuswahl() als "letzte
+        // N"-Override fuer die Startseiten-/Uebersichts-Auswahl) und
+        // "hauptseite_modus" (im echten Datenbestand vorhanden, aber
+        // aktuell von keinem Frontend-Code ausgelesen - dennoch der
+        // Vollstaendigkeit halber mitgespeichert) wurden bisher NICHT
+        // importiert. Beim Aufbau der Phase-3-Read-API aufgefallen, da
+        // aktuelles.json.einstellungen mehr Felder enthaelt als nur
+        // "kategorien". Landet generisch in settings (Gruppe "aktuelles"),
+        // keine Migration noetig.
+        if (is_array($data['einstellungen'] ?? null)) {
+            foreach (['hauptseite_anzahl', 'hauptseite_modus'] as $key) {
+                if (array_key_exists($key, $data['einstellungen']) && ! is_array($data['einstellungen'][$key])) {
+                    Setting::create([
+                        'gruppe' => 'aktuelles',
+                        'key' => $key,
+                        'value' => (string) $data['einstellungen'][$key],
+                    ]);
+                }
+            }
         }
 
         // einstellungen.kategorien -> beitrag_kategorien (typ=aktuelles).
@@ -1067,11 +1099,14 @@ class ImportContent extends Command
 
         $aufgaben = (string) ($data['aufgaben'] ?? '');
         $gruszwort = (string) ($data['grußwort'] ?? $data['gruszwort'] ?? '');
-        // Auftrag Phase 2 Punkt "kreisjjaegermeister": als Singleton-Page,
-        // Inhalt = grußwort + aufgaben (in dieser Reihenfolge), unveraendert
-        // aneinandergehaengt - kein erfundener Trenner/Ueberschrift.
-        $inhalt = trim($gruszwort."\n\n".$aufgaben);
-
+        // Phase 3 Korrektur (siehe Migration 2026_09_16_000001): das
+        // Frontend (kreisjjaegermeister/index.html) rendert "aufgaben" und
+        // "grußwort" in zwei getrennten, optisch unterschiedlichen
+        // DOM-Bloecken - eine Verkettung in EIN Feld (wie in Phase 2 aus
+        // reinem Datenerhaltungs-Interesse zunaechst gemacht) wuerde die
+        // Read-API in Phase 3 daran hindern, diese Trennung wiederherzu-
+        // stellen. Ab Phase 3 werden beide Felder daher UNVERKETTET
+        // gespeichert: aufgaben -> inhalt, grußwort -> grusswort.
         $page = Page::create([
             'section' => 'kreisjaegermeister',
             'parent_id' => null,
@@ -1081,13 +1116,14 @@ class ImportContent extends Command
             'kontakt_email' => (string) ($data['email'] ?? '') ?: null,
             'kontakt_telefon' => (string) ($data['telefon'] ?? '') ?: null,
             'bild' => (string) ($data['bild'] ?? '') ?: null,
-            'inhalt' => $inhalt !== '' ? $inhalt : null,
+            'inhalt' => $aufgaben !== '' ? $aufgaben : null,
+            'grusswort' => $gruszwort !== '' ? $gruszwort : null,
             'in_navigation' => true,
             'veroeffentlicht' => true,
             'sortierung' => 0,
         ]);
 
-        $this->addStat('kreisjaegermeister', 1, 1, 0, 0, "Seite #{$page->id}, inhalt = grußwort+aufgaben verkettet.");
+        $this->addStat('kreisjaegermeister', 1, 1, 0, 0, "Seite #{$page->id}, aufgaben -> inhalt und grußwort -> grusswort getrennt gespeichert (Phase-3-Korrektur).");
     }
 
     // ------------------------------------------------------------------
@@ -1377,12 +1413,25 @@ class ImportContent extends Command
             'vorschaubild' => (string) ($data['vorschaubild'] ?? '') ?: null,
             'kurzbeschreibung' => $data['kurzbeschreibung'] ?? null,
             'bild_groesse' => (string) ($data['bild_groesse'] ?? '') ?: null,
+            // Phase 3 Nachtrag (siehe Migration 2026_09_16_000001): nur bei
+            // genau 2 Hundeausbildungs-Kursseiten real vorhanden ("bild_flat":
+            // true) - steuert Rahmen/Schatten des Bildes. Default false ist
+            // fuer alle anderen Seiten identisch zum bisherigen (impliziten)
+            // Frontend-Verhalten bei fehlendem Feld.
+            'bild_flat' => $this->toBool($data['bild_flat'] ?? null, false),
             'kontakt_name' => (string) ($data['kontakt_name'] ?? '') ?: null,
             'kontakt_email' => (string) ($data['kontakt_email'] ?? '') ?: null,
             'kontakt_telefon' => (string) ($data['kontakt_telefon'] ?? '') ?: null,
             'unterseiten_titel' => (string) ($data['unterseiten_titel'] ?? '') ?: null,
             'gruppe' => (string) ($data['gruppe'] ?? '') ?: null,
             'linkliste_titel' => (string) ($data['linkliste_titel'] ?? '') ?: null,
+            // Phase 3 Nachtrag (siehe Migration 2026_09_16_000001): nur bei
+            // content/seiten-aufgaben/hundevermittlung.json real vorhanden
+            // (Sidebar-CTA-Box zur Hundeboerse) - fuer alle anderen Seiten
+            // ohne diese Schluessel bleibt das Feld einfach NULL (no-op).
+            'hundeboerse_cta_titel' => (string) ($data['hundeboerse_cta_titel'] ?? '') ?: null,
+            'hundeboerse_cta_text' => (string) ($data['hundeboerse_cta_text'] ?? '') ?: null,
+            'hundeboerse_cta_button' => (string) ($data['hundeboerse_cta_button'] ?? '') ?: null,
             'in_navigation' => $this->toBool($data['in_navigation'] ?? null, true),
             'veroeffentlicht' => $this->toBool($data['veroeffentlicht'] ?? null, true),
             'sortierung' => $sortierung,

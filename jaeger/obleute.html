@@ -6,7 +6,7 @@
   <title>Obleute – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -43,7 +43,7 @@
         <p style="color:var(--text-muted);">Wird geladen …</p>
       </div>
       <script>
-        fetch('../content/obleute.json')
+        fetch('../api/content/obleute.json')
           .then(r => r.json())
           .then(data => {
             document.getElementById('obleute-grid').innerHTML = data.obleute.map(m => `

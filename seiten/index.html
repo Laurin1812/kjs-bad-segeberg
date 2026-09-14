@@ -7,7 +7,7 @@
   <title>Seite – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -125,32 +125,36 @@
   // auffindbar ("Seite wurde nicht gefunden", Frank-Meldung). Root-Cause-Fix
   // für #119/Verbraucher-Umbau. content/seiten-verbraucher/ bleibt als
   // Alt-Ordner-Fallback drin, falls dort noch nicht migrierte Seiten liegen.
+  // Phase 3 (Laravel Read-API): alle Pfade unten zeigen jetzt auf
+  // /api/content/... statt /content/... (siehe Abschlussbericht Punkt 11) -
+  // reiner Praefix-Wechsel, an der Reihenfolge/Logik von versucheOrdner()
+  // unten aendert sich nichts.
   var ordnerPfade = [
-    '../content/seiten-kjs/',
-    '../content/seiten-aufgaben/',
-    '../content/seiten-weitere/',
-    '../content/seiten-verbraucher/',
-    '../content/seiten-sub-wildfleisch/',
-    '../content/seiten-sub-lernort-natur/',
-    '../content/seiten-sub-gruenes-klassenzimmer/',
-    '../content/seiten-sub-waidmannssprache/',
+    '../api/content/seiten-kjs/',
+    '../api/content/seiten-aufgaben/',
+    '../api/content/seiten-weitere/',
+    '../api/content/seiten-verbraucher/',
+    '../api/content/seiten-sub-wildfleisch/',
+    '../api/content/seiten-sub-lernort-natur/',
+    '../api/content/seiten-sub-gruenes-klassenzimmer/',
+    '../api/content/seiten-sub-waidmannssprache/',
     // 27.08.2026: die 14 Jäger-/Aufgaben-Seiten, die auf dasselbe
     // Unterseiten-Muster wie Verbraucher/Wildfleisch umgestellt wurden
     // (Laurin-Wunsch "einheitliche Seitenstruktur im Admin-Bereich").
-    '../content/seiten-sub-ueber-uns/',
-    '../content/seiten-sub-mitglied-werden/',
-    '../content/seiten-sub-jaeger-werden/',
-    '../content/seiten-sub-niederwild/',
-    '../content/seiten-sub-hochwild/',
-    '../content/seiten-sub-schiessobleute/',
-    '../content/seiten-sub-satzung/',
-    '../content/seiten-sub-landesjagdverband/',
-    '../content/seiten-sub-schiessen/',
-    '../content/seiten-sub-schweisshunde/',
-    '../content/seiten-sub-jugend/',
-    '../content/seiten-sub-jagdhorn/',
-    '../content/seiten-sub-naturschutz/',
-    '../content/seiten-sub-jungwildrettung/'
+    '../api/content/seiten-sub-ueber-uns/',
+    '../api/content/seiten-sub-mitglied-werden/',
+    '../api/content/seiten-sub-jaeger-werden/',
+    '../api/content/seiten-sub-niederwild/',
+    '../api/content/seiten-sub-hochwild/',
+    '../api/content/seiten-sub-schiessobleute/',
+    '../api/content/seiten-sub-satzung/',
+    '../api/content/seiten-sub-landesjagdverband/',
+    '../api/content/seiten-sub-schiessen/',
+    '../api/content/seiten-sub-schweisshunde/',
+    '../api/content/seiten-sub-jugend/',
+    '../api/content/seiten-sub-jagdhorn/',
+    '../api/content/seiten-sub-naturschutz/',
+    '../api/content/seiten-sub-jungwildrettung/'
   ];
   // Für die "Unterseiten zu X"-Sidebar-Box (22.08.2026 Sidebar-Umbau,
   // Laurin-Wunsch "Ja, Sidebar wie bei Hauptseiten") - Anzeigename je Ordner
@@ -186,16 +190,16 @@
     if (i >= ordnerPfade.length) {
       // 2. Fallback: In Manifest-Dateien suchen (Legacy-Format mit eingebettetem Inhalt)
       var sektionsDateien = [
-        '../content/seiten-kjs.json',
-        '../content/seiten-aufgaben.json',
-        '../content/seiten-weitere.json',
-        '../content/seiten-verbraucher.json',
-        '../content/seiten-sub-wildfleisch.json',
-        '../content/seiten-sub-lernort-natur.json',
-        '../content/seiten-sub-gruenes-klassenzimmer.json',
-        '../content/seiten-sub-waidmannssprache.json',
-        '../content/seiten.json',
-        '../content/navigation-extra.json'
+        '../api/content/seiten-kjs.json',
+        '../api/content/seiten-aufgaben.json',
+        '../api/content/seiten-weitere.json',
+        '../api/content/seiten-verbraucher.json',
+        '../api/content/seiten-sub-wildfleisch.json',
+        '../api/content/seiten-sub-lernort-natur.json',
+        '../api/content/seiten-sub-gruenes-klassenzimmer.json',
+        '../api/content/seiten-sub-waidmannssprache.json',
+        '../api/content/seiten.json',
+        '../api/content/navigation-extra.json'
       ];
       Promise.all(sektionsDateien.map(function(url) {
         return fetch(url).then(function(r) { return r.ok ? r.json() : {seiten:[]}; }).catch(function() { return {seiten:[]}; });

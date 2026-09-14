@@ -7,7 +7,7 @@
   <title>Hundeausbildung – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -40,7 +40,7 @@
       <div class="loading-spinner">Lädt...</div>
     </main>
     <script>
-      fetch('/content/aufgaben/hundeausbildung.json')
+      fetch('/api/content/aufgaben/hundeausbildung.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var main = document.getElementById('page-main');
@@ -78,7 +78,7 @@
           // Sidebar-CTA "Alle Kurse & Themen ansehen" (rechts, oben in der
           // Jagdhundeschule-Sidebar-Box) bekommt die tatsächliche Anzahl der
           // veröffentlichten Kurse/Themen als Beschriftung.
-          fetch('/content/aufgaben/hundeausbildung-seiten.json')
+          fetch('/api/content/aufgaben/hundeausbildung-seiten.json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
               var cta = document.getElementById('jagdhundeschule-cta');

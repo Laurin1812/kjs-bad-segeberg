@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="/js/vendor/marked.min.js"></script>
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -65,8 +65,8 @@
   // .btn-group stehen muss und daher schon beim ersten innerHTML-Aufbau
   // feststehen muss, ob ein TimeTree-Link hinterlegt ist.
   Promise.all([
-    fetch('/content/jaeger/infomobil.json').then(function(r) { return r.json(); }),
-    fetch('/content/einstellungen.json').then(function(r) { return r.json(); }).catch(function() { return {}; })
+    fetch('/api/content/jaeger/infomobil.json').then(function(r) { return r.json(); }),
+    fetch('/api/content/einstellungen.json').then(function(r) { return r.json(); }).catch(function() { return {}; })
   ])
     .then(function(results) {
       var d = results[0] || {};

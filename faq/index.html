@@ -7,7 +7,7 @@
   <title>FAQ – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -46,7 +46,7 @@
       <div id="faq-content"><p style="color:var(--text-muted);">Wird geladen …</p></div>
 
       <script>
-        fetch('../content/faq.json')
+        fetch('../api/content/faq.json')
           .then(r => r.json())
           .then(data => {
             var html = data.kategorien.map(kat => `

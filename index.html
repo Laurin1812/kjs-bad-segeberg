@@ -7,7 +7,7 @@
   <title>Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -320,7 +320,7 @@
       return plain.length > 150 ? plain.substring(0, 150) + ' …' : plain;
     }
 
-    fetch('/content/aktuelles.json')
+    fetch('/api/content/aktuelles.json')
       .then(function(r){ return r.json(); })
       .then(function(data){
         // Sichtbarkeit + Sortierung kommen jetzt zentral aus js/content.js
@@ -408,7 +408,7 @@
     var parseDatum = window.KJSContent ? window.KJSContent.Termine.parseDatum : parseDatumFallback;
     var MONATE_KURZ = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
-    fetch('/content/termine.json?_=' + Date.now())
+    fetch('/api/content/termine.json?_=' + Date.now())
       .then(function(r){ return r.json(); })
       .then(function(data){
         var alleTermine = data.termine || [];
@@ -541,7 +541,7 @@
 
 <script src="/js/main.js"></script>
 <script>
-  fetch('/content/startseite.json').then(function(r){return r.json();}).then(function(d){
+  fetch('/api/content/startseite.json').then(function(r){return r.json();}).then(function(d){
     // Hero-Hintergrund: ein Bild (fest) oder mehrere Bilder (automatische
     // Diashow mit Crossfade, je Bild eigene Anzeigedauer in Sekunden).
     // Fallback auf das bisherige hero_bild (Alt-Feld, war nie verdrahtet)

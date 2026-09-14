@@ -21,12 +21,26 @@ if (typeof marked !== 'undefined' && marked && typeof marked.use === 'function')
 }
 
 // ── content/*.json laden ─────────────────────────────────────────────────
-// Direkt von der Netlify-Website (relative Pfade), kein GitHub Raw, kein CDN.
-// Jedes Speichern im Admin erzeugt einen GitHub-Commit → Netlify löst
-// automatisch einen Redeploy aus, die neue Version ist danach live.
-// Cache-Buster (?_=Date.now()) verhindert, dass der Browser eine ältere
-// Version aus seinem eigenen HTTP-Cache anzeigt.
+// Phase 3 (Laravel Read-API, September 2026): liest inhaltlich dieselben
+// JSON-Strukturen jetzt aus MySQL statt aus den statischen Dateien -
+// zentrale, minimale Umschaltung genau HIER (Auftrag Phase 3 Punkt 11),
+// damit kein einzelner der zahlreichen Aufrufer unten geändert werden
+// musste: jeder Pfad, der mit "/content/" beginnt, wird transparent auf
+// "/api/content/" umgeleitet, bevor der eigentliche fetch() passiert.
+// Bewusst NICHT umgeleitet (bleiben auf den alten statischen Dateien, siehe
+// Abschlussbericht Punkt 9/10): /content/hundeboerse.json,
+// /content/waffenboerse.json, /content/service.json,
+// /content/test/testseite.json - keiner dieser vier Aufrufe läuft über
+// fetchContent()/fetchJsonSafe(), diese Ausnahme betrifft hier also ohnehin
+// nichts, ist aber der Vollständigkeit halber dokumentiert.
+//
+// Ehemals: direkt von der Netlify-Website (relative Pfade), kein GitHub Raw,
+// kein CDN. Cache-Buster (?_=Date.now()) verhindert weiterhin, dass der
+// Browser eine ältere Antwort aus seinem eigenen HTTP-Cache anzeigt.
 function fetchContent(path) {
+  if (path.indexOf('/content/') === 0) {
+    path = '/api' + path;
+  }
   return fetch(path + (path.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now());
 }
 

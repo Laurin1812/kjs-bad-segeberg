@@ -7,7 +7,7 @@
   <title id="page-title-meta">Jagdhundeschule – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -67,8 +67,10 @@
 <script src="/js/main.js"></script>
 <script>
 (function() {
-  var MANIFEST = '/content/aufgaben/hundeausbildung-seiten.json';
-  var CONTENT_DIR = '/content/aufgaben/hundeausbildung/';
+  // Phase 3 (Laravel Read-API): auf /api/content/... umgestellt (siehe
+  // Abschlussbericht Punkt 11).
+  var MANIFEST = '/api/content/aufgaben/hundeausbildung-seiten.json';
+  var CONTENT_DIR = '/api/content/aufgaben/hundeausbildung/';
   var BASE_URL = '/aufgaben/jagdhundeschule.html';
 
   var params = new URLSearchParams(window.location.search);

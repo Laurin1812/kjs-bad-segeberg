@@ -368,7 +368,9 @@
     mount = document.getElementById('siteBreadcrumb');
     if (!mount) { ready = true; return; } // Seite noch nicht auf Phase 3C umgestellt
 
-    fetch('/content/navigation.json')
+    // Phase 3 (Laravel Read-API): läuft nicht über main.js' fetchContent(),
+    // daher hier einzeln umgestellt (siehe Abschlussbericht Punkt 10/11).
+    fetch('/api/content/navigation.json')
       .then(function (r) { return r.json(); })
       .catch(function () { return {}; })
       .then(function (nav) {

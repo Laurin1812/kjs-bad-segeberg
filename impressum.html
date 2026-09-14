@@ -5,7 +5,7 @@
   <title>Impressum – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -39,8 +39,8 @@
       // liegen - vorher liefen diese beiden Dateien auseinander, sobald nur
       // eine Stelle aktualisiert wurde.
       Promise.all([
-        fetch('content/impressum.json').then(r => r.json()),
-        fetch('content/einstellungen.json').then(r => r.json())
+        fetch('api/content/impressum.json').then(r => r.json()),
+        fetch('api/content/einstellungen.json').then(r => r.json())
       ]).then(([d, k]) => {
           document.getElementById('impressum-content').innerHTML = `
             <h2>Angaben gemäß § 5 TMG</h2>

@@ -11,7 +11,7 @@
        geladen wie das bereits vorhandene marked.js weiter unten im Body. -->
   <link rel="stylesheet" href="/css/vendor/leaflet.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);

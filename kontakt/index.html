@@ -7,7 +7,7 @@
   <title>Kontakt – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -135,7 +135,7 @@
                 hegeringGroup.style.display = ja ? '' : 'none';
                 if (ja && !loaded) {
                   loaded = true;
-                  fetch('../content/hegeringe.json')
+                  fetch('../api/content/hegeringe.json')
                     .then(function(r) { return r.json(); })
                     .then(function(d) {
                       (d.hegeringe || []).forEach(function(h) {
@@ -187,7 +187,7 @@
             return { text: lines.join('\n'), telefon: telefon, email: email };
           }
 
-          fetch('../content/einstellungen.json')
+          fetch('../api/content/einstellungen.json')
             .then(r => r.json())
             .then(d => {
               if (d.kontakt_ueberschrift) document.getElementById('kontakt-ueberschrift').textContent = d.kontakt_ueberschrift;

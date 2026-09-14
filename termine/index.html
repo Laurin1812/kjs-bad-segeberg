@@ -7,7 +7,7 @@
   <title>Termine – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -88,7 +88,7 @@
         </p>
       </div>
       <script>
-        fetch('../content/einstellungen.json').then(r=>r.json()).then(d=>{
+        fetch('../api/content/einstellungen.json').then(r=>r.json()).then(d=>{
           if(d.google_kalender_url) {
             const block = document.getElementById('google-kalender-block');
             const wrap = document.getElementById('google-kalender-embed-wrap');
@@ -215,7 +215,7 @@ function buildFilterBar(sichtbareTermine) {
   });
 }
 
-fetch('../content/termine.json')
+fetch('../api/content/termine.json')
   .then(r => r.json())
   .then(data => {
     // Überschrift & Einleitungstext kommen jetzt aus dem Admin (content/termine.json

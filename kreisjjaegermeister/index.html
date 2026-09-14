@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="/js/vendor/marked.min.js"></script>
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -37,7 +37,7 @@
       <p style="color:var(--text-muted);">Wird geladen …</p>
     </main>
     <script>
-      fetch('../content/kreisjjaegermeister.json')
+      fetch('../api/content/kreisjjaegermeister.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var name     = d.name     || '–';

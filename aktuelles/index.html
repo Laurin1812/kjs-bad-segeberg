@@ -7,7 +7,7 @@
   <title>Aktuelles – Kreisjägerschaft Segeberg e.V.</title>
   <link rel="stylesheet" href="../css/style.css">
 <script>
-  fetch('/content/design.json').then(r=>r.json()).then(d=>{
+  fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
     const r = document.documentElement.style;
     if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
     if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
@@ -331,7 +331,7 @@
     });
   }
 
-  fetch('../content/aktuelles.json')
+  fetch('../api/content/aktuelles.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       // WICHTIG: _allBeitraege NICHT umsortieren – beitrag.html liest denselben

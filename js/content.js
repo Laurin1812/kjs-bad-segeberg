@@ -64,7 +64,9 @@
     }
 
     function laden() {
-      return fetch('/content/termine.json?_=' + Date.now()).then(function (r) { return r.json(); });
+      // Phase 3 (Laravel Read-API): läuft nicht über main.js' fetchContent(),
+      // daher hier einzeln umgestellt (siehe Abschlussbericht Punkt 10/11).
+      return fetch('/api/content/termine.json?_=' + Date.now()).then(function (r) { return r.json(); });
     }
 
     return {
@@ -186,7 +188,13 @@
     }
 
     function laden() {
-      return fetch('/content/aktuelles.json?_=' + Date.now()).then(function (r) { return r.json(); });
+      // Phase 3 (Laravel Read-API): läuft nicht über main.js' fetchContent(),
+      // daher hier einzeln umgestellt (siehe Abschlussbericht Punkt 10/11).
+      // Die Reihenfolge des zurückgegebenen Arrays entspricht weiterhin
+      // exakt dem alten Array-Index (ContentController::aktuelles()
+      // sortiert nach "legacy_index") - für weitereBeitraegeDesJahres()s
+      // "eigenerIndex" (?i=-Link) unverändert kritisch.
+      return fetch('/api/content/aktuelles.json?_=' + Date.now()).then(function (r) { return r.json(); });
     }
 
     return {
