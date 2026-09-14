@@ -23,15 +23,24 @@ use Illuminate\Support\Facades\File;
  *   php artisan migrate:fresh --seed=false && php artisan kjs:import-content --force
  * befuellt - dieses Kommando LIEST nur, es importiert nichts selbst.
  *
- * Vergleichsstrategie (bewusst pragmatisch, kein 1:1-Byte-Vergleich):
+ * Vergleichsstrategie (Werte-Vergleich seit der Phase-3-Nachbesserung
+ * September 2026, siehe diffRekursiv()-Kommentar fuer den Hintergrund):
  * - FEHLENDER Schluessel in der API-Antwort, den das Original hat: ABWEICHUNG
  *   (potenzielle Regression) - wird gemeldet.
  * - ZUSAETZLICHER Schluessel in der API-Antwort, den das Original nicht hat:
  *   NUR als Hinweis gezaehlt, keine Abweichung (siehe PageContentController::
  *   pageToJson()-Kommentar: bewusste Superset-Strategie, harmlos fuers
  *   Frontend).
- * - Bekannte, bewusste Formatunterschiede (siehe $KNOWN_NORMALISATIONS)
- *   werden NICHT als Abweichung gezaehlt, sondern separat ausgewiesen.
+ * - Skalare Werte werden sowohl im TYP als auch im tatsaechlichen INHALT
+ *   verglichen (String exakt, Integer exakt, Bool exakt, null vs. ""
+ *   unterschieden) - gleicher Typ mit unterschiedlichem Wert zaehlt als
+ *   echte Abweichung, nicht mehr nur ein reiner Typ-Mismatch.
+ * - Listen/Objekte werden rekursiv verglichen; eine andere Reihenfolge in
+ *   einer Liste fuehrt dadurch automatisch zu einer Wert-Abweichung an der
+ *   betroffenen Index-Position.
+ * - Bekannte, bewusste Formatunterschiede (siehe istBekannteNormalisierung())
+ *   werden NICHT als Abweichung gezaehlt, unabhaengig davon ob der
+ *   Unterschied Typ oder Wert betrifft.
  */
 class CompareContent extends Command
 {
@@ -230,12 +239,32 @@ class CompareContent extends Command
     }
 
     /**
-     * Rekursiver, pragmatischer Struktur-Vergleich (keine Byte-Gleichheit).
+     * Rekursiver Struktur- UND Werte-Vergleich (Phase-3-Nachbesserung,
+     * September 2026 - Laurin: "gleicher Typ + anderer Wert = echte
+     * Abweichung", ausgeloest durch einen visuellen Test, bei dem lokal
+     * sichtbar hellere Farben und ein unvollstaendiger Footer auffielen,
+     * obwohl die vorherige Version dieses Kommandos "0 echte Abweichungen"
+     * meldete). Vorher wurden Skalare NUR auf gettype() verglichen - zwei
+     * gleich lange Strings mit UNTERSCHIEDLICHEM Inhalt (z.B. eine falsche
+     * Hex-Farbe oder ein verlorener Fliesstext) wurden dadurch faelschlich
+     * als "OK" durchgewunken, weil beide Seiten "string" waren. Jetzt:
      * - fehlender Schluessel in $api -> $diffs (echte Abweichung)
-     * - zusaetzlicher Schluessel in $api -> $extras (harmloser Hinweis)
-     * - Typ-Mismatch bei einem in beiden vorhandenen Skalarwert -> $diffs,
-     *   AUSSER es handelt sich um eine bekannte, bewusste Normalisierung
-     *   (siehe istBekannteNormalisierung()).
+     * - zusaetzlicher Schluessel in $api -> $extras (harmloser Hinweis,
+     *   sofern das Frontend ihn nicht auswertet - siehe Klassenkommentar
+     *   oben zur bewussten Superset-Strategie)
+     * - Typ-Mismatch (inkl. null vs. "" - unterschiedliche gettype()) bei
+     *   einem in beiden vorhandenen Skalarwert -> $diffs
+     * - GLEICHER Typ, aber unterschiedlicher tatsaechlicher Wert (String,
+     *   Integer, Bool, Float) -> jetzt ebenfalls $diffs (vorher nicht
+     *   geprueft)
+     * - Listen: unterschiedliche Reihenfolge fuehrt automatisch zu
+     *   Wert-Abweichungen an der jeweiligen Index-Position, da Element i
+     *   gegen Element i verglichen wird - eine eigene Sortier-Erkennung ist
+     *   dafuer nicht noetig
+     * - bekannte, bewusste Normalisierungen (siehe istBekannteNormalisierung())
+     *   werden weiterhin weder als Diff noch als Hinweis gezaehlt, jetzt
+     *   unabhaengig davon, ob der Unterschied ein Typ- oder ein reiner
+     *   Wert-Unterschied ist
      */
     private function diffRekursiv(mixed $original, mixed $api, string $pfad, array &$diffs, array &$extras): void
     {
@@ -279,9 +308,27 @@ class CompareContent extends Command
             return;
         }
 
-        // Skalarer Wert.
-        if (gettype($original) !== gettype($api) && ! $this->istBekannteNormalisierung($pfad, $original, $api)) {
+        // Skalarer Wert (string|int|float|bool|null) - bekannte, bewusste
+        // Normalisierungen zuerst abfangen, unabhaengig davon, ob sich
+        // Original und API-Wert im Typ oder nur im Inhalt unterscheiden.
+        if ($this->istBekannteNormalisierung($pfad, $original, $api)) {
+            return;
+        }
+
+        if (gettype($original) !== gettype($api)) {
             $diffs[] = "{$pfad}: Typ-Unterschied (Original ".gettype($original).' "'.json_encode($original, JSON_UNESCAPED_UNICODE).'" vs. API '.gettype($api).' "'.json_encode($api, JSON_UNESCAPED_UNICODE).'").';
+
+            return;
+        }
+
+        // Gleicher Typ, aber echter Wert-Vergleich (strikter Vergleich ===,
+        // damit z.B. 0 vs. "0" oder false vs. null - die durch die
+        // vorherige gettype()-Pruefung ohnehin schon ausgeschlossen sind -
+        // nicht aus Versehen als gleich durchgehen; fuer bereits
+        // typgleiche Skalare verhaelt sich === wie ein exakter
+        // Wertevergleich).
+        if ($original !== $api) {
+            $diffs[] = "{$pfad}: Wert-Unterschied (Original ".json_encode($original, JSON_UNESCAPED_UNICODE).' vs. API '.json_encode($api, JSON_UNESCAPED_UNICODE).').';
         }
     }
 
