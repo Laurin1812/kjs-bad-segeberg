@@ -173,20 +173,20 @@ function renderTermine(termine) {
   }
   tbody.innerHTML = gefiltert.map(t => {
     const gold = goldKategorien.includes(t.kategorie) ? ' badge--gold' : '';
-    // Jeder Zellenwert bekommt ein umschließendes <span> (auch reiner Text
-    // ohne eigenes Element wie Uhrzeit/Veranstaltung/Ort) - Korrektur
-    // 14.09.2026: die Karten-Layout-Regel ".termine-table-wrap.is-stacked
-    // .termine-table tbody td > *" (style.css) greift nur bei einem echten
-    // Kind-ELEMENT der Zelle, nicht bei einem nackten Text-Knoten. Ohne
-    // eigenes Element hatten diese drei Spalten auf schmalen Bildschirmen
-    // kein greifbares "min-width:0", schrumpften daher nicht mit und liefen
-    // stattdessen breit über die Karte hinaus ("Veranstaltung/Ort nehmen
-    // große Breiten ein" aus der Fehlermeldung).
+    const ort = formatOrt(t);
+    // Jeder befüllte Zellenwert bekommt ein umschließendes <span> (auch
+    // reiner Text ohne eigenes Element wie Uhrzeit/Veranstaltung/Ort).
+    // Korrektur 15.09.2026 (Mobile-Kartenlayout Termine): bei leerem Wert
+    // wird das <span> jetzt komplett weggelassen (Ternary wie bei Revier),
+    // damit die Zelle wirklich leer ist und die CSS-Regel
+    // ".termine-table-wrap.is-stacked .termine-table tbody td:empty
+    // { display:none }" (style.css) sie auf Mobile ausblendet, statt eine
+    // sichtbare leere Zeile/Lücke in der Event-Karte zu hinterlassen.
     return `<tr>
       <td><strong>${formatDatum(t.datum)}</strong></td>
-      <td><span>${escHtml(t.uhrzeit)}</span></td>
-      <td><span>${escHtml(t.veranstaltung)}</span></td>
-      <td><span>${formatOrt(t)}</span></td>
+      <td>${t.uhrzeit ? '<span>' + escHtml(t.uhrzeit) + '</span>' : ''}</td>
+      <td>${t.veranstaltung ? '<span>' + escHtml(t.veranstaltung) + '</span>' : ''}</td>
+      <td>${ort ? '<span>' + ort + '</span>' : ''}</td>
       <td>${t.revier ? '<span class="badge badge--gray">' + escHtml(t.revier) + '</span>' : ''}</td>
       <td><span class="badge${gold}">${escHtml(t.kategorie)}</span></td>
     </tr>`;

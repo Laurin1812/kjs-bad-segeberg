@@ -1876,34 +1876,17 @@ body.kjs-lightbox-lock { overflow: hidden; }
   display: none;
 }
 
-.content-table-wrap.is-stacked table tbody tr,
-.termine-table-wrap.is-stacked .termine-table tbody tr {
+.content-table-wrap.is-stacked table tbody tr {
   display: block;
   margin-bottom: .9rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
-.content-table-wrap.is-stacked table tbody tr:nth-child(even),
-.termine-table-wrap.is-stacked .termine-table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
+.content-table-wrap.is-stacked table tbody tr:nth-child(even) { background: none; } /* Zebra-Streifen stören im Karten-Layout */
 
-.content-table-wrap.is-stacked table tbody td,
-.termine-table-wrap.is-stacked .termine-table tbody td {
+.content-table-wrap.is-stacked table tbody td {
   display: flex;
-  /* Korrektur 14.09.2026 (Frank/Laurin-Meldung "Termine auf Mobile
-     buchstabenweise umgebrochen"): OHNE flex-wrap mussten Label (::before)
-     und Wert zwingend auf EINER Zeile nebeneinander Platz finden, da eine
-     Flex-Zeile per Default nicht umbricht. Passten beide nicht nebeneinander
-     (z.B. Label "REVIER" + ein kurzer Wert wie "Kisdorf" auf 390px), wurde
-     bisher nur der WERT zusammengequetscht (siehe "Notbremse" weiter unten,
-     vorher "overflow-wrap: anywhere") - und das reduziert bei kurzen,
-     bindestrich-/leerzeichenlosen Werten (Datum, Kategorie, Revier-Badge)
-     die minimale Breite bis auf ein einzelnes Zeichen, statt den Wert auf
-     eine eigene Zeile umzubrechen. "flex-wrap: wrap" lässt den Wert bei
-     Platzmangel stattdessen auf eine eigene Zeile unter das Label
-     ausweichen, wo er die volle Kartenbreite zur Verfügung hat - echtes
-     Buchstabe-für-Buchstabe-Umbrechen bleibt dadurch die absolute
-     Ausnahme (siehe Notbremse). */
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
@@ -1929,34 +1912,25 @@ body.kjs-lightbox-lock { overflow: hidden; }
    steht. Eine lange E-Mail-Adresse lief dadurch im Karten-Layout sichtbar
    über den rechten Kartenrand hinaus, statt (wie auf Desktop/Tablet bereits
    korrekt) innerhalb der Karte umzubrechen. "flex: 1 1 auto" lässt den Wert
-   auf seiner eigenen Zeile (nach dem obigen flex-wrap) die volle
-   Kartenbreite ausfüllen, "min-width: 0" erlaubt das nötige Schrumpfen.
-   WICHTIG (Korrektur 14.09.2026): "overflow-wrap: anywhere" wurde hier
-   bewusst durch "overflow-wrap: break-word" ersetzt. Der Unterschied ist
-   fuer die Buchstaben-Umbruch-Korrektur oben entscheidend: "anywhere"
-   verkleinert bereits die MIN-CONTENT-Breite eines Werts (das erlaubt dem
-   Flex-Algorithmus, den Wert beliebig schmal zu quetschen statt ihn per
-   flex-wrap umbrechen zu lassen - exakt der "2018"/"Kisdorf"-Bug), waehrend
-   "break-word" die Zeilenumbruch-Berechnung NICHT beeinflusst und nur als
-   echte letzte Notbremse beim tatsaechlichen Rendern greift, wenn ein Wert
+   auf seiner eigenen Zeile die volle Kartenbreite ausfüllen, "min-width: 0"
+   erlaubt das nötige Schrumpfen. "overflow-wrap: break-word" (nicht
+   "anywhere") beeinflusst die Zeilenumbruch-Berechnung NICHT und greift nur
+   als echte letzte Notbremse beim tatsaechlichen Rendern, wenn ein Wert
    selbst auf eigener, voller Kartenbreite noch zu lang ist (z.B. eine lange
-   URL/E-Mail ohne Leerzeichen) - das ist der einzige Fall, fuer den diese
-   Regel gedacht war. Bewusst auf ALLE direkten Kind-Elemente der Zelle
-   (nicht nur <p>) angewendet, damit es unabhängig vom genauen TipTap-Markup
-   künftiger Tabellen funktioniert; die generierte Label-Beschriftung
-   (::before) ist kein echtes Kind-Element und bleibt davon unberührt. */
-.content-table-wrap.is-stacked table tbody td > *,
-.termine-table-wrap.is-stacked .termine-table tbody td > * {
+   URL/E-Mail ohne Leerzeichen). Bewusst auf ALLE direkten Kind-Elemente der
+   Zelle (nicht nur <p>) angewendet, damit es unabhängig vom genauen
+   TipTap-Markup künftiger Tabellen funktioniert; die generierte
+   Label-Beschriftung (::before) ist kein echtes Kind-Element und bleibt
+   davon unberührt. */
+.content-table-wrap.is-stacked table tbody td > * {
   flex: 1 1 auto;
   min-width: 0;
   overflow-wrap: break-word;
 }
-.content-table-wrap.is-stacked table tbody td:last-child,
-.termine-table-wrap.is-stacked .termine-table tbody td:last-child {
+.content-table-wrap.is-stacked table tbody td:last-child {
   border-bottom: none;
 }
-.content-table-wrap.is-stacked table tbody td::before,
-.termine-table-wrap.is-stacked .termine-table tbody td::before {
+.content-table-wrap.is-stacked table tbody td::before {
   content: attr(data-label);
   font-weight: 700;
   font-size: .78rem;
@@ -1968,10 +1942,114 @@ body.kjs-lightbox-lock { overflow: hidden; }
   flex-shrink: 0;
 }
 /* Zellen ohne Label (z.B. eine reine Trennzeile) normal anzeigen */
-.content-table-wrap.is-stacked table tbody td:not([data-label])::before,
-.termine-table-wrap.is-stacked .termine-table tbody td:not([data-label])::before {
+.content-table-wrap.is-stacked table tbody td:not([data-label])::before {
   content: '';
   margin: 0;
+}
+
+/* ── Termine-Tabelle: eigenes Event-Karten-Layout auf Mobile ──────────────
+   Frank/Laurin-Feedback 15.09.2026: das obige, generische Label/Wert-
+   Kartenlayout (weiterhin unverändert für TipTap-Content-Tabellen wie
+   Hochwild/Niederwild) wirkte für Termine "technisch korrekt, aber optisch
+   zu sehr wie eine gestapelte Tabelle" - viele wiederholte GROSSBUCHSTABEN-
+   Label (DATUM/UHRZEIT/...), viele Trennlinien pro Karte, unnötige Höhe.
+   Termine bekommt deshalb ein eigenständiges, zweckgebundenes Karten-Layout
+   (nur Mobile/.is-stacked - Desktop/Tablet bleiben über die weiter oben
+   stehenden ":not(.is-stacked)"-Regeln unverändert): Datum+Uhrzeit oben
+   prominent nebeneinander, Veranstaltung als wichtigste Information direkt
+   darunter, Ort klein/sekundär darunter, Revier+Kategorie als kompakte,
+   NICHT gestreckte Tags ganz unten - ohne wiederholte Spaltenlabel und ohne
+   Linien zwischen den Werten (nur noch die Kartenumrandung selbst trennt).
+   Bewusst NICHT im obigen ".content-table-wrap.is-stacked"-Selektor mit
+   drin, sondern komplett separat unter ".termine-table-wrap.is-stacked",
+   damit ausschließlich die Termine-Seite betroffen ist. Die Zellreihenfolge
+   im Markup (Datum, Uhrzeit, Veranstaltung, Ort, Revier, Kategorie - siehe
+   termine/index.html renderTermine()) entspricht bereits exakt der
+   gewünschten visuellen Reihenfolge; hier wird nur die Anordnung/Typografie
+   pro Spalte über nth-child gesetzt, keine Umsortierung nötig. */
+.termine-table-wrap.is-stacked .termine-table tbody tr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: .3rem;
+  padding: .85rem 1rem;
+  margin-bottom: .65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-white);
+  overflow: hidden;
+}
+.termine-table-wrap.is-stacked .termine-table tbody tr:nth-child(even) { background: var(--bg-white); }
+
+.termine-table-wrap.is-stacked .termine-table tbody td {
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+/* Komplett ohne Spaltenlabel (kein "DATUM"/"UHRZEIT"/...) - bei dieser
+   eigens für Termine gebauten Karte ist durch Position, Typografie und
+   Badge-Form bereits eindeutig erkennbar, was welcher Wert ist. */
+.termine-table-wrap.is-stacked .termine-table tbody td::before { content: none; }
+/* Eine Zelle ohne Wert (z.B. Ort/Revier nicht gepflegt - termine/index.html
+   lässt eine leere Zelle dann bewusst ganz ohne <span> stehen, siehe dort)
+   soll keine leere Zeile/keinen toten Abstand erzeugen. */
+.termine-table-wrap.is-stacked .termine-table tbody td:empty { display: none; }
+
+/* Datum + Uhrzeit: oben, prominent, nebeneinander (erste Flex-Zeile der
+   Karte - beide Werte sind kurz und passen zusammen ohne umzubrechen). */
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(1),
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(2) {
+  flex: 0 1 auto;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(1) { order: 1; margin-right: 1rem; }
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(2) { order: 2; color: var(--green-dark); }
+
+/* Veranstaltung: wichtigste Information, eigene Zeile ("flex: 1 1 100%"
+   erzwingt im umschließenden flex-wrap-Container einen Zeilenumbruch, ganz
+   ohne zusätzliches Wrapper-Element im Markup). */
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(3) {
+  order: 3;
+  flex: 1 1 100%;
+  font-weight: 600;
+  font-size: .95rem;
+  line-height: 1.4;
+  color: var(--text-dark);
+  margin-top: .2rem;
+}
+
+/* Ort: sekundär, kleiner und gedämpfter, eigene Zeile. */
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(4) {
+  order: 4;
+  flex: 1 1 100%;
+  font-size: .82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+/* Revier + Kategorie: kompakte Tags nebeneinander, eigene Zeile - bewusst
+   "flex: 0 1 auto" (nicht "1 1 auto" wie im generischen Layout oben), damit
+   die Badges sich auf ihre eigene Textbreite beschränken statt sich über
+   die Kartenbreite zu strecken ("keine riesigen Pills"); flex-shrink:1 +
+   min-width:0 bleiben als Sicherheitsnetz für einen ungewöhnlich langen
+   Revier-/Kategorienamen auf sehr schmalen Displays. */
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(5),
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(6) {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-top: .35rem;
+}
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(5) { order: 5; margin-right: .4rem; }
+.termine-table-wrap.is-stacked .termine-table tbody td:nth-child(6) { order: 6; }
+
+.termine-table-wrap.is-stacked .termine-table tbody td > * {
+  overflow-wrap: break-word;
 }
 
 /* ── Sehr kleine Displays (375 px / iPhone SE) ──────────────────── */
