@@ -92,6 +92,61 @@
     </IfModule>
 </FilesMatch>
 
+# ── Laravel-Bruecke fuer /api/content/* und /api/admin/* (Phase 7,
+#    "Laravel-Konflikte pruefen") ──────────────────────────────────────────
+# Diese Website hat zwei PHP-Ebenen im selben Webroot:
+#   1) die bestehenden, eigenstaendigen Endpunkte unter api/hundeboerse/*.php,
+#      api/waffenboerse/*.php, api/kontakt/*.php, api/contact.php - das sind
+#      ECHTE Dateien im Webroot. Apache liefert/fuehrt sie ganz normal aus,
+#      OHNE dass die Regel unten eingreift (die Bedingung
+#      "RewriteCond %{REQUEST_FILENAME} !-f" schliesst sie bewusst aus) -
+#      live in dieser Analyse geprueft: mit UND ohne diese Regel bleibt
+#      z.B. "/api/hundeboerse/anzeigen.php" unveraendert erreichbar.
+#   2) die Laravel-Anwendung unter laravel/ (Content-/Admin-Schreib- und
+#      Lese-Weg, siehe laravel/routes/api.php) - ihr Front-Controller liegt
+#      unter laravel/public/index.php und ist unter der oeffentlichen URL
+#      "/api/content/..." bzw. "/api/admin/..." selbst KEINE echte Datei im
+#      Webroot. OHNE die Regel unten liefert Apache fuer z.B.
+#      "/api/content/navigation.json" nur ein eigenes "404 Not Found" aus -
+#      Laravel wird nie erreicht (live in dieser Analyse mit einem echten
+#      Apache+mod_rewrite nachgestellt und bestaetigt, siehe Abschlussbericht
+#      Phase 7, Punkt "Routing-/Rewrite-Konflikte").
+#
+# Die Regel greift NUR, wenn (a) der Pfad mit /api/content/ oder /api/admin/
+# beginnt UND (b) dort weder eine echte Datei noch ein echtes Verzeichnis
+# existiert - genau das trifft auf jede Laravel-Route zu, waehrend
+# api/hundeboerse/*.php & co. immer echte Dateien sind und daher unveraendert
+# direkt ausgeliefert werden. Es ist ein interner Rewrite (kein Redirect):
+# REQUEST_URI bleibt fuer PHP/Laravel unveraendert sichtbar, Laravels eigenes
+# Routing (routes/api.php) funktioniert dadurch genauso wie im lokalen
+# "php artisan serve"-Test.
+#
+# IN DIESER SANDBOX VERIFIZIERT (kein echtes mod_php/PHP-FPM verfuegbar,
+# siehe Abschlussbericht): ueber einen echten Apache mit dieser Regel, per
+# Reverse-Proxy an eine laufende "php artisan serve"-Instanz statt direkt an
+# laravel/public/index.php (identisches Ergebnis aus Laravels Sicht, da
+# beide Wege dieselbe REQUEST_URI an Laravel weiterreichen) - bestaetigt:
+# "/api/content/navigation.json" liefert echtes Laravel-JSON, ein
+# ungueltiges "/api/admin/..."-PATCH liefert Laravels eigenes 401-JSON
+# (Middleware laeuft also vollstaendig), "/admin/index.html" und
+# "/api/hundeboerse/anzeigen.php" bleiben unveraendert direkt erreichbar,
+# und eine beliebige andere nicht existierende URL wird NICHT an Laravel
+# durchgereicht (kein versehentliches "Verschlucken" der gesamten Seite).
+#
+# WICHTIG - Carsten: nach dem ersten Deploy auf den echten Server bitte
+# einmal live gegenpruefen (z.B. "/api/content/navigation.json" im Browser
+# oder per curl aufrufen und echtes JSON statt 404 erwarten) - der
+# tatsaechliche mod_php/PHP-FPM-Betrieb auf dem echten Server konnte in
+# dieser Sandbox mangels Internetzugriffs fuer diese PHP-Apache-Pakete nicht
+# 1:1 nachgestellt werden, nur die Rewrite-Logik selbst (s.o.).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^/api/(content|admin)/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ laravel/public/index.php [L]
+</IfModule>
+
 # ── Verzeichnislisten global aus - falls fuer einen Ordner kein eigener
 #    "index.html"/"index.php" existiert, soll kein Datei-Listing erscheinen ──
 Options -Indexes
