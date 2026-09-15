@@ -207,6 +207,26 @@ Route::prefix('admin')->group(function () {
     Route::delete('content/seiten-sub-{parentSlug}/{childSlug}.json', [AdminPageController::class, 'destroySubSeite'])
         ->middleware('identity.page_permission:sub');
 
+    // -- Pages (Phase 6B: Drag-&-Drop-Sortierung dynamischer Seiten) --------
+    // PATCH auf denselben URLs wie die jeweiligen POST-Routen oben (Punkt 2)
+    // mit identischen "<kind>"-Rechten (Punkt 3: "dieselbe PagePermissions-
+    // Logik wie beim Bearbeiten/Anlegen"). Body: {"order": [...Slugs in
+    // gewuenschter Reihenfolge...]}. Keine Route fuer "festeSeite" - feste
+    // Systemseiten werden nie ueber eine Registry-Liste mitsortiert (siehe
+    // reordne()-Kommentar in AdminPageController).
+    Route::patch('content/aufgaben/hundeausbildung-seiten.json', [AdminPageController::class, 'reorderHundeausbildungKurse'])
+        ->middleware('identity.page_permission:hundeausbildung_kurs');
+    Route::patch('content/seiten-kjs.json', [AdminPageController::class, 'reorderRegistrierteSeiteKjs'])
+        ->middleware('identity.page_permission:registrierte_jaeger');
+    Route::patch('content/seiten-aufgaben.json', [AdminPageController::class, 'reorderRegistrierteSeiteAufgaben'])
+        ->middleware('identity.page_permission:registrierte_aufgaben');
+    Route::patch('content/seiten-verbraucher.json', [AdminPageController::class, 'reorderRegistrierteSeiteVerbraucher'])
+        ->middleware('identity.page_permission:registrierte_verbraucher');
+    Route::patch('content/seiten-weitere.json', [AdminPageController::class, 'reorderWeitereSeiten'])
+        ->middleware('identity.page_permission:weitere');
+    Route::patch('content/seiten-sub-{parentSlug}.json', [AdminPageController::class, 'reorderSubSeiten'])
+        ->middleware('identity.page_permission:sub');
+
     // -- Medienbibliothek (Phase 5B.1, Frontend-Anbindung Phase 5B.2) -------
     // Eigenstaendige, generische Medien-API (siehe AdminMediaController-
     // Klassenkommentar) - "medien" ist ein eigener Berechtigungsschluessel

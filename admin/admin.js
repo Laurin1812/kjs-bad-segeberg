@@ -1394,21 +1394,43 @@
     return true;
   }
 
+  // Phase 6B ("Drag-&-Drop-Sortierung ... auf Laravel/MySQL umstellen"):
+  // speichert die neue Reihenfolge dynamischer Seiten direkt per PATCH in
+  // MySQL (AdminPageController::reordne()), statt wie bisher (Git-Gateway-
+  // Pfad, siehe onSidebarReorder() unten) das Reihenfolge-Manifest per
+  // GET+PUT zu lesen/umzubauen/zurückzuschreiben - der Server übernimmt das
+  // Umbauen (inkl. "nicht genannte Seiten ans Ende anhängen") jetzt selbst,
+  // "navFile" ist wie bei apiCreateSeiteLaravel() bereits exakt der content/
+  // …-Pfad der zugehörigen PATCH-Route (z.B. "content/seiten-sub-hochwild.json").
+  async function apiReorderSeitenLaravel(navFile, order) {
+    var tok = await getToken();
+    var r = await fetch('/api/admin/' + navFile, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order: order })
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      throw new Error(laravelPageErrorMessage(r.status, body));
+    }
+    return body;
+  }
+
   // Gegenstück zu apiGetLaravel() speziell für Registry-Manifeste (content/
   // seiten-sub-<parent>.json, seiten-aufgaben.json, seiten-weitere.json,
   // aufgaben/hundeausbildung-seiten.json, ...): die Read-API dafür existiert
   // bereits seit Phase 3 (PageContentController, liefert {"seiten":[...]}
   // live aus der "pages"-Tabelle) - anders als bei apiGetLaravel() gibt es
   // hier aber bewusst KEIN Laravel-PUT-Gegenstück (siehe apiCreateSeiteLaravel/
-  // apiDeleteSeiteLaravel oben: Anlegen/Löschen läuft jetzt über eigene
-  // POST/DELETE-Endpunkte, nicht mehr über Lesen+Ändern+Zurückschreiben
-  // dieses Manifests) - deshalb eine EIGENE, schlankere Funktion statt
-  // laravelPageModulFuerDatei()/laravelModulFuerDatei() um diesen Fall zu
-  // erweitern (die bleiben unverändert, u.a. weil onSidebarReorder() für
-  // die Drag&Drop-Reihenfolge dynamischer Seiten weiterhin unverändert über
-  // den bisherigen Git-Gateway-Weg läuft, siehe Abschlussbericht "offene
-  // Risiken" - hier NUR die beiden lesenden Aufrufstellen betroffen, die die
-  // Sidebar beim Laden befüllen). Öffentliche Route, kein Token nötig.
+  // apiDeleteSeiteLaravel/apiReorderSeitenLaravel oben: Anlegen/Löschen/
+  // Umsortieren läuft jetzt über eigene POST/DELETE/PATCH-Endpunkte, nicht
+  // mehr über Lesen+Ändern+Zurückschreiben dieses Manifests) - deshalb eine
+  // EIGENE, schlankere Funktion statt laravelPageModulFuerDatei()/
+  // laravelModulFuerDatei() um diesen Fall zu erweitern (die bleiben
+  // unverändert). Nur zum Befüllen der Sidebar beim Laden verwendet
+  // (loadAllManifestItems()/loadDynamicChildren()) - onSidebarReorder()
+  // (Phase 6B) ruft für IS_PHP_HOST stattdessen direkt
+  // apiReorderSeitenLaravel() auf. Öffentliche Route, kein Token nötig.
   async function apiGetRegistryLaravel(navFile) {
     var rest = navFile.slice('content/'.length);
     var r = await fetch('/api/content/' + rest + '?_=' + Date.now(), {
@@ -2340,9 +2362,18 @@
         })());
       }
 
-      // 2) Eigene/dynamische Seiten → Reihenfolge-Manifest (z.B. seiten-kjs.json)
+      // 2) Eigene/dynamische Seiten → Reihenfolge (Phase 6B: auf IS_PHP_HOST
+      //    direkt in der "pages"-Tabelle über die neue Reorder-API, siehe
+      //    AdminPageController::reordne() - dort passiert serverseitig exakt
+      //    dasselbe "übrige Seiten am Ende anhängen" wie hier bisher clientseitig,
+      //    inkl. serverseitiger Rechte-/Zugehörigkeitsprüfung. Auf Netlify bleibt
+      //    der bisherige Git-Gateway-Manifest-Weg unverändert als Übergang bestehen).
       if (opts.dynamicNavFile && dynamicOrder.length) {
         jobs.push((async function() {
+          if (IS_PHP_HOST) {
+            await apiReorderSeitenLaravel(opts.dynamicNavFile, dynamicOrder);
+            return;
+          }
           var resp = await apiGet(opts.dynamicNavFile);
           trackSha(opts.dynamicNavFile, resp.sha);
           var data = JSON.parse(fromBase64(resp.content));
@@ -2451,8 +2482,16 @@
   function showPanelError(msg) {
     var extra = '';
     if (S.section && S.section.isDynamic) {
-      extra = '<p class="mt-1"><button class="btn btn-danger-outline" onclick="dynSeiteRemoveFromManifest()">🗑️ Aus Menü entfernen</button>' +
-        ' <span style="color:var(--text-muted);font-size:.8rem">Entfernt den Eintrag aus der Navigation (Datei bleibt ggf. im Repo)</span></p>';
+      // Phase 6B (Punkt 9): auf IS_PHP_HOST bildet dynSeiteRemoveFromManifest()
+      // diesen Button auf einen einfachen Reload ab (kein separates Manifest
+      // mehr, siehe dortiger Kommentar) - Beschriftung/Hinweistext entsprechend
+      // angepasst, damit nichts mehr von einem "Menü-Eintrag entfernen"
+      // spricht, das es auf Laravel-Hosts so nicht mehr gibt.
+      extra = IS_PHP_HOST
+        ? '<p class="mt-1"><button class="btn btn-danger-outline" onclick="dynSeiteRemoveFromManifest()">🔄 Admin neu laden</button>' +
+          ' <span style="color:var(--text-muted);font-size:.8rem">Lädt die Admin-Oberfläche neu (Seitenliste kommt live aus der Datenbank)</span></p>'
+        : '<p class="mt-1"><button class="btn btn-danger-outline" onclick="dynSeiteRemoveFromManifest()">🗑️ Aus Menü entfernen</button>' +
+          ' <span style="color:var(--text-muted);font-size:.8rem">Entfernt den Eintrag aus der Navigation (Datei bleibt ggf. im Repo)</span></p>';
     }
     id('admin-main').innerHTML =
       '<div class="panel-body"><div class="form-card">' +
@@ -2471,10 +2510,27 @@
       '</div></div>';
   }
 
-  // Remove a dynamic page from its nav manifest (without deleting the file)
+  // Remove a dynamic page from its nav manifest (without deleting the file) -
+  // Phase 6B (Punkt 9, "Recovery-Button prüfen"): auf IS_PHP_HOST gibt es seit
+  // Phase 6 kein separates Navigations-Manifest mehr, aus dem eine dynamische
+  // Seite "entfernt" werden könnte/müsste - die Sidebar liest die Liste direkt
+  // aus der "pages"-Tabelle (siehe apiGetRegistryLaravel()/loadAllManifestItems()/
+  // loadDynamicChildren()), die auch schon die eigentliche Ursache des hier
+  // behandelten Ladefehlers ist. Ein Schreiben in dieses Manifest wäre daher ein
+  // toter Git-Gateway-Pfad auf einem Laravel-Host (siehe Auftrag Punkt 9: "nicht
+  // einfach einen toten Git-Gateway-Pfad ... stehen lassen") - für IS_PHP_HOST
+  // genügt stattdessen ein einfacher Reload, der die Sidebar ohnehin wieder
+  // korrekt (und aktuell) aus der DB aufbaut. Der Netlify-Zweig bleibt unverändert.
   window.dynSeiteRemoveFromManifest = async function() {
     var def = S.section;
     if (!def || !def.isDynamic) return;
+    if (IS_PHP_HOST) {
+      showConfirm('Admin neu laden',
+        'Die Seite „' + (def.label || def.slug) + '" konnte nicht geladen werden. Admin-Oberfläche neu laden?',
+        function() { location.reload(); }
+      );
+      return;
+    }
     showConfirm('Aus Menü entfernen',
       'Den Eintrag „' + (def.label || def.slug) + '" aus dem Menü entfernen?',
       async function() {

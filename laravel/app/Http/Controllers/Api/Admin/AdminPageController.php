@@ -8,6 +8,7 @@ use App\Models\PageLink;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
 use App\Support\KjsPagesConfig;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,6 +37,13 @@ use Illuminate\Support\Facades\DB;
  * Berechtigung fuer "Unterseite von X anlegen/löschen" dieselbe ist wie fuer
  * "X selbst bearbeiten" (Phase-6-Auftrag Punkt 6: bestehende Rechte-Logik
  * unveraendert wiederverwenden, keine neue Rechte-Ebene erfinden).
+ *
+ * Phase 6B ("Drag-&-Drop-Sortierung ... auf Laravel/MySQL umstellen")
+ * ergänzt die reorder*()-Methoden (PATCH auf denselben URLs wie die
+ * jeweilige store*()-Route) für admin.js' onSidebarReorder(), die bisher
+ * (fuer die dynamischen Registry-/Weitere-/Unterseiten-/Hundeausbildung-
+ * Listen) immer ueber ein separates Git-Gateway-Manifest lief, unabhaengig
+ * von IS_PHP_HOST - siehe reordne() unten fuer die gemeinsame Logik.
  */
 class AdminPageController extends Controller
 {
@@ -511,6 +519,150 @@ class AdminPageController extends Controller
             : null;
 
         return $this->loescheSeite($page);
+    }
+
+    /**
+     * Phase 6B ("Drag-&-Drop-Sortierung ... auf Laravel/MySQL umstellen"):
+     * gemeinsame Kernlogik fuer alle reorder*()-Endpunkte unten. $scope
+     * grenzt die "Familie" ein, innerhalb derer sortiert werden darf (z.B.
+     * "alle Registry-Zusatzseiten von section=jaeger" oder "alle Kinder
+     * eines bestimmten Unterseiten-Parents") - dieselbe Eingrenzung, die
+     * auch die jeweilige store*()/destroy*()-Methode oben schon verwendet,
+     * damit keine fremde Section/kein fremder Parent versehentlich
+     * mitsortiert werden kann (Auftrag Punkt 2/4: "keine fremden Sections
+     * verschieben", "Parent/Child-Grenzen beachten"). $order ist die vom
+     * Client gewuenschte neue Reihenfolge als Liste von Slugs.
+     *
+     * Verhalten bei einer nur TEILWEISEN Liste (nicht alle Seiten der
+     * Familie genannt): identisch zum bisherigen Client-Verhalten in
+     * admin.js' onSidebarReorder() ("Übrige Seiten (z.B. unveröffentlichte)
+     * am Ende anhängen") - die genannten Seiten werden zuerst in der
+     * gewuenschten Reihenfolge einsortiert, alle nicht genannten Seiten der
+     * Familie werden unveraendert in ihrer bisherigen relativen Reihenfolge
+     * dahinter angehaengt. So bleibt die Reihenfolge nach einem Reload
+     * exakt stabil (Auftrag Punkt 4), auch wenn admin.js einmal nicht alle
+     * Zeilen mitschickt.
+     */
+    private function reordne(Builder $scope, mixed $order): JsonResponse
+    {
+        if (! is_array($order) || $order === []) {
+            return $this->invalid('Bitte eine Liste von Seiten in der gewünschten Reihenfolge angeben.');
+        }
+        $slugs = [];
+        foreach ($order as $eintrag) {
+            if (! is_string($eintrag) || trim($eintrag) === '') {
+                return $this->invalid('Die Reihenfolge-Liste enthält einen ungültigen Eintrag.');
+            }
+            $slugs[] = $eintrag;
+        }
+        if (count($slugs) !== count(array_unique($slugs))) {
+            // Punkt 4: "doppelte Slugs im Payload -> 422".
+            return $this->invalid('Die Reihenfolge-Liste enthält doppelte Seiten.');
+        }
+
+        return DB::transaction(function () use ($scope, $slugs) {
+            // lockForUpdate() serialisiert gleichzeitige Reorder-Anfragen
+            // auf derselben Familie/demselben Parent, damit zwei parallele
+            // Drag-Vorgaenge sich nicht gegenseitig die sortierung-Werte
+            // kaputt schreiben.
+            $seiten = (clone $scope)->orderBy('sortierung')->lockForUpdate()->get(['id', 'slug']);
+            $bySlug = $seiten->keyBy('slug');
+
+            foreach ($slugs as $slug) {
+                if (! $bySlug->has($slug)) {
+                    // Unbekannter Slug ODER eine Seite aus einer fremden
+                    // Section/einem fremden Parent (beides würde hier
+                    // fehlen, weil $scope schon korrekt eingegrenzt ist) -
+                    // Punkt 4: "unbekannte Slugs -> 422", "Payload enthält
+                    // Seite aus fremder Section/anderem Parent -> 422".
+                    return $this->invalid('Unbekannte oder nicht zu diesem Bereich gehörende Seite: "'.$slug.'".');
+                }
+            }
+
+            // Genannte Seiten zuerst in Wunsch-Reihenfolge, alle nicht
+            // genannten Seiten der Familie danach in ihrer bisherigen
+            // relativen Reihenfolge (siehe Klassenkommentar oben).
+            $reihenfolge = [];
+            foreach ($slugs as $slug) {
+                $reihenfolge[] = $bySlug->get($slug);
+            }
+            $genannt = array_flip($slugs);
+            foreach ($seiten as $seite) {
+                if (! isset($genannt[$seite->slug])) {
+                    $reihenfolge[] = $seite;
+                }
+            }
+
+            foreach ($reihenfolge as $index => $seite) {
+                Page::where('id', $seite->id)->update(['sortierung' => $index]);
+            }
+
+            return response()->json(['success' => true]);
+        });
+    }
+
+    /** content/seiten-{kjs|aufgaben|verbraucher}.json (PATCH) - Reihenfolge der Registry-Zusatzseiten. */
+    private function reordneRegistrierteSeite(Request $request, string $section): JsonResponse
+    {
+        if (! in_array($section, KjsPagesConfig::familySections(), true)) {
+            return $this->notFound();
+        }
+        $scope = Page::where('section', $section)
+            ->whereNull('parent_id')
+            ->whereNotIn('slug', KjsPagesConfig::fixedSlugs($section));
+
+        return $this->reordne($scope, $request->input('order'));
+    }
+
+    public function reorderRegistrierteSeiteKjs(Request $request): JsonResponse
+    {
+        return $this->reordneRegistrierteSeite($request, 'jaeger');
+    }
+
+    public function reorderRegistrierteSeiteAufgaben(Request $request): JsonResponse
+    {
+        return $this->reordneRegistrierteSeite($request, 'aufgaben');
+    }
+
+    /** Siehe Kommentar bei storeRegistrierteSeiteVerbraucher() - API-Vollständigkeit, aktuell kein UI-Button in admin.js. */
+    public function reorderRegistrierteSeiteVerbraucher(Request $request): JsonResponse
+    {
+        return $this->reordneRegistrierteSeite($request, 'verbraucher');
+    }
+
+    /** content/seiten-weitere.json (PATCH) - Reihenfolge der "Weitere Themen"-Seiten (section=weitere, immer flach). */
+    public function reorderWeitereSeiten(Request $request): JsonResponse
+    {
+        $scope = Page::where('section', 'weitere');
+
+        return $this->reordne($scope, $request->input('order'));
+    }
+
+    /** content/seiten-sub-{parentSlug}.json (PATCH) - Reihenfolge der Unterseiten EINES Parents (Punkt 2: "Unterseiten nur innerhalb desselben Parents"). */
+    public function reorderSubSeiten(Request $request, string $parentSlug): JsonResponse
+    {
+        $parent = Page::whereIn('section', KjsPagesConfig::familySections())
+            ->whereNull('parent_id')
+            ->where('slug', $parentSlug)
+            ->first();
+        if (! $parent) {
+            return $this->notFound();
+        }
+        $scope = Page::where('section', $parent->section)->where('parent_id', $parent->id);
+
+        return $this->reordne($scope, $request->input('order'));
+    }
+
+    /** content/aufgaben/hundeausbildung-seiten.json (PATCH) - Reihenfolge der Hundeausbildungs-Kurse UNTER DEM HUB (Punkt 2: "Hundeausbildung-Kurse nur innerhalb ihres Hub-Parents"). */
+    public function reorderHundeausbildungKurse(Request $request): JsonResponse
+    {
+        $hub = Page::where('section', 'hundeausbildung')->whereNull('parent_id')->first();
+        if (! $hub) {
+            return $this->notFound();
+        }
+        $scope = Page::where('section', 'hundeausbildung')->where('parent_id', $hub->id);
+
+        return $this->reordne($scope, $request->input('order'));
     }
 
     private function replaceEmbeddedDownloads(Page $page, mixed $items): void
