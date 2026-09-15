@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminListController;
+use App\Http\Controllers\Api\Admin\AdminMediaController;
 use App\Http\Controllers\Api\Admin\AdminPageController;
 use App\Http\Controllers\Api\Admin\AdminSettingsController;
 use App\Http\Controllers\Api\Admin\AdminVersionController;
@@ -173,4 +174,20 @@ Route::prefix('admin')->group(function () {
     Route::put('content/{section}/{slug}.json', [AdminPageController::class, 'festeSeite'])
         ->where('section', 'jaeger|aufgaben|verbraucher')
         ->middleware('identity.page_permission:feste');
+
+    // -- Medienbibliothek (Phase 5B.1) --------------------------------------
+    // Eigenstaendige, generische Medien-API (siehe AdminMediaController-
+    // Klassenkommentar) - "medien" ist ein eigener Berechtigungsschluessel
+    // aus admin.js' PERM_BY_KEY, kein "__admin__". Bewusst NICHT unter
+    // "content/*" registriert (kein content/*.json-Aequivalent), sondern
+    // als eigene Ressource "admin/media".
+    Route::get('media', [AdminMediaController::class, 'index'])
+        ->middleware('identity.permission:medien');
+    Route::post('media/images', [AdminMediaController::class, 'storeImage'])
+        ->middleware('identity.permission:medien');
+    Route::post('media/pdfs', [AdminMediaController::class, 'storePdf'])
+        ->middleware('identity.permission:medien');
+    Route::delete('media/{medium}', [AdminMediaController::class, 'destroy'])
+        ->where('medium', '[0-9]+')
+        ->middleware('identity.permission:medien');
 });
