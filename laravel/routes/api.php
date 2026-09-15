@@ -147,18 +147,30 @@ Route::prefix('admin')->group(function () {
     Route::put('content/kreisjjaegermeister.json', [AdminListController::class, 'kreisjaegermeister'])
         ->middleware('identity.permission:kjm');
 
-    // -- Pages (Bearbeiten bestehender Seiten, admin-only) - siehe
-    //    Klassenkommentar in AdminPageController fuer die Begruendung, warum
-    //    hier (noch) nicht granular pro Seite geprueft wird. -------------
-    Route::middleware('identity.permission:__admin__')->group(function () {
-        Route::put('content/aufgaben/hundeausbildung.json', [AdminPageController::class, 'hundeausbildungHub']);
-        Route::put('content/aufgaben/hundeausbildung/{slug}.json', [AdminPageController::class, 'hundeausbildungKurs']);
-        Route::put('content/seiten-kjs/{slug}.json', [AdminPageController::class, 'registrierteSeiteKjs']);
-        Route::put('content/seiten-aufgaben/{slug}.json', [AdminPageController::class, 'registrierteSeiteAufgaben']);
-        Route::put('content/seiten-verbraucher/{slug}.json', [AdminPageController::class, 'registrierteSeiteVerbraucher']);
-        Route::put('content/seiten-weitere/{slug}.json', [AdminPageController::class, 'weitereSeite']);
-        Route::put('content/seiten-sub-{parentSlug}/{childSlug}.json', [AdminPageController::class, 'subSeite']);
-        Route::put('content/{section}/{slug}.json', [AdminPageController::class, 'festeSeite'])
-            ->where('section', 'jaeger|aufgaben|verbraucher');
-    });
+    // -- Pages (Bearbeiten bestehender Seiten) -----------------------------
+    // Phase 4 (Fortsetzung, Auftrag "normale Inhaltsseiten/Unterseiten/
+    // Hundeausbildung"): granulare Pro-Seite-Rechtepruefung jetzt ueber
+    // "identity.page_permission:<kind>" (siehe EnsurePagePermission/
+    // PagePermissions) statt des bisherigen pauschalen "__admin__" - admin
+    // bleibt weiterhin ueber PagePermissions::userMayAccess() (isAdmin()
+    // zuerst geprueft) uneingeschraenkt zugriffsberechtigt, Redakteure
+    // bekommen jetzt genau die Rechte, die admin.js' PERM_BY_KEY/PERM_BY_DIR
+    // ihnen client-seitig ohnehin schon zubilligt.
+    Route::put('content/aufgaben/hundeausbildung.json', [AdminPageController::class, 'hundeausbildungHub'])
+        ->middleware('identity.page_permission:hundeausbildung_hub');
+    Route::put('content/aufgaben/hundeausbildung/{slug}.json', [AdminPageController::class, 'hundeausbildungKurs'])
+        ->middleware('identity.page_permission:hundeausbildung_kurs');
+    Route::put('content/seiten-kjs/{slug}.json', [AdminPageController::class, 'registrierteSeiteKjs'])
+        ->middleware('identity.page_permission:registrierte_jaeger');
+    Route::put('content/seiten-aufgaben/{slug}.json', [AdminPageController::class, 'registrierteSeiteAufgaben'])
+        ->middleware('identity.page_permission:registrierte_aufgaben');
+    Route::put('content/seiten-verbraucher/{slug}.json', [AdminPageController::class, 'registrierteSeiteVerbraucher'])
+        ->middleware('identity.page_permission:registrierte_verbraucher');
+    Route::put('content/seiten-weitere/{slug}.json', [AdminPageController::class, 'weitereSeite'])
+        ->middleware('identity.page_permission:weitere');
+    Route::put('content/seiten-sub-{parentSlug}/{childSlug}.json', [AdminPageController::class, 'subSeite'])
+        ->middleware('identity.page_permission:sub');
+    Route::put('content/{section}/{slug}.json', [AdminPageController::class, 'festeSeite'])
+        ->where('section', 'jaeger|aufgaben|verbraucher')
+        ->middleware('identity.page_permission:feste');
 });

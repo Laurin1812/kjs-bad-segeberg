@@ -1189,11 +1189,10 @@
   // ueber git-gateway, bis eine bewusste Go-Live-Entscheidung ansteht.
   //
   // Seiten (content/jaeger/*.json, content/seiten-*/*.json, Hundeausbildung)
-  // sind ABSICHTLICH NICHT in dieser Tabelle - siehe Abschlussbericht
-  // "offene Punkte": AdminPageController existiert bereits serverseitig,
-  // ist aber noch nicht an admin.js angebunden (granulare Seiten-Rechte
-  // pro Slug, siehe dortiger Klassenkommentar). Seiten speichern daher
-  // vorerst weiterhin unveraendert ueber git-gateway.
+  // sind NICHT in dieser Tabelle, weil ihre "section"-Kennung vom jeweiligen
+  // Slug abhaengt (kein fester 1:1-Eintrag moeglich) - siehe
+  // laravelPageModulFuerDatei() weiter unten, das dafuer eigens per Regex
+  // aufloest und ueber laravelModulFuerDatei() genauso eingebunden ist.
   var LARAVEL_WRITE_MODULES = {
     'content/design.json': { get: '/api/content/design.json', put: '/api/admin/content/design.json', section: 'design' },
     'content/einstellungen.json': { get: '/api/content/einstellungen.json', put: '/api/admin/content/einstellungen.json', section: 'einstellungen' },
@@ -1213,9 +1212,73 @@
     'content/kreisjjaegermeister.json': { get: '/api/content/kreisjjaegermeister.json', put: '/api/admin/content/kreisjjaegermeister.json', section: 'kreisjaegermeister' }
   };
 
+  // Phase 4 (Fortsetzung, "normale Inhaltsseiten/Unterseiten/
+  // Hundeausbildung"): Gegenstueck zu AdminPageController/PagePermissions
+  // (Laravel-Seite) - liefert fuer JEDEN content/*-Pfad {get,put,section},
+  // fuer den es dort jetzt eine granular abgesicherte Route gibt. get/put
+  // sind fuer JEDEN content/*.json-Pfad identisch aufgebaut
+  // (/api/content/<rest> bzw. /api/admin/content/<rest>, siehe routes/
+  // api.php-Kommentar "unter admin/content/* registriert") - nur die
+  // "section"-Kennung fuer die Versionspruefung (siehe apiGetLaravel()/
+  // apiPutLaravel() oben) MUSS exakt denselben zusammengesetzten Schluessel
+  // ergeben wie AdminPageController::versionSection() serverseitig (z.B.
+  // "page:jaeger:hochwild"), deshalb hier per Regex in EXAKT derselben
+  // Reihenfolge/Spezifitaet wie routes/api.php aufgeloest (literale Pfade
+  // zuerst, generischer {section}/{slug}-Fall zuletzt).
+  //
+  // FIXED_SLUGS_BY_SECTION ist eine bewusste 1:1-Kopie von Laravels
+  // KjsPagesConfig::fixedFamilies() (nur die Slug-Listen) - ohne diese
+  // Kontrolle wuerde die generische {section}/{slug}-Regel ganz unten auch
+  // Nicht-Seiten-Dateien wie "content/aufgaben/hundeausbildung-seiten.json"
+  // (ein reines Sortier-Manifest, keine Page, siehe makeSortable() weiter
+  // oben) faelschlich als Laravel-Seite behandeln und ihr Speichern mit 404
+  // brechen (Git-Gateway-Fallback ist fuer solche Dateien weiterhin richtig).
+  var FIXED_SLUGS_BY_SECTION = {
+    'jaeger': ['uebersicht', 'hochwild', 'infomobil', 'jaeger-werden', 'landesjagdverband', 'mitglied-werden', 'niederwild', 'satzung', 'schiessobleute', 'ueber-uns'],
+    'aufgaben': ['jagdhorn', 'jugend', 'jungwildrettung', 'naturschutz', 'schiessen', 'schweisshunde'],
+    'verbraucher': ['gruenes-klassenzimmer', 'lernort-natur', 'waidmannssprache', 'wildfleisch']
+  };
+
+  function pageModulUrls(path, section) {
+    var rest = path.slice('content/'.length);
+    return { get: '/api/content/' + rest, put: '/api/admin/content/' + rest, section: section };
+  }
+
+  function laravelPageModulFuerDatei(path) {
+    var m;
+    if (path === 'content/aufgaben/hundeausbildung.json') {
+      return pageModulUrls(path, 'page:hundeausbildung:hub');
+    }
+    if ((m = /^content\/aufgaben\/hundeausbildung\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:hundeausbildung:' + m[1]);
+    }
+    if ((m = /^content\/seiten-kjs\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:jaeger:' + m[1]);
+    }
+    if ((m = /^content\/seiten-aufgaben\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:aufgaben:' + m[1]);
+    }
+    if ((m = /^content\/seiten-verbraucher\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:verbraucher:' + m[1]);
+    }
+    if ((m = /^content\/seiten-weitere\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:weitere:' + m[1]);
+    }
+    if ((m = /^content\/seiten-sub-([^\/]+)\/([^\/]+)\.json$/.exec(path))) {
+      return pageModulUrls(path, 'page:sub:' + m[1] + ':' + m[2]);
+    }
+    if ((m = /^content\/(jaeger|aufgaben|verbraucher)\/([^\/]+)\.json$/.exec(path))) {
+      var section = m[1], slug = m[2];
+      if (FIXED_SLUGS_BY_SECTION[section].indexOf(slug) === -1) return null; // keine Page (z.B. Sortier-Manifest) - Git-Gateway
+      return pageModulUrls(path, 'page:' + section + ':' + slug);
+    }
+    return null;
+  }
+
   function laravelModulFuerDatei(path) {
     if (!IS_PHP_HOST) return null;
-    return Object.prototype.hasOwnProperty.call(LARAVEL_WRITE_MODULES, path) ? LARAVEL_WRITE_MODULES[path] : null;
+    if (Object.prototype.hasOwnProperty.call(LARAVEL_WRITE_MODULES, path)) return LARAVEL_WRITE_MODULES[path];
+    return laravelPageModulFuerDatei(path);
   }
 
   async function apiGetLaravel(cfg) {

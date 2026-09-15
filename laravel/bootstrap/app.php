@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureIdentityPermission;
+use App\Http\Middleware\EnsurePagePermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // in routes/api.php ("identity.permission:<key>").
         $middleware->alias([
             'identity.permission' => EnsureIdentityPermission::class,
+            // Phase 4 (Fortsetzung): dieselbe Absicherung wie oben, aber fuer
+            // die Seiten-Routen (AdminPageController), deren Recht vom Slug
+            // in der URL abhaengt - siehe EnsurePagePermission/PagePermissions.
+            'identity.page_permission' => EnsurePagePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

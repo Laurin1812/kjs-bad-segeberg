@@ -98,6 +98,28 @@ class AdminListController extends Controller
         return response()->json(['success' => false, 'error' => 'invalid_payload', 'message' => $message], 422);
     }
 
+    /**
+     * Schritt 2/9 (Sicherheits-Mindesttest "ungueltiger Payload -> 422"):
+     * bislang wurde ein fehlendes oder falsch typisiertes "data"-Feld von
+     * bodyAndVersion() stillschweigend zu [] normalisiert - jede Methode hat
+     * dann anstandslos MIT DIESEM LEEREN ARRAY weitergespeichert und dabei
+     * den kompletten bestehenden Datensatz auf leer/Standardwerte
+     * zurueckgesetzt (getestet: ein PUT ohne "data" hat footer.json auf drei
+     * leere Spalten geloescht). Das ist genau der Fall, fuer den der bereits
+     * vorhandene, bis jetzt aber nirgends aufgerufene invalid()-Helfer oben
+     * gedacht war - diese Methode schliesst die Luecke zentral, damit jede
+     * Schreib-Methode sie mit einer Zeile vor die eigentliche Speicherlogik
+     * setzen kann, statt die Pruefung ueberall einzeln zu wiederholen.
+     */
+    private function requireDataArray(Request $request): ?JsonResponse
+    {
+        if (! is_array($request->input('data'))) {
+            return $this->invalid('Feld "data" fehlt oder ist kein gültiges Objekt.');
+        }
+
+        return null;
+    }
+
     /** @return array{data: array<string, mixed>, expected_version: int|null} */
     private function bodyAndVersion(Request $request): array
     {
@@ -238,6 +260,9 @@ class AdminListController extends Controller
      */
     public function aktuelles(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         $items = is_array($data['beitraege'] ?? null) ? $data['beitraege'] : [];
         $einstellungen = is_array($data['einstellungen'] ?? null) ? $data['einstellungen'] : [];
@@ -345,6 +370,9 @@ class AdminListController extends Controller
     /** Spiegelbild von ImportContent::importTermine(). Zuordnung ueber "_id" (siehe Klassenkommentar). */
     public function termine(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         $items = is_array($data['termine'] ?? null) ? $data['termine'] : [];
         $einstellungen = is_array($data['einstellungen'] ?? null) ? $data['einstellungen'] : [];
@@ -438,6 +466,9 @@ class AdminListController extends Controller
 
     public function vorstand(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $expectedRaw = $request->input('expected_version');
         $expected = is_numeric($expectedRaw) ? (int) $expectedRaw : null;
         $items = is_array($request->input('data.mitglieder')) ? $request->input('data.mitglieder') : [];
@@ -456,6 +487,9 @@ class AdminListController extends Controller
 
     public function obleute(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $expectedRaw = $request->input('expected_version');
         $expected = is_numeric($expectedRaw) ? (int) $expectedRaw : null;
         $items = is_array($request->input('data.obleute')) ? $request->input('data.obleute') : [];
@@ -478,6 +512,9 @@ class AdminListController extends Controller
 
     public function hegeringe(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $expectedRaw = $request->input('expected_version');
         $expected = is_numeric($expectedRaw) ? (int) $expectedRaw : null;
         $items = is_array($request->input('data.hegeringe')) ? $request->input('data.hegeringe') : [];
@@ -551,6 +588,9 @@ class AdminListController extends Controller
      */
     public function partner(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $expectedRaw = $request->input('expected_version');
         $expected = is_numeric($expectedRaw) ? (int) $expectedRaw : null;
         $items = is_array($request->input('data.partner')) ? $request->input('data.partner') : [];
@@ -633,6 +673,9 @@ class AdminListController extends Controller
 
     public function faq(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $expectedRaw = $request->input('expected_version');
         $expected = is_numeric($expectedRaw) ? (int) $expectedRaw : null;
         $kategorien = is_array($request->input('data.kategorien')) ? $request->input('data.kategorien') : [];
@@ -695,6 +738,9 @@ class AdminListController extends Controller
 
     public function downloads(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         $kategorien = is_array($data['kategorien'] ?? null) ? $data['kategorien'] : [];
 
@@ -775,6 +821,9 @@ class AdminListController extends Controller
 
     public function kreisjaegermeister(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
 
         try {

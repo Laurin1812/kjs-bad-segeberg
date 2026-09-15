@@ -20,26 +20,19 @@ use Illuminate\Support\Facades\DB;
  * Abschlussbericht "offene Punkte"). Eine nicht gefundene Seite liefert
  * bewusst 404 statt sie stillschweigend anzulegen.
  *
- * RECHTE (Auftrag Punkt 5, Fallback-Klausel: "Wenn vollstaendige
- * serverseitige Rechtepruefung in Phase 4 zu gross wird: zuerst sicheren
- * Admin-only Write-Path bauen und die granulare Serverpruefung als klaren
- * Blocker vor Go-Live dokumentieren"): anders als bei den Settings-/Listen-
- * Modulen oben (dort 1 Route <-> 1 fester PERM_BY_KEY-Wert) haengt die
- * Berechtigung fuer eine einzelne Seite in admin.js von IHREM SLUG ab
- * (PERM_BY_KEY/PERM_BY_DIR, z.B. 'niederwild' vs. 'hochwild' vs.
- * 'aufgaben_natur' - siehe dortige Tabelle), nicht vom Endpunkt selbst. Eine
- * vollstaendige serverseitige Nachbildung dieser ca. 30 Slug-zu-Recht-
- * Zuordnungen war im Rahmen dieser Runde nicht mit vertretbarer Sorgfalt zu
- * verifizieren (siehe Auftrag Punkt 7 "Pages besonders vorsichtig") - diese
- * Routen verlangen daher bewusst durchgaengig die Rolle "admin"
- * (identity.permission:__admin__ in routes/api.php), NICHT die einzelnen
- * Redakteur-Rechte. Redakteure mit nur einzelnen Seiten-Rechten koennen
- * ihre Seiten dadurch in dieser Phase NOCH NICHT ueber Laravel speichern
- * (admin.js faellt fuer sie weiterhin automatisch auf den bisherigen
- * Git-Gateway-Weg zurueck, siehe admin.js-Aenderungen: pages sind bewusst
- * NICHT in laravelModulFuerDatei() aufgenommen) - klar dokumentierter
- * Blocker vor einem Go-Live, an dem Redakteure (nicht nur Admins) Seiten
- * bearbeiten sollen.
+ * RECHTE (Fortsetzung, vormaliger Blocker jetzt aufgeloest): anders als bei
+ * den Settings-/Listen-Modulen oben (dort 1 Route <-> 1 fester
+ * PERM_BY_KEY-Wert) haengt die Berechtigung fuer eine einzelne Seite in
+ * admin.js von IHREM SLUG ab (PERM_BY_KEY/PERM_BY_DIR, z.B. 'niederwild' vs.
+ * 'hochwild' vs. 'aufgaben_natur' - siehe dortige Tabelle), nicht vom
+ * Endpunkt selbst. Diese ca. 30 Slug-zu-Recht-Zuordnungen sind jetzt 1:1
+ * nach PHP portiert (siehe App\Support\PagePermissions) und werden ueber die
+ * neue Middleware "identity.page_permission:<kind>" (routes/api.php,
+ * App\Http\Middleware\EnsurePagePermission) VOR jeder dieser Methoden
+ * geprueft - admin.js ist entsprechend angepasst (laravelModulFuerDatei()
+ * inkl. neuer laravelPageModulFuerDatei()), Redakteure mit einzelnen
+ * Seiten-Rechten speichern ihre Seiten dadurch jetzt ebenfalls ueber
+ * Laravel/MySQL, nicht mehr ueber Git-Gateway.
  */
 class AdminPageController extends Controller
 {
@@ -61,6 +54,30 @@ class AdminPageController extends Controller
     private function notFound(): JsonResponse
     {
         return response()->json(['success' => false, 'error' => 'not_found', 'message' => 'Seite nicht gefunden.'], 404);
+    }
+
+    private function invalid(string $message): JsonResponse
+    {
+        return response()->json(['success' => false, 'error' => 'invalid_payload', 'message' => $message], 422);
+    }
+
+    /**
+     * Schritt 2/9 (Sicherheits-Mindesttest "ungueltiger Payload -> 422"):
+     * ohne diese Pruefung faellt bodyAndVersion() unten bei fehlendem/falsch
+     * typisiertem "data" auf $request->except('expected_version') zurueck -
+     * bei einem leeren PUT-Body waere das ein leeres Array, mit dem
+     * applyFields() die bestehende Seite anschliessend auf lauter
+     * Leer-/Standardwerte zurueckgesetzt haette, statt den Request
+     * abzulehnen. Siehe identisches Gegenstueck in AdminSettingsController/
+     * AdminListController.
+     */
+    private function requireDataArray(Request $request): ?JsonResponse
+    {
+        if (! is_array($request->input('data'))) {
+            return $this->invalid('Feld "data" fehlt oder ist kein gültiges Objekt.');
+        }
+
+        return null;
     }
 
     /** @return array{data: array<string, mixed>, expected_version: int|null} */
@@ -238,6 +255,9 @@ class AdminPageController extends Controller
 
     public function festeSeite(Request $request, string $section, string $slug): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         if (! in_array($section, KjsPagesConfig::familySections(), true) || ! in_array($slug, KjsPagesConfig::fixedSlugs($section), true)) {
             return $this->notFound();
         }
@@ -249,6 +269,9 @@ class AdminPageController extends Controller
 
     private function registrierteSeite(Request $request, string $section, string $slug): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         if (! in_array($section, KjsPagesConfig::familySections(), true)) {
             return $this->notFound();
         }
@@ -283,6 +306,9 @@ class AdminPageController extends Controller
      */
     public function weitereSeite(Request $request, string $slug): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $page = Page::where('section', 'weitere')->where('slug', $slug)->first();
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
 
@@ -291,6 +317,9 @@ class AdminPageController extends Controller
 
     public function subSeite(Request $request, string $parentSlug, string $childSlug): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $parent = Page::whereIn('section', KjsPagesConfig::familySections())
             ->whereNull('parent_id')
             ->where('slug', $parentSlug)
@@ -306,6 +335,9 @@ class AdminPageController extends Controller
 
     public function hundeausbildungHub(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $page = Page::where('section', 'hundeausbildung')->whereNull('parent_id')->first();
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
 
@@ -314,6 +346,9 @@ class AdminPageController extends Controller
 
     public function hundeausbildungKurs(Request $request, string $slug): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         $hub = Page::where('section', 'hundeausbildung')->whereNull('parent_id')->first();
         $page = $hub
             ? Page::where('section', 'hundeausbildung')->where('parent_id', $hub->id)->where('slug', $slug)->first()

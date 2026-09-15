@@ -60,6 +60,28 @@ class AdminSettingsController extends Controller
         return response()->json(['success' => true, 'version' => $version]);
     }
 
+    private function invalid(string $message): JsonResponse
+    {
+        return response()->json(['success' => false, 'error' => 'invalid_payload', 'message' => $message], 422);
+    }
+
+    /**
+     * Schritt 2/9 (Sicherheits-Mindesttest "ungueltiger Payload -> 422"):
+     * bislang wurde ein fehlendes/falsch typisiertes "data"-Feld von
+     * bodyAndVersion() stillschweigend zu [] normalisiert, wodurch z.B. ein
+     * PUT ohne "data" den kompletten Datensatz (getestet: footer.json) auf
+     * leer zurueckgesetzt statt abgelehnt hat. Diese Methode schliesst die
+     * Luecke zentral - siehe identisches Gegenstueck in AdminListController.
+     */
+    private function requireDataArray(Request $request): ?JsonResponse
+    {
+        if (! is_array($request->input('data'))) {
+            return $this->invalid('Feld "data" fehlt oder ist kein gültiges Objekt.');
+        }
+
+        return null;
+    }
+
     /** @return array{data: array<string, mixed>, expected_version: int|null} */
     private function bodyAndVersion(Request $request): array
     {
@@ -101,6 +123,9 @@ class AdminSettingsController extends Controller
 
     public function design(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         try {
             return DB::transaction(function () use ($data, $expected) {
@@ -116,6 +141,9 @@ class AdminSettingsController extends Controller
 
     public function impressum(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         try {
             return DB::transaction(function () use ($data, $expected) {
@@ -132,6 +160,9 @@ class AdminSettingsController extends Controller
     /** Spiegelbild von ImportContent::importEinstellungen(). */
     public function einstellungen(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         try {
             return DB::transaction(function () use ($data, $expected) {
@@ -139,11 +170,20 @@ class AdminSettingsController extends Controller
                 $this->replaceScalarSettings('einstellungen', $data, ['oeffnungszeiten']);
 
                 if (isset($data['oeffnungszeiten']) && is_array($data['oeffnungszeiten'])) {
-                    Setting::create([
-                        'gruppe' => 'einstellungen',
-                        'key' => 'oeffnungszeiten',
-                        'value' => json_encode($data['oeffnungszeiten'], JSON_UNESCAPED_UNICODE),
-                    ]);
+                    // Bugfix (im lokalen Sicherheits-/E2E-Test entdeckt):
+                    // "oeffnungszeiten" wird oben bewusst von
+                    // replaceScalarSettings() ausgenommen, die Zeile bleibt
+                    // also bei jedem Speichern bestehen - ein Setting::create()
+                    // hier hat deshalb ab dem ZWEITEN Speichern (die Zeile
+                    // existiert ja schon seit dem Import) immer einen
+                    // Duplicate-Key-Fehler auf settings_gruppe_key_unique
+                    // ausgeloest und jeden Einstellungen-Save mit HTTP 500
+                    // abgebrochen. updateOrCreate() ist hier korrekt, exakt
+                    // wie bereits in saveNavigationBlob() oben verwendet.
+                    Setting::updateOrCreate(
+                        ['gruppe' => 'einstellungen', 'key' => 'oeffnungszeiten'],
+                        ['value' => json_encode($data['oeffnungszeiten'], JSON_UNESCAPED_UNICODE)]
+                    );
                 }
 
                 return $this->ok(ContentVersioning::bump(self::SECTION_EINSTELLUNGEN));
@@ -156,6 +196,9 @@ class AdminSettingsController extends Controller
     /** Spiegelbild von ImportContent::importFooter(). */
     public function footer(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         $listKeys = ['spalte_ueber_kjs' => 'ueber_kjs', 'spalte_uebersicht' => 'uebersicht', 'spalte_informationen' => 'informationen'];
         try {
@@ -204,6 +247,15 @@ class AdminSettingsController extends Controller
         $blob = is_array($data) ? $data : $request->all();
         unset($blob['expected_version']);
 
+        // Kein "data"-Wrapper bei diesen beiden Modulen (siehe Methoden-
+        // kommentar oben) - ein voellig leeres/kein Objekt enthaltendes
+        // Payload ist trotzdem kein gueltiger Speicherwunsch, sondern der
+        // Sicherheits-Mindesttest "ungueltiger Payload -> 422" (Auftrag
+        // Schritt 9) bzw. ein defekter Client-Request.
+        if (! is_array($blob) || count($blob) === 0) {
+            return $this->invalid('Leeres oder ungültiges Payload.');
+        }
+
         try {
             return DB::transaction(function () use ($gruppe, $section, $blob, $expected) {
                 ContentVersioning::assertNotStale($section, $expected);
@@ -232,6 +284,9 @@ class AdminSettingsController extends Controller
     /** Spiegelbild von ImportContent::importStartseite(). */
     public function startseite(Request $request): JsonResponse
     {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
         ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
         $exclude = ['hero_slides', 'testimonials', 'testimonials_sichtbar', 'downloads', 'galerie'];
 
