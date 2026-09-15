@@ -249,17 +249,28 @@ class MediaUploadService
 
     /**
      * Loescht Original + (bei Bildern) Thumb/Card gemeinsam, MIT
-     * Path-Traversal-Pruefung je Datei (Auftrag Punkt 7) - erst danach den
-     * DB-Datensatz. Prueft NICHT, ob die Datei noch irgendwo in einer
-     * Seite/einem Beitrag/einer Galerie referenziert wird (Auftrag Punkt 7:
-     * "erstmal klar dokumentieren, nicht still eine Datenbankkaskade
-     * erfinden") - genau wie das bestehende medienDeleteImage() im Admin
-     * (admin/admin.js), das ebenfalls keine Referenzpruefung durchfuehrt.
-     * Diese Verantwortung liegt beim Admin, der vor dem Loeschen selbst
-     * prueft, ob ein Bild/PDF noch verwendet wird.
+     * Path-Traversal-Pruefung je Datei (Auftrag Punkt 7 aus Phase 5B.1) -
+     * erst danach den DB-Datensatz (falls vorhanden, siehe deleteByFilename()
+     * fuer historische Dateien ohne DB-Zeile).
+     *
+     * Phase 5B.2 (Auftrag Punkt 5 "Löschen – Sicherheitsverbesserung"):
+     * VOR jedem Loeschvorgang wird jetzt zusaetzlich MediaReferenceScanner
+     * befragt - wird die Datei noch irgendwo referenziert, wird
+     * MediaReferencedException geworfen und NICHTS geloescht (weder Dateien
+     * noch DB-Zeile). Bewusst weiterhin KEINE automatische Entfernung der
+     * gefundenen Referenzen und kein Override-Parameter (siehe dortiger
+     * Klassenkommentar) - das war in Phase 5B.1 noch nicht gebaut ("erstmal
+     * klar dokumentieren"), ist jetzt die zentrale Sicherheitsverbesserung
+     * dieser Phase.
      */
     public function delete(MedienEintrag $medium): void
     {
+        $publicPath = MediaStorage::publicUrl($medium);
+        $references = MediaReferenceScanner::referencingLocations($publicPath);
+        if (! empty($references)) {
+            throw new MediaReferencedException($references);
+        }
+
         $root = MediaStorage::rootPathFor($medium->media_type);
         $paths = array_filter([
             MediaStorage::originalDiskPath($medium),
@@ -278,6 +289,31 @@ class MediaUploadService
         }
 
         $medium->delete();
+    }
+
+    /**
+     * Phase 5B.2: einheitlicher Loesch-Einstieg fuer die Medienbibliothek,
+     * die jetzt sowohl echte "medien"-Datensaetze (neu ueber Laravel
+     * hochgeladen) als auch historische, nur auf der Platte liegende
+     * Dateien OHNE DB-Zeile anzeigt (siehe AdminMediaController::index()).
+     * admin.js kennt fuer beide Faelle nur Dateiname + Typ, nie eine
+     * numerische ID - deshalb wird hier IMMER per (media_type, path)
+     * nachgeschaut: existiert eine DB-Zeile, wird sie inkl. Metadaten
+     * geloescht; existiert keine (historische Datei), wird ein
+     * NICHT gespeichertes MedienEintrag-Objekt nur fuer die Pfad-/
+     * Varianten-Ableitung verwendet - delete() unten faellt dann bei
+     * $medium->delete() auf ein no-op zurueck (Eloquent macht bei einem
+     * Model ohne exists=true keinen Query), es werden aber trotzdem
+     * Original+Thumb+Card auf der Platte entfernt.
+     */
+    public function deleteByFilename(string $mediaType, string $filename): void
+    {
+        $medium = MedienEintrag::where('media_type', $mediaType)->where('path', $filename)->first();
+        if ($medium === null) {
+            $medium = new MedienEintrag(['media_type' => $mediaType, 'path' => $filename]);
+        }
+
+        $this->delete($medium);
     }
 
     private function cleanupFiles(array $paths): void

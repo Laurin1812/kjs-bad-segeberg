@@ -175,7 +175,7 @@ Route::prefix('admin')->group(function () {
         ->where('section', 'jaeger|aufgaben|verbraucher')
         ->middleware('identity.page_permission:feste');
 
-    // -- Medienbibliothek (Phase 5B.1) --------------------------------------
+    // -- Medienbibliothek (Phase 5B.1, Frontend-Anbindung Phase 5B.2) -------
     // Eigenstaendige, generische Medien-API (siehe AdminMediaController-
     // Klassenkommentar) - "medien" ist ein eigener Berechtigungsschluessel
     // aus admin.js' PERM_BY_KEY, kein "__admin__". Bewusst NICHT unter
@@ -187,7 +187,10 @@ Route::prefix('admin')->group(function () {
         ->middleware('identity.permission:medien');
     Route::post('media/pdfs', [AdminMediaController::class, 'storePdf'])
         ->middleware('identity.permission:medien');
-    Route::delete('media/{medium}', [AdminMediaController::class, 'destroy'])
-        ->where('medium', '[0-9]+')
+    // Phase 5B.2: kein {id}-Routenparameter mehr (siehe AdminMediaController
+    // ::destroy()-Kommentar) - media_type/filename kommen jetzt im JSON-Body,
+    // weil die Medienbibliothek jetzt auch historische Dateien ohne
+    // numerische DB-ID anzeigt.
+    Route::delete('media', [AdminMediaController::class, 'destroy'])
         ->middleware('identity.permission:medien');
 });

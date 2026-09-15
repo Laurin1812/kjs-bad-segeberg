@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MedienEintrag;
+use App\Support\MediaReferencedException;
 use App\Support\MediaServiceUnavailableException;
 use App\Support\MediaStorage;
 use App\Support\MediaUploadService;
@@ -27,14 +28,18 @@ use Throwable;
  * ['medien'] = 'medien'), genau nach demselben 1:1-Muster wie alle anderen
  * Module.
  *
- * WICHTIG (Auftrag Punkt 8): admin/admin.js' bestehende Upload-Funktionen
- * werden in dieser Phase NICHT auf diese neue API umgestellt - Phase 5B.1
- * ist ausschliesslich Backend/API. Diese Endpunkte sind bis zur naechsten
- * Phase von keinem Frontend-Code aus erreichbar.
- *
  * Response-Format konsequent identisch zu den bestehenden Admin-Controllern:
  * {success:false, error:<kurzer_code>, message:<lesbarer_text>} im
  * Fehlerfall, {success:true, ...} im Erfolgsfall.
+ *
+ * Phase 5B.2 (Admin-Medienfunktionen auf diese API umstellen, Auftrag
+ * Punkt 4 "Medienbibliothek alt+neu"): index() zeigt jetzt NICHT mehr nur
+ * die "medien"-Tabelle, sondern zusaetzlich historische Dateien, die direkt
+ * im Dateisystem liegen, aber (noch) keine DB-Zeile besitzen - siehe
+ * scanLegacyFiles()/serializeLegacy(). Und Punkt 5 "Löschen –
+ * Sicherheitsverbesserung": destroy() ist jetzt filename-basiert (nicht
+ * mehr ID-basiert, siehe dortiger Methodenkommentar) und respektiert
+ * MediaReferencedException (409, siehe MediaReferenceScanner).
  */
 class AdminMediaController extends Controller
 {
@@ -63,23 +68,113 @@ class AdminMediaController extends Controller
     }
 
     /**
-     * GET admin/media - Liste der Mediendatensaetze, neueste zuerst.
-     * Optionaler Query-Parameter "type" (image|pdf) filtert nach media_type -
-     * ungueltige/unbekannte Werte werden ignoriert (kein Fehler), damit ein
-     * Tippfehler im Query-String nicht die ganze Liste als 422 abbricht.
+     * Phase 5B.2: liefert dieselbe Feldform wie serialize(), aber fuer eine
+     * Datei, die NUR auf der Platte liegt (kein "medien"-Datensatz) - id
+     * bleibt null (das UI unterscheidet ohnehin nicht danach, siehe
+     * admin.js apiGetDirLaravel()), original_name/mime_type/Masse werden aus
+     * dem Dateisystem abgeleitet statt aus der DB. width/height werden
+     * bewusst NICHT per getimagesize() ermittelt (koennte bei ~250
+     * historischen Bildern jede Listenabfrage spuerbar verlangsamen) -
+     * admin.js zeigt diese Werte ohnehin nirgends an.
+     */
+    private function serializeLegacy(string $mediaType, string $filename, int $sizeBytes, int $mtime): array
+    {
+        $medium = new MedienEintrag(['media_type' => $mediaType, 'path' => $filename]);
+        $ext = strtolower((string) pathinfo($filename, PATHINFO_EXTENSION));
+        $mime = match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'pdf' => 'application/pdf',
+            default => 'application/octet-stream',
+        };
+
+        return [
+            'id' => null,
+            'media_type' => $mediaType,
+            'original_name' => $filename,
+            'mime_type' => $mime,
+            'size_bytes' => $sizeBytes,
+            'width' => null,
+            'height' => null,
+            'uploaded_by' => null,
+            'url' => MediaStorage::publicUrl($medium),
+            'thumb_url' => MediaStorage::thumbUrl($medium),
+            'card_url' => MediaStorage::cardUrl($medium),
+            'created_at' => date('c', $mtime),
+        ];
+    }
+
+    /**
+     * Phase 5B.2: nicht-rekursives Directory-Listing der historischen
+     * Original-Dateien (images/ bzw. downloads/, OHNE thumb/card-
+     * Unterordner - is_file() filtert Verzeichniseintraege automatisch
+     * heraus, es wird nirgends in Unterordner hinabgestiegen). Dieselbe
+     * Endungs-Filterliste wie admin.js' medienBilderListe()/loadPdfGallery(),
+     * damit die Medienbibliothek exakt dieselben Dateien zeigt wie bisher
+     * (inkl. historischer GIF/SVG-Bilder, die fuer NEUE Uploads per
+     * kjs_media.php nicht mehr erlaubt sind, aber weiter angezeigt/
+     * geloescht werden koennen muessen).
+     *
+     * @return array<string, array{size:int, mtime:int}> Dateiname => Metadaten
+     */
+    private function scanLegacyFiles(string $mediaType): array
+    {
+        $dir = MediaStorage::rootPathFor($mediaType);
+        if (! is_dir($dir)) {
+            return [];
+        }
+        $pattern = $mediaType === 'image' ? '/\.(jpg|jpeg|png|gif|webp|svg)$/i' : '/\.pdf$/i';
+
+        $out = [];
+        foreach (scandir($dir) ?: [] as $entry) {
+            $full = $dir.'/'.$entry;
+            if (! is_file($full) || ! preg_match($pattern, $entry)) {
+                continue;
+            }
+            $out[$entry] = ['size' => (int) (@filesize($full) ?: 0), 'mtime' => (int) (@filemtime($full) ?: 0)];
+        }
+
+        return $out;
+    }
+
+    /**
+     * GET admin/media - Liste ALLER Bilder/PDFs (Auftrag Punkt 4:
+     * "bestehende historische Dateien weiterhin anzeigen, neue Laravel-
+     * Medien ebenfalls anzeigen, keine Duplikate"): zuerst alle "medien"-
+     * Datensaetze (massgebliche Metadaten), danach ein Dateisystem-Scan pro
+     * Typ - jede Datei, die dort bereits per DB-Zeile erfasst ist, wird
+     * uebersprungen (Dateiname ist eindeutig, siehe medien.path als unique
+     * Spalte), jede andere als "legacy"-Eintrag ergaenzt. Optionaler
+     * Query-Parameter "type" (image|pdf) filtert wie bisher; ungueltige/
+     * fehlende Werte liefern beide Typen (admin.js ruft IMMER mit
+     * explizitem type auf, siehe apiGetDirLaravel()).
      */
     public function index(Request $request): JsonResponse
     {
-        $query = MedienEintrag::query()->orderByDesc('created_at')->orderByDesc('id');
-
         $type = $request->query('type');
-        if (in_array($type, ['image', 'pdf'], true)) {
-            $query->where('media_type', $type);
+        $types = in_array($type, ['image', 'pdf'], true) ? [$type] : ['image', 'pdf'];
+
+        $items = [];
+        foreach ($types as $t) {
+            $dbByFilename = [];
+            foreach (MedienEintrag::where('media_type', $t)->get() as $m) {
+                $dbByFilename[$m->path] = true;
+                $items[] = ['sort' => $m->created_at?->timestamp ?? 0, 'item' => $this->serialize($m)];
+            }
+            foreach ($this->scanLegacyFiles($t) as $filename => $meta) {
+                if (isset($dbByFilename[$filename])) {
+                    continue; // bereits per DB-Zeile erfasst - keine Duplikate (Auftrag Punkt 4)
+                }
+                $items[] = ['sort' => $meta['mtime'], 'item' => $this->serializeLegacy($t, $filename, $meta['size'], $meta['mtime'])];
+            }
         }
 
-        $items = $query->get()->map(fn (MedienEintrag $m) => $this->serialize($m))->values();
+        usort($items, fn ($a, $b) => $b['sort'] <=> $a['sort']);
 
-        return response()->json(['success' => true, 'items' => $items]);
+        return response()->json(['success' => true, 'items' => array_values(array_map(fn ($x) => $x['item'], $items))]);
     }
 
     private function uploadedBy(Request $request): ?string
@@ -132,21 +227,52 @@ class AdminMediaController extends Controller
     }
 
     /**
-     * DELETE admin/media/{medium} - loescht Original + Varianten + DB-Zeile
-     * gemeinsam (siehe MediaUploadService::delete() fuer die bewusst NICHT
-     * vorhandene Referenzpruefung, Auftrag Punkt 7).
+     * DELETE admin/media - Phase 5B.2: umgestellt von einer numerischen ID
+     * (Phase 5B.1, bis heute von keinem Frontend-Code aufgerufen - siehe
+     * dortiger Klassenkommentar) auf (media_type, filename) im JSON-Body.
+     * Grund: die Medienbibliothek zeigt jetzt AUCH historische Dateien ohne
+     * DB-Zeile (siehe index()) - admin.js kennt fuer die immer nur Typ und
+     * Dateiname, nie eine ID. MediaUploadService::deleteByFilename() findet
+     * bei Bedarf selbst die passende DB-Zeile oder behandelt die Datei als
+     * rein dateisystembasiert.
+     *
+     * Reihenfolge: erst pruefen, ob ueberhaupt etwas zu loeschen da ist
+     * (DB-Zeile ODER Datei auf der Platte) -> sonst 404, statt "erfolgreich"
+     * nichts zu tun zu melden. Referenzpruefung (409) und Path-Traversal-
+     * Schutz laufen dann innerhalb von deleteByFilename()/delete().
      */
-    public function destroy(int $medium, MediaUploadService $service): JsonResponse
+    public function destroy(Request $request, MediaUploadService $service): JsonResponse
     {
-        $eintrag = MedienEintrag::find($medium);
-        if ($eintrag === null) {
-            return $this->errorResponse('not_found', 'Mediendatensatz nicht gefunden.', 404);
+        $mediaType = $request->input('media_type');
+        $filename = $request->input('filename');
+
+        if (! in_array($mediaType, ['image', 'pdf'], true) || ! is_string($filename) || $filename === '') {
+            return $this->errorResponse('invalid_payload', 'media_type ("image"/"pdf") und filename sind erforderlich.', 422);
+        }
+        // Defense-in-depth zusaetzlich zu MediaStorage::assertWithinRoot()
+        // (das den AUFGELOESTEN Pfad prueft) - ein Dateiname darf hier gar
+        // nicht erst wie ein Pfad aussehen.
+        if ($filename !== basename($filename) || str_contains($filename, '..')) {
+            return $this->errorResponse('invalid_payload', 'Ungültiger Dateiname.', 422);
+        }
+
+        $existsInDb = MedienEintrag::where('media_type', $mediaType)->where('path', $filename)->exists();
+        $existsOnDisk = is_file(MediaStorage::rootPathFor($mediaType).'/'.$filename);
+        if (! $existsInDb && ! $existsOnDisk) {
+            return $this->errorResponse('not_found', 'Datei nicht gefunden.', 404);
         }
 
         try {
-            $service->delete($eintrag);
+            $service->deleteByFilename($mediaType, $filename);
 
             return response()->json(['success' => true]);
+        } catch (MediaReferencedException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'referenced',
+                'message' => $e->getMessage(),
+                'references' => $e->references,
+            ], 409);
         } catch (Throwable $e) {
             return $this->errorResponse('delete_failed', 'Löschen fehlgeschlagen.', 500);
         }

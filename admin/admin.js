@@ -1413,7 +1413,38 @@
     return r.json();
   }
 
+  // Phase 5B.2 (Admin-Medienfunktionen auf Laravel-Media-API umstellen,
+  // Auftrag Punkt 1/4): auf einem PHP-/Laravel-Host liefert GET
+  // /api/admin/media BEREITS die zusammengeführte Liste aus "medien"-
+  // Tabelle (neu über Laravel hochgeladen) UND historischen Dateien ohne
+  // DB-Zeile (siehe AdminMediaController::index()) - hier wird das nur noch
+  // in die von admin.js ueberall erwartete GitHub-Contents-API-Form
+  // {type,name,path,sha} übersetzt, damit KEINE der zahlreichen
+  // Aufrufstellen (Medienbibliothek, generischer Bild-Picker, Markdown-
+  // Bild-Einfügen, PDF-Galerie) angefasst werden muss ("möglichst zentral
+  // ändern", Auftrag Punkt 1). "sha" ist hier nur ein Platzhalter (wird auf
+  // diesem Weg nie für einen echten Löschvorgang verwendet, siehe
+  // medienDeleteImage() - Löschen läuft für IS_PHP_HOST separat über
+  // apiDeleteFileLaravel()).
+  async function apiGetDirLaravel(path) {
+    var type = (path === 'downloads') ? 'pdf' : 'image';
+    var tok = await getToken();
+    var r = await fetch('/api/admin/media?type=' + type + '&_=' + Date.now(), {
+      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
+    if (!r.ok) return [];
+    var body = await r.json().catch(function() { return null; });
+    if (!body || !Array.isArray(body.items)) return [];
+    return body.items.map(function(it) {
+      var name = it.url.slice(it.url.lastIndexOf('/') + 1);
+      return { type: 'file', name: name, path: path + '/' + name, sha: 'laravel:' + (it.id === null ? 'legacy' : it.id) };
+    });
+  }
+
   async function apiGetDir(path) {
+    if (IS_PHP_HOST && (path === 'images' || path === 'downloads')) {
+      return apiGetDirLaravel(path);
+    }
     var tok = await getToken();
     var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH + '&_=' + Date.now(), {
       headers: {
@@ -1443,6 +1474,39 @@
     if (!r.ok) {
       var err = await r.json().catch(function() { return {}; });
       throw new Error((err.message || 'Fehler beim Löschen') + ' (' + r.status + ')');
+    }
+    return true;
+  }
+
+  // Phase 5B.2 (Auftrag Punkt 5 "Löschen – Sicherheitsverbesserung"): Pendant
+  // zu apiDeleteFile() für IS_PHP_HOST - "path" ist hier "images/<name>"
+  // bzw. "downloads/<name>" (siehe apiGetDirLaravel()), daraus werden
+  // media_type und Dateiname für DELETE /api/admin/media abgeleitet. Ein
+  // HTTP 409 (Datei wird noch referenziert, siehe MediaReferenceScanner)
+  // wird NICHT wie ein normaler Fehler behandelt, sondern als eigene
+  // Fehlerform mit e.referenced=true + e.references=[...] geworfen, damit
+  // medienDeleteImage() dem Admin gezielt sagen kann, WO die Datei noch
+  // verwendet wird, statt nur "Löschen fehlgeschlagen".
+  async function apiDeleteFileLaravel(path) {
+    var slash = path.indexOf('/');
+    var folder = path.slice(0, slash);
+    var filename = path.slice(slash + 1);
+    var mediaType = (folder === 'downloads') ? 'pdf' : 'image';
+    var tok = await getToken();
+    var r = await fetch('/api/admin/media', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ media_type: mediaType, filename: filename })
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      if (r.status === 409 && body && body.error === 'referenced') {
+        var refErr = new Error(laravelMediaErrorMessage(409, body));
+        refErr.referenced = true;
+        refErr.references = body.references || [];
+        throw refErr;
+      }
+      throw new Error(laravelMediaErrorMessage(r.status, body));
     }
     return true;
   }
@@ -1510,6 +1574,44 @@
     if (!detail && r.status === 413) detail = 'Datei zu groß';
     if (!detail && r.status === 422) detail = 'Ungültige Anfrage (evtl. Datei zu groß oder Namenskonflikt)';
     return 'Upload fehlgeschlagen (' + r.status + (detail ? ': ' + detail : '') + ')';
+  }
+
+  // Phase 5B.2 (Admin-Medienfunktionen auf Laravel-Media-API umstellen,
+  // Auftrag Punkt 7 "Fehlerbehandlung"): EIN gemeinsamer Übersetzer für alle
+  // Laravel-Medien-Endpunkte (Upload Bild/PDF, Löschen) - liefert für jeden
+  // im Auftrag genannten Statuscode eine verständliche deutsche Meldung statt
+  // eines rohen HTTP-Codes, nie einen technischen Stacktrace. "body" ist die
+  // bereits geparste JSON-Antwort (oder {}, falls keine gültige JSON-Antwort
+  // kam, z.B. bei einem serverseitigen 413 von PHP selbst statt von unserem
+  // Code, siehe kjs_media.php-Kommentar zu upload_max_filesize/post_max_size).
+  function laravelMediaErrorMessage(status, body) {
+    var msg = body && body.message;
+    if (status === 401) return 'Sitzung abgelaufen – bitte neu anmelden.';
+    if (status === 403) return 'Keine Berechtigung für Medien.';
+    if (status === 404) return msg || 'Datei nicht gefunden.';
+    if (status === 409) return msg || 'Datei wird noch verwendet.';
+    if (status === 413) return 'Datei zu groß.';
+    if (status === 422) return msg || 'Datei ungültig.';
+    if (status === 503) return msg || 'Bildverarbeitung auf dem Server derzeit nicht verfügbar (fehlende PHP-Erweiterung).';
+    return msg || ('Fehler (' + status + ')');
+  }
+
+  // Wandelt einen Base64-String (wie ihn prepareImageForUpload()/
+  // fileToBase64() liefern) in ein Blob um - für den Laravel-Upload-Pfad
+  // (multipart/form-data statt des bisherigen JSON-Base64-Bodys von
+  // git-gateway). Reine Browser-APIs (atob), keine zusätzliche Abhängigkeit.
+  function base64ToBlob(base64, mime) {
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  function guessImageMime(filename) {
+    var ext = (filename.split('.').pop() || '').toLowerCase();
+    if (ext === 'png') return 'image/png';
+    if (ext === 'webp') return 'image/webp';
+    return 'image/jpeg';
   }
 
   function toBase64(str) {
@@ -6499,7 +6601,15 @@
       'Bild „' + name + '" wirklich löschen?',
       async function() {
         try {
-          await apiDeleteFile(path, sha, '🗑️ Bild gelöscht: ' + name);
+          // Phase 5B.2: auf einem PHP-/Laravel-Host läuft das Löschen über
+          // die neue Media-API (inkl. Referenzprüfung, siehe Auftrag Punkt 5)
+          // statt über git-gateway - "sha" wird dort nicht gebraucht/verwendet
+          // (siehe apiGetDirLaravel()-Kommentar). Auf Netlify unverändert.
+          if (IS_PHP_HOST) {
+            await apiDeleteFileLaravel(path);
+          } else {
+            await apiDeleteFile(path, sha, '🗑️ Bild gelöscht: ' + name);
+          }
           toast('✅ Bild gelöscht.', 'ok');
           if (medienFiles) medienFiles = medienFiles.filter(function(f) { return f.path !== path; });
           // aus der Archiv-Liste ebenfalls entfernen (falls dort vorhanden), damit
@@ -6518,7 +6628,16 @@
           }
           medienAktuelleAnsichtNeuRendern();
         } catch(e) {
-          toast('❌ Fehler: ' + e.message, 'err');
+          // Phase 5B.2 (Auftrag Punkt 5): klare, eigene Warnung statt eines
+          // generischen Fehlers, wenn die Datei noch verwendet wird - NICHT
+          // gelöscht, mit den (bis zu 3) wichtigsten Fundstellen.
+          if (e.referenced) {
+            var orte = (e.references || []).slice(0, 3).join('; ');
+            toast('⚠️ Nicht gelöscht – wird noch verwendet' + (orte ? ': ' + orte : '') +
+              (e.references && e.references.length > 3 ? ' (und weitere)' : ''), 'err');
+          } else {
+            toast('❌ Fehler: ' + e.message, 'err');
+          }
         }
       }
     );
@@ -7882,7 +8001,46 @@
   // NICHT den gesamten Upload ab - das Original ist zu diesem Zeitpunkt schon
   // gespeichert und bleibt nutzbar; die Seite zeigt bis zum nächsten
   // erfolgreichen Speichern/zur Migration einfach weiter das Original an.
+  // Phase 5B.2 (Admin-Medienfunktionen auf Laravel-Media-API umstellen,
+  // Auftrag Punkt 2 "Bilder"): auf einem PHP-/Laravel-Host erzeugt der
+  // Server bereits Original+Thumb+Card in EINEM Aufruf (siehe
+  // MediaUploadService::uploadImage()) - hier wird deshalb NUR die bereits
+  // bestehende clientseitige Verkleinerung/Komprimierung (prepareImageFor
+  // Upload(), spart weiterhin Bandbreite, siehe Auftrag "darf bleiben")
+  // wiederverwendet, aber NUR EINE Datei per multipart/form-data an
+  // POST /api/admin/media/images gesendet - keine zweite/dritte Variante
+  // vom Client aus, wie es Auftrag Punkt 2 explizit verlangt.
+  async function uploadImageLaravel(file) {
+    var prepared = await prepareImageForUpload(file);
+    var blob = base64ToBlob(prepared.base64, guessImageMime(prepared.filename));
+    var tok = await getToken();
+    var fd = new FormData();
+    fd.append('file', blob, prepared.filename);
+    var r = await fetch('/api/admin/media/images', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tok },
+      body: fd
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) throw new Error(laravelMediaErrorMessage(r.status, body));
+    return body.item.url;
+  }
+
+  // Zentrale Upload-Funktion für ALLE drei Aufrufstellen (Medienbibliothek,
+  // Bildfeld-Picker, Markdown-Bild-Einfügen): auf Netlify (git-gateway) lädt
+  // sie wie bisher Original + thumb + card einzeln hoch; auf einem PHP-/
+  // Laravel-Host (Phase 5B.2) delegiert sie komplett an uploadImageLaravel()
+  // oben, das den Server die Varianten erzeugen lässt. Gibt in beiden Fällen
+  // NUR die Original-URL zurück - der Aufrufer/die content/*.json-Datei
+  // merkt sich weiterhin exakt einen Pfad, unverändert gegenüber vor dieser
+  // Umstellung.
   async function uploadImageWithVariants(file) {
+    if (IS_PHP_HOST) return uploadImageLaravel(file);
+
+    // Schlägt eine Vorschau-Variante fehl (z.B. Netzwerkfehler), bricht das
+    // NICHT den gesamten Upload ab - das Original ist zu diesem Zeitpunkt schon
+    // gespeichert und bleibt nutzbar; die Seite zeigt bis zum nächsten
+    // erfolgreichen Speichern/zur Migration einfach weiter das Original an.
     var prepared = await prepareImageForUpload(file);
     var safeName = makeSafeImageName(prepared.filename);
     var mainUrl = await apiUploadImageToFolder('images', safeName, prepared.base64);
@@ -8496,8 +8654,31 @@
   // vorab prüfen und eine klare, verständliche Meldung zeigen statt erst
   // nach dem Hochladen mit einer kryptischen API-Fehlermeldung zu scheitern.
   var PDF_MAX_BYTES = 1000000; // ~1 MB, entspricht dem Contents-API-Limit
+  // Phase 5B.2: auf einem PHP-/Laravel-Host gilt NICHT mehr das ~1MB-Limit
+  // der GitHub-Contents-API, sondern das serverseitig konfigurierte Limit
+  // aus laravel/config/kjs_media.php (Standard 20 MB, siehe dortiger
+  // Kommentar "KJS_MAX_PDF_BYTES"). Nur ein client-seitiger Hinweiswert für
+  // eine frühe, verständliche Meldung - maßgeblich bleibt in jedem Fall die
+  // serverseitige Prüfung (422, siehe laravelMediaErrorMessage()).
+  var PDF_MAX_BYTES_LARAVEL = 20000000;
+
+  async function apiUploadPdfLaravel(filename, base64Data) {
+    var blob = base64ToBlob(base64Data, 'application/pdf');
+    var tok = await getToken();
+    var fd = new FormData();
+    fd.append('file', blob, filename);
+    var r = await fetch('/api/admin/media/pdfs', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tok },
+      body: fd
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) throw new Error(laravelMediaErrorMessage(r.status, body));
+    return body.item.url;
+  }
 
   async function apiUploadPdf(filename, base64Data) {
+    if (IS_PHP_HOST) return apiUploadPdfLaravel(filename, base64Data);
     var tok = await getToken();
     var safeName = Date.now() + '-' + filename.replace(/[^a-zA-Z0-9._-]/g, '-');
     var body = { message: '📄 PDF hochgeladen: ' + safeName, content: base64Data, branch: BRANCH };
@@ -8607,8 +8788,9 @@
       var file = this.files[0];
       if (!file) return;
       var status = id('pdf-upload-status');
-      if (file.size > PDF_MAX_BYTES) {
-        status.textContent = '❌ Datei zu groß (' + (file.size / 1000000).toFixed(1) + ' MB) – maximal 1 MB möglich. Bitte das PDF vorher verkleinern/komprimieren.';
+      var maxBytes = IS_PHP_HOST ? PDF_MAX_BYTES_LARAVEL : PDF_MAX_BYTES;
+      if (file.size > maxBytes) {
+        status.textContent = '❌ Datei zu groß (' + (file.size / 1000000).toFixed(1) + ' MB) – maximal ' + Math.round(maxBytes / 1000000) + ' MB möglich. Bitte das PDF vorher verkleinern/komprimieren.';
         input.value = '';
         return;
       }
