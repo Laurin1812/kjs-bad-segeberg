@@ -1327,6 +1327,98 @@
     return { content: { sha: 'v' + (body.version || 0) } };
   }
 
+  // Phase 6 ("Neue Seiten und Unterseiten ... über Laravel/MySQL anlegen"):
+  // Übersetzer für die neuen Create-/Delete-Endpunkte (AdminPageController::
+  // store*()/destroy*()) - gleiches Prinzip wie laravelMediaErrorMessage()
+  // aus Phase 5B.2 (Auftrag Punkt 7 "Fehlerbehandlung"), aber mit den für
+  // Seiten relevanten Fehlerformen (409 doppelter/reservierter Slug, 404
+  // ungültiger Parent, 409 mit Unterseiten beim Löschen) statt der
+  // Medien-spezifischen (413/503).
+  function laravelPageErrorMessage(status, body) {
+    var msg = body && body.message;
+    if (status === 401) return 'Sitzung abgelaufen – bitte neu anmelden.';
+    if (status === 403) return 'Keine Berechtigung für diesen Bereich.';
+    if (status === 404) return msg || 'Übergeordnete Seite nicht gefunden.';
+    if (status === 409) return msg || 'URL-Kürzel bereits vergeben.';
+    if (status === 422) return msg || 'Eingabe ungültig.';
+    return msg || ('Fehler (' + status + ')');
+  }
+
+  // Erstellt eine neue Seite/Unterseite direkt in MySQL (POST), statt wie
+  // bisher (Git-Gateway-Pfad) den Content per PUT anzulegen UND zusätzlich
+  // ein separates Navigations-Manifest per GET+PUT nachzuziehen - die
+  // Auflistung kommt für IS_PHP_HOST jetzt ohnehin live aus der DB (siehe
+  // apiGetRegistryLaravel()/loadAllManifestItems()/loadDynamicChildren()
+  // unten), ein Manifest-Update entfällt daher komplett (Auftrag Punkt 8:
+  // "Keine JSON-Datei und kein Git-Commit nötig"). "def.navFile" ist bereits
+  // exakt der content/…-Pfad, unter dem die zugehörige POST-Route liegt
+  // (z.B. "content/seiten-sub-hochwild.json" -> admin/content/seiten-sub-
+  // hochwild.json, siehe routes/api.php) - dieselbe Datei-"Identität", die
+  // admin.js an dieser Stelle ohnehin schon für den Git-Gateway-Pfad pflegt.
+  async function apiCreateSeiteLaravel(def, newData) {
+    var tok = await getToken();
+    var r = await fetch('/api/admin/' + def.navFile, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: newData })
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      throw new Error(laravelPageErrorMessage(r.status, body));
+    }
+    return body;
+  }
+
+  // Löscht eine dynamisch angelegte Seite direkt in MySQL (DELETE), statt wie
+  // bisher IMMER (unabhängig von IS_PHP_HOST) per hartkodiertem Git-Gateway-
+  // DELETE - siehe dynSeiteDelete() unten. Ein HTTP 409 mit
+  // error:"has_children" wird NICHT wie ein normaler Fehler behandelt,
+  // sondern (analog zu apiDeleteFileLaravel() aus Phase 5B.2) als eigene
+  // Fehlerform mit e.hasChildren=true geworfen, damit dynSeiteDelete() dem
+  // Admin die konkrete Ursache nennen kann statt nur "Löschen fehlgeschlagen".
+  async function apiDeleteSeiteLaravel(def) {
+    var tok = await getToken();
+    var r = await fetch('/api/admin/' + def.file, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + tok }
+    });
+    var body = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      if (r.status === 409 && body && body.error === 'has_children') {
+        var err = new Error(laravelPageErrorMessage(409, body));
+        err.hasChildren = true;
+        throw err;
+      }
+      throw new Error(laravelPageErrorMessage(r.status, body));
+    }
+    return true;
+  }
+
+  // Gegenstück zu apiGetLaravel() speziell für Registry-Manifeste (content/
+  // seiten-sub-<parent>.json, seiten-aufgaben.json, seiten-weitere.json,
+  // aufgaben/hundeausbildung-seiten.json, ...): die Read-API dafür existiert
+  // bereits seit Phase 3 (PageContentController, liefert {"seiten":[...]}
+  // live aus der "pages"-Tabelle) - anders als bei apiGetLaravel() gibt es
+  // hier aber bewusst KEIN Laravel-PUT-Gegenstück (siehe apiCreateSeiteLaravel/
+  // apiDeleteSeiteLaravel oben: Anlegen/Löschen läuft jetzt über eigene
+  // POST/DELETE-Endpunkte, nicht mehr über Lesen+Ändern+Zurückschreiben
+  // dieses Manifests) - deshalb eine EIGENE, schlankere Funktion statt
+  // laravelPageModulFuerDatei()/laravelModulFuerDatei() um diesen Fall zu
+  // erweitern (die bleiben unverändert, u.a. weil onSidebarReorder() für
+  // die Drag&Drop-Reihenfolge dynamischer Seiten weiterhin unverändert über
+  // den bisherigen Git-Gateway-Weg läuft, siehe Abschlussbericht "offene
+  // Risiken" - hier NUR die beiden lesenden Aufrufstellen betroffen, die die
+  // Sidebar beim Laden befüllen). Öffentliche Route, kein Token nötig.
+  async function apiGetRegistryLaravel(navFile) {
+    var rest = navFile.slice('content/'.length);
+    var r = await fetch('/api/content/' + rest + '?_=' + Date.now(), {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' beim Laden von ' + navFile);
+    var data = await r.json();
+    return { sha: 'v0', content: toBase64(JSON.stringify(data)) };
+  }
+
   async function apiGetBoerse(modul) {
     var tok = await getToken();
     var r = await fetch('/api/' + modul + '/admin/liste.php?_=' + Date.now(), {
@@ -1918,7 +2010,7 @@
       // macht das aber nicht nur implizit, sondern klar lesbar).
       if (!isAdminUser() && !hasPermission(PERM_BY_DIR[sec.dir])) continue;
       try {
-        var resp = await apiGet(sec.file);
+        var resp = IS_PHP_HOST ? await apiGetRegistryLaravel(sec.file) : await apiGet(sec.file);
         var data = JSON.parse(fromBase64(resp.content));
         var seiten = (data.seiten || []).filter(function(s) {
           return s.veroeffentlicht !== false;
@@ -2058,7 +2150,7 @@
     var weitereNode = findByKey(NAV, 'weitere');
     if (!weitereNode) return;
     try {
-      var resp = await apiGet(weitereNode.navFile);
+      var resp = IS_PHP_HOST ? await apiGetRegistryLaravel(weitereNode.navFile) : await apiGet(weitereNode.navFile);
       var data = JSON.parse(fromBase64(resp.content));
       var seiten = (data[weitereNode.navKey] || []).filter(function(s) { return s.veroeffentlicht !== false; });
       var wrap = id('dynchildren-' + weitereNode.key);
@@ -2409,30 +2501,39 @@
       'Seite „' + (def.label || def.slug) + '" wirklich dauerhaft löschen?',
       async function() {
         try {
-          // 1. Remove from manifest
-          var manifestResp = await apiGet(def.navFile);
-          var manifestData = JSON.parse(fromBase64(manifestResp.content));
-          var key = def.navKey || 'seiten';
-          manifestData[key] = (manifestData[key] || []).filter(function(s) { return s.slug !== def.slug; });
-          await apiPut(def.navFile, manifestData, manifestResp.sha, '🗑️ Navigation: ' + (def.label || def.slug) + ' entfernt');
+          if (IS_PHP_HOST) {
+            // Phase 6: ein DELETE auf die Seite selbst genügt (siehe
+            // AdminPageController::loescheSeite()) - kein separates Manifest
+            // mehr, aus dem der Eintrag zuerst entfernt werden müsste; bisher
+            // lief dieser Schritt IMMER (auch auf PHP-/Laravel-Hosts) über
+            // das rohe Git-Gateway, siehe apiDeleteSeiteLaravel()-Kommentar.
+            await apiDeleteSeiteLaravel(def);
+          } else {
+            // 1. Remove from manifest
+            var manifestResp = await apiGet(def.navFile);
+            var manifestData = JSON.parse(fromBase64(manifestResp.content));
+            var key = def.navKey || 'seiten';
+            manifestData[key] = (manifestData[key] || []).filter(function(s) { return s.slug !== def.slug; });
+            await apiPut(def.navFile, manifestData, manifestResp.sha, '🗑️ Navigation: ' + (def.label || def.slug) + ' entfernt');
 
-          // 2. Delete content file (requires its SHA)
-          try {
-            var fileResp = await apiGet(def.file);
-            var tok = await getToken();
-            await fetch(GIT + '/' + def.file, {
-              method: 'DELETE',
-              headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message: '🗑️ Seite gelöscht: ' + (def.label || def.slug), sha: fileResp.sha, branch: BRANCH })
-            });
-          } catch(e2) {
-            // File may not exist — ignore
+            // 2. Delete content file (requires its SHA)
+            try {
+              var fileResp = await apiGet(def.file);
+              var tok = await getToken();
+              await fetch(GIT + '/' + def.file, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: '🗑️ Seite gelöscht: ' + (def.label || def.slug), sha: fileResp.sha, branch: BRANCH })
+              });
+            } catch(e2) {
+              // File may not exist — ignore
+            }
           }
 
           toast('✅ Seite gelöscht. Seite lädt neu…', 'ok');
           setTimeout(function() { location.reload(); }, 1500);
         } catch(e) {
-          toast('❌ Fehler: ' + e.message, 'err');
+          toast((e.hasChildren ? '⚠️ ' : '❌ ') + e.message, 'err');
         }
       }
     );
@@ -7413,6 +7514,8 @@
     if (!titel) { toast('⚠️ Bitte Seitentitel eingeben', 'err'); return; }
     if (!slug)  { toast('⚠️ Bitte URL-Kürzel eingeben', 'err'); return; }
 
+    var istHundeausbildung = def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1;
+
     var newData = {
       titel:          titel,
       nav_label:      navLabel,
@@ -7427,27 +7530,43 @@
       in_navigation:  true,
       veroeffentlicht: toggleVal('ns-veroeffentlicht'),
     };
-
-    var contentPath = def.dir + '/' + slug + '.json';
+    // Jagdhundeschule: Kachel-Vorschaufelder gehören auch in die Seite selbst
+    // (nicht nur ins bisherige Navigations-Manifest, siehe dort weiter unten)
+    // - eine bestehende Kursseite führt vorschaubild/kurzbeschreibung/gruppe
+    // ebenfalls direkt im Content (siehe z.B. content/aufgaben/
+    // hundeausbildung/vps-preistraeger.json).
+    if (istHundeausbildung) {
+      newData.vorschaubild     = gv('ns-vorschaubild') || '';
+      newData.kurzbeschreibung = gv('ns-kurzbeschreibung') || '';
+      newData.gruppe           = gv('ns-gruppe') || '';
+    }
 
     setSaving(true);
     try {
-      // 1. Create content file
-      await apiPut(contentPath, newData, null, '➕ Neue Seite erstellt: ' + titel);
+      if (IS_PHP_HOST) {
+        // Phase 6: EIN POST legt Seite + Registry-Eintrag zugleich in MySQL
+        // an (siehe AdminPageController::erzeugeSeite()) - kein separates
+        // Manifest mehr zu lesen/schreiben, siehe apiCreateSeiteLaravel().
+        await apiCreateSeiteLaravel(def, newData);
+      } else {
+        var contentPath = def.dir + '/' + slug + '.json';
+        // 1. Create content file
+        await apiPut(contentPath, newData, null, '➕ Neue Seite erstellt: ' + titel);
 
-      // 2. Update nav manifest
-      var manifestResp = await apiGet(def.navFile);
-      var manifestData = JSON.parse(fromBase64(manifestResp.content));
-      manifestData[def.navKey] = manifestData[def.navKey] || [];
-      var manifestEntry = { slug: slug, nav_label: navLabel, in_navigation: true, veroeffentlicht: true };
-      // Jagdhundeschule: Kachel-Vorschaufelder in das Manifest schreiben
-      if (def.navFile && def.navFile.indexOf('hundeausbildung-seiten') !== -1) {
-        manifestEntry.vorschaubild     = gv('ns-vorschaubild') || '';
-        manifestEntry.kurzbeschreibung = gv('ns-kurzbeschreibung') || '';
-        manifestEntry.gruppe           = gv('ns-gruppe') || '';
+        // 2. Update nav manifest
+        var manifestResp = await apiGet(def.navFile);
+        var manifestData = JSON.parse(fromBase64(manifestResp.content));
+        manifestData[def.navKey] = manifestData[def.navKey] || [];
+        var manifestEntry = { slug: slug, nav_label: navLabel, in_navigation: true, veroeffentlicht: true };
+        // Jagdhundeschule: Kachel-Vorschaufelder in das Manifest schreiben
+        if (istHundeausbildung) {
+          manifestEntry.vorschaubild     = newData.vorschaubild;
+          manifestEntry.kurzbeschreibung = newData.kurzbeschreibung;
+          manifestEntry.gruppe           = newData.gruppe;
+        }
+        manifestData[def.navKey].push(manifestEntry);
+        await apiPut(def.navFile, manifestData, manifestResp.sha, '➕ Navigation aktualisiert: ' + titel);
       }
-      manifestData[def.navKey].push(manifestEntry);
-      await apiPut(def.navFile, manifestData, manifestResp.sha, '➕ Navigation aktualisiert: ' + titel);
 
       toast('✅ Seite erstellt! Sie erscheint nach einem Reload im Menü.', 'ok');
       setSaving(false);
@@ -7456,7 +7575,7 @@
       setTimeout(function() { location.reload(); }, 2000);
     } catch(e) {
       setSaving(false);
-      toast('❌ Fehler: ' + e.message, 'err');
+      toast('❌ ' + e.message, 'err');
     }
   };
 

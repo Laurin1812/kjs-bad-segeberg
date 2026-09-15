@@ -8,31 +8,34 @@ use App\Models\PageLink;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
 use App\Support\KjsPagesConfig;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Phase 4 (Admin-Schreibweg Git/JSON -> Laravel/MySQL) - Schreib-Gegenstueck
- * zu PageContentController (Read-API, Phase 3), fuer diese Phase bewusst
- * NUR zum BEARBEITEN bestehender Seiten (kein Anlegen neuer Registry-Zusatz-
- * seiten/Unterseiten ueber die "+ Neue Unterseite/Seite"-Buttons - siehe
- * Abschlussbericht "offene Punkte"). Eine nicht gefundene Seite liefert
- * bewusst 404 statt sie stillschweigend anzulegen.
+ * zu PageContentController (Read-API, Phase 3). Ursprünglich (Phase 4) NUR
+ * zum BEARBEITEN bestehender Seiten gedacht - Phase 6 ("Neue Seiten und
+ * Unterseiten ... über Laravel/MySQL anlegen") ergänzt hier die eigentlichen
+ * store*()/destroy*()-Methoden für die "+ Neue Unterseite/Seite"-Buttons in
+ * admin.js sowie deren "🗑️ Seite löschen", die zuvor (Phase 4/5) eine
+ * bestehende Seite voraussetzten und bei einem noch nicht existierenden Slug
+ * mit 404 abgelehnt hätten. Das BEARBEITEN bestehender Seiten (saveResolved()
+ * unten) bleibt unverändert.
  *
- * RECHTE (Fortsetzung, vormaliger Blocker jetzt aufgeloest): anders als bei
- * den Settings-/Listen-Modulen oben (dort 1 Route <-> 1 fester
- * PERM_BY_KEY-Wert) haengt die Berechtigung fuer eine einzelne Seite in
- * admin.js von IHREM SLUG ab (PERM_BY_KEY/PERM_BY_DIR, z.B. 'niederwild' vs.
- * 'hochwild' vs. 'aufgaben_natur' - siehe dortige Tabelle), nicht vom
- * Endpunkt selbst. Diese ca. 30 Slug-zu-Recht-Zuordnungen sind jetzt 1:1
+ * RECHTE: anders als bei den Settings-/Listen-Modulen oben (dort 1 Route <->
+ * 1 fester PERM_BY_KEY-Wert) haengt die Berechtigung fuer eine einzelne
+ * Seite in admin.js von IHREM SLUG ab (PERM_BY_KEY/PERM_BY_DIR, z.B.
+ * 'niederwild' vs. 'hochwild' vs. 'aufgaben_natur' - siehe dortige Tabelle),
+ * nicht vom Endpunkt selbst. Diese ca. 30 Slug-zu-Recht-Zuordnungen sind 1:1
  * nach PHP portiert (siehe App\Support\PagePermissions) und werden ueber die
- * neue Middleware "identity.page_permission:<kind>" (routes/api.php,
+ * Middleware "identity.page_permission:<kind>" (routes/api.php,
  * App\Http\Middleware\EnsurePagePermission) VOR jeder dieser Methoden
- * geprueft - admin.js ist entsprechend angepasst (laravelModulFuerDatei()
- * inkl. neuer laravelPageModulFuerDatei()), Redakteure mit einzelnen
- * Seiten-Rechten speichern ihre Seiten dadurch jetzt ebenfalls ueber
- * Laravel/MySQL, nicht mehr ueber Git-Gateway.
+ * geprueft - dieselben <kind>-Werte wie beim jeweiligen PUT-Pendant, weil die
+ * Berechtigung fuer "Unterseite von X anlegen/löschen" dieselbe ist wie fuer
+ * "X selbst bearbeiten" (Phase-6-Auftrag Punkt 6: bestehende Rechte-Logik
+ * unveraendert wiederverwenden, keine neue Rechte-Ebene erfinden).
  */
 class AdminPageController extends Controller
 {
@@ -158,6 +161,356 @@ class AdminPageController extends Controller
         $this->replaceEmbeddedDownloads($page, $data['downloads'] ?? null);
         $this->replaceEmbeddedGalerie($page, $data['galerie'] ?? null);
         $this->replacePageLinks($page, $data['linkliste'] ?? null);
+    }
+
+    /**
+     * Phase 6 Auftrag Punkt 5 ("Slug-Sicherheit"): serverseitige Prüfung,
+     * unabhängig davon, was admin.js' makeSlug() clientseitig bereits erzeugt
+     * hat (die dortige Erzeugung bleibt UI-Komfort, kein Vertrauensanker).
+     * Nur Kleinbuchstaben/Ziffern/Bindestriche, kein "..", kein "/", nicht
+     * leer, keine führenden/folgenden/doppelten Bindestriche - exakt die
+     * Zeichenmenge, die makeSlug() selbst erzeugt, damit ein normal über den
+     * Admin erzeugter Titel nie serverseitig abgelehnt wird.
+     *
+     * @return string|null Fehlermeldung, oder null wenn der Slug gültig ist.
+     */
+    private function slugFehler(string $slug): ?string
+    {
+        if ($slug === '') {
+            return 'Bitte ein URL-Kürzel (Slug) angeben.';
+        }
+        if (mb_strlen($slug) > 100) {
+            return 'URL-Kürzel ist zu lang (max. 100 Zeichen).';
+        }
+        if (! preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $slug)) {
+            return 'URL-Kürzel darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten (keine Leerzeichen, Punkte, Schrägstriche oder Sonderzeichen).';
+        }
+
+        return null;
+    }
+
+    /**
+     * Feldübernahme beim NEUANLEGEN (Punkt 3 "Datenmodell/Seitenregister") -
+     * bewusst eine EIGENE, kleinere Methode statt applyFields() wiederzuver-
+     * wenden: nimmt NUR die Felder entgegen, die admin.js' neueSeiteSpeedSave()
+     * beim Anlegen tatsächlich mitschickt (siehe dortiges "newData"-Objekt),
+     * und - anders als applyFields() - NIE "section"/"parent_id"/"slug"/
+     * "sortierung"/"registry_veroeffentlicht"/"id" aus dem Client-Payload
+     * (Punkt 3 "Keine IDs aus dem Browser übernehmen", Punkt 12 "keine
+     * Mass-Assignment-Lücke") - diese fünf Felder setzt IMMER der jeweilige
+     * store*()-Aufrufer selbst, serverseitig. Speichert bewusst NICHT selbst
+     * (Aufrufer setzt zuerst section/parent_id/slug/sortierung, dann genau
+     * ein $page->save()).
+     */
+    private function fillCreateFields(Page $page, array $data): void
+    {
+        $page->fill([
+            'titel' => (string) ($data['titel'] ?? '') ?: null,
+            'nav_label' => (string) ($data['nav_label'] ?? '') ?: null,
+            'intro' => $data['intro'] ?? null,
+            'inhalt' => $data['inhalt'] ?? null,
+            'hero_bild' => (string) ($data['hero_bild'] ?? '') ?: null,
+            'bild' => (string) ($data['bild'] ?? '') ?: null,
+            'bild_alt' => (string) ($data['bild_alt'] ?? '') ?: null,
+            // Nur bei Hundeausbildungs-Kursen von admin.js gesendet
+            // (Kachel-Vorschau) - fuer alle anderen Faelle einfach leer.
+            'vorschaubild' => (string) ($data['vorschaubild'] ?? '') ?: null,
+            'kurzbeschreibung' => $data['kurzbeschreibung'] ?? null,
+            'gruppe' => (string) ($data['gruppe'] ?? '') ?: null,
+            'kontakt_name' => (string) ($data['kontakt_name'] ?? '') ?: null,
+            'kontakt_email' => (string) ($data['kontakt_email'] ?? '') ?: null,
+            'in_navigation' => $this->toBool($data['in_navigation'] ?? null, true),
+            'veroeffentlicht' => $this->toBool($data['veroeffentlicht'] ?? null, true),
+        ]);
+    }
+
+    /**
+     * Punkt 7 ("Sortierung"): neue Seiten landen am Ende ihrer Geschwister
+     * (gleiche section+parent_id, feste UND per Registry angelegte Seiten
+     * zusammen) - "entweder am Ende" aus dem Auftrag. Bestehende
+     * sortierung-Werte werden dabei nie verändert (nur gelesen), Lücken in
+     * der Nummerierung sind fuer "ORDER BY sortierung" folgenlos.
+     */
+    private function naechsteSortierung(string $section, ?int $parentId): int
+    {
+        $max = Page::where('section', $section)->where('parent_id', $parentId)->max('sortierung');
+
+        return $max === null ? 0 : ((int) $max) + 1;
+    }
+
+    /**
+     * Gemeinsamer Speicher-Ablauf fuer alle store*()-Methoden unten: prüft
+     * Titel/Slug, prüft Eindeutigkeit (Punkt 3 "keine doppelten Slugs
+     * innerhalb derselben Seitenfamilie/Parent-Struktur" - EXPLIZIT per
+     * Anwendungscode geprüft, nicht nur über den DB-Unique-Index verlassen,
+     * weil MySQL mehrere NULLs in einer UNIQUE-Spalte nicht als Duplikate
+     * behandelt und "parent_id" bei allen Top-Level-Seiten NULL ist - der
+     * DB-Index allein würde zwei Top-Level-Seiten mit demselben Slug in
+     * derselben Section NICHT verhindern), legt die Page an und vergibt die
+     * erste Versionsnummer (ContentVersioning::bump()), damit ein
+     * unmittelbar folgendes Bearbeiten/Speichern derselben Seite (Laden über
+     * apiGetLaravel(), siehe admin.js) sofort eine gültige Versionsnummer
+     * fuer die Konflikterkennung vorfindet.
+     */
+    private function erzeugeSeite(array $data, string $section, ?int $parentId, string $versionSection): JsonResponse
+    {
+        $slug = trim((string) ($data['slug'] ?? ''));
+        if ($fehler = $this->slugFehler($slug)) {
+            return $this->invalid($fehler);
+        }
+        $titel = trim((string) ($data['titel'] ?? ''));
+        if ($titel === '') {
+            return $this->invalid('Bitte einen Seitentitel angeben.');
+        }
+        if (Page::where('section', $section)->where('parent_id', $parentId)->where('slug', $slug)->exists()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'slug_taken',
+                'message' => 'Dieses URL-Kürzel wird in diesem Bereich bereits verwendet. Bitte ein anderes wählen.',
+            ], 409);
+        }
+        if ($parentId === null && in_array($section, KjsPagesConfig::familySections(), true)
+            && in_array($slug, KjsPagesConfig::fixedSlugs($section), true)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'slug_reserved',
+                'message' => 'Dieses URL-Kürzel ist für eine feste Seite dieses Bereichs reserviert.',
+            ], 409);
+        }
+
+        try {
+            return DB::transaction(function () use ($data, $section, $parentId, $slug, $versionSection) {
+                $page = new Page(['section' => $section, 'parent_id' => $parentId, 'slug' => $slug]);
+                $this->fillCreateFields($page, $data);
+                $page->sortierung = $this->naechsteSortierung($section, $parentId);
+                $page->save();
+                $version = ContentVersioning::bump($versionSection);
+
+                return response()->json([
+                    'success' => true,
+                    'id' => $page->id,
+                    'slug' => $page->slug,
+                    'version' => $version,
+                ], 201);
+            });
+        } catch (QueryException $e) {
+            // Sicherheitsnetz gegen die oben beschriebene MySQL-NULL-
+            // Unique-Lücke bei einem echten Gleichzeitigkeits-Wettlauf
+            // (zwei Anfragen bestehen beide die exists()-Prüfung, bevor
+            // die erste ihren Insert abschliesst) - kein Stacktrace/keine
+            // rohe DB-Fehlermeldung in der Antwort (Punkt 12).
+            if ((int) $e->getCode() === 23000) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'slug_taken',
+                    'message' => 'Dieses URL-Kürzel wird in diesem Bereich bereits verwendet. Bitte ein anderes wählen.',
+                ], 409);
+            }
+            throw $e;
+        }
+    }
+
+    /** content/seiten-{kjs|aufgaben|verbraucher}.json - neue Registry-Zusatzseite (parent_id=NULL). */
+    private function erstelleRegistrierteSeite(Request $request, string $section): JsonResponse
+    {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
+        if (! in_array($section, KjsPagesConfig::familySections(), true)) {
+            return $this->notFound();
+        }
+        $data = (array) $request->input('data');
+
+        return $this->erzeugeSeite($data, $section, null, $this->versionSection($section, trim((string) ($data['slug'] ?? ''))));
+    }
+
+    public function storeRegistrierteSeiteKjs(Request $request): JsonResponse
+    {
+        return $this->erstelleRegistrierteSeite($request, 'jaeger');
+    }
+
+    public function storeRegistrierteSeiteAufgaben(Request $request): JsonResponse
+    {
+        return $this->erstelleRegistrierteSeite($request, 'aufgaben');
+    }
+
+    /**
+     * Punkt 2 ("... Verbraucher, falls der bestehende Admin das wirklich
+     * unterstützt"): siehe Analyse in Punkt 1 des Abschlussberichts - der
+     * generische "➕ Neue Verbraucher-Seite"-Button wurde am 22.08.2026
+     * bewusst entfernt (siehe admin.js-Kommentar bei "new-sub-wild"), admin.js
+     * hat daher AKTUELL keinen UI-Button, der diesen Endpunkt aufruft. Der
+     * Endpunkt existiert trotzdem (API-Vollständigkeit, exakt wie schon das
+     * seit Phase 4 bestehende, ebenfalls ungenutzte PUT-Pendant
+     * registrierteSeiteVerbraucher()), ist aber bewusst NICHT an admin.js
+     * angebunden - "bestehende UI beibehalten" (Punkt 1) heisst hier: keinen
+     * frueher entfernten Button wieder einführen.
+     */
+    public function storeRegistrierteSeiteVerbraucher(Request $request): JsonResponse
+    {
+        return $this->erstelleRegistrierteSeite($request, 'verbraucher');
+    }
+
+    /** content/seiten-weitere.json - neue "Weitere Themen"-Seite (section=weitere, immer parent_id=NULL). */
+    public function storeWeitereSeite(Request $request): JsonResponse
+    {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
+        $data = (array) $request->input('data');
+
+        return $this->erzeugeSeite($data, 'weitere', null, $this->versionSection('weitere', trim((string) ($data['slug'] ?? ''))));
+    }
+
+    /** content/seiten-sub-{parentSlug}.json - neue Unterseite unter einer bestehenden Hauptseite. */
+    public function storeSubSeite(Request $request, string $parentSlug): JsonResponse
+    {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
+        $parent = Page::whereIn('section', KjsPagesConfig::familySections())
+            ->whereNull('parent_id')
+            ->where('slug', $parentSlug)
+            ->first();
+        if (! $parent) {
+            // Ungueltiger Parent (Punkt 12 "ungueltiger Parent -> 404/422") -
+            // z.B. Tippfehler in der URL oder eine zwischenzeitlich gelöschte
+            // Hauptseite.
+            return $this->notFound();
+        }
+        $data = (array) $request->input('data');
+
+        return $this->erzeugeSeite(
+            $data,
+            $parent->section,
+            $parent->id,
+            $this->versionSection('sub', $parent->slug, trim((string) ($data['slug'] ?? '')))
+        );
+    }
+
+    /** content/aufgaben/hundeausbildung-seiten.json - neuer Hundeausbildungs-Kurs unter dem festen Hub. */
+    public function storeHundeausbildungKurs(Request $request): JsonResponse
+    {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
+        $hub = Page::where('section', 'hundeausbildung')->whereNull('parent_id')->first();
+        if (! $hub) {
+            // Sollte im echten Datenbestand nie vorkommen (der Hub ist ein
+            // fester Singleton) - fail-safe trotzdem als 404 statt eines
+            // Fehlers mit unklarer Ursache.
+            return $this->notFound();
+        }
+        $data = (array) $request->input('data');
+
+        return $this->erzeugeSeite(
+            $data,
+            'hundeausbildung',
+            $hub->id,
+            $this->versionSection('hundeausbildung', trim((string) ($data['slug'] ?? '')))
+        );
+    }
+
+    /**
+     * Punkt 9 ("Löschen neuer Seiten"): admin.js' dynSeiteDelete() existiert
+     * bereits (nur fuer isDynamic-Seiten, siehe renderStandard() dort) und
+     * loeschte bisher IMMER per direktem Git-Gateway-DELETE, unabhaengig von
+     * IS_PHP_HOST - das ist der Teil, der hier durch einen echten
+     * Laravel/MySQL-Endpunkt ersetzt wird. "Niemals still Kinder mitlöschen"
+     * (Auftrag): aktuell kann im Admin keine der hier loeschbaren Seiten
+     * (Registry-Zusatzseite/Unterseite/Weitere-Themen-Seite/Hundeausbildungs-
+     * Kurs) selbst wieder eigene Unterseiten haben (keine dieser vier hat in
+     * admin.js ein "➕ Neue Unterseite"-Kind, siehe hatUnterseitenSystem()),
+     * die Prüfung unten ist daher rein defensiv/zukunftssicher, nicht Teil
+     * eines heute erreichbaren Falls.
+     */
+    private function loescheSeite(?Page $page): JsonResponse
+    {
+        if (! $page) {
+            return $this->notFound();
+        }
+        $childCount = Page::where('parent_id', $page->id)->count();
+        if ($childCount > 0) {
+            return response()->json([
+                'success' => false,
+                'error' => 'has_children',
+                'message' => 'Diese Seite hat noch '.$childCount.' Unterseite(n) und wurde nicht gelöscht. Bitte zuerst die Unterseiten entfernen oder verschieben.',
+            ], 409);
+        }
+
+        return DB::transaction(function () use ($page) {
+            // Eingebettete Downloads/Galerie/Linkliste der Seite mit aufräumen
+            // (dieselben privaten Methoden wie applyFields() beim Speichern
+            // verwendet, mit leerem Array = "alles entfernen") - sonst blieben
+            // verwaiste Download-/Galerie-/Link-Zeilen mit einer owner_id
+            // zurueck, die auf keine Page-Zeile mehr zeigt.
+            $this->replaceEmbeddedDownloads($page, []);
+            $this->replaceEmbeddedGalerie($page, []);
+            $this->replacePageLinks($page, []);
+            $page->delete();
+
+            return response()->json(['success' => true]);
+        });
+    }
+
+    private function destroyRegistrierteSeite(string $section, string $slug): JsonResponse
+    {
+        if (! in_array($section, KjsPagesConfig::familySections(), true)) {
+            return $this->notFound();
+        }
+        $page = Page::where('section', $section)
+            ->whereNull('parent_id')
+            ->whereNotIn('slug', KjsPagesConfig::fixedSlugs($section))
+            ->where('slug', $slug)
+            ->first();
+
+        return $this->loescheSeite($page);
+    }
+
+    public function destroyRegistrierteSeiteKjs(string $slug): JsonResponse
+    {
+        return $this->destroyRegistrierteSeite('jaeger', $slug);
+    }
+
+    public function destroyRegistrierteSeiteAufgaben(string $slug): JsonResponse
+    {
+        return $this->destroyRegistrierteSeite('aufgaben', $slug);
+    }
+
+    public function destroyRegistrierteSeiteVerbraucher(string $slug): JsonResponse
+    {
+        return $this->destroyRegistrierteSeite('verbraucher', $slug);
+    }
+
+    public function destroyWeitereSeite(string $slug): JsonResponse
+    {
+        $page = Page::where('section', 'weitere')->where('slug', $slug)->first();
+
+        return $this->loescheSeite($page);
+    }
+
+    public function destroySubSeite(string $parentSlug, string $childSlug): JsonResponse
+    {
+        $parent = Page::whereIn('section', KjsPagesConfig::familySections())
+            ->whereNull('parent_id')
+            ->where('slug', $parentSlug)
+            ->first();
+        if (! $parent) {
+            return $this->notFound();
+        }
+        $page = Page::where('section', $parent->section)->where('parent_id', $parent->id)->where('slug', $childSlug)->first();
+
+        return $this->loescheSeite($page);
+    }
+
+    public function destroyHundeausbildungKurs(string $slug): JsonResponse
+    {
+        $hub = Page::where('section', 'hundeausbildung')->whereNull('parent_id')->first();
+        $page = $hub
+            ? Page::where('section', 'hundeausbildung')->where('parent_id', $hub->id)->where('slug', $slug)->first()
+            : null;
+
+        return $this->loescheSeite($page);
     }
 
     private function replaceEmbeddedDownloads(Page $page, mixed $items): void

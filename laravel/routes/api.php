@@ -175,6 +175,38 @@ Route::prefix('admin')->group(function () {
         ->where('section', 'jaeger|aufgaben|verbraucher')
         ->middleware('identity.page_permission:feste');
 
+    // -- Pages (Phase 6: NEUE Seiten/Unterseiten anlegen/löschen) -----------
+    // Dieselben "<kind>"-Werte wie beim jeweiligen PUT-Pendant direkt
+    // darüber (identisches Recht fürs Anlegen/Löschen wie fürs Bearbeiten,
+    // siehe AdminPageController-Klassenkommentar/PagePermissions) - bewusst
+    // KEINE Route fuer "festeSeite" (Systemvorlagen-Seiten sind weder neu
+    // anlegbar noch löschbar, siehe Auftrag "keine festen Systemseiten neu
+    // anlegbar machen").
+    Route::post('content/aufgaben/hundeausbildung-seiten.json', [AdminPageController::class, 'storeHundeausbildungKurs'])
+        ->middleware('identity.page_permission:hundeausbildung_kurs');
+    Route::delete('content/aufgaben/hundeausbildung/{slug}.json', [AdminPageController::class, 'destroyHundeausbildungKurs'])
+        ->middleware('identity.page_permission:hundeausbildung_kurs');
+    Route::post('content/seiten-kjs.json', [AdminPageController::class, 'storeRegistrierteSeiteKjs'])
+        ->middleware('identity.page_permission:registrierte_jaeger');
+    Route::delete('content/seiten-kjs/{slug}.json', [AdminPageController::class, 'destroyRegistrierteSeiteKjs'])
+        ->middleware('identity.page_permission:registrierte_jaeger');
+    Route::post('content/seiten-aufgaben.json', [AdminPageController::class, 'storeRegistrierteSeiteAufgaben'])
+        ->middleware('identity.page_permission:registrierte_aufgaben');
+    Route::delete('content/seiten-aufgaben/{slug}.json', [AdminPageController::class, 'destroyRegistrierteSeiteAufgaben'])
+        ->middleware('identity.page_permission:registrierte_aufgaben');
+    Route::post('content/seiten-verbraucher.json', [AdminPageController::class, 'storeRegistrierteSeiteVerbraucher'])
+        ->middleware('identity.page_permission:registrierte_verbraucher');
+    Route::delete('content/seiten-verbraucher/{slug}.json', [AdminPageController::class, 'destroyRegistrierteSeiteVerbraucher'])
+        ->middleware('identity.page_permission:registrierte_verbraucher');
+    Route::post('content/seiten-weitere.json', [AdminPageController::class, 'storeWeitereSeite'])
+        ->middleware('identity.page_permission:weitere');
+    Route::delete('content/seiten-weitere/{slug}.json', [AdminPageController::class, 'destroyWeitereSeite'])
+        ->middleware('identity.page_permission:weitere');
+    Route::post('content/seiten-sub-{parentSlug}.json', [AdminPageController::class, 'storeSubSeite'])
+        ->middleware('identity.page_permission:sub');
+    Route::delete('content/seiten-sub-{parentSlug}/{childSlug}.json', [AdminPageController::class, 'destroySubSeite'])
+        ->middleware('identity.page_permission:sub');
+
     // -- Medienbibliothek (Phase 5B.1, Frontend-Anbindung Phase 5B.2) -------
     // Eigenstaendige, generische Medien-API (siehe AdminMediaController-
     // Klassenkommentar) - "medien" ist ein eigener Berechtigungsschluessel
