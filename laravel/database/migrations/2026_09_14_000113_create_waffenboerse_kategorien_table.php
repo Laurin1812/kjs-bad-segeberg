@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Schema;
 // Im Admin ueber "+ Neu"/Papierkorb verwaltet (waffenboerseKategorieAdd/
 // -Delete in admin/admin.js) - bleibt unveraendert, schreibt kuenftig nur
 // nach MySQL statt in die JSON-Datei.
+// PHASE 8B - DORMANT / BEWUSST UNGENUTZT: diese Migration legt die
+// Tabellenstruktur in der LARAVEL-DB an, aber KEIN Controller/KEINE Route
+// nutzt sie aktuell (siehe Phase-7/8B-Analyse). Produktive Wahrheit fuer
+// Hundeboerse/Waffenboerse/Kontakt bleiben die bestehenden PHP-
+// Sondermodule mit ihrer EIGENEN, separaten MySQL-Datenbank. NICHT
+// loeschen/zurueckrollen - siehe docs/deployment/dormante-boersen-tabellen.md.
+
 return new class extends Migration
 {
     public function up(): void

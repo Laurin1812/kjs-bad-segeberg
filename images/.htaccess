@@ -1,0 +1,54 @@
+# Oeffentlich erreichbarer Bild-Ordner (Laravel-Medienarchitektur, siehe
+# laravel/config/kjs_media.php + App\Support\MediaStorage/MediaUploadService,
+# Phase 5B.1) - sowohl bestehende Alt-Bilder (aus dem fruehreren Netlify/
+# git-gateway-CMS) als auch neue, ueber die Laravel-Admin-Oberflaeche
+# hochgeladene Bilder liegen hier als echte Dateien, inkl. der Vorschau-
+# Unterordner thumb/ und card/ (diese .htaccess gilt fuer beide mit, Apache
+# wertet .htaccess rekursiv fuer Unterordner aus).
+#
+# Verteidigung in der Tiefe, analog zur bereits bestehenden Absicherung von
+# uploads/boersen/ (siehe dortige uploads/.htaccess) und nachgezogen in
+# Phase 8B, nachdem Phase 8 diese Luecke gefunden hatte: PHP-Ausfuehrung in
+# diesem Ordner ist komplett deaktiviert, Verzeichnislisten sind aus. Dies
+# aendert NICHTS an der normalen Bild-Auslieferung (jpeg/png/webp werden von
+# Apache weiterhin ganz normal als statische Dateien ausgeliefert) - nur die
+# (ohnehin durch serverseitige MIME-/getimagesize()-Pruefung in
+# MediaUploadService bereits weitgehend ausgeschlossene) Ausfuehrung von
+# jemals hierher gelangten PHP-Dateien wird zusaetzlich blockiert.
+
+# Apache >= 2.4
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|php\d|phtml|phar)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+Options -Indexes -ExecCGI
+
+# WICHTIG (nachgezogen aus Phase 8/8B, identisches Muster wie
+# uploads/.htaccess): .htaccess wird NUR von Apache ausgewertet. Laeuft der
+# echte PHP-Host (kjs.mysolution-webservice.de) unter nginx (oder Apache im
+# nginx-Reverse-Proxy-Betrieb ohne mod_php/AllowOverride fuer diesen
+# Ordner), hat diese Datei GAR KEINE Wirkung. Carsten muesste in diesem Fall
+# serverseitig sicherstellen, dass ein nginx-"location"-Block etwa der
+# folgenden Form fuer /images/ aktiv ist (auf den echten Serverblock der
+# Site angepasst, NICHT wortwoertlich uebernehmbar):
+#
+#   location ^~ /images/ {
+#       location ~ \.(php|php\d|phtml|phar)$ {
+#           deny all;
+#           return 403;
+#       }
+#       autoindex off;
+#   }
+#
+# Ohne diese (oder eine gleichwertige) nginx-Konfiguration ist die
+# "Verteidigung in der Tiefe" fuer diesen Ordner unter nginx NICHT
+# vorhanden - siehe Abschlussbericht Phase 8B, Abschnitt "Upload-Haertung".

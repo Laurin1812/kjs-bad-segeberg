@@ -139,6 +139,14 @@
 # tatsaechliche mod_php/PHP-FPM-Betrieb auf dem echten Server konnte in
 # dieser Sandbox mangels Internetzugriffs fuer diese PHP-Apache-Pakete nicht
 # 1:1 nachgestellt werden, nur die Rewrite-Logik selbst (s.o.).
+#
+# Phase-8B-Entscheidung ("/up"-Health-Check): Laravels eingebauter
+# Health-Check ("/up", von bootstrap/app.php automatisch registriert) wird
+# von dieser Regel BEWUSST NICHT erfasst (nur /api/content/ und /api/admin/
+# sind eingeschlossen) - aktuell haengt kein Monitoring an "/up". Keine
+# Erweiterung fuer den jetzigen Go-Live, um den Wirkungsbereich dieser Regel
+# so eng wie moeglich zu halten. Falls spaeter externes Uptime-Monitoring
+# auf "/up" gewuenscht wird: RewriteCond oben gezielt um "|up$" ergaenzen.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_URI} ^/api/(content|admin)/

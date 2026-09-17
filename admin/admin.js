@@ -1166,6 +1166,27 @@
   // unten - verpackt als String "v<Nummer>", damit eine Version von 0 (ganz
   // frische, leere Installation) nicht wie "keine SHA bekannt" behandelt
   // wird (trackSha() betrachtet einen falsy-Wert als "nichts zu merken").
+  // Phase 8B ("Alte Git-/JSON-Fallbacks pruefen", Auftrag Punkt 4): Dateien,
+  // die im Admin-Panel noch existieren, aber noch NICHT auf Laravel/MySQL
+  // umgestellt wurden (aktuell nur "service.json" - Service-Seite, siehe
+  // NAECHSTE-SCHRITTE-GO-LIVE.md Prioritaet 2 "CMS-Fundament vereinheitlichen").
+  // Weder boerseModulFuerDatei() noch laravelModulFuerDatei() kennen diesen
+  // Pfad, apiGet()/apiPut() wuerden ohne diese Pruefung auf dem echten
+  // PHP-Host stillschweigend in den ROHEN git-gateway-Zweig durchfallen -
+  // git-gateway ist aber eine reine Netlify-Plattformfunktion
+  // (/.netlify/git/github/contents) und existiert auf dem echten PHP-Host
+  // gar nicht. Das Ergebnis waere ein raetselhafter Netzwerkfehler statt
+  // eines verstaendlichen Hinweises. Diese Liste macht den bekannten Rest
+  // bewusst explizit, statt ihn nur brechen zu lassen - Erweitern, falls
+  // spaeter weitere, noch nicht migrierte Admin-Bereiche auffallen.
+  var NICHT_MIGRIERTE_DATEIEN_PHP_HOST = ['content/service.json'];
+
+  function pruefeNichtMigriert(path) {
+    if (IS_PHP_HOST && NICHT_MIGRIERTE_DATEIEN_PHP_HOST.indexOf(path) !== -1) {
+      throw new Error('Dieser Admin-Bereich ist auf dem neuen Server noch nicht verfügbar (Umstellung auf die Datenbank steht für „' + path + '" noch aus).');
+    }
+  }
+
   function boerseModulFuerDatei(path) {
     // Siehe IS_PHP_HOST-Kommentar oben: auf Netlify (aktuell IMMER, siehe
     // dort) bleibt dieser Pfad deaktiviert, damit apiGet()/apiPut() fuer
@@ -1488,6 +1509,7 @@
     if (boerseModul) return apiGetBoerse(boerseModul);
     var laravelModul = laravelModulFuerDatei(path);
     if (laravelModul) return apiGetLaravel(laravelModul);
+    pruefeNichtMigriert(path);
 
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
@@ -1510,6 +1532,7 @@
     if (boerseModul) return apiPutBoerse(boerseModul, jsonData, sha);
     var laravelModul = laravelModulFuerDatei(path);
     if (laravelModul) return apiPutLaravel(laravelModul, jsonData, sha);
+    pruefeNichtMigriert(path);
 
     var tok = await getToken();
     var content = toBase64(JSON.stringify(jsonData, null, 2));
