@@ -78,6 +78,8 @@ class AdminListController extends Controller
 
     public const SECTION_KJM = 'kreisjaegermeister';
 
+    public const SECTION_SERVICE = 'service';
+
     private function conflictResponse(ContentVersionConflictException $e): JsonResponse
     {
         return response()->json([
@@ -357,6 +359,130 @@ class AdminListController extends Controller
                 Beitrag::where('typ', 'aktuelles')->whereNotIn('id', $keepIds)->delete();
 
                 return $this->ok(ContentVersioning::bump(self::SECTION_AKTUELLES));
+            });
+        } catch (ContentVersionConflictException $e) {
+            return $this->conflictResponse($e);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Service (Phase 8C - letzter migrierter CMS-Rest)
+    // ------------------------------------------------------------------
+
+    /**
+     * Spiegelbild von ImportContent::importService() bzw. ContentController::
+     * service() - siehe dortige Kommentare fuer die Feldzuordnung
+     * (insbesondere "video" -> die bereits vorhandene generische "link"-
+     * Spalte, kein "bild"/"galerie" bei Service). Ansonsten strukturell
+     * identisch zu aktuelles() oben: Zuordnung bestehender Beitraege ueber
+     * "legacy_index" (nicht Array-Position), Kategorien werden komplett neu
+     * geschrieben (admin.js haengt neue Namen nur dauerhaft an, siehe
+     * window.serviceEinstSave()/renderService()).
+     */
+    public function service(Request $request): JsonResponse
+    {
+        if ($invalid = $this->requireDataArray($request)) {
+            return $invalid;
+        }
+        ['data' => $data, 'expected_version' => $expected] = $this->bodyAndVersion($request);
+        $items = is_array($data['beitraege'] ?? null) ? $data['beitraege'] : [];
+        $einstellungen = is_array($data['einstellungen'] ?? null) ? $data['einstellungen'] : [];
+
+        try {
+            return DB::transaction(function () use ($data, $items, $einstellungen, $expected) {
+                ContentVersioning::assertNotStale(self::SECTION_SERVICE, $expected);
+
+                foreach (['titel', 'hero_bild', 'kontakt_name', 'kontakt_email'] as $key) {
+                    if (array_key_exists($key, $data) && ! is_array($data[$key])) {
+                        Setting::updateOrCreate(
+                            ['gruppe' => 'service', 'key' => $key],
+                            ['value' => (string) $data[$key]]
+                        );
+                    }
+                }
+                if (array_key_exists('veroeffentlicht', $data)) {
+                    Setting::updateOrCreate(
+                        ['gruppe' => 'service', 'key' => 'veroeffentlicht'],
+                        ['value' => $this->toBool($data['veroeffentlicht'], true) ? '1' : '0']
+                    );
+                }
+
+                // Kategorien: siehe Kommentar bei aktuelles() oben - Zuordnung
+                // ueber den Namen, Liste wird komplett neu geschrieben.
+                $kategorieNamen = is_array($einstellungen['kategorien'] ?? null) ? $einstellungen['kategorien'] : [];
+                BeitragKategorie::where('typ', 'service')->delete();
+                $kategorieMap = [];
+                foreach (array_values($kategorieNamen) as $i => $name) {
+                    if (! is_string($name) || trim($name) === '') {
+                        continue;
+                    }
+                    $kat = BeitragKategorie::create(['typ' => 'service', 'name' => $name, 'sortierung' => $i]);
+                    $kategorieMap[$name] = $kat->id;
+                }
+                $ensureKategorie = function (string $name) use (&$kategorieMap) {
+                    if ($name === '') {
+                        return null;
+                    }
+                    if (! isset($kategorieMap[$name])) {
+                        $kat = BeitragKategorie::create(['typ' => 'service', 'name' => $name, 'sortierung' => count($kategorieMap)]);
+                        $kategorieMap[$name] = $kat->id;
+                    }
+
+                    return $kategorieMap[$name];
+                };
+
+                $existingByLegacyIndex = Beitrag::where('typ', 'service')->get()->keyBy('legacy_index');
+                $nextLegacyIndex = ((int) Beitrag::where('typ', 'service')->max('legacy_index')) + 1;
+                $keepIds = [];
+
+                foreach (array_values($items) as $position => $item) {
+                    if (! is_array($item)) {
+                        continue;
+                    }
+                    $legacyIndex = isset($item['legacy_index']) && is_numeric($item['legacy_index']) ? (int) $item['legacy_index'] : null;
+                    $existing = $legacyIndex !== null ? $existingByLegacyIndex->get($legacyIndex) : null;
+
+                    $kategorieName = trim((string) ($item['kategorie'] ?? ''));
+                    $fields = [
+                        'typ' => 'service',
+                        'titel' => (string) ($item['titel'] ?? ''),
+                        'datum' => $this->parseDatum($item['datum'] ?? null),
+                        'jahr' => isset($item['jahr']) && $item['jahr'] !== '' ? (int) $item['jahr'] : null,
+                        'kategorie_id' => $kategorieName !== '' ? $ensureKategorie($kategorieName) : null,
+                        // Service hat kein eigenes Beitragsbild und keine
+                        // Galerie (siehe Methodenkommentar) - beide bewusst
+                        // immer null, unabhaengig davon, was der Client sendet.
+                        'bild' => null,
+                        'text' => $item['text'] ?? null,
+                        'link' => (string) ($item['video'] ?? '') ?: null,
+                        'galerie_titel' => null,
+                        'archiviert' => $this->toBool($item['archiviert'] ?? null, false),
+                        'sortierung' => $position,
+                    ];
+
+                    if ($existing) {
+                        $existing->update($fields);
+                        $beitrag = $existing;
+                    } else {
+                        $titel = $fields['titel'] !== '' ? $fields['titel'] : ('beitrag-'.$nextLegacyIndex);
+                        $baseSlug = \Illuminate\Support\Str::slug($titel) ?: 'beitrag';
+                        $candidate = $baseSlug;
+                        $n = 2;
+                        while (Beitrag::where('typ', 'service')->where('slug', $candidate)->exists()) {
+                            $candidate = $baseSlug.'-'.$n;
+                            $n++;
+                        }
+                        $beitrag = Beitrag::create($fields + ['slug' => $candidate, 'legacy_index' => $nextLegacyIndex]);
+                        $nextLegacyIndex++;
+                    }
+
+                    $this->replaceEmbeddedDownloads($beitrag, $item['downloads'] ?? null);
+                    $keepIds[] = $beitrag->id;
+                }
+
+                Beitrag::where('typ', 'service')->whereNotIn('id', $keepIds)->delete();
+
+                return $this->ok(ContentVersioning::bump(self::SECTION_SERVICE));
             });
         } catch (ContentVersionConflictException $e) {
             return $this->conflictResponse($e);

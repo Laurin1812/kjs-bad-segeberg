@@ -121,7 +121,7 @@ class ImportContent extends Command
                 $this->importMedienArchiv();
                 $this->importWunschliste();
                 $this->importBeitraege();
-                $this->importServicePlatzhalter();
+                $this->importService();
                 $this->importTermine();
                 $this->importPersonen();
                 $this->importHegeringe();
@@ -701,7 +701,9 @@ class ImportContent extends Command
     }
 
     // ------------------------------------------------------------------
-    // Aktuelles (Beitraege) + service.json (bewusst NICHT importiert)
+    // Aktuelles + Service (beide Beitraege, gemeinsames Schema, "typ"
+    // unterscheidet - siehe importService()-Kommentar fuer die Phase-8C-
+    // Migration von Service weg vom bisherigen Platzhalter-Ueberspringen)
     // ------------------------------------------------------------------
 
     private function importBeitraege(): void
@@ -813,23 +815,116 @@ class ImportContent extends Command
     }
 
     /**
-     * service.json enthaelt laut Analysebericht ausschliesslich Platzhalter-
-     * /Testdaten (kontakt_name/kontakt_email = "Test", beitraege: []) - wird
-     * daher AUSDRUECKLICH NICHT als produktiver Inhalt importiert (Auftrag
-     * Phase 2 Punkt 3B). Es werden keine Service-Inhalte erfunden.
+     * service.json -> settings (Gruppe "service": titel/hero_bild/
+     * kontakt_name/kontakt_email/veroeffentlicht) + beitraege/
+     * beitrag_kategorien (typ=service) - Spiegelbild von importBeitraege()
+     * oben.
+     *
+     * Phase 8C: bis hierhin enthielt service.json laut Analysebericht
+     * ausschliesslich Platzhalter-/Testdaten (kontakt_name/kontakt_email =
+     * "Test", beitraege: []) und wurde deshalb bewusst NICHT importiert
+     * (Auftrag Phase 2 Punkt 3B) - diese Sonderbehandlung entfaellt jetzt:
+     * Service wird wie jeder andere Content-Bereich 1:1 aus der JSON-Datei
+     * importiert, welchen Inhalt sie auch immer tatsaechlich enthaelt (auch
+     * weiterhin nur die Platzhalterwerte, falls sich daran noch nichts
+     * geaendert hat) - es werden nach wie vor keine Inhalte erfunden, nur
+     * die bisherige Weigerung zu importieren wird aufgehoben.
+     *
+     * "video" (YouTube-Link, nur bei Service vorhanden, siehe admin.js'
+     * serviceEdit()) wird bewusst in der bereits vorhandenen generischen
+     * "link"-Spalte gespeichert statt einer eigenen Spalte nur fuer diesen
+     * einen Anwendungsfall (Auftrag Phase 8C Punkt 2: keine unnoetige
+     * Generalisierung) - siehe ContentController::service()/
+     * AdminListController::service() fuer die Gegenrichtung. Service hat
+     * kein eigenes Beitragsbild ("bild") und keine Galerie pro Beitrag
+     * (admin.js' NO_GALERIE_FORMS schliesst 'service' ausdruecklich aus) -
+     * beide bleiben hier bewusst null.
      */
-    private function importServicePlatzhalter(): void
+    private function importService(): void
     {
         $data = $this->loadJson('service.json');
-        $count = is_array($data['beitraege'] ?? null) ? count($data['beitraege']) : 0;
-        $this->addStat(
-            'service',
-            $count,
-            0,
-            $count,
-            0,
-            'NICHT importiert: service.json enthaelt laut Analyse nur Platzhalter-/Testdaten (kontakt_name/kontakt_email = "Test", beitraege leer). Kein produktiver Inhalt erfunden.'
-        );
+        if (! is_array($data)) {
+            $this->addStat('service', 0, 0, 0, 0, 'Datei fehlt oder leer.');
+
+            return;
+        }
+
+        // Flache Seiteneinstellungen (titel/hero_bild/kontakt_name/
+        // kontakt_email/veroeffentlicht) -> settings; "einstellungen" und
+        // "beitraege" werden unten gesondert behandelt.
+        $this->importScalarSettings('service.json', 'service', ['einstellungen', 'beitraege']);
+
+        // einstellungen.kategorien -> beitrag_kategorien (typ=service).
+        $kategorieNamen = is_array($data['einstellungen']['kategorien'] ?? null)
+            ? $data['einstellungen']['kategorien']
+            : [];
+        $kategorieMap = [];
+        foreach (array_values($kategorieNamen) as $i => $name) {
+            if (! is_string($name) || trim($name) === '') {
+                continue;
+            }
+            $kat = BeitragKategorie::create([
+                'typ' => 'service',
+                'name' => $name,
+                'sortierung' => $i,
+            ]);
+            $kategorieMap[$name] = $kat->id;
+        }
+
+        $items = is_array($data['beitraege'] ?? null) ? $data['beitraege'] : [];
+        $source = count($items);
+        $target = 0;
+        $errors = 0;
+        foreach (array_values($items) as $legacyIndex => $item) {
+            if (! is_array($item)) {
+                $errors++;
+                continue;
+            }
+            try {
+                $titel = (string) ($item['titel'] ?? '');
+                $kategorieName = trim((string) ($item['kategorie'] ?? ''));
+                if ($kategorieName !== '' && ! isset($kategorieMap[$kategorieName])) {
+                    // Kategorie im Beitrag referenziert, aber nicht in
+                    // einstellungen.kategorien gelistet - defensiv anlegen
+                    // statt den Beitrag zu verwerfen, mit Warnung.
+                    $this->warnings[] = "service: Kategorie \"{$kategorieName}\" war nicht in einstellungen.kategorien gelistet - automatisch nachgetragen.";
+                    $kat = BeitragKategorie::create([
+                        'typ' => 'service',
+                        'name' => $kategorieName,
+                        'sortierung' => count($kategorieMap),
+                    ]);
+                    $kategorieMap[$kategorieName] = $kat->id;
+                }
+
+                $slug = $this->uniqueSlug($titel !== '' ? $titel : ('beitrag-'.$legacyIndex), fn ($s) => Beitrag::where('typ', 'service')->where('slug', $s)->exists()
+                );
+
+                $beitrag = Beitrag::create([
+                    'typ' => 'service',
+                    'slug' => $slug,
+                    'legacy_index' => $legacyIndex,
+                    'titel' => $titel,
+                    'datum' => $this->parseDatum($item['datum'] ?? null),
+                    'jahr' => isset($item['jahr']) && $item['jahr'] !== '' ? (int) $item['jahr'] : null,
+                    'kategorie_id' => $kategorieName !== '' ? ($kategorieMap[$kategorieName] ?? null) : null,
+                    'bild' => null,
+                    'text' => $item['text'] ?? null,
+                    'link' => (string) ($item['video'] ?? '') ?: null,
+                    'galerie_titel' => null,
+                    'archiviert' => $this->toBool($item['archiviert'] ?? null, false),
+                    'sortierung' => $legacyIndex,
+                ]);
+
+                $this->importEmbeddedDownloads($beitrag, $item['downloads'] ?? null);
+
+                $target++;
+            } catch (Throwable $e) {
+                $errors++;
+                $this->warnings[] = "service: Beitrag Index {$legacyIndex} (\"".($item['titel'] ?? '?')."\") konnte nicht importiert werden: ".$e->getMessage();
+            }
+        }
+
+        $this->addStat('service', $source, $target, 0, $errors);
     }
 
     // ------------------------------------------------------------------

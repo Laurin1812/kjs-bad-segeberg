@@ -94,7 +94,12 @@
   var ICON_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>';
   var ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>';
 
-  fetch('/content/service.json').then(r=>r.json()).then(d=>{
+  // Phase 8C: liest jetzt die Laravel-Read-API statt der statischen JSON-
+  // Datei direkt (bisheriger, veralteter Vor-Phase-3-Pfad) - identisches
+  // Muster wie index.html/aktuelles/index.html (kein Fallback/Catch, siehe
+  // dortiger Kommentar bzw. _redirects: /api/* ist auf Netlify ohnehin
+  // unconditional geblockt, betrifft also nur echte PHP-Host-Deployments).
+  fetch('/api/content/service.json').then(r=>r.json()).then(d=>{
     if(d.hero_bild){ var bg=document.querySelector('.page-hero__bg'); if(bg) bg.style.backgroundImage="url('"+d.hero_bild+"')"; }
     var h1 = document.querySelector('.page-hero h1');
     if(h1 && d.titel) h1.textContent = d.titel;

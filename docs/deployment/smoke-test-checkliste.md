@@ -9,6 +9,8 @@ Fehlschlag: NICHT weiter-deployen, siehe `rollback-checkliste.md`.
 - [ ] Navigation (Haupt- und Unterpunkte) vollstaendig und korrekt
 - [ ] Footer korrekt (Links, Copyright)
 - [ ] Aktuelles-Liste + mindestens ein Einzelbeitrag
+- [ ] Service-Seite laedt (Phase 8C: jetzt ueber `/api/content/service.json`
+      statt der frueheren statischen Datei)
 - [ ] Termine-Liste
 - [ ] Eine normale Inhaltsseite (z.B. eine Jaeger-Unterseite)
 
@@ -21,6 +23,10 @@ Fehlschlag: NICHT weiter-deployen, siehe `rollback-checkliste.md`.
 - [ ] Neue Seite/Unterseite anlegen
 - [ ] Seite/Eintrag loeschen
 - [ ] Drag&Drop-Sortierung einer Seiten-/Navigationsliste
+- [ ] Admin-Bereich „Service": lesen, Seiteneinstellungen speichern, einen
+      Beitrag anlegen/bearbeiten/archivieren/loeschen (Phase 8C - letzter
+      migrierter CMS-Rest, laeuft jetzt wie alle anderen Bereiche ueber
+      Laravel/MySQL)
 
 ## Sondermodule (PHP-Weg, unveraendert)
 
@@ -48,8 +54,9 @@ Fehlschlag: NICHT weiter-deployen, siehe `rollback-checkliste.md`.
       Admin-Panel pruefen, dass Bild-/PDF-Upload und Seiten-Verwaltung ueber
       die Laravel-API laufen (Netzwerk-Tab: Aufrufe gehen an `/api/...`,
       nicht an `/.netlify/git/...`)
-- [ ] Admin-Bereich „Service" zeigt die in Phase 8B ergaenzte, klare
-      Fehlermeldung ("... noch nicht verfuegbar ...") statt eines
-      raetselhaften Netzwerkfehlers - siehe `NICHT_MIGRIERTE_DATEIEN_PHP_HOST`
-      in `admin/admin.js` (Abschlussbericht Phase 8B, Abschnitt "Git-/JSON-
-      Reste"), bis dieser Bereich auf Laravel migriert ist
+- [ ] Admin-Bereich „Service" speichert ueber `/api/admin/content/
+      service.json` (Netzwerk-Tab pruefen) - Phase 8C hat diesen zuvor
+      letzten unmigrierten CMS-Rest (`NICHT_MIGRIERTE_DATEIEN_PHP_HOST` in
+      `admin/admin.js`, siehe Abschlussbericht Phase 8B) vollstaendig auf
+      Laravel/MySQL umgestellt; diese Sonderpruefung existiert im Code nicht
+      mehr

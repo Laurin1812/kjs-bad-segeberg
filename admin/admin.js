@@ -1166,26 +1166,17 @@
   // unten - verpackt als String "v<Nummer>", damit eine Version von 0 (ganz
   // frische, leere Installation) nicht wie "keine SHA bekannt" behandelt
   // wird (trackSha() betrachtet einen falsy-Wert als "nichts zu merken").
-  // Phase 8B ("Alte Git-/JSON-Fallbacks pruefen", Auftrag Punkt 4): Dateien,
-  // die im Admin-Panel noch existieren, aber noch NICHT auf Laravel/MySQL
-  // umgestellt wurden (aktuell nur "service.json" - Service-Seite, siehe
-  // NAECHSTE-SCHRITTE-GO-LIVE.md Prioritaet 2 "CMS-Fundament vereinheitlichen").
-  // Weder boerseModulFuerDatei() noch laravelModulFuerDatei() kennen diesen
-  // Pfad, apiGet()/apiPut() wuerden ohne diese Pruefung auf dem echten
-  // PHP-Host stillschweigend in den ROHEN git-gateway-Zweig durchfallen -
-  // git-gateway ist aber eine reine Netlify-Plattformfunktion
-  // (/.netlify/git/github/contents) und existiert auf dem echten PHP-Host
-  // gar nicht. Das Ergebnis waere ein raetselhafter Netzwerkfehler statt
-  // eines verstaendlichen Hinweises. Diese Liste macht den bekannten Rest
-  // bewusst explizit, statt ihn nur brechen zu lassen - Erweitern, falls
-  // spaeter weitere, noch nicht migrierte Admin-Bereiche auffallen.
-  var NICHT_MIGRIERTE_DATEIEN_PHP_HOST = ['content/service.json'];
-
-  function pruefeNichtMigriert(path) {
-    if (IS_PHP_HOST && NICHT_MIGRIERTE_DATEIEN_PHP_HOST.indexOf(path) !== -1) {
-      throw new Error('Dieser Admin-Bereich ist auf dem neuen Server noch nicht verfügbar (Umstellung auf die Datenbank steht für „' + path + '" noch aus).');
-    }
-  }
+  // Phase 8B hatte hier zusaetzlich NICHT_MIGRIERTE_DATEIEN_PHP_HOST/
+  // pruefeNichtMigriert(path) ergaenzt, um "content/service.json" (den
+  // damals letzten bekannten, noch nicht auf Laravel/MySQL umgestellten
+  // Admin-Bereich) auf dem echten PHP-Host mit einer klaren Fehlermeldung
+  // statt eines raetselhaften Netzwerkfehlers abzufangen (git-gateway ist
+  // reine Netlify-Plattformfunktion, existiert auf dem PHP-Host nicht).
+  // Phase 8C hat Service jetzt vollstaendig migriert (siehe
+  // LARAVEL_WRITE_MODULES unten, Eintrag "content/service.json") - die
+  // Liste ist dadurch leer geworden und wurde mitsamt der Pruef-Funktion
+  // und ihren beiden Aufrufstellen in apiGet()/apiPut() wieder entfernt
+  // (kein toter Schutzcode fuer einen inzwischen leeren Sonderfall).
 
   function boerseModulFuerDatei(path) {
     // Siehe IS_PHP_HOST-Kommentar oben: auf Netlify (aktuell IMMER, siehe
@@ -1223,6 +1214,9 @@
     'content/navigation-extra.json': { get: '/api/content/navigation-extra.json', put: '/api/admin/content/navigation-extra.json', section: 'navigation-extra' },
     'content/startseite.json': { get: '/api/content/startseite.json', put: '/api/admin/content/startseite.json', section: 'startseite' },
     'content/aktuelles.json': { get: '/api/content/aktuelles.json', put: '/api/admin/content/aktuelles.json', section: 'aktuelles' },
+    // Phase 8C: letzter migrierter CMS-Rest (vorher NICHT_MIGRIERTE_DATEIEN_
+    // PHP_HOST, siehe Kommentar oberhalb dieser Objektdefinition).
+    'content/service.json': { get: '/api/content/service.json', put: '/api/admin/content/service.json', section: 'service' },
     'content/termine.json': { get: '/api/content/termine.json', put: '/api/admin/content/termine.json', section: 'termine' },
     'content/vorstand.json': { get: '/api/content/vorstand.json', put: '/api/admin/content/vorstand.json', section: 'vorstand' },
     'content/obleute.json': { get: '/api/content/obleute.json', put: '/api/admin/content/obleute.json', section: 'obleute' },
@@ -1509,7 +1503,6 @@
     if (boerseModul) return apiGetBoerse(boerseModul);
     var laravelModul = laravelModulFuerDatei(path);
     if (laravelModul) return apiGetLaravel(laravelModul);
-    pruefeNichtMigriert(path);
 
     var tok = await getToken();
     // Cache-busting: ohne dies liefert der Browser/Git-Gateway bei wiederholtem
@@ -1532,7 +1525,6 @@
     if (boerseModul) return apiPutBoerse(boerseModul, jsonData, sha);
     var laravelModul = laravelModulFuerDatei(path);
     if (laravelModul) return apiPutLaravel(laravelModul, jsonData, sha);
-    pruefeNichtMigriert(path);
 
     var tok = await getToken();
     var content = toBase64(JSON.stringify(jsonData, null, 2));

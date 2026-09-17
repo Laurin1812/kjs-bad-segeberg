@@ -140,6 +140,76 @@ class ContentController extends Controller
     }
 
     /**
+     * content/service.json (Phase 8C - letzter migrierter CMS-Rest).
+     *
+     * Analog zu aktuelles() oben (gemeinsames Beitrag-/BeitragKategorie-
+     * Schema, "typ" unterscheidet beide Bereiche, siehe Migrations-
+     * Kommentare) - mit drei bewussten Abweichungen, die den tatsaechlichen
+     * Service-Datenformen entsprechen (siehe admin.js' renderService()/
+     * serviceEdit()/NO_GALERIE_FORMS):
+     * - kein "bild" pro Beitrag (Service hat nur das eine Hero-Bild auf
+     *   Seitenebene, siehe unten) und keine "galerie" (NO_GALERIE_FORMS
+     *   schliesst 'service' ausdruecklich aus - "rein dokumentenorientiert").
+     * - "video" (YouTube-Link) ersetzt "link" im JSON - wiederverwendet die
+     *   bereits vorhandene generische "link"-Spalte von "beitraege" statt
+     *   einer eigenen Spalte nur fuer diesen einen Anwendungsfall (Auftrag
+     *   Phase 8C Punkt 2: keine unnoetige Generalisierung).
+     * - zusaetzliche Seiteneinstellungen (titel/hero_bild/kontakt_name/
+     *   kontakt_email/veroeffentlicht) auf oberster Ebene statt nur unter
+     *   "einstellungen" - Service ist (anders als Aktuelles) ein Hybrid aus
+     *   Settings-Modul und Beitragsliste, siehe Analysebericht Phase 8C
+     *   Punkt 1. Landen generisch in settings (Gruppe "service"), keine
+     *   eigene Tabelle noetig.
+     */
+    public function service(): JsonResponse
+    {
+        $settings = Setting::where('gruppe', 'service')->pluck('value', 'key');
+
+        $kategorien = BeitragKategorie::where('typ', 'service')
+            ->orderBy('sortierung')
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        $beitraege = Beitrag::where('typ', 'service')
+            ->orderBy('legacy_index')
+            ->get()
+            ->map(fn (Beitrag $b) => [
+                // Phase 8C (Admin-Schreibweg): siehe Kommentar bei
+                // aktuelles()/legacy_index - identische Zuordnungslogik,
+                // damit AdminListController::service() bestehende Zeilen
+                // beim Speichern zweifelsfrei wiederfindet.
+                'legacy_index' => $b->legacy_index,
+                'titel' => $b->titel,
+                'datum' => $b->datum?->toDateString() ?? '',
+                'jahr' => $b->jahr !== null ? (string) $b->jahr : '',
+                'kategorie' => $b->kategorie?->name ?? '',
+                'text' => $b->text ?? '',
+                'video' => $b->link ?? '',
+                'archiviert' => (bool) $b->archiviert,
+                'downloads' => self::embeddedDownloads($b),
+            ])
+            ->values()
+            ->all();
+
+        return response()->json([
+            'titel' => (string) ($settings['titel'] ?? ''),
+            'hero_bild' => (string) ($settings['hero_bild'] ?? ''),
+            'kontakt_name' => (string) ($settings['kontakt_name'] ?? ''),
+            'kontakt_email' => (string) ($settings['kontakt_email'] ?? ''),
+            // Gespeichert als '1'/'0' (siehe ImportContent::importScalarSettings()
+            // bool-Normalisierung) - fehlt der Schluessel ganz (z.B. vor dem
+            // ersten Import), wird bewusst "veroeffentlicht" angenommen statt
+            // die Seite grundlos zu verstecken.
+            'veroeffentlicht' => ($settings['veroeffentlicht'] ?? '1') === '1',
+            'einstellungen' => [
+                'kategorien' => $kategorien,
+            ],
+            'beitraege' => $beitraege,
+        ]);
+    }
+
+    /**
      * content/termine.json. Reihenfolge: "id asc" (= urspruengliche
      * Einfuege-/Array-Reihenfolge, da "termine" keine eigene
      * sortierung-Spalte besitzt - js/content.js sortiert Termine ohnehin

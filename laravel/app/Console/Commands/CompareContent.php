@@ -86,6 +86,8 @@ class CompareContent extends Command
 
         // -- Flache Content-Listen -----------------------------------------
         $this->vergleiche('aktuelles', 'aktuelles.json', '/api/content/aktuelles.json');
+        // Phase 8C: letzter migrierter CMS-Rest.
+        $this->vergleiche('service', 'service.json', '/api/content/service.json');
         $this->vergleiche('termine', 'termine.json', '/api/content/termine.json');
         $this->vergleiche('vorstand', 'vorstand.json', '/api/content/vorstand.json');
         $this->vergleiche('obleute', 'obleute.json', '/api/content/obleute.json');

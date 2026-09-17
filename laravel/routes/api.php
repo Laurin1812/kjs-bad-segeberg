@@ -52,6 +52,9 @@ Route::prefix('content')->group(function () {
 
     // -- Flache Content-Listen -------------------------------------------
     Route::get('aktuelles.json', [ContentController::class, 'aktuelles']);
+    // Phase 8C: letzter migrierter CMS-Rest (vorher NICHT_MIGRIERTE_DATEIEN_
+    // PHP_HOST in admin.js, siehe dortiger Kommentar-Verweis).
+    Route::get('service.json', [ContentController::class, 'service']);
     Route::get('termine.json', [ContentController::class, 'termine']);
     Route::get('vorstand.json', [ContentController::class, 'vorstand']);
     Route::get('obleute.json', [ContentController::class, 'obleute']);
@@ -131,6 +134,10 @@ Route::prefix('admin')->group(function () {
     // -- Flache Content-Listen ----------------------------------------------
     Route::put('content/aktuelles.json', [AdminListController::class, 'aktuelles'])
         ->middleware('identity.permission:aktuelles');
+    // Phase 8C: letzter migrierter CMS-Rest - "service" ist ein bereits
+    // bestehendes, eigenstaendiges Recht (siehe admin.js' PERM_BY_KEY).
+    Route::put('content/service.json', [AdminListController::class, 'service'])
+        ->middleware('identity.permission:service');
     Route::put('content/termine.json', [AdminListController::class, 'termine'])
         ->middleware('identity.permission:termine');
     Route::put('content/vorstand.json', [AdminListController::class, 'vorstand'])
