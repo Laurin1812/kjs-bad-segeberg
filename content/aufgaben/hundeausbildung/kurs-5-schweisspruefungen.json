@@ -5,8 +5,8 @@
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
-  "bild": "/images/1787147318481-Designer--5-.png",
-  "bild_groesse": "img-100",
+  "bild": "/images/1789757672401-Schwei-pr-fung.jpg",
+  "bild_groesse": "img-75",
   "bild_alt": "",
   "kontakt_name": "Marcel Zickermann",
   "kontakt_email": "marcel.zickermann@kjs-segeberg.de",
@@ -14,5 +14,7 @@
   "kurzbeschreibung": "",
   "downloads": [],
   "galerie": [],
-  "galerie_titel": "Bildergalerie"
+  "galerie_titel": "Bildergalerie",
+  "nav_label": "Kurs 5: Schweißprüfungen",
+  "bild_flat": false
 }
