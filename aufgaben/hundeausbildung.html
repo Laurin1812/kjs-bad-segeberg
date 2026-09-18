@@ -76,9 +76,11 @@
             }
           }
 
-          // Sidebar-CTA "Alle Kurse & Themen ansehen" (rechts, oben in der
-          // Jagdhundeschule-Sidebar-Box) bekommt die tatsächliche Anzahl der
-          // veröffentlichten Kurse/Themen als Beschriftung.
+          // Sidebar-CTA "Alle Themen ansehen" (rechts, oben in der
+          // Jagdhundeschule-Sidebar-Box) - Textänderung 18.09.2026 (Laurin):
+          // Zahl/"Kurse &" entfernt, reiner Text "Alle Themen ansehen →".
+          // Der Fetch-Guard (nur setzen, wenn mind. 1 veröffentlichte
+          // Seite existiert) bleibt unverändert bestehen.
           fetch('/content/aufgaben/hundeausbildung-seiten.json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -86,7 +88,7 @@
               if (!cta) return;
               var seiten = (data.seiten || []).filter(function(s) { return s.veroeffentlicht !== false; });
               if (seiten.length) {
-                cta.textContent = 'Alle ' + seiten.length + ' Kurse & Themen ansehen →';
+                cta.textContent = 'Alle Themen ansehen →';
               }
             })
             .catch(function() {});
@@ -100,7 +102,7 @@
     <aside class="sidebar">
       <div class="sidebar-widget">
         <h4>Jagdhundeschule</h4>
-        <a href="jagdhundeschule.html" id="jagdhundeschule-cta" class="btn btn-primary" style="display:block;text-align:center;">Alle Kurse & Themen ansehen →</a>
+        <a href="jagdhundeschule.html" id="jagdhundeschule-cta" class="btn btn-primary" style="display:block;text-align:center;">Alle Themen ansehen →</a>
       </div>
       <div class="sidebar-widget">
         <h4>Aufgaben des Hegerings</h4>
