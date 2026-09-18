@@ -5,7 +5,7 @@
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
-  "bild": "/images/download-1-.jpg",
+  "bild": "/images/1789753288649-Jagdhunde.jpg",
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
@@ -14,5 +14,7 @@
   "kurzbeschreibung": "",
   "downloads": [],
   "galerie": [],
-  "galerie_titel": "Bildergalerie"
+  "galerie_titel": "Bildergalerie",
+  "nav_label": "Kurs 1: Junghunde",
+  "bild_flat": false
 }
