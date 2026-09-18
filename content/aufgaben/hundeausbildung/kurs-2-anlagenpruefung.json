@@ -13,12 +13,7 @@
   "vorschaubild": "/images/1787141423525-hunderassen.jpg",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [
-    {
-      "bild": "/images/1787145706348-Fitzner_Heidi_2.webp",
-      "titel": "test"
-    }
-  ],
+  "galerie": [],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Kurs 2: Anlagenprüfung",
   "bild_flat": false
