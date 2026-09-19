@@ -1,11 +1,11 @@
 {
   "titel": "Kurs 1: Junghunde",
   "veroeffentlicht": true,
-  "inhalt": "<p>Der Junghundekurs legt das Fundament für einen zuverlässigen Jagdgebrauchshund. Im Vordergrund stehen Sozialverhalten, Grundkommandos und die jagdliche Vorbereitung.</p><h2>Kursinhalte</h2><ul><li><p><strong>Sozialverhalten</strong> – Umgang mit Menschen, anderen Hunden und Wild</p></li><li><p><strong>Grundkommandos</strong> – Sitz, Platz, Fuß, Hier</p></li><li><p><strong>Jagdliche Vorbereitung</strong> – erste Revierarbeit, Schussfestigkeit, Wasserarbeit</p></li></ul><h2>Kontakte</h2><table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Hegering</p></th><th colspan=\"1\" rowspan=\"1\"><p>Ansprechpartner</p></th><th colspan=\"1\" rowspan=\"1\"><p>Mobil</p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Gerd Büge</p></td><td colspan=\"1\" rowspan=\"1\"><p>0171-3548114</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Stefanie Hausser</p></td><td colspan=\"1\" rowspan=\"1\"><p>0162 9451130</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Arne Lunau</p></td><td colspan=\"1\" rowspan=\"1\"><p>auf Anfrage</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>–</p></td><td colspan=\"1\" rowspan=\"1\"><p>Norbert Sommer</p></td><td colspan=\"1\" rowspan=\"1\"><p>0174 3639660</p></td></tr></tbody></table>",
+  "inhalt": "<p>Der Junghundekurs legt das Fundament für einen zuverlässigen Jagdgebrauchshund. Im Vordergrund stehen Sozialverhalten, Grundkommandos und die jagdliche Vorbereitung.</p><h2>Die Ausbilder in den Hundeführerlehrgängen erarbeiten mit Ihnen gemeinsam z. B. folgendes:</h2><ul><li><p><u>Das Sozial- und Gruppenverhalten Ihres Hundes:</u></p><ul><li><p>Körperkontrolle: wie z. B. Zähne, Augen, Hoden, Größe, Mikrochip</p></li><li><p>Leinenführigkeit</p></li><li><p>Grundkommandos wie z. B. Sitz, Ablegen, Komm, Nein</p></li><li><p>Heranführen an die verschiedenen Wildarten</p></li><li><p>Futterschleppen</p></li><li><p>Schweißfährten</p></li><li><p>Wassergewöhnung</p></li><li><p>Vorstehtraining</p></li><li><p>Gewöhnung an den Schuss</p></li></ul></li></ul><h2>Kontakte</h2><table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p>Hegering</p></th><th colspan=\"1\" rowspan=\"1\"><p>Ansprechpartner</p></th><th colspan=\"1\" rowspan=\"1\"><p>Mobil</p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Hegering I / Streglin</p></td><td colspan=\"1\" rowspan=\"1\"><p>Norbert Sommer</p></td><td colspan=\"1\" rowspan=\"1\"><p>0174 3639660</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Hegering IV / Bad Segeberg</p></td><td colspan=\"1\" rowspan=\"1\"><p>Ellen Jürgens</p></td><td colspan=\"1\" rowspan=\"1\"><p>01578 5551050</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Hegering V / Travental</p></td><td colspan=\"1\" rowspan=\"1\"><p>Stefanie Hausser</p></td><td colspan=\"1\" rowspan=\"1\"><p>0162 9451130</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Hegering VI / Hartenholm</p></td><td colspan=\"1\" rowspan=\"1\"><p>Gerd Büge</p></td><td colspan=\"1\" rowspan=\"1\"><p>0171 3548114</p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p>Hegering XII / Leezen</p></td><td colspan=\"1\" rowspan=\"1\"><p>Arne Lunau</p></td><td colspan=\"1\" rowspan=\"1\"><p>0173 4526846</p></td></tr></tbody></table>",
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
-  "bild": "/images/download-1-.jpg",
+  "bild": "/images/1789753288649-Jagdhunde.jpg",
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
@@ -14,5 +14,7 @@
   "kurzbeschreibung": "",
   "downloads": [],
   "galerie": [],
-  "galerie_titel": "Bildergalerie"
+  "galerie_titel": "Bildergalerie",
+  "nav_label": "Kurs 1: Junghunde",
+  "bild_flat": false
 }

@@ -1396,7 +1396,12 @@
       recordLastLogin();
     });
     netlifyIdentity.on('logout', onLogout);
-    netlifyIdentity.init();
+    /* locale:'de' ist die offizielle Netlify-Identity-Übersetzungsoption.
+       Deutsch ist im Widget nicht mitgeliefert, daher übernimmt der
+       DOM-Übersetzer aus /js/identity-de.js die eigentliche Arbeit -
+       diese Option schadet aber nicht und greift automatisch, sollte
+       Netlify Identity Deutsch in Zukunft selbst nachliefern. */
+    netlifyIdentity.init({ locale: 'de' });
 
     id('login-btn').addEventListener('click', function() {
       netlifyIdentity.open('login');

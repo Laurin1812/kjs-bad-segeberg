@@ -1,16 +1,20 @@
 {
   "titel": "VGP/VPS-Wanderpokal",
   "veroeffentlicht": true,
-  "inhalt": "Die Kreisjägerschaft Segeberg verleiht jährlich zwei Wanderpokale für herausragende Leistungen bei der Verbandsgebrauchsprüfung (VGP) und der Vielseitigkeitsprüfung für Stöberhunde (VPS).\n\n## VGP-Wanderpokal (Richtlinien, Stand 2011)\n\nDer Pokal geht jährlich an den Hundeführer mit den höchsten Punkten bei einer VGP im Jagdjahr. Bei Punktgleichheit entscheidet in dieser Reihenfolge: Preisnote, Leistung im Gehorsam, Wasserarbeit. Bei weiterer Gleichheit gewinnt das jüngere Gespann.\n\n## VPS-Wanderpokal (Richtlinien, Stand 2017)\n\nFür die VPS gelten dieselben Kriterien und Tiebreaker-Regeln wie beim VGP-Pokal.\n\n## Meldepflicht\n\nHundeführer mit erfolgreicher VGP oder VPS müssen ihren Hegeringhundewart oder den Kreishundeführer **bis zum 31. Dezember des Prüfungsjahres** informieren, sonst erlischt die Berechtigung.\n\n## Sieger 2025\n\n**VGP:** Wolfgang Böttcher (Nehms) mit Deutsch Drahthaar „Rufus vom Hundebrink” – 336 Punkte, Preis I mit Nachtarbeit in Lauenburg\n\n**VPS:** Ferdinand Stoltenberg (Nehms) mit Kleinem Münsterländer „Ivar II von der Gieselau” – 189 Punkte, Preis II in Ahrensbök",
+  "inhalt": "<p><span style=\"color: rgb(0, 0, 0);\">Die Kreisjägerschaft Segeberg verleiht jährlich zwei Wanderpokale für herausragende Leistungen bei der Verbandsgebrauchsprüfung (VGP) und der Verbandsprüfung nach dem Schuss (VPS).&nbsp;</span></p><h2>VGP-Wanderpokal (Richtlinien, Stand 2011)</h2><p><span style=\"color: black;\">Der Wanderpreis wird jedes Jahr an den Hundeführer/in vergeben, der/die im letzten Jagdjahr die höchste Punktzahl (ohne Zusatzpunkte für Totverbeller und Totverweiser) auf einer VGP erhalten hat. Der erteilte Preis zählt zunächst nicht. Nur bei Punktgleichheit zählt dann der bessere Preis, hiernach der bessere Gehorsam und dann die bessere Wasserarbeit. Sind die Hunde anhand dieser Kriterien nicht zu unterscheiden, erhält der jüngere Hund den Preis. Ferner sind folgende Bedingungen mit der Vergabe dieses Preises verknüpft: Der Führer muss Mitglied des LJV in der Kreisjägerschaft Segeberg e. V. sein.</span></p><h2>VPS-Wanderpokal (Richtlinien, Stand 2017)</h2><p><span style=\"color: black;\">Der Wanderpreis wird jedes Jahr an den Hundeführer/in vergeben, der/die im letzten Jagdjahr die höchste Punktzahl (ohne Zusatzpunkte für Totverbeller und Totverweiser) auf einer VPS erhalten hat. Der erteilte Preis zählt zunächst nicht. Nur bei Punktgleichheit zählt dann der bessere Preis, hiernach der bessere Gehorsam und dann die bessere Wasserarbeit. Sind die Hunde anhand dieser Kriterien nicht zu unterscheiden, erhält der jüngere Hund den Preis. Ferner sind folgende Bedingungen mit der Vergabe dieses Preises verknüpft: Der Führer muss Mitglied des LJV in der Kreisjägerschaft Segeberg e. V. sein.&nbsp;</span></p><h2>Meldepflicht</h2><p>Hundeführer mit erfolgreicher VGP oder VPS müssen ihren Hegeringhundewart <span style=\"color: black;\">oder der Kreishundeobfrau</span> <strong>bis zum 31. Dezember des Prüfungsjahres</strong> informieren, sonst erlischt die Berechtigung.</p><h2>Sieger 2025</h2><p><strong>VGP:</strong> Wolfgang Böttcher (Nehms) mit Deutsch Drahthaar „Rufus vom Hundebrink” – 336 Punkte, I.Preis <span style=\"color: black;\">mit Übernachtfährte</span> in Lauenburg</p><p><strong>VPS:</strong> Ferdinand Stoltenberg (Nehms) mit Kleinem Münsterländer „Ivar II von der Gieselau” – 189 Punkte, II. Preis in Ahrensbök</p>",
   "untertitel": "",
   "intro": "",
   "hero_bild": "",
-  "bild": "",
-  "bild_groesse": "img-100",
+  "bild": "/images/logo.png",
+  "bild_groesse": "img-75",
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
   "vorschaubild": "/images/hero.jpg",
   "kurzbeschreibung": "",
-  "downloads": []
+  "downloads": [],
+  "nav_label": "VGP/VPS-Wanderpokal",
+  "bild_flat": false,
+  "galerie": [],
+  "galerie_titel": "Bildergalerie"
 }

@@ -691,6 +691,12 @@
     kjsIdentityScript.src = 'https://identity.netlify.com/v1/netlify-identity-widget.js';
     kjsIdentityScript.onload = function() {
       if (window.netlifyIdentity) {
+        // Deutsche Texte + Autofill-Fix (12.09.2026, siehe /js/identity-de.js)
+        // auch für Invite-/Recovery-Links laden, die zufällig auf der
+        // Startseite landen - identisch zu /admin/ und /login/.
+        var kjsIdentityDeScript = document.createElement('script');
+        kjsIdentityDeScript.src = '/js/identity-de.js';
+        document.head.appendChild(kjsIdentityDeScript);
         window.netlifyIdentity.on("init", function(user) {
           if (!user) {
             window.netlifyIdentity.on("login", function(loggedInUser) {

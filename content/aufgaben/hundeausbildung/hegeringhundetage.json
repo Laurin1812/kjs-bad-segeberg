@@ -13,11 +13,8 @@
   "vorschaubild": "/images/1787149516755-gruppenbild_hundetag_2006.jpg",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [
-    {
-      "bild": "/images/1781424007487-info2_.jpeg",
-      "titel": "Test"
-    }
-  ],
-  "galerie_titel": "Bildergalerie"
+  "galerie": [],
+  "galerie_titel": "Bildergalerie",
+  "nav_label": "Hegeringhundetage",
+  "bild_flat": false
 }
