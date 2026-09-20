@@ -9,12 +9,25 @@
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
-  "bild_groesse": "img-75",
-  "vorschaubild": "/images/logo.png",
+  "bild_groesse": "img-50",
+  "vorschaubild": "/images/logo-dunkel.png",
   "kurzbeschreibung": "",
   "downloads": [],
   "bild_flat": true,
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1789900576670-bisherigeVPS_Preistr-ger_3.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789900589553-bisherige_VPS_Preistr-ger_1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789900608330-bisherigeVPS_Preistr-ger_2.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Bisherige VPS-Preisträger"
 }

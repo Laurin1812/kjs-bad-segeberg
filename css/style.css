@@ -904,8 +904,14 @@ p  { margin-bottom: 1rem; }
 .main-content li p,
 #page-inhalt li p,
 #seite-inhalt li p { margin: 0; line-height: 1.5; }
-.main-content a:not(.btn) { color: var(--green-main); text-decoration: underline; }
-.main-content a:not(.btn):hover { color: var(--green-dark); }
+/* :not(.galerie-item) ergänzt (20.09.2026, Laurin-Wunsch): diese generische
+   Link-Regel für Fließtext-Links traf durch ihre hoehere Spezifitaet auch die
+   Bildergalerie-Kacheln (<a class="galerie-item">) und ueberschrieb deren
+   eigenes "text-decoration: none" - jeder Galerie-Bildtitel (.galerie-item__
+   caption erbt vom umschliessenden <a>) erschien dadurch faelschlich
+   unterstrichen. Gleiches Muster wie :not(.btn) daneben. */
+.main-content a:not(.btn):not(.galerie-item) { color: var(--green-main); text-decoration: underline; }
+.main-content a:not(.btn):not(.galerie-item):hover { color: var(--green-dark); }
 .main-content strong { color: var(--green-dark); }
 /* Abstand: drei feste Stufen über die Editor-Toolbar-Buttons "Eng/Normal/
    Weit" pro Absatz/Liste (Frank-Feedback 19.08.2026 – ersetzt einen
@@ -1562,7 +1568,31 @@ p  { margin-bottom: 1rem; }
   border-radius: 0;
   box-shadow: none;
 }
-.galerie-item__caption { padding: .55rem .75rem; font-size: .95rem; font-weight: 600; color: var(--text-dark); }
+/* Wortumbruch-Fix (20.09.2026, Laurin-Wunsch): Ursache war NICHT diese Regel
+   selbst, sondern die weiter oben stehende, sitebreite Regel
+   ".main-content, #seite-inhalt, #page-inhalt { overflow-wrap: break-word;
+   word-break: break-word; }" (siehe dort) - die Galerie-Kacheln haengen als
+   Kind-Element in genau diesen Containern, und "word-break: break-word" wird
+   von Browsern wie ein aggressives break-all behandelt, sobald der Text
+   nicht in die Kachelbreite passt. Dadurch wurden lange zusammengesetzte
+   Wörter (z.B. "ASP-Kadaversuchhundeführerin") mitten im Wort statt an
+   Leerzeichen/Bindestrichen getrennt. Fix hier: word-break für die Caption
+   explizit auf "normal" zurücksetzen (Bindestriche/Leerzeichen bleiben ganz
+   normale Umbruchstellen), overflow-wrap nur als Sicherheitsnetz für
+   wirklich unteilbare Einzeltoken behalten, plus hyphens:auto (mit
+   Praefixen) fuer sinnvolle Silbentrennung bei langen deutschen
+   Komposita, wenn selbst das natuerliche Wort nicht mehr in die Kachel
+   passt. Greift automatisch ueberall, wo .galerie-item__caption verwendet
+   wird (kein Hardcoding einzelner Seiten/Texte). Braucht keine eigene
+   text-decoration-Regel: die bereits bestehende .galerie-item {
+   text-decoration: none } plus die oben ergaenzte a:not(.galerie-item)-
+   Ausnahme sorgen bereits dafuer, dass hier (auch bei :hover) nie
+   unterstrichen wird. */
+.galerie-item__caption {
+  padding: .55rem .75rem; font-size: .95rem; font-weight: 600; color: var(--text-dark);
+  word-break: normal; overflow-wrap: break-word;
+  -webkit-hyphens: auto; -ms-hyphens: auto; hyphens: auto;
+}
 @media (max-width: 640px) {
   .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }

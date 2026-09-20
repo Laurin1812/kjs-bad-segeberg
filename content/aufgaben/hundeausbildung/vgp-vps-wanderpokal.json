@@ -10,11 +10,16 @@
   "bild_alt": "",
   "kontakt_name": "",
   "kontakt_email": "",
-  "vorschaubild": "/images/hero.jpg",
+  "vorschaubild": "/images/logo-dunkel.png",
   "kurzbeschreibung": "",
   "downloads": [],
   "nav_label": "VGP/VPS-Wanderpokal",
   "bild_flat": false,
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1789900365376-VGP_VPS_Wanderpreis_1.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie"
 }
