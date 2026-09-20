@@ -14,7 +14,20 @@
   "kurzbeschreibung": "",
   "downloads": [],
   "bild_flat": true,
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1789900576670-bisherigeVPS_Preistr-ger_3.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789900589553-bisherige_VPS_Preistr-ger_1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789900608330-bisherigeVPS_Preistr-ger_2.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Bisherige VPS-Preisträger"
 }
