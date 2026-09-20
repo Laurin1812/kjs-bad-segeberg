@@ -1593,6 +1593,19 @@ p  { margin-bottom: 1rem; }
   word-break: normal; overflow-wrap: break-word;
   -webkit-hyphens: auto; -ms-hyphens: auto; hyphens: auto;
 }
+/* Einzelfall-Override (20.09.2026, Laurin-Wunsch): fester Zeilenumbruch nur
+   beim Hausser-Bildtitel auf der Hundewarte-Seite (galerie-Eintrag in
+   content/aufgaben/hundeausbildung/hegeringhundewarte.json). Bewusst NICHT
+   die Regel oben angefasst - die gilt weiter unveraendert fuer alle
+   Bildtitel. Stattdessen ueber :has() gezielt nur die eine Kachel mit genau
+   diesem Bild getroffen; der Content-Titel enthaelt dafuer ein echtes "\n",
+   das erst durch dieses white-space:pre-line hier zu einem sichtbaren
+   Umbruch wird (word-break/overflow-wrap/hyphens bleiben unveraendert von
+   der Regel oben geerbt). Faellt in Browsern ohne :has()-Unterstuetzung
+   harmlos auf den normalen, bereits reparierten Umbruch zurueck. */
+.galerie-item:has(img[src="/images/1789752768296-Hausser_Stefanie_2.jpg"]) .galerie-item__caption {
+  white-space: pre-line;
+}
 @media (max-width: 640px) {
   .galerie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
