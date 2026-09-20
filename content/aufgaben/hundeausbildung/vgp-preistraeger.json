@@ -10,11 +10,20 @@
   "kontakt_name": "",
   "kontakt_email": "",
   "bild_groesse": "img-50",
-  "vorschaubild": "/images/1781435792677-drohen.jpg",
+  "vorschaubild": "/images/logo-dunkel.png",
   "kurzbeschreibung": "",
   "downloads": [],
   "nav_label": "Bisherige VGP-Preisträger",
   "bild_flat": false,
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1789900451545-bisherigeVGP_Preistr-ger_1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789900534413-bisherigeVGP_Preistr-ger_2.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie"
 }
