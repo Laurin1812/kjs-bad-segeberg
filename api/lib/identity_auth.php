@@ -1,199 +1,275 @@
 <?php
 /**
- * Serverseitige Pruefung von Netlify-Identity-Zugriffstoken (JWT) fuer die
- * Admin-Endpunkte der Hundeboerse/Waffenboerse.
+ * Serverseitige Pruefung der ANMELDUNG fuer die Admin-Endpunkte der
+ * Hundeboerse/Waffenboerse/Kontaktanfragen.
  *
- * HINTERGRUND / WARUM DAS UEBERHAUPT NOETIG IST:
- * Das bestehende Admin-Panel (admin/admin.js) meldet Benutzer ueber das
- * Netlify-Identity-Widget an und schreibt Inhalte bisher ausschliesslich
- * ueber Netlifys eigene git-gateway-API. Diese prueft zwar, dass ueberhaupt
- * ein gueltiger Identity-Benutzer eingeloggt ist, aber NICHT, ob dieser
- * Benutzer die passende Berechtigung fuer ein bestimmtes Modul
- * (app_metadata.permissions, z.B. "hundeboerse"/"waffenboerse") hat - siehe
- * der Kommentar bei guardSavePermission() in admin/admin.js: "serverseitige
- * Pruefung [...] gibt es fuer Inhalte technisch [...] nicht". Das ist genau
- * die im Auftrag ausdrueckliche "keine Scheinsicherheit"-Anforderung, die
- * dieser neue PHP-Server auf einem dritten Host (kjs.mysolution-webservice.de)
- * NICHT einfach von Netlify erben kann (siehe netlify/functions/admin-users.js:
- * dort erledigt Netlifys eigene Infrastruktur die Verifikation automatisch
- * und liefert context.clientContext.user - das gibt es fuer einen
- * eigenstaendigen PHP-Server nicht).
+ * NETLIFY IDENTITY -> LARAVEL FORTIFY (Auftrag "Admin-Authentifizierung
+ * vollstaendig auf Laravel umstellen"): dieser Datei-Kommentar ersetzt den
+ * bisherigen (siehe Git-Historie) - das bestehende Admin-Panel
+ * (admin/admin.js) meldet Benutzer nicht mehr ueber das Netlify-Identity-
+ * Widget an, sondern ueber Laravel Fortify (klassische Session-
+ * Authentifizierung, "web"-Guard, siehe laravel/config/fortify.php und
+ * laravel/app/Support/AdminIdentity.php). Diese Datei hier ist bewusst
+ * WEITERHIN ein eigenstaendiges PHP-Skript OHNE Laravel-Bootstrap (kein
+ * "require vendor/autoload.php", kein Kernel-Handle) - die Hundeboerse-/
+ * Waffenboerse-/Kontakt-Endpunkte selbst wurden NICHT nach Laravel migriert
+ * (ausdruecklich nicht Teil dieses Auftrags: "keine funktionale
+ * Neuentwicklung der Sondermodule") und bleiben unveraendert einfache
+ * PHP-Dateien auf demselben Host.
  *
- * Diese Datei prueft das vom Browser mitgesendete Netlify-Identity-JWT
- * (Authorization: Bearer <token>) DESHALB selbststaendig nach, per HS256
- * (Netlifys Identity-Instanz signiert Zugriffstoken standardmaessig mit
- * einem einzigen, pro Site festen "JWT secret" - siehe Netlify-
- * Dashboard: Site configuration -> Identity -> Settings and usage ->
- * Abschnitt "JSON Web Tokens" -> "JWT secret" kopieren). Ohne dieses Secret
- * (Environment-Variable IDENTITY_JWT_SECRET, siehe unten) kann diese Datei
- * KEIN Token pruefen und verweigert dann - bewusst fail-closed, siehe
- * kjs_boerse_current_admin_user() - jeden Admin-Zugriff, statt ihn
- * ungeprueft durchzulassen.
+ * TECHNISCH SAUBERSTE LOESUNG FUER DIESEN FALL (vor der Umsetzung wie
+ * gefordert analysiert - siehe Abschlussbericht Punkt 6 fuer die
+ * ausfuehrliche Begruendung, warum die Alternativen verworfen wurden):
+ * diese eigenstaendigen PHP-Skripte lesen die ECHTE, von Laravel selbst
+ * verwaltete Sitzung DIREKT aus der gemeinsam genutzten MySQL-Datenbank
+ * (Tabelle "sessions", von Laravels SESSION_DRIVER=database ohnehin schon
+ * befuellt - siehe laravel/database/migrations/
+ * 0001_01_01_000000_create_users_table.php). Es gibt dadurch weiterhin nur
+ * EINE einzige Quelle der Wahrheit fuer "wer ist angemeldet" (Laravels
+ * eigene Session), kein zweites, selbstgebautes Token-/Auth-System:
  *
- * WICHTIGE EINSCHRAENKUNG (siehe Abschlussbericht Punkt "was Carsten noch
- * liefern muss" / "bekannte technische Grenzen"): dies deckt den
- * Standardfall von Netlify Identity ab (HS256, ein Shared Secret). Wurde
- * auf der Site zusaetzlich ein externer OAuth-Provider fuer Identity
- * konfiguriert, kann sich das Token-Format unterscheiden - das war anhand
- * des bestehenden Codes (netlify/functions/admin-users.js, admin/admin.js)
- * nicht zu erkennen und muesste im Zweifel nachgeprueft werden.
+ *   1. Das Sitzungs-Cookie des Browsers (Name aus SESSION_COOKIE in
+ *      laravel/.env, siehe unten) wird mit genau demselben Verfahren
+ *      entschluesselt, das Laravels eigene EncryptCookies-Middleware
+ *      verwendet (AES-256-CBC + HMAC-SHA256 ueber APP_KEY, siehe
+ *      Illuminate\Encryption\Encrypter, sowie der zusaetzliche
+ *      "CookieValuePrefix" von Illuminate\Cookie\CookieValuePrefix) - das
+ *      Ergebnis ist die reine Sitzungs-ID.
+ *   2. Mit dieser ID wird die Zeile in der "sessions"-Tabelle gelesen.
+ *      Laravels eigener DatabaseSessionHandler schreibt dort bei JEDER
+ *      angemeldeten Anfrage automatisch die Spalte "user_id" (siehe
+ *      Illuminate\Session\DatabaseSessionHandler::addUserInformation()) -
+ *      diese Datei liest NUR diese eine Spalte, keine eigene
+ *      Deserialisierung von PHP-Objekten aus dem restlichen "payload".
+ *   3. "last_activity" wird gegen SESSION_LIFETIME geprueft (Laravel raeumt
+ *      abgelaufene Sitzungen nur per Zufalls-Lotterie auf, nicht sofort -
+ *      siehe Store::lottery -, ohne diese Pruefung wuerde ein abgelaufenes,
+ *      aber noch nicht aufgeraeumtes Sitzungs-Cookie faelschlich als
+ *      gueltig durchgehen).
+ *   4. Der eigentliche Benutzer (E-Mail, roles, permissions) wird per
+ *      "user_id" direkt aus der ebenfalls gemeinsam genutzten "users"-
+ *      Tabelle geladen (dieselben Spalten wie
+ *      laravel/app/Support/AdminIdentity.php).
+ *
+ * Fuer die aendernden Endpunkte (POST/PATCH: speichern.php, status.php)
+ * kommt zusaetzlich eine CSRF-Pruefung dazu (siehe kjs_boerse_require_csrf()
+ * unten) - notwendig, weil die Authentifizierung jetzt ueber ein
+ * automatisch vom Browser mitgeschicktes Cookie laeuft (anders als vorher
+ * beim Bearer-Token, das ein Angreifer nicht "einfach mitschicken" konnte).
+ * Sie prueft denselben Mechanismus, den Laravels eigene
+ * PreventRequestForgery-Middleware fuer die Laravel-Admin-API verwendet
+ * (X-XSRF-TOKEN-Header, siehe admin/admin.js getToken()).
+ *
+ * KONFIGURATION: diese Datei liest AUSSCHLIESSLICH aus laravel/.env (per
+ * einfachem, hier selbst implementiertem Zeilen-Parser - keine neue
+ * Composer-Abhaengigkeit fuer zwei Werte):
+ *   - APP_KEY        (Laravels Verschluesselungs-Schluessel, "base64:...")
+ *   - SESSION_COOKIE (siehe laravel/.env.example - fest auf
+ *                      "kjs_admin_session" gesetzt statt aus APP_NAME
+ *                      abgeleitet, damit sich der Name nicht "unter der
+ *                      Hand" aendert)
+ *   - SESSION_LIFETIME (Minuten, Standard 120 wie Laravels eigener
+ *                        Default)
+ * Fehlt APP_KEY, verweigert diese Datei (fail-closed, wie zuvor bei einem
+ * fehlenden IDENTITY_JWT_SECRET) jeden Zugriff mit 401, statt ungeprueft
+ * durchzulassen.
+ *
+ * BEKANNTE EINSCHRAENKUNG (siehe Abschlussbericht "bekannte technische
+ * Grenzen"): unterstuetzt nur EIN aktives APP_KEY (keine Schluessel-
+ * Rotation ueber APP_PREVIOUS_KEYS) - identisch zur bisherigen
+ * Einschraenkung bei genau einem IDENTITY_JWT_SECRET ohne Rotation.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/response.php';
+require_once __DIR__ . '/db.php';
 
-if (!function_exists('kjs_boerse_jwt_b64url_decode')) {
-    function kjs_boerse_jwt_b64url_decode(string $segment): string
+if (!function_exists('kjs_boerse_laravel_env_file')) {
+    /** Pfad zu laravel/.env, ausgehend von diesem Verzeichnis (api/lib). */
+    function kjs_boerse_laravel_env_file(): string
     {
-        $segment = strtr($segment, '-_', '+/');
-        $pad = strlen($segment) % 4;
-        if ($pad) {
-            $segment .= str_repeat('=', 4 - $pad);
-        }
-        $decoded = base64_decode($segment, true);
-        return $decoded === false ? '' : $decoded;
+        return dirname(__DIR__, 2) . '/laravel/.env';
     }
 }
 
-if (!function_exists('kjs_boerse_verify_identity_jwt')) {
+if (!function_exists('kjs_boerse_laravel_env')) {
     /**
-     * Prueft Signatur + Zeitgueltigkeit eines HS256-JWT gegen das gegebene
-     * Secret. Gibt bei Erfolg das dekodierte Payload-Array zurueck, sonst
-     * null. Es wird bewusst NUR "HS256" akzeptiert (Netlify-Identity-
-     * Standard) - jeder andere/fehlende "alg"-Header (z.B. "none", was ein
-     * Angreifer versuchen koennte, um die Signaturpruefung zu umgehen) wird
-     * abgelehnt.
-     *
-     * Security-Finalisierung, Punkt "JWT-Pruefung" ("keine Scheinsicherheit"):
-     * - "exp" (Ablaufzeitpunkt) war bisher nur geprueft, WENN vorhanden -
-     *   ein Token ganz ohne "exp"-Claim waere also unbegrenzt gueltig
-     *   gewesen. Das ist jetzt ein Pflichtfeld: fehlt "exp" oder ist es kein
-     *   gueltiger Zeitstempel, wird das Token abgelehnt.
-     * - "nbf" ("not before") wurde bisher gar nicht geprueft. Netlify
-     *   Identity setzt diesen Claim standardmaessig nicht, aber falls er
-     *   doch vorkommt (z.B. durch eine kuenftige Netlify-Aenderung oder
-     *   einen frei konfigurierten Provider), MUSS ein noch nicht gueltiges
-     *   Token abgelehnt werden - alles andere waere eine bekannte,
-     *   vermeidbare Luecke.
-     * - "iss"/"aud" (Aussteller/Empfaenger) werden NUR geprueft, wenn Carsten
-     *   ueber die Environment-Variablen IDENTITY_JWT_ISSUER bzw.
-     *   IDENTITY_JWT_AUDIENCE einen erwarteten Wert konfiguriert. Es wird
-     *   hier bewusst KEIN Wert geraten/hartkodiert (die genaue "iss"/"aud"-
-     *   Struktur echter Netlify-Identity-Token dieser Site konnte ohne
-     *   Zugriff auf die echte Produktionsumgebung nicht verifiziert werden -
-     *   siehe Abschlussbericht). Ohne Konfiguration ist diese Pruefung ein
-     *   reines No-Op, verhaelt sich also exakt wie vorher.
+     * Minimaler, bewusst simpler .env-Zeilen-Parser: liest NUR die eine
+     * angefragte Variable aus laravel/.env (KEY=value, optionale
+     * doppelte/einfache Anfuehrungszeichen um den Wert, "#"-Kommentarzeilen
+     * und Leerzeilen werden uebersprungen). Kein Caching zwischen Requests
+     * noetig - jeder PHP-Prozess dieser Endpunkte ist ohnehin kurzlebig
+     * (klassisches PHP-FPM-Request-Modell, kein Dauerprozess).
      */
-    function kjs_boerse_verify_identity_jwt(string $token, string $secret): ?array
+    function kjs_boerse_laravel_env(string $key): ?string
     {
-        $parts = explode('.', $token);
-        if (count($parts) !== 3) return null;
-        [$headerB64, $payloadB64, $sigB64] = $parts;
-
-        $header = json_decode(kjs_boerse_jwt_b64url_decode($headerB64), true);
-        if (!is_array($header) || ($header['alg'] ?? '') !== 'HS256') return null;
-
-        $expectedSig = hash_hmac('sha256', $headerB64 . '.' . $payloadB64, $secret, true);
-        $actualSig = kjs_boerse_jwt_b64url_decode($sigB64);
-        if ($actualSig === '' || !hash_equals($expectedSig, $actualSig)) return null;
-
-        $payload = json_decode(kjs_boerse_jwt_b64url_decode($payloadB64), true);
-        if (!is_array($payload)) return null;
-
-        // "exp" ist jetzt Pflicht (fail-closed statt "nur wenn vorhanden").
-        if (!isset($payload['exp']) || !is_numeric($payload['exp'])) {
-            return null;
-        }
-        if (time() >= (int) $payload['exp']) {
-            return null; // abgelaufen
+        static $cache = [];
+        if (array_key_exists($key, $cache)) {
+            return $cache[$key];
         }
 
-        // "nbf": nur pruefen, wenn vorhanden - Netlify Identity setzt diesen
-        // Claim standardmaessig nicht, ein Token ohne "nbf" bleibt also wie
-        // bisher gueltig. Ist er vorhanden, muss er bereits erreicht sein.
-        if (isset($payload['nbf']) && is_numeric($payload['nbf']) && time() < (int) $payload['nbf']) {
-            return null; // noch nicht gueltig
+        $path = kjs_boerse_laravel_env_file();
+        if (!is_file($path) || !is_readable($path)) {
+            return $cache[$key] = null;
         }
 
-        // "iss"/"aud": nur pruefen, wenn Carsten einen erwarteten Wert
-        // konfiguriert hat (siehe Funktionskommentar) - sonst No-Op.
-        $expectedIssuer = kjs_boerse_env('IDENTITY_JWT_ISSUER');
-        if ($expectedIssuer !== null && $expectedIssuer !== '') {
-            if (!isset($payload['iss']) || !is_string($payload['iss']) || $payload['iss'] !== $expectedIssuer) {
-                return null;
+        $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return $cache[$key] = null;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] === '#') continue;
+            $eq = strpos($line, '=');
+            if ($eq === false) continue;
+            $lineKey = trim(substr($line, 0, $eq));
+            if ($lineKey !== $key) continue;
+
+            $value = trim(substr($line, $eq + 1));
+            $len = strlen($value);
+            if ($len >= 2 && (
+                ($value[0] === '"' && $value[$len - 1] === '"') ||
+                ($value[0] === "'" && $value[$len - 1] === "'")
+            )) {
+                $value = substr($value, 1, -1);
             }
-        }
-        $expectedAudience = kjs_boerse_env('IDENTITY_JWT_AUDIENCE');
-        if ($expectedAudience !== null && $expectedAudience !== '') {
-            $aud = $payload['aud'] ?? null;
-            $audMatches = (is_string($aud) && $aud === $expectedAudience)
-                || (is_array($aud) && in_array($expectedAudience, $aud, true));
-            if (!$audMatches) {
-                return null;
-            }
+
+            return $cache[$key] = ($value === '' ? null : $value);
         }
 
-        return $payload;
+        return $cache[$key] = null;
     }
 }
 
-if (!function_exists('kjs_boerse_bearer_token')) {
-    function kjs_boerse_bearer_token(): ?string
+if (!function_exists('kjs_boerse_laravel_app_key_bytes')) {
+    /** Rohe Schluesselbytes aus APP_KEY ("base64:..." oder Klartext). */
+    function kjs_boerse_laravel_app_key_bytes(): ?string
     {
-        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if ($header === '' && function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
-            $header = $headers['Authorization'] ?? ($headers['authorization'] ?? '');
+        $appKey = kjs_boerse_laravel_env('APP_KEY');
+        if ($appKey === null || $appKey === '') return null;
+
+        if (str_starts_with($appKey, 'base64:')) {
+            $decoded = base64_decode(substr($appKey, 7), true);
+            return $decoded === false ? null : $decoded;
         }
-        $header = trim((string) $header);
-        if ($header === '' || !preg_match('/^Bearer\s+(.+)$/i', $header, $m)) {
-            return null;
-        }
-        return trim($m[1]);
+
+        return $appKey;
+    }
+}
+
+if (!function_exists('kjs_boerse_laravel_decrypt')) {
+    /**
+     * Entschluesselt einen von Laravel per Illuminate\Encryption\Encrypter
+     * erzeugten Wert (Cookie-Inhalt) - 1:1 nachgebaut nach
+     * Encrypter::decrypt() fuer den Standard-Cipher "aes-256-cbc"
+     * (Laravels Standardeinstellung, unveraendert in dieser Anwendung):
+     * base64(JSON{iv,value,mac,tag}), MAC = hash_hmac('sha256', iv.value,
+     * key), AES-256-CBC-Entschluesselung erst NACH erfolgreicher MAC-
+     * Pruefung (verhindert Padding-Oracle-artige Angriffe). Gibt den reinen
+     * String zurueck (Laravel-Cookies werden ohne PHP-serialize()
+     * verschluesselt, siehe Illuminate\Cookie\Middleware\EncryptCookies::
+     * $serialize = false), oder null bei jedem Fehler (fail-closed).
+     */
+    function kjs_boerse_laravel_decrypt(string $payload, string $key): ?string
+    {
+        $json = json_decode(base64_decode($payload, true) ?: '', true);
+        if (!is_array($json) || !isset($json['iv'], $json['value'], $json['mac'])) return null;
+
+        $iv = base64_decode((string) $json['iv'], true);
+        if ($iv === false || strlen($iv) !== openssl_cipher_iv_length('aes-256-cbc')) return null;
+
+        $calculatedMac = hash_hmac('sha256', $json['iv'] . $json['value'], $key);
+        if (!hash_equals($calculatedMac, (string) $json['mac'])) return null;
+
+        $decrypted = openssl_decrypt((string) $json['value'], 'aes-256-cbc', $key, 0, $iv);
+
+        return $decrypted === false ? null : $decrypted;
+    }
+}
+
+if (!function_exists('kjs_boerse_strip_cookie_value_prefix')) {
+    /**
+     * Entfernt das von Laravel (seit Illuminate\Cookie\CookieValuePrefix)
+     * jedem verschluesselten Cookie-Wert vorangestellte 41-Zeichen-Praefix
+     * (40 Hex-Zeichen HMAC-SHA1 aus Cookie-Name+"v2"+Schluessel, gefolgt von
+     * "|") - ein Schutz dagegen, dass ein fuer einen anderen Cookie-Namen
+     * verschluesselter Wert hier wiederverwendet werden koennte. Gibt null
+     * zurueck, wenn das Praefix nicht zum erwarteten Cookie-Namen passt.
+     */
+    function kjs_boerse_strip_cookie_value_prefix(string $decrypted, string $cookieName, string $key): ?string
+    {
+        $expectedPrefix = hash_hmac('sha1', $cookieName . 'v2', $key) . '|';
+        if (!str_starts_with($decrypted, $expectedPrefix)) return null;
+
+        return substr($decrypted, strlen($expectedPrefix));
+    }
+}
+
+if (!function_exists('kjs_boerse_session_cookie_name')) {
+    function kjs_boerse_session_cookie_name(): string
+    {
+        return kjs_boerse_laravel_env('SESSION_COOKIE') ?? 'kjs_admin_session';
     }
 }
 
 if (!function_exists('kjs_boerse_current_admin_user')) {
     /**
      * Liefert ['sub','email','roles'=>[],'permissions'=>[]] fuer den
-     * aufrufenden, per gueltigem Netlify-Identity-JWT authentifizierten
-     * Benutzer, oder null wenn nicht angemeldet/Token ungueltig/abgelaufen
-     * ODER IDENTITY_JWT_SECRET serverseitig gar nicht konfiguriert ist
-     * (fail-closed - siehe Datei-Kommentar oben).
+     * aufrufenden, per gueltiger Laravel-Sitzung (Fortify-Login,
+     * "web"-Guard) angemeldeten Benutzer, oder null (nicht angemeldet/
+     * Sitzung ungueltig oder abgelaufen/APP_KEY nicht lesbar - fail-closed,
+     * exakt wie zuvor bei einem fehlenden Netlify-Identity-Secret).
+     *
+     * @return array{sub: ?string, email: ?string, roles: list<string>, permissions: list<string>}|null
      */
     function kjs_boerse_current_admin_user(): ?array
     {
-        $secret = kjs_boerse_env('IDENTITY_JWT_SECRET');
-        if ($secret === null) {
-            $configPath = kjs_boerse_env('IDENTITY_CONFIG_PATH');
-            if ($configPath === null) {
-                $configPath = dirname(__DIR__, 2) . '/config/identity.local.php';
-            }
-            if (is_file($configPath)) {
-                $fileConfig = require $configPath;
-                if (is_array($fileConfig) && !empty($fileConfig['jwt_secret'])) {
-                    $secret = (string) $fileConfig['jwt_secret'];
-                }
-            }
+        $key = kjs_boerse_laravel_app_key_bytes();
+        if ($key === null) return null;
+
+        $cookieName = kjs_boerse_session_cookie_name();
+        $rawCookie = $_COOKIE[$cookieName] ?? null;
+        if (!is_string($rawCookie) || $rawCookie === '') return null;
+
+        $decrypted = kjs_boerse_laravel_decrypt($rawCookie, $key);
+        if ($decrypted === null) return null;
+
+        $sessionId = kjs_boerse_strip_cookie_value_prefix($decrypted, $cookieName, $key);
+        if ($sessionId === null || $sessionId === '') return null;
+
+        $pdo = kjs_boerse_require_db();
+
+        $lifetimeMinutes = (int) (kjs_boerse_laravel_env('SESSION_LIFETIME') ?? '120');
+        if ($lifetimeMinutes <= 0) $lifetimeMinutes = 120;
+
+        $stmt = $pdo->prepare('SELECT user_id, last_activity FROM sessions WHERE id = ? LIMIT 1');
+        $stmt->execute([$sessionId]);
+        $session = $stmt->fetch();
+        if ($session === false) return null;
+
+        $lastActivity = (int) ($session['last_activity'] ?? 0);
+        if ($lastActivity <= 0 || $lastActivity < (time() - $lifetimeMinutes * 60)) {
+            return null; // abgelaufen, wie Illuminate\Session\DatabaseSessionHandler::expired()
         }
-        if ($secret === null || $secret === '') return null;
 
-        $token = kjs_boerse_bearer_token();
-        if ($token === null) return null;
+        $userId = $session['user_id'] ?? null;
+        if ($userId === null) return null; // Sitzung existiert, aber (noch) nicht angemeldet (Gast)
 
-        $payload = kjs_boerse_verify_identity_jwt($token, $secret);
-        if ($payload === null) return null;
+        $userStmt = $pdo->prepare('SELECT id, email, roles, permissions FROM users WHERE id = ? LIMIT 1');
+        $userStmt->execute([(int) $userId]);
+        $user = $userStmt->fetch();
+        if ($user === false) return null;
 
-        $appMeta = is_array($payload['app_metadata'] ?? null) ? $payload['app_metadata'] : [];
-        $roles = is_array($appMeta['roles'] ?? null) ? array_values(array_filter($appMeta['roles'], 'is_string')) : [];
-        $permissions = is_array($appMeta['permissions'] ?? null) ? array_values(array_filter($appMeta['permissions'], 'is_string')) : [];
+        $roles = json_decode((string) ($user['roles'] ?? 'null'), true);
+        $permissions = json_decode((string) ($user['permissions'] ?? 'null'), true);
 
         return [
-            'sub' => is_string($payload['sub'] ?? null) ? $payload['sub'] : null,
-            'email' => is_string($payload['email'] ?? null) ? $payload['email'] : null,
-            'roles' => $roles,
-            'permissions' => $permissions,
+            'sub' => (string) $user['id'],
+            'email' => is_string($user['email'] ?? null) ? $user['email'] : null,
+            'roles' => is_array($roles) ? array_values(array_filter($roles, 'is_string')) : [],
+            'permissions' => is_array($permissions) ? array_values(array_filter($permissions, 'is_string')) : [],
         ];
     }
 }
@@ -218,7 +294,7 @@ if (!function_exists('kjs_boerse_require_permission')) {
      * Benutzer mit der gegebenen Modul-Berechtigung vorliegt - sonst
      * Rueckgabe des Benutzer-Arrays. $permissionKey entspricht exakt den
      * Schluesseln aus PERMISSIONS/PERM_BY_KEY in admin/admin.js
-     * ("hundeboerse"/"waffenboerse").
+     * ("hundeboerse"/"waffenboerse"/"kontaktanfragen").
      */
     function kjs_boerse_require_permission(string $permissionKey): array
     {
@@ -238,5 +314,61 @@ if (!function_exists('kjs_boerse_require_permission')) {
             ]);
         }
         return $user;
+    }
+}
+
+if (!function_exists('kjs_boerse_require_csrf')) {
+    /**
+     * CSRF-Schutz fuer die aendernden Sondermodul-Endpunkte (POST/PATCH:
+     * speichern.php/status.php) - NUR fuer diese noetig geworden, weil die
+     * Authentifizierung jetzt (Fortify-Session) ueber ein vom Browser
+     * automatisch mitgeschicktes Cookie laeuft statt ueber einen Bearer-
+     * Token, den ein Angreifer nicht "einfach mitschicken" kann. Prueft
+     * denselben Header, den admin.js fuer die Laravel-Admin-API sendet
+     * (X-XSRF-TOKEN, siehe dortige getToken()-Funktion) gegen den in der
+     * Sitzung gespeicherten CSRF-Token ("_token" im Session-Payload,
+     * genauso wie Laravels eigene PreventRequestForgery-Middleware das
+     * fuer die Laravel-API pruefen wuerde) - MUSS nach
+     * kjs_boerse_require_permission() aufgerufen werden (braucht eine
+     * bereits validierte Sitzung).
+     *
+     * Beendet die Anfrage mit 419 (derselbe Statuscode, den Laravel selbst
+     * fuer ein CSRF-Token-Mismatch verwendet), wenn die Pruefung fehlschlaegt.
+     */
+    function kjs_boerse_require_csrf(): void
+    {
+        $key = kjs_boerse_laravel_app_key_bytes();
+        $cookieName = kjs_boerse_session_cookie_name();
+        $rawCookie = $_COOKIE[$cookieName] ?? null;
+
+        $header = $_SERVER['HTTP_X_XSRF_TOKEN'] ?? '';
+        if ($key === null || !is_string($rawCookie) || $rawCookie === '' || $header === '') {
+            kjs_boerse_json_response(419, ['success' => false, 'error' => 'csrf_mismatch', 'message' => 'Sitzung abgelaufen - bitte Seite neu laden.']);
+        }
+
+        $sessionDecrypted = kjs_boerse_laravel_decrypt($rawCookie, $key);
+        $sessionId = $sessionDecrypted !== null
+            ? kjs_boerse_strip_cookie_value_prefix($sessionDecrypted, $cookieName, $key)
+            : null;
+
+        $headerDecrypted = kjs_boerse_laravel_decrypt($header, $key);
+        $headerToken = $headerDecrypted !== null
+            ? kjs_boerse_strip_cookie_value_prefix($headerDecrypted, 'XSRF-TOKEN', $key)
+            : null;
+
+        if ($sessionId === null || $sessionId === '' || $headerToken === null || $headerToken === '') {
+            kjs_boerse_json_response(419, ['success' => false, 'error' => 'csrf_mismatch', 'message' => 'Sitzung abgelaufen - bitte Seite neu laden.']);
+        }
+
+        $pdo = kjs_boerse_require_db();
+        $stmt = $pdo->prepare('SELECT payload FROM sessions WHERE id = ? LIMIT 1');
+        $stmt->execute([$sessionId]);
+        $row = $stmt->fetch();
+        $payload = $row !== false ? json_decode((string) ($row['payload'] ?? ''), true) : null;
+        $sessionToken = is_array($payload) && is_string($payload['_token'] ?? null) ? $payload['_token'] : null;
+
+        if ($sessionToken === null || !hash_equals($sessionToken, $headerToken)) {
+            kjs_boerse_json_response(419, ['success' => false, 'error' => 'csrf_mismatch', 'message' => 'Sitzung abgelaufen - bitte Seite neu laden.']);
+        }
     }
 }

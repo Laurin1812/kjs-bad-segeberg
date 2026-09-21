@@ -11,9 +11,11 @@ namespace App\Support;
  * AdminPageController dokumentierte Blocker ("~30 Slug-zu-Recht-
  * Zuordnungen ... nicht mit vertretbarer Sorgfalt zu verifizieren") -
  * diese Klasse loest ihn per bewusstem 1:1-Hand-Port (keine Ableitung, keine
- * Vereinfachung) derselben Tabellen, exakt nach demselben Vorgehen wie
- * NetlifyIdentity fuer die JWT-Pruefung: admin.js bleibt die einzige
- * "Quelle der Wahrheit", diese Klasse kopiert sie nur fuer die Server-Seite.
+ * Vereinfachung) derselben Tabellen: admin.js bleibt die einzige "Quelle
+ * der Wahrheit", diese Klasse kopiert sie nur fuer die Server-Seite. Nutzt
+ * seit der Umstellung von Netlify Identity auf Laravel Fortify
+ * App\Support\AdminIdentity::isAdmin()/hasPermission() (dieselbe Signatur
+ * wie zuvor NetlifyIdentity) fuer die eigentliche Rollen-/Rechtepruefung.
  *
  * WICHTIG bei kuenftigen Aenderungen an admin.js' PERM_BY_KEY/PERM_BY_DIR/
  * LEGACY_*: diese Tabellen hier IMMER synchron nachziehen, sonst laeuft ein
@@ -181,17 +183,17 @@ class PagePermissions
      */
     public static function userMayAccess(array $user, ?string $permissionKey): bool
     {
-        if (NetlifyIdentity::isAdmin($user)) {
+        if (AdminIdentity::isAdmin($user)) {
             return true;
         }
         if ($permissionKey === null) {
             return false;
         }
-        if (NetlifyIdentity::hasPermission($user, $permissionKey)) {
+        if (AdminIdentity::hasPermission($user, $permissionKey)) {
             return true;
         }
         if (in_array($permissionKey, self::LEGACY_INHALTSSEITEN_KEYS, true)
-            && NetlifyIdentity::hasPermission($user, 'inhaltsseiten')) {
+            && AdminIdentity::hasPermission($user, 'inhaltsseiten')) {
             return true;
         }
 

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Netlify Identity -> Laravel Fortify: Ersatz fuer die bisherige
+        // Netlify-Function "record-last-login.js" (schrieb bei jedem Login
+        // user_metadata.last_login, siehe admin/admin.js recordLastLogin()).
+        // Laravel feuert dieses Event bereits automatisch bei jedem
+        // erfolgreichen Auth::attempt()/guard->attempt() (u.a. innerhalb der
+        // Fortify-Login-Pipeline, siehe Laravel\Fortify\Actions\
+        // AttemptToAuthenticate) - kein eigener Aufruf in admin.js noetig.
+        Event::listen(function (Login $event) {
+            if ($event->user instanceof User) {
+                $event->user->forceFill(['last_login_at' => now()])->save();
+            }
+        });
     }
 }

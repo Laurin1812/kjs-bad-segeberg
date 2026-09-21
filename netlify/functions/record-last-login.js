@@ -2,6 +2,15 @@
 // LETZTER LOGIN – schreibt beim erfolgreichen Login den eigenen Zeitstempel
 // ────────────────────────────────────────────────────────────────────────
 //
+// VERALTET (Netlify Identity -> Laravel Fortify): admin/admin.js ruft diese
+// Function seit der Umstellung auf Laravel-Session-Authentifizierung NICHT
+// MEHR auf - "letzter Login" wird jetzt serverseitig automatisch von
+// Laravel selbst geschrieben (users.last_login_at, siehe
+// laravel/app/Providers/AppServiceProvider.php, Listener auf
+// Illuminate\Auth\Events\Login). Diese Datei bleibt nur stehen, weil sie
+// nichts mehr aufruft und dadurch keinen Schaden anrichtet - kann entfernt
+// werden, sobald klar ist, dass nichts anderes (mehr) darauf verweist.
+//
 // Hintergrund (11.09.2026, "Anzeige Letzter Login in der Benutzerverwaltung"):
 // Die rohen Netlify-Identity-/GoTrue-Benutzerobjekte dieser Site liefern
 // KEINEN eigenen Letzter-Login-Zeitstempel (weder last_sign_in_at noch eine

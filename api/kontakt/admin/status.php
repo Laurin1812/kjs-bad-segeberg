@@ -27,6 +27,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 kjs_boerse_require_permission('kontaktanfragen');
+// Netlify Identity -> Laravel Fortify: Session-Cookie statt Bearer-Token,
+// daher jetzt zusaetzlich CSRF-Pruefung noetig (siehe Kommentar bei
+// kjs_boerse_require_csrf() in api/lib/identity_auth.php).
+kjs_boerse_require_csrf();
 
 $pdo = kjs_boerse_require_db();
 

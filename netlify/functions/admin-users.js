@@ -2,6 +2,22 @@
 // BENUTZERVERWALTUNG – serverseitiger Proxy zur Netlify-Identity-Admin-API
 // ────────────────────────────────────────────────────────────────────────
 //
+// VERALTET / BEKANNTE LUECKE (Netlify Identity -> Laravel Fortify): admin-
+// Benutzer werden seit dieser Umstellung nicht mehr ueber Netlify Identity
+// verwaltet, sondern direkt in der Laravel-"users"-Tabelle (siehe
+// laravel/app/Console/Commands/CreateAdminUser.php, "php artisan
+// admin:create-user"). Diese Function (und die "Benutzerverwaltung"-
+// Oberflaeche in admin/admin.js, die sie aufruft) funktioniert dadurch
+// NICHT mehr, sobald die Seite nicht mehr auf Netlify laeuft bzw. Netlify
+// Identity fuer diese Site deaktiviert wird (Netlify Functions UND die
+// Identity-Admin-API existieren ausserhalb von Netlifys eigener
+// Plattform nicht). Eine Laravel-basierte Nachbildung dieser UI
+// (Auflisten/Anlegen/Rechte-Bearbeiten bestehender Benutzer direkt im
+// Admin-Panel) war nicht Teil dieses Auftrags ("keine unnoetige
+// Neuentwicklung") und ist als bekannte, im Abschlussbericht dokumentierte
+// Luecke offen - bis dahin: Benutzer-Administration ausschliesslich ueber
+// das genannte Artisan-Kommando.
+//
 // Hintergrund / Ursache des vorherigen Fehlers (05.09.2026):
 // Das Admin-UI rief bislang direkt "/.netlify/identity/admin/users" aus dem
 // Browser auf, mit dem Bearer-Token des eingeloggten Benutzers. Das schlägt

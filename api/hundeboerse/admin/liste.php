@@ -9,9 +9,10 @@
  * mit "version" fuer die optimistische Konflikterkennung beim Speichern
  * (ersetzt die bisherige Git-SHA-Pruefung aus admin.js doSave()).
  *
- * Auth: Authorization: Bearer <Netlify-Identity-JWT>, Berechtigung
+ * Auth: gueltige Laravel-Sitzung (Fortify-Login, Cookie "kjs_admin_session"
+ * bzw. der in laravel/.env konfigurierte SESSION_COOKIE-Name), Berechtigung
  * "hundeboerse" (oder Rolle "admin") erforderlich - siehe
- * api/lib/identity_auth.php.
+ * api/lib/identity_auth.php (Netlify Identity -> Laravel Fortify).
  */
 
 declare(strict_types=1);

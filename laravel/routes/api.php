@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminListController;
 use App\Http\Controllers\Api\Admin\AdminMediaController;
 use App\Http\Controllers\Api\Admin\AdminPageController;
@@ -98,11 +99,11 @@ Route::prefix('content')->group(function () {
 |
 | Schreib-Gegenstueck zur Read-API oben (Admin-Schreibweg Git/JSON ->
 | Laravel/MySQL, siehe Auftrag Phase 4). Jede Route ist per
-| "identity.permission:<key>" serverseitig gegen das jeweilige Netlify-
-| Identity-Zugriffstoken abgesichert (siehe App\Http\Middleware\
-| EnsureIdentityPermission) - <key> entspricht 1:1 den Werten aus admin.js'
-| PERM_BY_KEY. "__admin__" verlangt immer die Rolle "admin" (siehe dortiger
-| Sonderwert-Kommentar in EnsureIdentityPermission).
+| "identity.permission:<key>" serverseitig gegen den jeweils angemeldeten
+| Benutzer abgesichert (siehe App\Http\Middleware\EnsureIdentityPermission)
+| - <key> entspricht 1:1 den Werten aus admin.js' PERM_BY_KEY. "__admin__"
+| verlangt immer die Rolle "admin" (siehe dortiger Sonderwert-Kommentar in
+| EnsureIdentityPermission).
 |
 | Unter "admin/content/*" registriert (statt unter "content/*" wie die
 | Read-API oben), damit dieselben Datei-"Namen" (design.json, footer.json,
@@ -110,8 +111,39 @@ Route::prefix('content')->group(function () {
 | die oeffentliche Read-API oben an (siehe laravelModulFuerDatei()/
 | apiGetLaravel() in admin.js) und nur PUT/POST hier.
 |
+| Netlify Identity -> Laravel Fortify (Session/"web"-Guard): diese gesamte
+| Gruppe laeuft jetzt zusaetzlich durch die Standard-"web"-Middleware-
+| Gruppe (->middleware('web') unten) - das war vorher nicht noetig (reine
+| Bearer-Token-Pruefung ohne Cookies/Sitzung), ist jetzt aber Voraussetzung
+| dafuer, dass ueberhaupt eine Laravel-Session gestartet/gelesen wird
+| (Auth::guard('web'), siehe App\Support\AdminIdentity) UND dass CSRF-Schutz
+| (Illuminate\Foundation\Http\Middleware\PreventRequestForgery, Teil der
+| "web"-Gruppe) fuer die schreibenden Endpunkte greift. admin.js sendet
+| dafuer bei JEDEM aendernden Aufruf zusaetzlich den aus dem XSRF-TOKEN-
+| Cookie gelesenen Wert im Header "X-XSRF-TOKEN" mit (siehe dortige
+| getToken()-Funktion) - Laravels PreventRequestForgery erkennt modernere
+| Browser zusaetzlich automatisch ueber den Sec-Fetch-Site-Header als
+| Same-Origin-Anfrage. Die oeffentliche Lese-API oben bleibt bewusst
+| AUSSERHALB dieser Gruppe (kein unnoetiger Sitzungs-/Cookie-Overhead fuer
+| anonyme Seitenaufrufe).
+|
+| Login/Logout selbst werden nicht hier, sondern von Laravel Fortify
+| registriert (siehe config/fortify.php: 'paths' => ['login' =>
+| 'api/admin/auth/login', ...]) - bewusst unter demselben, bereits per
+| .htaccess gebrueckten "api/admin/*"-Praefix, damit keine zusaetzliche
+| Server-Konfigurationsaenderung noetig ist.
+|
 */
-Route::prefix('admin')->group(function () {
+Route::middleware('web')->prefix('admin')->group(function () {
+    // Netlify Identity -> Laravel Fortify: "wer bin ich" fuer admin.js -
+    // beim Laden von /admin/ (initAuth()/checkSession()) UND direkt nach
+    // einem erfolgreichen Login abgefragt (Fortifys eigene LoginResponse
+    // liefert bewusst nur {"two_factor":false}, keine Benutzerdaten). Kein
+    // "auth"-Middleware-Zwang hier (siehe EnsureIdentityPermission-Analogie
+    // an anderer Stelle) - ein Gast bekommt schlicht 401 statt eines
+    // Redirects, admin.js zeigt dann #login-screen.
+    Route::get('auth/user', [AdminAuthController::class, 'user']);
+
     Route::get('version/{section}', [AdminVersionController::class, 'show'])
         ->where('section', '.*');
 

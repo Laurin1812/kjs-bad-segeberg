@@ -10,12 +10,24 @@
 <body>
 
 <!-- ── LOGIN ─────────────────────────────────────────────────── -->
+<!-- Netlify Identity -> Laravel Fortify: statt des bisherigen Buttons, der
+     das Netlify-Identity-Widget-Modal geoeffnet hat (dort standen die
+     E-Mail-/Passwort-Felder), ist das Formular jetzt direkt Teil dieser
+     Seite - Login erfolgt per POST gegen den von Laravel Fortify
+     registrierten Endpunkt (siehe admin.js onLoginSubmit()/getToken()).
+     Struktur/Optik (login-box, Logo, Überschriften) bewusst unveraendert
+     uebernommen. -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-icon"><img src="/images/logo.png" alt="KJS Segeberg e.V." style="height:72px;width:auto;"></div>
     <h1>KJS Segeberg</h1>
     <p class="login-sub">Admin-Bereich</p>
-    <button id="login-btn" class="btn btn-primary btn-lg">🔐 Anmelden</button>
+    <form id="login-form" autocomplete="on">
+      <p id="login-error" class="login-error" style="display:none" role="alert"></p>
+      <input type="email" id="login-email" name="email" placeholder="E-Mail-Adresse" autocomplete="username" required>
+      <input type="password" id="login-password" name="password" placeholder="Passwort" autocomplete="current-password" required>
+      <button type="submit" id="login-btn" class="btn btn-primary btn-lg">🔐 Anmelden</button>
+    </form>
     <p class="login-hint">Anmeldung mit Ihrem E-Mail-Konto</p>
   </div>
 </div>
@@ -316,8 +328,15 @@
 <div id="toast" class="toast" role="status" aria-live="polite" style="display:none"></div>
 
 <!-- ── SCRIPTS ────────────────────────────────────────────────── -->
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script src="/js/identity-de.js"></script>
+<!-- Netlify Identity -> Laravel Fortify (Session/"web"-Guard): das Widget
+     und sein deutscher DOM-Uebersetzer (js/identity-de.js) werden hier
+     NICHT mehr geladen - der Login laeuft jetzt ueber das E-Mail/Passwort-
+     Formular in #login-screen oben und admin.js' eigene fetch()-Aufrufe
+     gegen die Laravel-Fortify-Endpunkte (siehe initAuth()/onLoginSubmit()
+     in admin.js). js/identity-de.js wird weiterhin von login.html/
+     redaktion/index.html verwendet (separates, per Auftrag NICHT
+     migriertes Redaktions-Werkzeug auf Decap-CMS/git-gateway-Basis) und
+     bleibt daher im Repository erhalten. -->
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="/js/vendor/marked.min.js"></script>

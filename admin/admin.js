@@ -1132,10 +1132,28 @@
   /* ────────────────────────────────────────────────────────────
      API LAYER (git-gateway)
   ──────────────────────────────────────────────────────────── */
+  // Netlify Identity -> Laravel Fortify (Session/"web"-Guard): getToken()
+  // liefert seit dieser Umstellung KEIN Netlify-Identity-JWT mehr, sondern
+  // Laravels eigenen CSRF-Token aus dem "XSRF-TOKEN"-Cookie (von Laravels
+  // PreventRequestForgery-Middleware auf jede Antwort der "web"-
+  // Middleware-Gruppe gesetzt, siehe routes/api.php - der Browser sendet
+  // dieses Cookie automatisch mit, "getToken()" liest hier nur seinen
+  // Wert aus, um ihn zusaetzlich als Header mitzuschicken). Der Name
+  // bleibt bewusst "getToken()" (statt an allen ~25 Aufrufstellen auch den
+  // Funktionsnamen zu aendern) - jede Aufrufstelle baut daraus weiterhin
+  // einen einzelnen Header, jetzt "X-XSRF-TOKEN" statt "Authorization:
+  // Bearer ..." (siehe Kommentar bei initAuth()/checkSession() fuer den
+  // Rest des Login-Ablaufs). "forceRefresh" wird nicht mehr gebraucht
+  // (Cookie ist immer aktuell) - Parameter bleibt fuer die bestehenden
+  // Aufrufstellen mit getToken(true) erhalten, aber ungenutzt.
+  function readCookie(name) {
+    var match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.$?*|{}()[\]\\/+^]/g, '\\$&') + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
   async function getToken(forceRefresh) {
-    var user = netlifyIdentity.currentUser();
-    if (!user) throw new Error('Nicht angemeldet');
-    return user.jwt ? await user.jwt(!!forceRefresh) : (user.token && user.token.access_token);
+    var tok = readCookie('XSRF-TOKEN');
+    if (!tok) throw new Error('Nicht angemeldet');
+    return tok;
   }
 
   // Hundeboerse/Waffenboerse: PHP/MySQL-Backend (08.09.2026, "Hundeboerse &
@@ -1299,7 +1317,7 @@
   async function apiGetLaravel(cfg) {
     var tok = await getToken();
     var r = await fetch(cfg.get + '?_=' + Date.now(), {
-      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      headers: { 'X-XSRF-TOKEN': tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
     });
     if (!r.ok) throw new Error('HTTP ' + r.status + ' beim Laden von ' + cfg.get);
     var content = await r.json();
@@ -1310,7 +1328,7 @@
     var version = 0;
     try {
       var vr = await fetch('/api/admin/version/' + encodeURIComponent(cfg.section) + '?_=' + Date.now(), {
-        headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        headers: { 'X-XSRF-TOKEN': tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
       });
       var vBody = await vr.json().catch(function() { return null; });
       if (vBody && typeof vBody.version === 'number') version = vBody.version;
@@ -1330,7 +1348,7 @@
     }
     var r = await fetch(cfg.put, {
       method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: jsonData, expected_version: expectedVersion })
     });
     var body = await r.json().catch(function() { return {}; });
@@ -1374,7 +1392,7 @@
     var tok = await getToken();
     var r = await fetch('/api/admin/' + def.navFile, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: newData })
     });
     var body = await r.json().catch(function() { return {}; });
@@ -1395,7 +1413,7 @@
     var tok = await getToken();
     var r = await fetch('/api/admin/' + def.file, {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + tok }
+      headers: { 'X-XSRF-TOKEN': tok }
     });
     var body = await r.json().catch(function() { return {}; });
     if (!r.ok) {
@@ -1421,7 +1439,7 @@
     var tok = await getToken();
     var r = await fetch('/api/admin/' + navFile, {
       method: 'PATCH',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ order: order })
     });
     var body = await r.json().catch(function() { return {}; });
@@ -1459,7 +1477,7 @@
   async function apiGetBoerse(modul) {
     var tok = await getToken();
     var r = await fetch('/api/' + modul + '/admin/liste.php?_=' + Date.now(), {
-      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      headers: { 'X-XSRF-TOKEN': tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
     });
     var body = await r.json().catch(function() { return null; });
     if (!r.ok || !body || body.success !== true) {
@@ -1480,7 +1498,7 @@
     }
     var r = await fetch('/api/' + modul + '/admin/speichern.php', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: jsonData, expected_version: expectedVersion })
     });
     var body = await r.json().catch(function() { return {}; });
@@ -1511,7 +1529,7 @@
     // gespeicherte Änderung scheint dann "zurückgesprungen" zu sein.
     var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH + '&_=' + Date.now(), {
       headers: {
-        'Authorization': 'Bearer ' + tok,
+        'X-XSRF-TOKEN': tok,
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache'
       }
@@ -1532,7 +1550,7 @@
     if (sha) body.sha = sha;
     var r = await fetch(GIT + '/' + path, {
       method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!r.ok) {
@@ -1559,7 +1577,7 @@
     var type = (path === 'downloads') ? 'pdf' : 'image';
     var tok = await getToken();
     var r = await fetch('/api/admin/media?type=' + type + '&_=' + Date.now(), {
-      headers: { 'Authorization': 'Bearer ' + tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      headers: { 'X-XSRF-TOKEN': tok, 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
     });
     if (!r.ok) return [];
     var body = await r.json().catch(function() { return null; });
@@ -1577,7 +1595,7 @@
     var tok = await getToken();
     var r = await fetch(GIT + '/' + path + '?ref=' + BRANCH + '&_=' + Date.now(), {
       headers: {
-        'Authorization': 'Bearer ' + tok,
+        'X-XSRF-TOKEN': tok,
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache'
       }
@@ -1597,7 +1615,7 @@
     var tok = await getToken();
     var r = await fetch(GIT + '/' + encodeGitPath(path), {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: message || '🗑️ Datei gelöscht: ' + path, sha: sha, branch: BRANCH })
     });
     if (!r.ok) {
@@ -1624,7 +1642,7 @@
     var tok = await getToken();
     var r = await fetch('/api/admin/media', {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify({ media_type: mediaType, filename: filename })
     });
     var body = await r.json().catch(function() { return {}; });
@@ -1656,7 +1674,7 @@
     var body = { message: 'Bild hochgeladen: ' + folder + '/' + safeName, content: base64Data, branch: BRANCH };
     var r = await fetch(GIT + '/' + folder + '/' + safeName, {
       method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error(await apiUploadErrorMessage(r));
@@ -1753,62 +1771,119 @@
   /* ────────────────────────────────────────────────────────────
      AUTH
   ──────────────────────────────────────────────────────────── */
-  // "Letzter Login" (11.09.2026): schreibt bei jedem erfolgreichen Login den
-  // eigenen Zeitstempel über netlify/functions/record-last-login.js (siehe
-  // dortiger Kommentar für Details/Sicherheit). Bewusst nur beim "login"-
-  // Event (echte Anmeldung), nicht beim "init"-Event (das bei jedem
-  // Seitenaufruf mit noch gültiger Sitzung feuert) - sonst würde jedes
-  // Neuladen der Seite fälschlich als neuer Login gezählt. Ein Fehlschlag
-  // (z.B. kurzzeitiger Netzwerkfehler) darf den Login selbst nie blockieren
-  // oder stören, daher nur Konsolen-Logging, keine UI-Meldung.
-  function recordLastLogin() {
-    getToken(true).then(function(tok) {
-      return fetch('/.netlify/functions/record-last-login', {
+  // Netlify Identity -> Laravel Fortify (Session/"web"-Guard):
+  //
+  // - "Letzter Login" wird nicht mehr client-seitig per eigenem fetch()
+  //   gegen eine Netlify-Function erfasst (siehe vorher record-last-
+  //   login.js), sondern serverseitig, automatisch bei jedem
+  //   erfolgreichen Login (Laravel-Event Illuminate\Auth\Events\Login,
+  //   siehe laravel/app/Providers/AppServiceProvider.php) - hier ist
+  //   dafür kein Code mehr nötig.
+  // - initAuth()/checkSession() ersetzen netlifyIdentity.on('init', ...):
+  //   statt auf ein clientseitiges Widget-Event zu warten, wird beim Laden
+  //   von /admin/ einmal aktiv beim Server nachgefragt, ob bereits eine
+  //   gültige Sitzung besteht (Browser schickt das Sitzungs-Cookie
+  //   automatisch mit, sofern vorhanden).
+  // - Login/Logout laufen jetzt über echte HTTP-Endpunkte (POST .../auth/
+  //   login bzw. .../auth/logout, von Laravel Fortify registriert - siehe
+  //   laravel/config/fortify.php) statt über das Netlify-Identity-Widget-
+  //   Modal.
+  async function checkSession() {
+    try {
+      var r = await fetch('/api/admin/auth/user', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
+      if (r.ok) {
+        onLogin(await r.json());
+      } else {
+        onLogout();
+      }
+    } catch (e) {
+      console.error('[Auth] Sitzungsprüfung fehlgeschlagen:', e);
+      onLogout();
+    }
+  }
+
+  function showLoginError(message) {
+    var el = id('login-error');
+    el.textContent = message;
+    el.style.display = '';
+  }
+  function clearLoginError() {
+    var el = id('login-error');
+    el.style.display = 'none';
+    el.textContent = '';
+  }
+
+  async function onLoginSubmit(ev) {
+    ev.preventDefault();
+    clearLoginError();
+    var email = id('login-email').value.trim();
+    var password = id('login-password').value;
+    var submitBtn = id('login-btn');
+    submitBtn.disabled = true;
+    try {
+      var tok = await getToken();
+      var r = await fetch('/api/admin/auth/login', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + tok }
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': tok },
+        body: JSON.stringify({ email: email, password: password })
       });
-    }).catch(function(e) {
-      console.error('[Letzter Login] Konnte nicht gespeichert werden:', e);
-    });
+      if (r.status === 429) {
+        showLoginError('Zu viele Anmeldeversuche – bitte kurz warten und erneut versuchen.');
+        return;
+      }
+      if (!r.ok) {
+        showLoginError('E-Mail-Adresse oder Passwort ist falsch.');
+        return;
+      }
+      var userResp = await fetch('/api/admin/auth/user', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
+      if (!userResp.ok) {
+        showLoginError('Anmeldung fehlgeschlagen. Bitte erneut versuchen.');
+        return;
+      }
+      id('login-password').value = '';
+      onLogin(await userResp.json());
+    } catch (e) {
+      console.error('[Auth] Login fehlgeschlagen:', e);
+      showLoginError('Anmeldung fehlgeschlagen. Bitte erneut versuchen.');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function doLogout() {
+    try {
+      var tok = await getToken();
+      await fetch('/api/admin/auth/logout', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-XSRF-TOKEN': tok }
+      });
+    } catch (e) {
+      console.error('[Auth] Logout fehlgeschlagen:', e);
+    } finally {
+      onLogout();
+    }
   }
 
   function initAuth() {
-    netlifyIdentity.on('init', function(user) {
-      if (user) onLogin(user); else onLogout();
-    });
-    netlifyIdentity.on('login', function(user) {
-      netlifyIdentity.close();
-      onLogin(user);
-      recordLastLogin();
-    });
-    netlifyIdentity.on('logout', onLogout);
-    /* locale:'de' ist die offizielle Netlify-Identity-Übersetzungsoption.
-       Deutsch ist im Widget nicht mitgeliefert, daher übernimmt der
-       DOM-Übersetzer aus /js/identity-de.js die eigentliche Arbeit -
-       diese Option schadet aber nicht und greift automatisch, sollte
-       Netlify Identity Deutsch in Zukunft selbst nachliefern. */
-    netlifyIdentity.init({ locale: 'de' });
-
-    id('login-btn').addEventListener('click', function() {
-      netlifyIdentity.open('login');
-    });
-    id('logout-btn').addEventListener('click', function() {
-      netlifyIdentity.logout();
-    });
+    id('login-form').addEventListener('submit', onLoginSubmit);
+    id('logout-btn').addEventListener('click', doLogout);
+    checkSession();
   }
 
   function onLogin(user) {
-    var name = (user.user_metadata && user.user_metadata.full_name) || user.email || '';
+    var name = (user && user.name) || (user && user.email) || '';
     S.userName = name;
     id('user-name').textContent = name;
-    // Rollen/Rechte aus dem EIGENEN, von Netlify signierten Zugriffstoken
-    // dieses Benutzers übernehmen (steuert Sidebar/Suche/Panel-Zugriff für
-    // die laufende Sitzung). Wird eine Rolle/ein Recht von einem Admin
-    // geändert, wirkt das erst nach dem nächsten Login dieser Person, weil
-    // genau diese Werte im Token eingebettet sind (siehe Hinweistext in der
+    // Rollen/Rechte kommen jetzt direkt aus der Datenbank (users.roles/
+    // users.permissions, siehe App\Support\AdminIdentity) statt aus einem
+    // clientseitig entschlüsselten JWT - inhaltlich dieselbe Bedeutung wie
+    // vorher: steuert Sidebar/Suche/Panel-Zugriff für die laufende Sitzung.
+    // Wird eine Rolle/ein Recht geändert, wirkt das (wie zuvor) erst beim
+    // nächsten Login dieser Person, weil hier nur einmal beim Login/beim
+    // Laden der Seite geladen wird (siehe Hinweistext in der
     // Benutzerverwaltung).
-    CURRENT_ROLES = (user.app_metadata && user.app_metadata.roles) || [];
-    CURRENT_PERMISSIONS = (user.app_metadata && user.app_metadata.permissions) || [];
+    CURRENT_ROLES = (user && user.roles) || [];
+    CURRENT_PERMISSIONS = (user && user.permissions) || [];
     id('login-screen').style.display = 'none';
     id('admin-app').style.display = '';
     initApp();
@@ -2593,7 +2668,7 @@
               var tok = await getToken();
               await fetch(GIT + '/' + def.file, {
                 method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+                headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: '🗑️ Seite gelöscht: ' + (def.label || def.slug), sha: fileResp.sha, branch: BRANCH })
               });
             } catch(e2) {
@@ -7152,7 +7227,7 @@
 
   async function buFetch(method, pathSuffix, bodyObj) {
     var tok = await getToken(true);
-    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
+    var opts = { method: method, headers: { 'X-XSRF-TOKEN': tok } };
     if (bodyObj !== undefined) {
       opts.headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(bodyObj);
@@ -7259,7 +7334,7 @@
       console.error('[Benutzerverwaltung] Fehler beim Laden der Benutzerliste:', e);
       list.innerHTML = '<p style="color:var(--danger);">❌ ' + escHtml(e.message) + '</p>' +
         '<p class="mt-1"><button class="btn btn-outline btn-sm" onclick="benutzerLoad()">🔄 Erneut versuchen</button> ' +
-        '<button class="btn btn-outline btn-sm" onclick="netlifyIdentity.logout()">🚪 Aus- &amp; wieder einloggen</button></p>';
+        '<button class="btn btn-outline btn-sm" onclick="document.getElementById(\'logout-btn\').click()">🚪 Aus- &amp; wieder einloggen</button></p>';
     }
   }
 
@@ -7397,7 +7472,7 @@
 
   async function kaFetch(method, url, bodyObj) {
     var tok = await getToken(true);
-    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + tok } };
+    var opts = { method: method, headers: { 'X-XSRF-TOKEN': tok } };
     if (bodyObj !== undefined) {
       opts.headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(bodyObj);
@@ -7833,7 +7908,7 @@
       var tok = await getToken();
       var r = await fetch(GIT + '/' + filePath + '?ref=' + BRANCH + '&_=' + Date.now(), {
         headers: {
-          'Authorization': 'Bearer ' + tok,
+          'X-XSRF-TOKEN': tok,
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
         }
@@ -8208,7 +8283,7 @@
     fd.append('file', blob, prepared.filename);
     var r = await fetch('/api/admin/media/images', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tok },
+      headers: { 'X-XSRF-TOKEN': tok },
       body: fd
     });
     var body = await r.json().catch(function() { return {}; });
@@ -8859,7 +8934,7 @@
     fd.append('file', blob, filename);
     var r = await fetch('/api/admin/media/pdfs', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + tok },
+      headers: { 'X-XSRF-TOKEN': tok },
       body: fd
     });
     var body = await r.json().catch(function() { return {}; });
@@ -8874,7 +8949,7 @@
     var body = { message: '📄 PDF hochgeladen: ' + safeName, content: base64Data, branch: BRANCH };
     var r = await fetch(GIT + '/downloads/' + safeName, {
       method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      headers: { 'X-XSRF-TOKEN': tok, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error(await apiUploadErrorMessage(r));

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'roles', 'permissions'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -20,6 +20,12 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
+     * "roles"/"permissions" (Netlify Identity -> Laravel Fortify, siehe
+     * Migration 2026_09_21_000001_add_roles_permissions_to_users_table.php
+     * und App\Support\AdminIdentity) sind JSON-Spalten mit einer Liste von
+     * Strings - Laravel liefert sie dadurch bereits als PHP-Array (null,
+     * wenn noch keine Rechte vergeben wurden).
+     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -27,6 +33,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'roles' => 'array',
+            'permissions' => 'array',
+            'last_login_at' => 'datetime',
         ];
     }
 }

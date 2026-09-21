@@ -63,6 +63,19 @@ html, body { height: 100%; overflow: hidden; font-family: Inter, system-ui, sans
 .login-box h1 { font-size: 1.4rem; color: var(--green-dark); margin-bottom: .3rem; }
 .login-sub   { color: var(--text-muted); margin-bottom: 2rem; }
 .login-hint  { color: var(--text-muted); font-size: .8rem; margin-top: .75rem; }
+/* Netlify Identity -> Laravel Fortify: E-Mail-/Passwort-Formular direkt in
+   #login-screen (ersetzt das bisherige Netlify-Identity-Widget-Modal). */
+#login-form { display: flex; flex-direction: column; gap: .75rem; text-align: left; }
+#login-form input {
+  padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 8px;
+  font-size: .95rem; font-family: inherit;
+}
+#login-form input:focus { outline: none; border-color: var(--green-main); }
+#login-form .btn-lg { width: 100%; margin-top: .25rem; }
+.login-error {
+  background: var(--danger-bg); color: var(--danger); border-radius: 8px;
+  padding: .6rem .8rem; font-size: .85rem; text-align: center; margin: 0;
+}
 
 /* ── TOPBAR ───────────────────────────────────────────────────── */
 .admin-topbar {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Support\NetlifyIdentity;
+use App\Support\AdminIdentity;
 use App\Support\PagePermissions;
 use Closure;
 use Illuminate\Http\Request;
@@ -27,7 +27,7 @@ class EnsurePagePermission
 {
     public function handle(Request $request, Closure $next, string $kind): Response
     {
-        $user = NetlifyIdentity::currentUser($request);
+        $user = AdminIdentity::currentUser($request);
         if ($user === null) {
             return response()->json([
                 'success' => false,

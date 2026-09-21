@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Support\NetlifyIdentity;
+use App\Support\AdminIdentity;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,6 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
  * Modul-Rechtepruefung fuer die neuen Admin-Schreib-Endpunkte, 1:1 nach dem
  * Muster von identity_auth.php::kjs_boerse_require_permission() (dort fuer
  * Hundeboerse/Waffenboerse).
+ *
+ * Netlify Identity -> Laravel Fortify: prueft seit dieser Umstellung die
+ * Laravel-Session (App\Support\AdminIdentity) statt eines Netlify-JWT -
+ * siehe dortigen Klassenkommentar. 401/403-Antwortform fuer admin.js
+ * unveraendert.
  *
  * $permissionKey entspricht exakt den Werten aus admin.js' PERM_BY_KEY
  * (z.B. "footer", "vorstand", "aktuelles") - siehe Verwendung in
@@ -32,7 +37,7 @@ class EnsureIdentityPermission
 {
     public function handle(Request $request, Closure $next, string $permissionKey): Response
     {
-        $user = NetlifyIdentity::currentUser($request);
+        $user = AdminIdentity::currentUser($request);
         if ($user === null) {
             return response()->json([
                 'success' => false,
@@ -42,8 +47,8 @@ class EnsureIdentityPermission
         }
 
         $allowed = $permissionKey === '__admin__'
-            ? NetlifyIdentity::isAdmin($user)
-            : NetlifyIdentity::hasPermission($user, $permissionKey);
+            ? AdminIdentity::isAdmin($user)
+            : AdminIdentity::hasPermission($user, $permissionKey);
 
         if (! $allowed) {
             return response()->json([
