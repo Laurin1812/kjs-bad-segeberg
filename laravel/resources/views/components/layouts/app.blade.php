@@ -37,6 +37,21 @@
     <meta name="description" content="{{ $description ?? 'Kreisjägerschaft Segeberg e.V. – Ihr Ansprechpartner für Jagd, Natur und Wildtierhege im Kreis Bad Segeberg.' }}">
     <title>{{ $title ? $title.' – Kreisjägerschaft Segeberg e.V.' : 'Kreisjägerschaft Segeberg e.V.' }}</title>
 
+    {{-- Phase-1-Nacharbeit ("Logo wird nicht geladen"): echte, statische
+         Laravel-Assets ueber den Standard-asset()-Helper aufgeloest - siehe
+         Kommentar in components/site-header.blade.php fuer die volle
+         Begruendung. window.KJS_ASSETS ist die einzige Bruecke zwischen
+         diesen Blade-generierten URLs und dem weiterhin JS-gebauten Footer
+         (resources/js/app.js liest logoDunkel hier aus, mit dem alten
+         hart-codierten Pfad als Fallback, falls das Skript aus irgendeinem
+         Grund vor diesem Block laeuft). --}}
+    <script>
+      window.KJS_ASSETS = {
+        logo: "{{ asset('images/logo.png') }}",
+        logoDunkel: "{{ asset('images/logo-dunkel.png') }}"
+      };
+    </script>
+
     <script>
       fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
         const r = document.documentElement.style;

@@ -568,11 +568,17 @@ function splitPostadresse(raw) {
   }
 
   function renderFooter(d) {
+    // Phase-1-Nacharbeit ("Logo wird nicht geladen"): URL kommt jetzt aus
+    // window.KJS_ASSETS (per asset()-Helper aus dem Layout gesetzt, siehe
+    // components/layouts/app.blade.php) statt eines hart codierten Pfads -
+    // der alte Pfad bleibt nur als Fallback, falls das Skript ausnahmsweise
+    // vor diesem Block laeuft.
+    var logoDunkelSrc = (window.KJS_ASSETS && window.KJS_ASSETS.logoDunkel) || '/images/logo-dunkel.png';
     var html =
       '<div class="container">' +
         '<div class="footer-grid">' +
           '<div class="footer-about">' +
-            '<img src="/images/logo-dunkel.png" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
+            '<img src="' + logoDunkelSrc + '" alt="KJS Logo" style="height:58px;width:auto;margin-bottom:1rem;">' +
             '<span class="footer-about__name">Kreisjägerschaft Segeberg e.V.</span>' +
             '<span class="footer-about__sub">Mitglied im Landesjagdverband Schleswig-Holstein</span>' +
             (d.ueber_text ? '<p>' + escHtml(d.ueber_text) + '</p>' : '') +

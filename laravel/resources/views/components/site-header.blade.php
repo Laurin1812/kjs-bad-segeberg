@@ -17,6 +17,20 @@
     Module in resources/js/app.js weiterhin #mainNav/#mobileNavList zur
     Laufzeit (Server-seitiges Rendern der Navigationseintraege selbst ist
     Phase 4).
+
+    Nachtrag (Phase-1-Nacharbeit, offener Punkt "Logo wird nicht geladen"):
+    "/images/logo.png" war ein 1:1 aus js/components.js uebernommener,
+    root-relativer Pfad, der im alten statischen Webroot auf eine dort
+    liegende Datei zeigte - im Laravel-Dokumentenstamm (public/) existierte
+    diese Datei nie, das Logo lief daher ins Leere. Fix: die echte, von der
+    produktiven Seite genutzte Logo-Datei (images/logo.png im alten
+    Webroot-Wurzelverzeichnis, 400x400 PNG) liegt jetzt als echtes,
+    committetes Laravel-Asset unter public/images/logo.png und wird ueber
+    den Standard-Helper asset() referenziert - keine Laufzeit-Abhaengigkeit
+    auf den alten Webroot mehr. Der Footer nutzt dieselbe Loesung, siehe
+    site-footer.blade.php (dort per window.KJS_ASSETS an das JS-gebaute
+    Footer-Markup uebergeben, da der Footer-Inhalt weiterhin per
+    resources/js/app.js zusammengebaut wird, siehe dortiger Kommentar).
 --}}
 <div class="topbar">
     <div class="container">
@@ -35,7 +49,7 @@
 <header class="site-header">
     <div class="container header-inner">
         <a href="/" class="site-logo">
-            <img src="/images/logo.png" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
+            <img src="{{ asset('images/logo.png') }}" alt="KJS Segeberg Logo" style="height:76px;width:auto;">
             <div class="site-logo__text">
                 <span class="site-logo__name">Kreisjägerschaft</span>
                 <span class="site-logo__sub">Segeberg <span class="no-caps">e.V.</span></span>
