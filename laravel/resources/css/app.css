@@ -334,6 +334,20 @@ p  { margin-bottom: 1rem; }
 .section--dark { background: var(--green-main); color: #fff; }
 .section--dark h2, .section--dark h3 { color: #fff; }
 
+/* Phase 4 Abschluss-Nacharbeit ("CTA-Bereich unten"): ".text-center" ist im
+   Original ein allgemeiner Utility-Selektor (css/style.css, Abschnitt
+   "UTILITIES", ganz am Dateiende), nicht Teil des Startseiten-Bausteins -
+   fehlte hier aber ebenfalls komplett (siehe Klassenkommentar oben), weshalb
+   "<div class="container text-center">" im CTA-Banner ("Werden Sie Teil der
+   Jagdgemeinschaft") wirkungslos blieb: h1/h2/Ueberschrift blieben
+   linksbuendig, waehrend der schmalere, per Inline-Style zentrierte
+   Absatz-Block optisch daneben "verschoben" wirkte. Nur diese eine, von
+   home.blade.php tatsaechlich genutzte Utility-Klasse wird hier ergaenzt
+   (1:1, keine der uebrigen ungenutzten UTILITIES-Klassen wie .text-green
+   oder die mt-/mb-Abstandshelfer - die kommen erst, wenn eine Seite sie
+   tatsaechlich braucht). */
+.text-center { text-align: center; }
+
 /* ----- Hero ----- */
 .hero {
   position: relative; min-height: 88vh;
@@ -1129,6 +1143,17 @@ body.kjs-lightbox-lock { overflow: hidden; }
   .testimonial-card { flex-basis: 100%; max-width: 100%; }
   .stats__grid { gap: 2rem; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  /* Phase 4 Abschluss-Nacharbeit ("Kontakt-Route"): 1:1 aus css/style.css
+     (dortselbst im selben 900px-Breakpoint). Fehlte hier bislang komplett -
+     ohne diese Regel behaelt ".page-content .container" (siehe oben,
+     Zeile ~559) auch auf schmalen Bildschirmen "1fr 290px", wodurch die
+     290px-Sidebar Inhalt und Text der schmaleren Hauptspalte ueberlappt/
+     abschneidet. Sichtbar geworden, weil /kontakt die erste Seite mit
+     ".page-content"+Sidebar ist, deren mobile Darstellung im Rahmen dieses
+     Auftrags tatsaechlich geprueft wurde - betrifft aber alle Seiten mit
+     diesem Layout (z.B. auch die bereits bestehenden jaeger/aufgaben/
+     verbraucher-Inhaltsseiten). */
+  .page-content .container { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {

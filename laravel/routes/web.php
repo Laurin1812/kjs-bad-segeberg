@@ -9,6 +9,7 @@ use App\Http\Controllers\HegeringeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HundeausbildungController;
 use App\Http\Controllers\ImpressumController;
+use App\Http\Controllers\KontaktController;
 use App\Http\Controllers\KreisjaegermeisterController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PersonenGremiumController;
@@ -31,6 +32,14 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/impressum', [ImpressumController::class, 'show'])->name('impressum');
 Route::get('/datenschutz', [DatenschutzController::class, 'show'])->name('datenschutz');
 Route::get('/service', [ServiceController::class, 'show'])->name('service');
+
+// Phase 4 Abschluss-Nacharbeit ("Kontakt-Route"): die Hauptnavigation
+// (settings-Gruppe "navigation") verweist seit Phase 4 bereits auf
+// "/kontakt" (ebenso mehrere bereits migrierte Seiten, z.B. pages/
+// show.blade.php), bisher lief das aber auf eine echte 404, da keine Route
+// existierte. Siehe KontaktController-Klassenkommentar fuer die bewusste
+// Abgrenzung zum weiterhin nicht migrierten Kontaktformular-Sondermodul.
+Route::get('/kontakt', [KontaktController::class, 'show'])->name('kontakt');
 
 Route::get('/aktuelles', [AktuellesController::class, 'index'])->name('aktuelles.index');
 // URL-Schema bewusst modernisiert (siehe AktuellesController-Klassenkommentar
