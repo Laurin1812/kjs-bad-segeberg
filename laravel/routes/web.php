@@ -4,11 +4,14 @@ use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
 use App\Http\Controllers\DownloadsController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\FesteSeiteController;
 use App\Http\Controllers\HegeringeController;
+use App\Http\Controllers\HundeausbildungController;
 use App\Http\Controllers\ImpressumController;
 use App\Http\Controllers\KreisjaegermeisterController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PersonenGremiumController;
+use App\Http\Controllers\RegistrySeiteController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TermineController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +60,50 @@ Route::get('/jaeger/hegeringe', [HegeringeController::class, 'index'])->name('ja
 // beibehalten ("kreisjjaegermeister" statt "kreisjaegermeister") - das ist
 // die tatsaechliche, bereits produktiv verlinkte/indexierte URL.
 Route::get('/kreisjjaegermeister', [KreisjaegermeisterController::class, 'show'])->name('kreisjaegermeister');
+
+// ---------------------------------------------------------------------
+// Phase 3 (Dynamische Seitenfamilien & Hundeausbildung, Laravel-
+// Vollmigration): jaeger/aufgaben/verbraucher (feste Vorlagen-Seiten UND
+// per Registry hinzugefuegte Zusatzseiten UND dynamisch angelegte
+// Unterseiten), "weitere"-Seiten, Hundeausbildung. Keine dieser Routen
+// liest zur Laufzeit content/*.json, /api/content/*.json, Legacy-PHP,
+// Netlify oder das Git-Gateway.
+//
+// WICHTIG (Routing-Reihenfolge, siehe Auftrag): Hundeausbildung nutzt
+// LITERALE Routen unter "aufgaben/..." (aufgaben/hundeausbildung,
+// aufgaben/jagdhundeschule[/…]) - diese MUESSEN vor der generischen
+// "{section}/{slug}"-Route stehen, sonst wuerde z.B. "/aufgaben/
+// hundeausbildung" faelschlich als (nicht existierende) Registry-Seite der
+// Section "aufgaben" interpretiert (identische Falle wie zuvor in
+// routes/api.php, siehe dortiger Kommentar). Aus demselben Grund steht die
+// generische 2-Segment-Route ("{section}/{slug}") vor der generischen
+// 3-Segment-Unterseiten-Route ("{section}/{parentSlug}/{childSlug}") -
+// unproblematisch, da unterschiedliche Segment-Anzahl, aber zur
+// Konsistenz in derselben Reihenfolge wie in der JSON-Read-API gehalten.
+// Ein unbekannter Slug fuehrt in allen Faellen ueber firstOrFail() zu
+// einer echten Laravel-404 (siehe FesteSeiteController/
+// RegistrySeiteController/HundeausbildungController).
+// ---------------------------------------------------------------------
+
+Route::get('/aufgaben/hundeausbildung', [HundeausbildungController::class, 'hub'])->name('hundeausbildung.hub');
+Route::get('/aufgaben/jagdhundeschule', [HundeausbildungController::class, 'index'])->name('hundeausbildung.index');
+Route::get('/aufgaben/jagdhundeschule/{slug}', [HundeausbildungController::class, 'show'])->name('hundeausbildung.show');
+
+// "weitere"-Seiten (z.B. /weitere/jagdhornblasen) - kein fixedSlugs-Konzept,
+// siehe RegistrySeiteController::weitere()/KjsPagesConfig-Klassenkommentar.
+Route::get('/weitere/{slug}', [RegistrySeiteController::class, 'weitere'])->name('weitere.show');
+
+// Feste Vorlagen-Seiten UND per Registry hinzugefuegte Zusatzseiten von
+// jaeger/aufgaben/verbraucher - EINE Route fuer beide Faelle (siehe
+// FesteSeiteController-Klassenkommentar "ROUTING"), da die Unterscheidung
+// fuer Besucher keine sichtbare URL-Struktur ist.
+Route::get('/{section}/{slug}', [FesteSeiteController::class, 'show'])
+    ->where('section', 'jaeger|aufgaben|verbraucher');
+
+// Dynamisch angelegte Unterseiten (Kind-Seiten via parent_id) einer festen
+// oder per Registry hinzugefuegten Eltern-Seite.
+Route::get('/{section}/{parentSlug}/{childSlug}', [RegistrySeiteController::class, 'sub'])
+    ->where('section', 'jaeger|aufgaben|verbraucher|weitere');
 
 // Phase 1 (Blade-Fundament, Laravel-Vollmigration): interne Vorschau-Route
 // zum visuellen Vergleich des neuen Blade-Grundlayouts (Header/Nav/Footer/

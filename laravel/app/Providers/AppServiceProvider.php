@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\View\Composers\DesignComposer;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,5 +36,10 @@ class AppServiceProvider extends ServiceProvider
                 $event->user->forceFill(['last_login_at' => now()])->save();
             }
         });
+
+        // Phase 3 Nacharbeit (100%-Laravel-Architektur-Korrektur): ersetzt
+        // den bisherigen "fetch('/api/content/design.json')"-Aufruf im
+        // Haupt-Layout - siehe DesignComposer-Klassenkommentar.
+        View::composer('components.layouts.app', DesignComposer::class);
     }
 }

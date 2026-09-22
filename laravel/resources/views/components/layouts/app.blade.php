@@ -8,8 +8,12 @@
 
     Uebernommen 1:1 aus dem bestehenden Muster (siehe z.B. index.html,
     jaeger/ueber-uns.html):
-      - der design.json-Farb-/Schrift-Override im <head> (unveraendert, liest
-        weiterhin von /api/content/design.json, keine neue Datenquelle)
+      - der Farb-/Schrift-Override im <head> (WICHTIG, Phase-3-Nacharbeit
+        "100% Laravel": laedt seit dieser Korrektur NICHT mehr per
+        clientseitigem "fetch('/api/content/design.json')", sondern
+        serverseitig ueber App\View\Composers\DesignComposer direkt aus der
+        "settings"-Tabelle, Gruppe "design" - siehe dortiger
+        Klassenkommentar. Kein JSON-Request, keine zweite Datenquelle mehr.)
       - lang="de", die Standard-Meta-Tags, das Grundprinzip
         "<title>{Seitentitel} – Kreisjägerschaft Segeberg e.V."
 
@@ -52,22 +56,47 @@
       };
     </script>
 
-    <script>
-      fetch('/api/content/design.json').then(r=>r.json()).then(d=>{
-        const r = document.documentElement.style;
-        if(d.farbe_gruen) r.setProperty('--green-main', d.farbe_gruen);
-        if(d.farbe_dunkelgruen) r.setProperty('--green-dark', d.farbe_dunkelgruen);
-        if(d.farbe_akzent) r.setProperty('--gold', d.farbe_akzent);
-        if(d.schrift_ueberschrift) r.setProperty('--font-heading', `"${d.schrift_ueberschrift}", serif`);
-        if(d.schrift_text) r.setProperty('--font-sans', `"${d.schrift_text}", sans-serif`);
-        if(d.schriftgroesse_h1) r.setProperty('--fs-h1', d.schriftgroesse_h1);
-        if(d.schriftgroesse_h2) r.setProperty('--fs-h2', d.schriftgroesse_h2);
-        if(d.schriftgroesse_h3) r.setProperty('--fs-h3', d.schriftgroesse_h3);
-        if(d.schriftgroesse_text) r.setProperty('--fs-text', d.schriftgroesse_text);
-      }).catch(()=>{});
-    </script>
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{--
+        Phase-3-Nacharbeit ("100% Laravel"): ersetzt den bisherigen
+        clientseitigen design.json-Fetch. $kjsDesign kommt serverseitig aus
+        App\View\Composers\DesignComposer (settings-Tabelle, Gruppe
+        "design") - dieselbe "nur setzen, wenn Wert vorhanden"-Logik wie
+        zuvor im JS, nur direkt als CSS-Custom-Property-Override auf
+        :root ausgegeben (nach dem app.css-Link, damit die Werte die
+        dortigen Standardwerte ueberschreiben). Werte kommen aus der
+        Admin-Oberflaeche gepflegten Einstellungen (kein Benutzereingabe-
+        Formular auf der oeffentlichen Seite) - {!! !!} bewusst statt
+        {{ }}, da HTML-Entities ("&quot;" statt '"') in einem <style>-Block
+        als Rohtext interpretiert wuerden und die Werte damit ungueltig
+        machen wuerden; zusaetzlich werden spitze Klammern defensiv
+        entfernt, um ein Herausbrechen aus dem <style>-Element
+        auszuschliessen.
+    --}}
+    @php
+        $kjsCss = static fn (?string $v) => $v ? str_replace(['<', '>'], '', $v) : null;
+        $kjsRootVars = array_filter([
+            'green-main' => $kjsCss($kjsDesign['farbe_gruen'] ?? null),
+            'green-dark' => $kjsCss($kjsDesign['farbe_dunkelgruen'] ?? null),
+            'gold' => $kjsCss($kjsDesign['farbe_akzent'] ?? null),
+            'font-heading' => ($h = $kjsCss($kjsDesign['schrift_ueberschrift'] ?? null)) ? '"'.$h.'", serif' : null,
+            'font-sans' => ($s = $kjsCss($kjsDesign['schrift_text'] ?? null)) ? '"'.$s.'", sans-serif' : null,
+            'fs-h1' => $kjsCss($kjsDesign['schriftgroesse_h1'] ?? null),
+            'fs-h2' => $kjsCss($kjsDesign['schriftgroesse_h2'] ?? null),
+            'fs-h3' => $kjsCss($kjsDesign['schriftgroesse_h3'] ?? null),
+            'fs-text' => $kjsCss($kjsDesign['schriftgroesse_text'] ?? null),
+        ]);
+    @endphp
+    @if ($kjsRootVars)
+        <style>
+            :root {
+                @foreach ($kjsRootVars as $kjsProp => $kjsValue)
+                    --{{ $kjsProp }}: {!! $kjsValue !!};
+                @endforeach
+            }
+        </style>
+    @endif
 </head>
 <body>
 

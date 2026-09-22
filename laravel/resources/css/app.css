@@ -959,3 +959,56 @@ body.kjs-lightbox-lock { overflow: hidden; }
   .site-logo img    { height: 42px !important; }
   .footer-about img { height: 70px !important; }
 }
+
+/* ── Phase 3 (Dynamische Seitenfamilien & Hundeausbildung) ──────────────
+   Aus css/style.css uebernommene Regeln, die von den neuen generischen
+   Inhaltsseiten (resources/views/pages/show.blade.php,
+   hundeausbildung/*.blade.php) benoetigt werden, aber in Phase 1/2 noch
+   nicht in die Vite-Pipeline uebernommen wurden (dort ohne Verwendung).
+   Bewusst 1:1 aus dem Original uebernommen, kein Redesign. ──────────── */
+
+/* Button-Gruppen (z.B. "Termine ansehen" + "Kontakt aufnehmen"): gap statt
+   margin-left auf dem zweiten Button - dadurch bleiben beide Buttons auf
+   kleinen Screens sauber links ausgerichtet, egal ob sie nebeneinander
+   passen oder umbrechen. */
+.btn-group { display: flex; flex-wrap: wrap; gap: .75rem; }
+@media (max-width: 480px) {
+  .btn-group { flex-direction: column; }
+  .btn-group .btn { width: 100%; justify-content: center; }
+}
+
+/* "Weiterführende Links"-Box der festen jaeger/aufgaben/verbraucher-Seiten
+   (linkliste/linkliste_titel) optisch hervorgehoben gegenueber den
+   neutralen, hellgrauen Sidebar-Boxen. */
+.sidebar-widget--highlight {
+  background: var(--green-dark);
+  border: 1px solid var(--green-dark);
+}
+.sidebar-widget--highlight h4 {
+  color: #fff;
+  border-bottom-color: var(--gold);
+}
+.sidebar-widget--highlight .sidebar-nav li a {
+  color: #fff;
+}
+.sidebar-widget--highlight .sidebar-nav li a::before {
+  color: var(--gold-light);
+}
+.sidebar-widget--highlight .sidebar-nav li a:hover,
+.sidebar-widget--highlight .sidebar-nav li.active a {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
+
+/* "Steckbrief"-Kerndaten-Box (bislang nur von partner/show.blade.php in
+   Phase 2 genutzt, aber noch nicht portiert - siehe Abschlussbericht). */
+.steckbrief { background: var(--bg-light); border-radius: var(--radius-md); padding: 1.5rem; margin: 1rem 0 2rem; }
+.steckbrief dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem 2rem; margin: 0; }
+.steckbrief dt {
+  font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-muted); margin-bottom: .15rem;
+}
+.steckbrief dd { margin: 0; font-size: .95rem; color: var(--text-dark); font-weight: 600; }
+@media (max-width: 600px) {
+  .steckbrief dl { grid-template-columns: 1fr; }
+}

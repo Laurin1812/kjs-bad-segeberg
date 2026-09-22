@@ -44,4 +44,25 @@ class Images
     {
         return self::variantUrl($url, 'card');
     }
+
+    /**
+     * Phase 3 (Dynamische Seitenfamilien & Hundeausbildung): server-
+     * seitiger Port der Bildgroessen-Klassen-Weiche aus jaeger/hochwild.html
+     * & Co. ("(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse
+     * :(d.bild_groesse==='klein'?'img-25':d.bild_groesse==='mittel'?'img-50'
+     * :'img-100')"). Von FesteSeiteController/RegistrySeiteController/
+     * HundeausbildungController gemeinsam genutzt.
+     */
+    public static function groesseClass(?string $bildGroesse): string
+    {
+        if ($bildGroesse && str_starts_with($bildGroesse, 'img-')) {
+            return $bildGroesse;
+        }
+
+        return match ($bildGroesse) {
+            'klein' => 'img-25',
+            'mittel' => 'img-50',
+            default => 'img-100',
+        };
+    }
 }
