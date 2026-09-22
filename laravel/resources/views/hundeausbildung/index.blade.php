@@ -10,7 +10,11 @@
     $gruppen = $kurse->groupBy(fn ($k) => $k->gruppe ?: '');
 @endphp
 <x-layouts.app title="Jagdhundeschule" description="Ausbildungskurse, Prüfungen und Themen rund um den Jagdhund der Kreisjägerschaft Segeberg.">
-    <x-page-hero title="Jagdhundeschule" :bg-image="$hub->hero_bild ?: '/images/hundeausbildung.jpg'" />
+    <x-page-hero title="Jagdhundeschule" :bg-image="$hub->hero_bild ?: '/images/hundeausbildung.jpg'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Aufgaben'],
+        ['label' => 'Jagdhundeschule'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -75,14 +79,4 @@
             </aside>
         </div>
     </div>
-
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: 'Aufgaben' },
-                { label: 'Jagdhundeschule' }
-            ]);
-        }
-    </script>
 </x-layouts.app>

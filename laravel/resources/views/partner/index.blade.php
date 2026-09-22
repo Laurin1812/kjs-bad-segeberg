@@ -5,7 +5,11 @@
     statt "detail.html?id=".
 --}}
 <x-layouts.app title="Partner">
-    <x-page-hero title="Partner" />
+    <x-page-hero title="Partner" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Jäger', 'href' => '/jaeger/uebersicht'],
+        ['label' => 'Partner'],
+    ]" />
 
     <div class="page-content full pn-overview-layout">
         <div class="container">

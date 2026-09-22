@@ -43,16 +43,12 @@ class GlobaleKontaktUndDesignTest extends TestCase
         // der Test zuverlaessig, dass die Box tatsaechlich aus der DB liest
         // und nicht zufaellig denselben String hart codiert enthaelt.
         //
-        // Hinweis: die site-weite Topbar (components/site-header.blade.php,
-        // Phase 1, NICHT Teil dieser Korrektur) zeigt weiterhin denselben
-        // statischen Platzhalter als Lade-Zustand fuer ihre eigene, per JS
-        // zur Laufzeit befuellte Anzeige (siehe dortiger Kommentar) - das
-        // ist hier bewusst kein Pruefgegenstand. Die Topbar allein liefert
-        // fuer die E-Mail ZWEI Vorkommen (href="mailto:..." UND sichtbarer
-        // Linktext) und fuer die Telefonnummer EIN Vorkommen (die Topbar
-        // verlinkt "tel:+494551123456", zeigt als Text aber "04551 / 12 34
-        // 56") - je ein weiteres Vorkommen waere die alte hart codierte
-        // Kontaktbox.
+        // Hinweis: seit Phase 4 (App\View\Composers\TopbarComposer,
+        // resources/views/components/site-header.blade.php) laedt auch die
+        // site-weite Topbar ihre E-Mail/Telefon-Werte direkt aus der
+        // settings-Tabelle statt aus einem hart codierten Platzhalter - der
+        // alte statische Platzhalter existiert im gesamten Markup also gar
+        // nicht mehr, weder in der Kontaktbox noch in der Topbar.
         $this->seedEinstellungen('kontakt@testverein.example', '05551 999999');
         Page::create(['section' => 'jaeger', 'slug' => 'hochwild', 'titel' => 'Hochwild']);
 
@@ -62,8 +58,8 @@ class GlobaleKontaktUndDesignTest extends TestCase
         $response->assertOk();
         $response->assertSee('kontakt@testverein.example');
         $response->assertSee('05551 999999');
-        $this->assertSame(2, substr_count($html, 'info@kjs-bad-segeberg.de'), 'info@kjs-bad-segeberg.de darf nur noch in der Topbar (Phase 1) vorkommen, nicht mehr in der Kontaktbox.');
-        $this->assertSame(1, substr_count($html, '04551 / 12 34 56'), '04551 / 12 34 56 darf nur noch in der Topbar (Phase 1) vorkommen, nicht mehr in der Kontaktbox.');
+        $this->assertSame(0, substr_count($html, 'info@kjs-bad-segeberg.de'), 'info@kjs-bad-segeberg.de darf seit Phase 4 nirgends mehr hart codiert vorkommen.');
+        $this->assertSame(0, substr_count($html, '04551 / 12 34 56'), '04551 / 12 34 56 darf seit Phase 4 nirgends mehr hart codiert vorkommen.');
     }
 
     public function test_fehlende_globale_kontaktdaten_zeigen_keinen_platzhalter(): void

@@ -6,6 +6,7 @@ use App\Http\Controllers\DownloadsController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FesteSeiteController;
 use App\Http\Controllers\HegeringeController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HundeausbildungController;
 use App\Http\Controllers\ImpressumController;
 use App\Http\Controllers\KreisjaegermeisterController;
@@ -16,17 +17,17 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TermineController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Phase 4 (Startseite + komplette Laravel-Navigation, Laravel-
+// Vollmigration): ersetzt die bisherige Laravel-Welcome-Seite durch die
+// echte KJS-Startseite - "Route -> Controller -> Eloquent/MySQL -> Blade",
+// siehe HomeController-Klassenkommentar. Kein Content-JSON mehr fuer "/".
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Phase 2 (Oeffentliche Inhaltsseiten / einfache Seitenfamilien,
 // Laravel-Vollmigration): echte Laravel-Web-Routen -> Controller ->
-// Eloquent/MySQL -> Blade fuer alle in Phase 2 beauftragten Seiten. "/"
-// bleibt bewusst unveraendert (welche, siehe Route oben) - die eigentliche
-// Startseite ist erst Phase 4. Keine dieser Routen liest zur Laufzeit
-// content/*.json, Legacy-PHP, Netlify oder das Git-Gateway (siehe
-// Abschlussbericht Punkt 6).
+// Eloquent/MySQL -> Blade fuer alle in Phase 2 beauftragten Seiten. Keine
+// dieser Routen liest zur Laufzeit content/*.json, Legacy-PHP, Netlify oder
+// das Git-Gateway (siehe Abschlussbericht Punkt 6).
 Route::get('/impressum', [ImpressumController::class, 'show'])->name('impressum');
 Route::get('/datenschutz', [DatenschutzController::class, 'show'])->name('datenschutz');
 Route::get('/service', [ServiceController::class, 'show'])->name('service');

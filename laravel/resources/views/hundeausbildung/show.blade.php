@@ -16,7 +16,12 @@
     $inhaltHtml = \App\Support\Text::renderInhalt($kurs->inhalt);
 @endphp
 <x-layouts.app :title="$kurs->titel ?: 'Jagdhundeschule'" :description="strip_tags($kurs->intro ?? '') ?: null">
-    <x-page-hero :title="$kurs->titel ?: 'Jagdhundeschule'" :bg-image="$kurs->hero_bild ?: '/images/hundeausbildung.jpg'" />
+    <x-page-hero :title="$kurs->titel ?: 'Jagdhundeschule'" :bg-image="$kurs->hero_bild ?: '/images/hundeausbildung.jpg'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Aufgaben'],
+        ['label' => 'Jagdhundeschule', 'href' => route('hundeausbildung.index')],
+        ['label' => $kurs->titel],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -113,15 +118,4 @@
             </aside>
         </div>
     </div>
-
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: 'Aufgaben' },
-                { label: 'Jagdhundeschule', href: '{{ route('hundeausbildung.index') }}' },
-                { label: @json($kurs->titel) }
-            ]);
-        }
-    </script>
 </x-layouts.app>

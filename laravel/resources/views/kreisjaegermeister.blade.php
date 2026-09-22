@@ -6,7 +6,11 @@
     siehe dortiger Klassenkommentar.
 --}}
 <x-layouts.app title="Kreisjägermeister">
-    <x-page-hero title="Kreisjägermeister" />
+    <x-page-hero title="Kreisjägermeister" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Jäger', 'href' => '/jaeger/uebersicht'],
+        ['label' => 'Kreisjägermeister'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -57,7 +61,7 @@
                     <h4>Jäger</h4>
                     <ul class="sidebar-nav" data-related-nav></ul>
                 </div>
-                <div class="contact-box"></div>
+                <x-kontaktbox />
             </aside>
         </div>
     </div>

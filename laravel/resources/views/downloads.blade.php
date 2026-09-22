@@ -6,7 +6,10 @@
     uebernommen (siehe DownloadsController-Klassenkommentar).
 --}}
 <x-layouts.app title="Downloads & Dokumente">
-    <x-page-hero title="Downloads & Dokumente" />
+    <x-page-hero title="Downloads & Dokumente" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Downloads'],
+    ]" />
 
     <div class="page-content full">
         <div class="container">
@@ -40,8 +43,12 @@
                     <h4 style="color: var(--green-dark); margin-bottom: .5rem;">Dokument nicht gefunden?</h4>
                     <p style="margin:0; font-size: .9rem;">
                         Falls Sie ein bestimmtes Dokument suchen und es hier nicht finden können,
-                        wenden Sie sich bitte an unsere Geschäftsstelle:
-                        <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a>.
+                        wenden Sie sich bitte an unsere Geschäftsstelle
+                        @if($kjsAllgemeineEmail)
+                            : <a href="mailto:{{ $kjsAllgemeineEmail }}">{{ $kjsAllgemeineEmail }}</a>.
+                        @else
+                            .
+                        @endif
                     </p>
                 </div>
             </main>

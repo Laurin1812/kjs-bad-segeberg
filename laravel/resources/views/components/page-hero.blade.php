@@ -19,6 +19,7 @@
 @props([
     'title' => null,
     'bgImage' => '/images/stock/hero-default.jpg',
+    'breadcrumbs' => [],
 ])
 <div class="page-hero">
     <div class="page-hero__bg" style="background-image: url('{{ $bgImage }}')"></div>
@@ -26,6 +27,6 @@
         @if ($title)
             <h1 id="page-title">{{ $title }}</h1>
         @endif
-        <x-breadcrumbs />
+        <x-breadcrumbs :items="$breadcrumbs" />
     </div>
 </div>

@@ -98,6 +98,12 @@ class RegistrySeiteController extends Controller
             'page' => $page,
             'section' => $section,
             'mode' => 'registry',
+            // Phase 4 (Auftrag Punkt 3, "Bei Unterseiten Elternseite
+            // einbeziehen"): die Breadcrumb-Anzeige in pages/show.blade.php
+            // baut daraus eine vierte Ebene (Startseite -> Section ->
+            // Elternseite -> diese Unterseite), z.B. "Startseite -> Jäger ->
+            // Hochwild -> <Unterseite>".
+            'parent' => $parent,
         ]);
     }
 }

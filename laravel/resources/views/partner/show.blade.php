@@ -6,7 +6,12 @@
     liefert bei fehlendem/inaktivem Partner bereits eine echte Laravel-404.
 --}}
 <x-layouts.app :title="$partner->name ?: 'Partner'">
-    <x-page-hero :title="$partner->name ?: '(Ohne Namen)'" />
+    <x-page-hero :title="$partner->name ?: '(Ohne Namen)'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Jäger', 'href' => '/jaeger/uebersicht'],
+        ['label' => 'Partner', 'href' => route('partner.index')],
+        ['label' => $partner->name ?: 'Partner'],
+    ]" />
 
     <div class="page-content">
         <div class="container pn-detail-layout">
@@ -88,14 +93,4 @@
         </div>
     </div>
 
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: 'Jäger', href: '/jaeger' },
-                { label: 'Partner', href: '{{ route('partner.index') }}' },
-                { label: @json($partner->name ?: 'Partner') }
-            ]);
-        }
-    </script>
 </x-layouts.app>

@@ -4,7 +4,12 @@
     PersonenGremiumController-Klassenkommentar.
 --}}
 <x-layouts.app title="Obleute">
-    <x-page-hero title="Obleute" />
+    <x-page-hero title="Obleute" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Jäger', 'href' => '/jaeger/uebersicht'],
+        ['label' => 'KJS Segeberg'],
+        ['label' => 'Obleute'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -46,11 +51,7 @@
                     <h4>KJS Segeberg</h4>
                     <ul class="sidebar-nav" data-related-nav></ul>
                 </div>
-                <div class="contact-box">
-                    <h4>Geschäftsstelle</h4>
-                    <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
-                    <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
-                </div>
+                <x-kontaktbox />
             </aside>
         </div>
     </div>

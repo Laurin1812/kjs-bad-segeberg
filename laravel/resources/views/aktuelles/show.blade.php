@@ -9,7 +9,11 @@
     echten Laravel-404-Seite - kein PHP-/JSON-Fallback.
 --}}
 <x-layouts.app :title="$beitrag->titel">
-    <x-page-hero :title="$beitrag->titel" :bg-image="$beitrag->bild ? \App\Support\Images::cardUrl($beitrag->bild) : '/images/stock/hero-waldweg.jpg'" />
+    <x-page-hero :title="$beitrag->titel" :bg-image="$beitrag->bild ? \App\Support\Images::cardUrl($beitrag->bild) : '/images/stock/hero-waldweg.jpg'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Aktuelles', 'href' => route('aktuelles.index')],
+        ['label' => $beitrag->titel],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -88,22 +92,8 @@
                     </div>
                 @endif
 
-                <div class="contact-box"></div>
+                <x-kontaktbox />
             </aside>
         </div>
     </div>
-
-    {{-- Beitragstitel steht bereits serverseitig fest - kein "Wird geladen …"-
-         Platzhalter mehr noetig, der Trail wird direkt vollstaendig gesetzt
-         (nutzt den fuer genau diesen Zweck vorgesehenen globalen Hook aus
-         resources/js/app.js, siehe dortiger Kommentar bei setBreadcrumbTrail). --}}
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: 'Aktuelles', href: '{{ route('aktuelles.index') }}' },
-                { label: @json($beitrag->titel) }
-            ]);
-        }
-    </script>
 </x-layouts.app>

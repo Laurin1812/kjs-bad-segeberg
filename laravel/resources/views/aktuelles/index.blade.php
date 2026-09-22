@@ -7,7 +7,10 @@
     unveraendert aus css/style.css uebernommen.
 --}}
 <x-layouts.app title="Aktuelles">
-    <x-page-hero title="Aktuelles" bg-image="/images/stock/hero-waldweg.jpg" />
+    <x-page-hero title="Aktuelles" bg-image="/images/stock/hero-waldweg.jpg" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Aktuelles'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -88,11 +91,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="contact-box">
-                    <h4>Kontakt</h4>
-                    <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
-                    <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
-                </div>
+                <x-kontaktbox title="Kontakt" />
             </aside>
         </div>
     </div>

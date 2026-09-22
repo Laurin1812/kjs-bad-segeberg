@@ -6,7 +6,10 @@
     client-seitigen fetch()-Aufrufen.
 --}}
 <x-layouts.app title="Impressum">
-    <x-page-hero title="Impressum" />
+    <x-page-hero title="Impressum" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Impressum'],
+    ]" />
 
     <div class="page-content full">
         <div class="container">

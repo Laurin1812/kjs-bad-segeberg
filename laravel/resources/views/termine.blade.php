@@ -7,7 +7,10 @@
     datenschutzfreundliche Zwei-Klick-Einbindung.
 --}}
 <x-layouts.app title="Termine">
-    <x-page-hero title="Termine" bg-image="/images/termine.jpg" />
+    <x-page-hero title="Termine" bg-image="/images/termine.jpg" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Termine'],
+    ]" />
 
     <div class="page-content full">
         <div class="container">

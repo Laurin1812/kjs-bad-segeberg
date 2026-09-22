@@ -15,7 +15,11 @@
     $inhaltHtml = \App\Support\Text::renderInhalt($hub->inhalt);
 @endphp
 <x-layouts.app :title="$hub->titel ?: 'Hundeausbildung'" :description="strip_tags($hub->intro ?? '') ?: null">
-    <x-page-hero :title="$hub->titel ?: 'Hundeausbildung'" :bg-image="$hub->hero_bild ?: '/images/hundeausbildung.jpg'" />
+    <x-page-hero :title="$hub->titel ?: 'Hundeausbildung'" :bg-image="$hub->hero_bild ?: '/images/hundeausbildung.jpg'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Aufgaben'],
+        ['label' => $hub->titel ?: 'Hundeausbildung'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -69,14 +73,4 @@
             </aside>
         </div>
     </div>
-
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: 'Aufgaben' },
-                { label: @json($hub->titel ?: 'Hundeausbildung') }
-            ]);
-        }
-    </script>
 </x-layouts.app>

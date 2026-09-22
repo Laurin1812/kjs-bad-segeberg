@@ -8,7 +8,10 @@
     (window.kjsActivateEmbed, siehe resources/js/app.js).
 --}}
 <x-layouts.app :title="$titel">
-    <x-page-hero :title="$titel" :bg-image="$heroBild ?: '/images/stock/hero-default.jpg'" />
+    <x-page-hero :title="$titel" :bg-image="$heroBild ?: '/images/stock/hero-default.jpg'" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Service'],
+    ]" />
 
     <div class="page-content full">
         <div class="container">

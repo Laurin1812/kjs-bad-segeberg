@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use App\Support\KjsPagesConfig;
+use App\Support\Navigation;
 use Illuminate\View\View;
 
 /**
@@ -23,19 +24,15 @@ use Illuminate\View\View;
  * "generische Architektur").
  *
  * SONDERFALL "uebersicht" (Section jaeger): im Original (jaeger/index.html)
- * hat diese eine Seite zusaetzlich zum normalen Seiteninhalt ein hart
- * kodiertes Kachel-Raster zu den Geschwisterseiten (Vorstand/Hegeringe/
- * Obleute/…) - dieses Raster ist NICHT Teil der Page-Zeile (keine
- * DB-Spalte dafuer) und gehoert inhaltlich zur spaeter geplanten
- * MySQL-Navigation-Phase (Auftrag: "volle Navigation aus MySQL" ist
- * explizit NICHT Teil dieser Phase) - es wird hier deshalb bewusst NICHT
- * nachgebaut. Der eigentliche Seiteninhalt (Titel/Intro/Inhalt/Kontakt aus
- * der DB) wird aber ganz normal ueber das generische Template gerendert,
- * DAMIT die von jeder anderen jaeger-Seite gesetzten "Zurück zur
- * Übersicht"-Links (siehe pages/show.blade.php) nicht ins Leere laufen -
- * ein durch die eigene Migration neu entstandener toter Link waere
- * schlimmer als ein bewusst vereinfachtes Zwischenergebnis fuer diese eine
- * Seite (siehe Abschlussbericht Punkt 1/6).
+ * hat diese eine Seite zusaetzlich zum normalen Seiteninhalt ein Kachel-
+ * Raster zu den Geschwisterseiten (Vorstand/Hegeringe/Obleute/…). In Phase 3
+ * war "volle Navigation aus MySQL" noch explizit nicht beauftragt, daher
+ * wurde das Raster damals bewusst nicht nachgebaut (siehe Abschlussbericht
+ * Punkt 1/6) - Phase 4 (Auftrag Punkt 7, "Jäger-Übersicht") beauftragt genau
+ * das jetzt nach: App\Support\Navigation::jaegerUebersichtKacheln() liefert
+ * dieselbe Geschwisterseiten-Liste wie das Hauptmenue (Settings-Gruppe
+ * "navigation" + dynamische Registry-Seiten), keine hart codierte Liste
+ * mehr im Code dieses Controllers.
  *
  * ROUTING: "{section}/{slug}" (routes/web.php) zeigt bewusst EINHEITLICH
  * hierher (nicht auf zwei getrennte Routen mit unterschiedlichem Muster,
@@ -68,6 +65,9 @@ class FesteSeiteController extends Controller
             'page' => $page,
             'section' => $section,
             'mode' => 'feste',
+            'geschwister' => $section === 'jaeger' && $slug === 'uebersicht'
+                ? Navigation::jaegerUebersichtKacheln($slug)
+                : null,
         ]);
     }
 }

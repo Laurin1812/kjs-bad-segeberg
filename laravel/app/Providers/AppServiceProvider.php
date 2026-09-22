@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\View\Composers\AllgemeineKontaktEmailComposer;
 use App\View\Composers\DesignComposer;
+use App\View\Composers\FooterComposer;
+use App\View\Composers\NavigationComposer;
+use App\View\Composers\TopbarComposer;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
@@ -41,5 +45,21 @@ class AppServiceProvider extends ServiceProvider
         // den bisherigen "fetch('/api/content/design.json')"-Aufruf im
         // Haupt-Layout - siehe DesignComposer-Klassenkommentar.
         View::composer('components.layouts.app', DesignComposer::class);
+
+        // Phase 4 (Startseite + komplette Laravel-Navigation): ersetzt die
+        // bisherigen "ZENTRALE NAVIGATION"-/"Topbar & Geschäftsstelle
+        // dynamisch laden"-/"ZENTRALER FOOTER"-Module in resources/js/
+        // app.js - siehe jeweiliger Composer-Klassenkommentar. Zwei
+        // Composer fuer dieselbe View (components.site-header) sind in
+        // Laravel unproblematisch, beide haengen lediglich weitere Daten
+        // an dieselbe View an.
+        View::composer('components.site-header', NavigationComposer::class);
+        View::composer('components.site-header', TopbarComposer::class);
+        View::composer('components.site-footer', FooterComposer::class);
+
+        // Phase 4 Korrektur: letzte hart codierte allgemeine KJS-Mailadresse
+        // in Fliesstexten - siehe AllgemeineKontaktEmailComposer-Klassen-
+        // kommentar.
+        View::composer(['faq', 'downloads', 'jaeger.vorstand'], AllgemeineKontaktEmailComposer::class);
     }
 }

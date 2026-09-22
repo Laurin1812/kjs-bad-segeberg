@@ -4,7 +4,12 @@
     generische data-related-nav-Modul aus resources/js/app.js.
 --}}
 <x-layouts.app title="Vorstand">
-    <x-page-hero title="Vorstand" />
+    <x-page-hero title="Vorstand" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Jäger', 'href' => '/jaeger/uebersicht'],
+        ['label' => 'KJS Segeberg'],
+        ['label' => 'Vorstand'],
+    ]" />
 
     <div class="page-content">
         <div class="container">
@@ -48,8 +53,11 @@
                     <h4 style="color: var(--green-dark); margin-bottom: .5rem;">📌 Hinweis</h4>
                     <p style="margin:0; font-size: .9rem;">
                         Die Vorstandsdaten werden regelmäßig aktualisiert. Alle Vorstandsmitglieder sind
-                        ehrenamtlich tätig. Bitte richten Sie allgemeine Anfragen an
-                        <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a>.
+                        ehrenamtlich tätig.
+                        @if($kjsAllgemeineEmail)
+                            Bitte richten Sie allgemeine Anfragen an
+                            <a href="mailto:{{ $kjsAllgemeineEmail }}">{{ $kjsAllgemeineEmail }}</a>.
+                        @endif
                     </p>
                 </div>
             </main>
@@ -59,11 +67,7 @@
                     <h4>KJS Segeberg</h4>
                     <ul class="sidebar-nav" data-related-nav></ul>
                 </div>
-                <div class="contact-box">
-                    <h4>Geschäftsstelle</h4>
-                    <p>📧 <a href="mailto:info@kjs-bad-segeberg.de">info@kjs-bad-segeberg.de</a></p>
-                    <p>📞 <a href="tel:+494551123456">04551 / 12 34 56</a></p>
-                </div>
+                <x-kontaktbox />
                 <div class="sidebar-widget">
                     <h4>Nächste Termine</h4>
                     <ul class="sidebar-nav">

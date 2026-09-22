@@ -33,9 +33,21 @@
     $inhaltHtml = \App\Support\Text::renderInhalt($page->inhalt);
     $subSeiten = $page->relationLoaded('children') ? $page->children : collect();
     $sektionLabel = ['jaeger' => 'Jäger', 'aufgaben' => 'Aufgaben', 'verbraucher' => 'Verbraucher', 'weitere' => 'Weitere Themen'][$section] ?? ucfirst($section);
+    // Phase 4 (Auftrag Punkt 3, "Bei Unterseiten Elternseite einbeziehen"):
+    // RegistrySeiteController::sub() uebergibt zusaetzlich die Elternseite -
+    // damit wird der Trail vier statt drei Ebenen tief (Startseite ->
+    // Section -> Elternseite -> diese Unterseite).
+    $kjsBreadcrumbs = [
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => $sektionLabel],
+    ];
+    if (isset($parent)) {
+        $kjsBreadcrumbs[] = ['label' => $parent->nav_label ?: $parent->titel, 'href' => url($section.'/'.$parent->slug)];
+    }
+    $kjsBreadcrumbs[] = ['label' => $page->nav_label ?: $page->titel];
 @endphp
 <x-layouts.app :title="$page->titel" :description="strip_tags($page->intro ?? '') ?: null">
-    <x-page-hero :title="$page->titel" :bg-image="$page->hero_bild ?: '/images/stock/hero-default.jpg'" />
+    <x-page-hero :title="$page->titel" :bg-image="$page->hero_bild ?: '/images/stock/hero-default.jpg'" :breadcrumbs="$kjsBreadcrumbs" />
 
     <div class="page-content">
         <div class="container">
@@ -66,6 +78,39 @@
                         @endif
                     </p>
                 @endif
+
+                {{--
+                    Phase 4 (Auftrag Punkt 7, "Jäger-Übersicht"): das Kachel-
+                    Raster von jaeger/index.html, jetzt aus MySQL/Nav-Daten
+                    erzeugt statt hart codiert (siehe FesteSeiteController /
+                    App\Support\Navigation::jaegerUebersichtKacheln()). Nur
+                    auf der einen Seite vorhanden, die diese Daten bekommt
+                    (aktuell ausschliesslich jaeger/uebersicht).
+                --}}
+                @isset($geschwister)
+                    @if (! empty($geschwister))
+                        <div class="news__grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;margin:2.5rem 0;">
+                            @foreach ($geschwister as $kachel)
+                                <a href="{{ $kachel['href'] }}" class="service-card" style="text-decoration:none;color:inherit;">
+                                    <div class="service-card__img-wrap">
+                                        @if ($kachel['bild'])
+                                            <img class="service-card__img" src="{{ $kachel['bild'] }}" alt="{{ $kachel['label'] }}" loading="lazy" onerror="kjsImgFallback(this)">
+                                        @else
+                                            <div style="background:var(--green-light);display:flex;align-items:center;justify-content:center;min-height:140px;"><img src="{{ asset('images/logo.png') }}" alt="KJS" style="height:56px;opacity:.35;"></div>
+                                        @endif
+                                    </div>
+                                    <div class="service-card__body">
+                                        <div class="service-card__title">{{ $kachel['label'] }}</div>
+                                        @if ($kachel['beschreibung'])
+                                            <p class="service-card__text">{{ $kachel['beschreibung'] }}</p>
+                                        @endif
+                                        <span class="read-more">Mehr erfahren</span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                @endisset
 
                 @if ($mode === 'registry' && $page->galerieBilder->isNotEmpty())
                     <div class="galerie-section">
@@ -161,14 +206,4 @@
             </aside>
         </div>
     </div>
-
-    <script>
-        if (window.setBreadcrumbTrail) {
-            window.setBreadcrumbTrail([
-                { label: 'Startseite', href: '/' },
-                { label: @json($sektionLabel) },
-                { label: @json($page->nav_label ?: $page->titel) }
-            ]);
-        }
-    </script>
 </x-layouts.app>

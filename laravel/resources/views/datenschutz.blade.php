@@ -5,7 +5,10 @@
     Gruppe "einstellungen" (jetzt serverseitig statt per fetch()).
 --}}
 <x-layouts.app title="Datenschutz">
-    <x-page-hero title="Datenschutzerklärung" />
+    <x-page-hero title="Datenschutzerklärung" :breadcrumbs="[
+        ['label' => 'Startseite', 'href' => '/'],
+        ['label' => 'Datenschutz'],
+    ]" />
 
     <div class="page-content full">
         <div class="container">
