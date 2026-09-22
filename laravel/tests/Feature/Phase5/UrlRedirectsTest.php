@@ -175,9 +175,12 @@ class UrlRedirectsTest extends TestCase
             // bewusst KEIN Redirect, bleibt eine echte 404.
             'Formulare-Sondermodul' => ['/formulare/index.php?form_id=9452'],
             'Voellig unbekannter Pfad' => ['/dieser-pfad-hat-nie-existiert.html'],
-            // Sondermodule (Hundeboerse/Waffenboerse) werden in dieser Phase
-            // bewusst nicht auf irgendeine Laravel-Seite umgebogen.
-            'Hundeboerse-Detail (noch nicht migriert)' => ['/hundeboerse/detail.html?id=abc'],
+            // Waffenboerse ist weiterhin nicht migriert (siehe Phase-6A-
+            // Abschlussbericht) - bewusst nicht auf irgendeine Laravel-Seite
+            // umgebogen. Hundeboerse selbst ist seit Phase 6A migriert (siehe
+            // tests/Feature/Phase6A/HundeboerseTest.php fuer deren Redirects) -
+            // hier daher NICHT mehr als "unbekannte URL" gelistet.
+            'Waffenboerse-Detail (noch nicht migriert)' => ['/waffenboerse/detail.html?id=abc'],
         ];
     }
 }

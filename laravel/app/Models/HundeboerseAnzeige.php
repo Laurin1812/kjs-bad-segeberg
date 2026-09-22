@@ -19,19 +19,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'lat', 'lng',
 ])]
 // ══════════════════════════════════════════════════════════════════════
-// PHASE 8B - WICHTIG: DORMANT / BEWUSST UNGENUTZT
-// Dieses Model existiert seit Phase 1 (Migrationen+Models fuers neue
-// CMS-Schema), wird aber von KEINEM Controller/KEINER Route in
-// routes/api.php verwendet (siehe Phase-7-Analyse: grep nach
-// "Hundeboerse\\|Waffenboerse" in app/Http/Controllers/ findet nichts).
-// Die produktive Wahrheit fuer Hundeboerse/Waffenboerse/Kontakt bleiben
-// AUSSCHLIESSLICH die bestehenden PHP-Sondermodule (api/hundeboerse/*.php,
-// api/waffenboerse/*.php, api/kontakt/*.php) mit ihrer EIGENEN, separaten
-// MySQL-Datenbank (siehe database/schema.sql, config/db.example.php) -
-// NICHT diese Laravel-DB/dieses Model. Siehe
-// docs/deployment/dormante-boersen-tabellen.md fuer die vollstaendige
-// Begruendung, bevor hier jemals eine Verbindung zum echten Schreibweg
-// hergestellt wird.
+// PHASE 6A - AKTIVIERT (Sondermodule inventarisieren + Hundeboerse auf
+// Laravel/MySQL): dieses Model war seit Phase 1 angelegt, aber bis Phase 6A
+// dormant (siehe Git-Historie / docs/deployment/dormante-boersen-tabellen.md
+// fuer die vollstaendige Vorgeschichte). Ab Phase 6A ist dies die EINZIGE
+// Datenquelle der oeffentlichen Hundeboerse (HundeboerseController) - keine
+// Laufzeit-Abhaengigkeit mehr von content/hundeboerse.json oder der
+// separaten PHP+MySQL-Produktivdatenbank (api/hundeboerse/*.php). Die
+// PHP-Sondermodule (api/hundeboerse/*.php) selbst bleiben unveraendert
+// bestehen (nicht Teil dieses Auftrags), verlieren aber ihre Rolle als
+// Datenquelle fuer diese Laravel-Seite. Waffenboerse/Kontakt-Anfragen
+// bleiben WEITERHIN dormant (siehe deren Model-Klassenkommentare) - Phase 6A
+// betrifft ausdruecklich nur die Hundeboerse.
 // ══════════════════════════════════════════════════════════════════════
 class HundeboerseAnzeige extends Model
 {
@@ -54,5 +53,107 @@ class HundeboerseAnzeige extends Model
     public function bilder(): HasMany
     {
         return $this->hasMany(HundeboerseBild::class, 'anzeige_id');
+    }
+
+    /**
+     * Server-seitiger Port von preisText() aus hundeboerse/index.html +
+     * detail.html - Felder ("price_type"/"price") 1:1 identisch.
+     */
+    public function preisText(): string
+    {
+        return match ($this->price_type) {
+            'fixed' => $this->price !== '' && $this->price !== null ? $this->price.' €' : 'Festpreis',
+            'negotiable' => $this->price !== '' && $this->price !== null ? $this->price.' € VB' : 'VB',
+            'on_request' => 'Preis auf Anfrage',
+            default => 'Keine Preisangabe',
+        };
+    }
+
+    public function typLabel(): string
+    {
+        return $this->type === 'litter' ? 'WURF' : 'EINZELHUND';
+    }
+
+    /**
+     * Server-seitiger Port von typZeile() (Kachel/Detailseiten-Unterzeile:
+     * "Wurf vom ... · X Rüden, Y Hündinnen" bzw. "Rüde · 8 Monate").
+     */
+    public function typZeile(): string
+    {
+        if ($this->type === 'litter') {
+            $teile = [];
+            if ($this->litter_date) {
+                $teile[] = 'Wurf vom '.$this->formatiertesDatum($this->litter_date);
+            }
+            $anzahl = [];
+            if ($this->male_count) {
+                $anzahl[] = $this->male_count.' Rüden';
+            }
+            if ($this->female_count) {
+                $anzahl[] = $this->female_count.' Hündinnen';
+            }
+            if ($anzahl) {
+                $teile[] = implode(', ', $anzahl);
+            }
+
+            return implode(' · ', $teile);
+        }
+
+        $teile = [];
+        if ($this->gender) {
+            $teile[] = $this->gender === 'male' ? 'Rüde' : 'Hündin';
+        }
+        $alter = $this->altersText();
+        if ($alter) {
+            $teile[] = $alter;
+        }
+
+        return implode(' · ', $teile);
+    }
+
+    /**
+     * Server-seitiger Port von formatDatum() - wandelt ein gespeichertes
+     * "DD.MM.YYYY" (siehe HundeboerseController::normalizeDatum()) in die
+     * deutsche Langform ("12. März 2026") um. Unbekanntes/leeres Format
+     * wird unveraendert zurueckgegeben statt zu raten.
+     */
+    public function formatiertesDatum(?string $roh): string
+    {
+        if (! $roh) {
+            return '';
+        }
+
+        $monate = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+        if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $roh, $m)) {
+            return ((int) $m[1]).'. '.$monate[((int) $m[2]) - 1].' '.$m[3];
+        }
+
+        return $roh;
+    }
+
+    /**
+     * Server-seitiger Port von alterText() - Alter in Monaten/Jahren aus
+     * dem gespeicherten Geburtsdatum ("DD.MM.YYYY").
+     */
+    public function altersText(): string
+    {
+        if (! $this->birth_date || ! preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $this->birth_date, $m)) {
+            return '';
+        }
+
+        $geburt = \Carbon\Carbon::createSafe((int) $m[3], (int) $m[2], (int) $m[1]);
+        if (! $geburt) {
+            return '';
+        }
+
+        $monate = $geburt->diffInMonths(now());
+        if ($monate < 24) {
+            return $monate.($monate === 1 ? ' Monat' : ' Monate');
+        }
+
+        $jahre = intdiv($monate, 12);
+
+        return $jahre.($jahre === 1 ? ' Jahr' : ' Jahre');
     }
 }

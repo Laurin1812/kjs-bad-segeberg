@@ -8,6 +8,7 @@ use App\Http\Controllers\FesteSeiteController;
 use App\Http\Controllers\HegeringeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HundeausbildungController;
+use App\Http\Controllers\HundeboerseController;
 use App\Http\Controllers\ImpressumController;
 use App\Http\Controllers\KontaktController;
 use App\Http\Controllers\KreisjaegermeisterController;
@@ -59,6 +60,20 @@ Route::get('/partner', [PartnerController::class, 'index'])->name('partner.index
 // ueber "external_id" (siehe PartnerController-Klassenkommentar).
 Route::get('/partner/detail/{externalId}', [PartnerController::class, 'show'])->name('partner.show');
 
+// Phase 6A (Sondermodule inventarisieren + Hundeboerse auf Laravel/MySQL):
+// ersetzt hundeboerse/index.html + detail.html + anbieten.html - siehe
+// HundeboerseController-Klassenkommentar. "/hundeboerse/detail/{id}" statt
+// "?id=" analog zum bereits etablierten Partner-URL-Schema oben. Die
+// POST-Route traegt eine einfache Laravel-Throttle-Bremse (5 Versuche /
+// 15 Minuten je IP) als Laravel-idiomatisches Aequivalent zum bisherigen
+// dateibasierten kjs_rate_limit_check() aus api/lib/rate_limit.php.
+Route::get('/hundeboerse', [HundeboerseController::class, 'index'])->name('hundeboerse.index');
+Route::get('/hundeboerse/anbieten', [HundeboerseController::class, 'createForm'])->name('hundeboerse.anbieten');
+Route::post('/hundeboerse/anbieten', [HundeboerseController::class, 'store'])
+    ->middleware('throttle:5,15')
+    ->name('hundeboerse.anbieten.store');
+Route::get('/hundeboerse/detail/{id}', [HundeboerseController::class, 'show'])->name('hundeboerse.show');
+
 // Bewusst unter dem alten "/jaeger/"-Pfadpraefix belassen (entspricht der
 // bisherigen Verzeichnisstruktur jaeger/vorstand.html etc.) statt neue
 // Top-Level-Pfade zu erfinden - im Sinne von "alte URLs bleiben erhalten",
@@ -86,10 +101,11 @@ Route::get('/kreisjjaegermeister', [KreisjaegermeisterController::class, 'show']
 // Liste tatsaechlich vorher existierender Pfade - jedes Redirect-Ziel ist
 // eine echte, bereits registrierte Route (siehe Abschlussbericht). Alte
 // URLs, die zu einem noch nicht migrierten Sondermodul gehoeren
-// (Hundeboerse/Waffenboerse/Infomobil-Formular) oder zur weiterhin
-// unveraendert erreichbaren Admin-/Login-Infrastruktur, werden hier
-// bewusst NICHT umgebogen (siehe Abschlussbericht) - sie bleiben als
-// echte, im Webroot weiterhin vorhandene Dateien unveraendert erreichbar.
+// (Waffenboerse) oder zur weiterhin unveraendert erreichbaren Admin-/
+// Login-Infrastruktur, werden hier bewusst NICHT umgebogen (siehe
+// Abschlussbericht) - sie bleiben als echte, im Webroot weiterhin
+// vorhandene Dateien unveraendert erreichbar. Hundeboerse (Phase 6A) ist
+// seitdem migriert und weiter unten mit eigenem Block erfasst.
 Route::permanentRedirect('/index.html', '/');
 Route::permanentRedirect('/impressum.html', '/impressum');
 Route::permanentRedirect('/datenschutz.html', '/datenschutz');
@@ -154,6 +170,18 @@ Route::permanentRedirect('/aktuelles/beitrag.html', '/aktuelles');
 // LegacyUrlController-Klassenkommentar).
 Route::get('/seiten/index.html', [LegacyUrlController::class, 'seiten']);
 Route::get('/partner/detail.html', [LegacyUrlController::class, 'partnerDetail']);
+
+// Phase 6A (Sondermodule inventarisieren + Hundeboerse auf Laravel/MySQL):
+// alte Hundeboerse-Pfade (bislang echte Dateien im Webroot) auf die neuen
+// Laravel-Routen - "detail.html?id=" haengt vom Query-Parameter ab, siehe
+// LegacyUrlController::hundeboerseDetail(). MUESSEN ebenfalls vor der
+// generischen "{section}/{slug}"-Route weiter unten stehen (siehe Kommentar
+// dort) - unproblematisch, da "hundeboerse" nicht Teil von deren
+// section-Whitelist (jaeger|aufgaben|verbraucher) ist, aber zur
+// Konsistenz mit dem uebrigen Phase-5-Block hier zusammen registriert.
+Route::permanentRedirect('/hundeboerse/index.html', '/hundeboerse');
+Route::permanentRedirect('/hundeboerse/anbieten.html', '/hundeboerse/anbieten');
+Route::get('/hundeboerse/detail.html', [LegacyUrlController::class, 'hundeboerseDetail']);
 
 // ---------------------------------------------------------------------
 // Phase 3 (Dynamische Seitenfamilien & Hundeausbildung, Laravel-

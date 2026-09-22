@@ -46,6 +46,43 @@ class Images
     }
 
     /**
+     * Phase 6A (Hundeboerse): server-seitiger Port von boerseThumbUrl()/
+     * boerseCardUrl() aus hundeboerse/index.html + detail.html. Anders als
+     * thumbUrl()/cardUrl() oben (die gezielt nach "/images/" suchen) fuegt
+     * dies den Varianten-Ordner IMMER direkt vor dem Dateinamen ein, egal
+     * unter welchem Pfad-Praefix - passend zu HundeboerseController::
+     * storeImages(), das Original+Varianten unter /uploads/boersen/
+     * hundeboerse/(thumb|card)/<datei> ablegt (siehe dortiger Kommentar),
+     * nicht unter /images/. Fehlt die Variante (z.B. GD-Extension war beim
+     * Hochladen nicht verfuegbar), greift weiterhin der bestehende
+     * onerror-Fallback (kjsImgFallback, resources/js/app.js) und laedt
+     * automatisch das Original.
+     */
+    public static function boerseVariantUrl(?string $url, string $folder): ?string
+    {
+        if (! $url) {
+            return $url;
+        }
+
+        $pos = strrpos($url, '/');
+        if ($pos === false) {
+            return $url;
+        }
+
+        return substr($url, 0, $pos).'/'.$folder.'/'.substr($url, $pos + 1);
+    }
+
+    public static function boerseThumbUrl(?string $url): ?string
+    {
+        return self::boerseVariantUrl($url, 'thumb');
+    }
+
+    public static function boerseCardUrl(?string $url): ?string
+    {
+        return self::boerseVariantUrl($url, 'card');
+    }
+
+    /**
      * Phase 3 (Dynamische Seitenfamilien & Hundeausbildung): server-
      * seitiger Port der Bildgroessen-Klassen-Weiche aus jaeger/hochwild.html
      * & Co. ("(d.bild_groesse&&d.bild_groesse.indexOf('img-')===0)?d.bild_groesse

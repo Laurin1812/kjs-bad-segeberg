@@ -104,4 +104,19 @@ class LegacyUrlController extends Controller
 
         return redirect($id !== '' ? '/partner/detail/'.$id : '/partner', 301);
     }
+
+    /**
+     * hundeboerse/detail.html?id=hb-<...> (Phase 6A) - "id" wird
+     * unveraendert als Pfadsegment weitergereicht, exakt wie bei
+     * partnerDetail() oben. Existiert dazu keine (mehr) veroeffentlichte
+     * Anzeige, liefert HundeboerseController::show() selbst eine echte 404
+     * (kein erfundenes Ziel). Fehlt "id", ist die Hundeboerse-Uebersicht
+     * die einzige fachlich eindeutige Alternative.
+     */
+    public function hundeboerseDetail(Request $request): RedirectResponse
+    {
+        $id = trim((string) $request->query('id', ''));
+
+        return redirect($id !== '' ? '/hundeboerse/detail/'.$id : '/hundeboerse', 301);
+    }
 }
