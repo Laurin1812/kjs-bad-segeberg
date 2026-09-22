@@ -36,8 +36,25 @@ class HomeController extends Controller
 
         $heroSlides = StartseiteHeroSlide::orderBy('sortierung')->get()->filter(fn ($s) => (bool) $s->bild)->values();
 
-        $testimonials = Testimonial::orderBy('sortierung')->get();
-        $testimonialsSichtbar = $testimonials->isEmpty() ? true : (bool) $testimonials->first()->sichtbar;
+        // Phase 4 Korrektur (visuelle Nacharbeit): "sichtbar" ist eine
+        // Spalte je EINZELNEM Testimonial-Datensatz (siehe Testimonial-
+        // Model/Migration + Phase4/StartseiteTest::test_startseite_
+        // blendet_testimonials_bei_sichtbar_false_komplett_aus, die genau
+        // dieses Verhalten fuer EIN Testimonial prueft), keine globale
+        // Schalter-Einstellung wie im alten "testimonials_sichtbar"-Feld
+        // aus content/startseite.json. Vorher wurde faelschlich nur der
+        // sichtbar-Wert des ERSTEN Datensatzes als Alles-oder-nichts-
+        // Schalter fuer den kompletten Abschnitt verwendet: bei mehreren
+        // Testimonials mit gemischter Sichtbarkeit (oder gleicher
+        // sortierung wie in den echten Bestandsdaten) konnte das sowohl
+        // einzeln ausgeblendete Testimonials durchrutschen lassen als auch
+        // den ganzen Abschnitt faelschlich verstecken, obwohl sichtbare
+        // Eintraege vorhanden waren (bei der visuellen Pruefung mit den
+        // echten Bestandsdaten beobachtet). Jetzt: jedes Testimonial filtert
+        // sich ausschliesslich selbst, der Abschnitt erscheint genau dann,
+        // wenn mindestens eines uebrig bleibt.
+        $testimonials = Testimonial::orderBy('sortierung')->get()->filter(fn ($t) => (bool) $t->sichtbar)->values();
+        $testimonialsSichtbar = $testimonials->isNotEmpty();
 
         $nichtArchivierteBeitraege = Beitrag::where('typ', 'aktuelles')->where('archiviert', false)->get();
         $neuesteBeitraege = AktuellesRules::sortiertNeuesteZuerst($nichtArchivierteBeitraege)->take(3);
@@ -66,7 +83,7 @@ class HomeController extends Controller
         return view('home', [
             's' => $startseite,
             'heroSlides' => $heroSlides,
-            'testimonials' => $testimonialsSichtbar ? $testimonials : collect(),
+            'testimonials' => $testimonials,
             'testimonialsSichtbar' => $testimonialsSichtbar,
             'beitraege' => $neuesteBeitraege,
             'termine' => $naechsteTermine,
