@@ -11,6 +11,7 @@ use App\Http\Controllers\HundeausbildungController;
 use App\Http\Controllers\ImpressumController;
 use App\Http\Controllers\KontaktController;
 use App\Http\Controllers\KreisjaegermeisterController;
+use App\Http\Controllers\LegacyUrlController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PersonenGremiumController;
 use App\Http\Controllers\RegistrySeiteController;
@@ -70,6 +71,89 @@ Route::get('/jaeger/hegeringe', [HegeringeController::class, 'index'])->name('ja
 // beibehalten ("kreisjjaegermeister" statt "kreisjaegermeister") - das ist
 // die tatsaechliche, bereits produktiv verlinkte/indexierte URL.
 Route::get('/kreisjjaegermeister', [KreisjaegermeisterController::class, 'show'])->name('kreisjaegermeister');
+
+// ---------------------------------------------------------------------
+// Phase 5 (URL-Erhalt / alte Pfade / Redirects): permanente (301)
+// Weiterleitungen von den alten, vor der Laravel-Migration oeffentlich
+// erreichbaren ".html"-URLs auf die entsprechende kanonische Laravel-Route
+// - damit alte Google-Ergebnisse, Lesezeichen und externe Verlinkungen
+// nicht unnoetig auf 404 laufen. MUESSEN vor der generischen
+// "{section}/{slug}"-Route weiter unten stehen, sonst wuerde z.B.
+// "/jaeger/hochwild.html" faelschlich als Registry-Seite mit dem Slug
+// "hochwild.html" interpretiert (und 404en), statt hierher zu greifen.
+//
+// Bewusst NICHT per pauschalem Catch-all geloest, sondern als explizite
+// Liste tatsaechlich vorher existierender Pfade - jedes Redirect-Ziel ist
+// eine echte, bereits registrierte Route (siehe Abschlussbericht). Alte
+// URLs, die zu einem noch nicht migrierten Sondermodul gehoeren
+// (Hundeboerse/Waffenboerse/Infomobil-Formular) oder zur weiterhin
+// unveraendert erreichbaren Admin-/Login-Infrastruktur, werden hier
+// bewusst NICHT umgebogen (siehe Abschlussbericht) - sie bleiben als
+// echte, im Webroot weiterhin vorhandene Dateien unveraendert erreichbar.
+Route::permanentRedirect('/index.html', '/');
+Route::permanentRedirect('/impressum.html', '/impressum');
+Route::permanentRedirect('/datenschutz.html', '/datenschutz');
+Route::permanentRedirect('/service.html', '/service');
+Route::permanentRedirect('/aktuelles/index.html', '/aktuelles');
+Route::permanentRedirect('/termine/index.html', '/termine');
+Route::permanentRedirect('/faq/index.html', '/faq');
+Route::permanentRedirect('/downloads/index.html', '/downloads');
+Route::permanentRedirect('/partner/index.html', '/partner');
+Route::permanentRedirect('/kontakt/index.html', '/kontakt');
+Route::permanentRedirect('/kreisjjaegermeister/index.html', '/kreisjjaegermeister');
+
+// "jaeger/index.html" ist der einzige Sonderfall unter den festen Seiten:
+// ergibt NICHT das (nicht existierende) bereinigte "/jaeger", sondern die
+// Jaeger-Uebersichtsseite - identische Ausnahme wie in
+// HomeController::$quicklinkHref/Navigation::prettyHref()-Klassenkommentar.
+Route::permanentRedirect('/jaeger/index.html', '/jaeger/uebersicht');
+
+Route::permanentRedirect('/jaeger/vorstand.html', '/jaeger/vorstand');
+Route::permanentRedirect('/jaeger/obleute.html', '/jaeger/obleute');
+Route::permanentRedirect('/jaeger/hegeringe.html', '/jaeger/hegeringe');
+Route::permanentRedirect('/jaeger/hochwild.html', '/jaeger/hochwild');
+Route::permanentRedirect('/jaeger/niederwild.html', '/jaeger/niederwild');
+Route::permanentRedirect('/jaeger/ueber-uns.html', '/jaeger/ueber-uns');
+Route::permanentRedirect('/jaeger/satzung.html', '/jaeger/satzung');
+Route::permanentRedirect('/jaeger/landesjagdverband.html', '/jaeger/landesjagdverband');
+Route::permanentRedirect('/jaeger/schiessobleute.html', '/jaeger/schiessobleute');
+Route::permanentRedirect('/jaeger/jaeger-werden.html', '/jaeger/jaeger-werden');
+Route::permanentRedirect('/jaeger/mitglied-werden.html', '/jaeger/mitglied-werden');
+Route::permanentRedirect('/jaeger/infomobil.html', '/jaeger/infomobil');
+
+Route::permanentRedirect('/aufgaben/hundeausbildung.html', '/aufgaben/hundeausbildung');
+Route::permanentRedirect('/aufgaben/jagdhundeschule.html', '/aufgaben/jagdhundeschule');
+Route::permanentRedirect('/aufgaben/jagdhorn.html', '/aufgaben/jagdhorn');
+Route::permanentRedirect('/aufgaben/jugend.html', '/aufgaben/jugend');
+Route::permanentRedirect('/aufgaben/jungwildrettung.html', '/aufgaben/jungwildrettung');
+Route::permanentRedirect('/aufgaben/naturschutz.html', '/aufgaben/naturschutz');
+Route::permanentRedirect('/aufgaben/schiessen.html', '/aufgaben/schiessen');
+Route::permanentRedirect('/aufgaben/schweisshunde.html', '/aufgaben/schweisshunde');
+
+Route::permanentRedirect('/verbraucher/gruenes-klassenzimmer.html', '/verbraucher/gruenes-klassenzimmer');
+Route::permanentRedirect('/verbraucher/lernort-natur.html', '/verbraucher/lernort-natur');
+Route::permanentRedirect('/verbraucher/waidmannssprache.html', '/verbraucher/waidmannssprache');
+Route::permanentRedirect('/verbraucher/wildfleisch.html', '/verbraucher/wildfleisch');
+
+// "aktuelles/beitrag.html?i=<Array-Index>": der Index war eine reine
+// Fetch-Zeit-Position innerhalb von content/aktuelles.json, keine stabile
+// ID - verschiebt sich, sobald neue Aktuelles-Beitraege dazukommen (siehe
+// Abschlussbericht Punkt "form_id"/Aktuelles fuer die ausfuehrliche
+// Begruendung). Ohne den exakten JSON-Stand von damals laesst sich "i"
+// nicht mehr verlustfrei auf einen bestimmten Beitrags-Slug zurueckrechnen
+// - eine falsche Rate-Weiterleitung waere schlimmer als eine 404. Die
+// Aktuelles-Uebersicht ist dagegen fachlich eindeutig die richtige
+// naechsthoehere Seite fuer JEDEN alten Beitrags-Link, deshalb (und nur
+// dafuer) ein bewusster, eng auf genau dieses eine alte Pfadmuster
+// begrenzter Fallback - kein pauschaler Catch-all.
+Route::permanentRedirect('/aktuelles/beitrag.html', '/aktuelles');
+
+// "seiten/index.html?s=<slug>" und "partner/detail.html?id=<id>" haengen
+// vom jeweiligen Query-Parameter ab - keine feste Ziel-URL moeglich, daher
+// eigene Controller-Methoden statt Route::permanentRedirect() (siehe
+// LegacyUrlController-Klassenkommentar).
+Route::get('/seiten/index.html', [LegacyUrlController::class, 'seiten']);
+Route::get('/partner/detail.html', [LegacyUrlController::class, 'partnerDetail']);
 
 // ---------------------------------------------------------------------
 // Phase 3 (Dynamische Seitenfamilien & Hundeausbildung, Laravel-
