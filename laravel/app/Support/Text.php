@@ -50,4 +50,34 @@ class Text
             ? $inhalt
             : (string) Str::markdown($inhalt);
     }
+
+    /**
+     * Phase 6B (Waffenboerse): server-seitiger Port von
+     * kjs_wb_text_to_safe_html() aus api/waffenboerse/anzeigen.php. Baut
+     * aus reinem Freitext (z.B. der "beschreibung" einer oeffentlichen
+     * "Anbieten"-Einreichung, siehe WaffenboerseController::store())
+     * sicheres, minimales Absatz-HTML: Absaetze durch Leerzeilen getrennt,
+     * Zeilenumbrueche als "<br>" - der komplette Text wird dabei escaped,
+     * es koennen also NIE HTML-/Script-Tags aus der Eingabe durchschlagen.
+     * NICHT verwenden fuer bereits vertrauenswuerdiges HTML (z.B. die
+     * "beschreibung" importierter Bestandsanzeigen aus
+     * content/waffenboerse.json - die kommt bereits fertig sanitisiert aus
+     * dem TipTap-Editor des alten Admin-Bereichs, siehe
+     * ImportWaffenboerse::handle()).
+     */
+    public static function freeTextToSafeParagraphs(string $text): string
+    {
+        $bloecke = preg_split('/\n{2,}/', trim($text)) ?: [];
+        $html = '';
+        foreach ($bloecke as $block) {
+            $block = trim($block);
+            if ($block === '') {
+                continue;
+            }
+            $escaped = htmlspecialchars($block, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $html .= '<p>'.str_replace("\n", '<br>', $escaped).'</p>';
+        }
+
+        return $html;
+    }
 }

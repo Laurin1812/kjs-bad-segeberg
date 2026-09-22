@@ -6,18 +6,20 @@ use Illuminate\Http\UploadedFile;
 
 /**
  * KJS Bad Segeberg - Phase 6A (Sondermodule inventarisieren + Hundeboerse
- * auf Laravel/MySQL).
+ * auf Laravel/MySQL), erweitert in Phase 6B (Waffenboerse auf
+ * Laravel/MySQL).
  *
  * Server-seitiger Laravel-Port von api/lib/boerse_upload.php
  * (kjs_boerse_handle_image_uploads/kjs_boerse_generate_image_variants) fuer
  * oeffentliche Boersen-Einreichungen ("Anbieten"). Bewusst als eigene,
  * modulunabhaengige Klasse (Parameter $modul wie im PHP-Original) statt nur
  * hart in HundeboerseController - im PHP-Original ist boerse_upload.php
- * ebenfalls bereits fuer Hundeboerse UND Waffenboerse gemeinsam gebaut, eine
- * spaetere Waffenboerse-Migration (naechste Phase, siehe Abschlussbericht)
- * kann diese Klasse dann unveraendert mitverwenden - keine neue
- * Generalisierung, nur derselbe bereits im PHP-Original etablierte
- * Zuschnitt.
+ * ebenfalls bereits fuer Hundeboerse UND Waffenboerse gemeinsam gebaut. Wie
+ * in Phase 6A angekuendigt, verwendet WaffenboerseController::store() jetzt
+ * store() unten unveraendert mit - keine neue Generalisierung, nur derselbe
+ * bereits im PHP-Original etablierte Zuschnitt. Fuer die Bestandsbild-
+ * uebernahme aus dem alten Webroot (kein HTTP-Upload) kommt zusaetzlich
+ * importLocalFile() dazu (siehe dort).
  *
  * Sicherheitsmassnahmen (1:1 aus dem PHP-Original uebernommen, siehe dort
  * fuer die ausfuehrliche Begruendung):
@@ -97,6 +99,60 @@ class BoerseUploads
         }
 
         return $results;
+    }
+
+    /**
+     * Phase 6B (Waffenboerse): uebernimmt eine bereits vorhandene, echte
+     * Bestandsbild-Datei (aus dem alten Webroot, ueber
+     * ImportWaffenboerse::handle()) in den Laravel-eigenen Storage-Pfad -
+     * Gegenstueck zu store() oben, aber fuer eine lokale Quelldatei statt
+     * eines UploadedFile aus einem HTTP-Request. Bewusst OHNE zufaelligen
+     * Dateinamen (anders als store()): die Zufalls-Umbenennung in store()
+     * ist eine Sicherheitsmassnahme gegen von der OEFFENTLICHKEIT
+     * hochgeladene Dateien (siehe Klassenkommentar) - hier handelt es sich
+     * dagegen um bereits bekannte, vertrauenswuerdige Bestandsdateien aus
+     * dem bisherigen Webroot, deren Original-Dateiname zur Nachvollziehbarkeit
+     * bewusst erhalten bleibt. Nutzt dieselbe generateVariants()-Logik wie
+     * store(), damit Waffenboerse-Bestandsbilder dieselben Thumb-/Card-
+     * Varianten wie neu eingereichte Bilder bekommen (keine Dopplung).
+     *
+     * @return array{pfad: string, titel: string}|null null, falls die
+     *               Quelldatei fehlt oder sich nicht als Bild lesen laesst.
+     */
+    public static function importLocalFile(string $sourcePath, string $modul, string $filename): ?array
+    {
+        if (! is_file($sourcePath)) {
+            return null;
+        }
+
+        $imageInfo = @getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            return null;
+        }
+
+        $mime = $imageInfo['mime'] ?? '';
+        $ext = self::MIME_TO_EXT[$mime] ?? null;
+        if ($ext === null) {
+            return null;
+        }
+
+        $dir = public_path('uploads/boersen/'.$modul);
+        if (! is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        $destPath = $dir.'/'.$filename;
+        if (! @copy($sourcePath, $destPath)) {
+            return null;
+        }
+        @chmod($destPath, 0644);
+
+        self::generateVariants($destPath, $dir, $filename, $mime);
+
+        return [
+            'pfad' => '/uploads/boersen/'.$modul.'/'.$filename,
+            'titel' => '',
+        ];
     }
 
     /**

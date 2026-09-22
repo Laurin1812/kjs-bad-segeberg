@@ -7,19 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['name', 'sortierung'])]
 // ══════════════════════════════════════════════════════════════════════
-// PHASE 8B - WICHTIG: DORMANT / BEWUSST UNGENUTZT
-// Dieses Model existiert seit Phase 1 (Migrationen+Models fuers neue
-// CMS-Schema), wird aber von KEINEM Controller/KEINER Route in
-// routes/api.php verwendet (siehe Phase-7-Analyse: grep nach
-// "Hundeboerse\\|Waffenboerse" in app/Http/Controllers/ findet nichts).
-// Die produktive Wahrheit fuer Hundeboerse/Waffenboerse/Kontakt bleiben
-// AUSSCHLIESSLICH die bestehenden PHP-Sondermodule (api/hundeboerse/*.php,
-// api/waffenboerse/*.php, api/kontakt/*.php) mit ihrer EIGENEN, separaten
-// MySQL-Datenbank (siehe database/schema.sql, config/db.example.php) -
-// NICHT diese Laravel-DB/dieses Model. Siehe
-// docs/deployment/dormante-boersen-tabellen.md fuer die vollstaendige
-// Begruendung, bevor hier jemals eine Verbindung zum echten Schreibweg
-// hergestellt wird.
+// PHASE 6B - AKTIVIERT: siehe WaffenboerseAnzeige-Klassenkommentar. Feste,
+// kuratierte Kategorienliste (die 7 Standardkategorien werden bereits von
+// der Migration selbst per insertOrIgnore angelegt, siehe dort) - anders
+// als Hundeboerse-Zuchtverbaende waechst diese Liste NICHT automatisch
+// durch oeffentliche Einreichungen (siehe WaffenboerseAnbietenRequest::
+// rules(): "kategorie" muss ein bereits bekannter Name sein, exakt wie im
+// PHP-Original api/waffenboerse/anzeigen.php::kjs_wb_handle_submit()).
 // ══════════════════════════════════════════════════════════════════════
 class WaffenboerseKategorie extends Model
 {

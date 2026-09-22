@@ -119,4 +119,18 @@ class LegacyUrlController extends Controller
 
         return redirect($id !== '' ? '/hundeboerse/detail/'.$id : '/hundeboerse', 301);
     }
+
+    /**
+     * waffenboerse/detail.html?id=wb-<...> (Phase 6B) - exakt dasselbe
+     * Muster wie hundeboerseDetail() oben. Existiert dazu keine (mehr)
+     * veroeffentlichte Anzeige, liefert WaffenboerseController::show()
+     * selbst eine echte 404 (kein erfundenes Ziel). Fehlt "id", ist die
+     * Waffenboerse-Uebersicht die einzige fachlich eindeutige Alternative.
+     */
+    public function waffenboerseDetail(Request $request): RedirectResponse
+    {
+        $id = trim((string) $request->query('id', ''));
+
+        return redirect($id !== '' ? '/waffenboerse/detail/'.$id : '/waffenboerse', 301);
+    }
 }

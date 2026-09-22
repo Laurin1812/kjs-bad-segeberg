@@ -1245,3 +1245,361 @@ body.kjs-lightbox-lock { overflow: hidden; }
 @media (max-width: 600px) {
   .steckbrief dl { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   FORMULARE (generisch: bisher nur clientseitig unter kontakt/index.html
+   genutzt, das Kontaktformular-Sondermodul selbst ist nicht Teil dieser
+   Migration - jetzt zusaetzlich von der Phase-6A-Hundeboerse-Einreichung
+   ("Anbieten") verwendet). 1:1 aus css/style.css, unveraendert.
+   ========================================================= */
+.kontakt-form { background: var(--bg-light); padding: 2rem; border-radius: var(--radius-lg); }
+.kontakt-form h3 { margin-bottom: 1.5rem; color: var(--green-dark); }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: .84rem; font-weight: 600; margin-bottom: .4rem; color: var(--text-dark); }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: .7rem 1rem; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: .9rem;
+  color: var(--text-dark); background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.form-group textarea { resize: vertical; min-height: 130px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 600px) {
+  .form-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   HUNDEBÖRSE (Phase 6A: Route -> Controller -> Eloquent -> MySQL -> Blade,
+   ersetzt hundeboerse/index.html + detail.html + anbieten.html). 1:1 aus
+   css/style.css uebernommen, kein Redesign - nutzt bewusst dieselben
+   Bausteine wie der Rest der Seite (.news__grid/.news-card, .page-content/
+   .sidebar-widget/.contact-box, .kontakt-form/.form-group/.form-grid-2
+   oben) fuer die Kachel-Uebersicht bzw. das Formular.
+   ========================================================= */
+.hb-detail-top { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: stretch; margin-bottom: 2rem; }
+@media (max-width: 900px) {
+  .hb-detail-top { grid-template-columns: 1fr; }
+}
+.hb-main-image {
+  display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+.hb-eckdaten { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+.hb-eckdaten__bottom { margin-top: 1rem; }
+
+.hb-gallery { display: flex; flex-direction: column; gap: .75rem; }
+.hb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.hb-thumb {
+  flex: 0 0 auto; width: 72px; height: 72px; padding: 0; overflow: hidden;
+  border: 2px solid transparent; border-radius: var(--radius-sm); background: none;
+  cursor: pointer; line-height: 0; transition: border-color .15s ease;
+}
+.hb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hb-thumb:hover { border-color: var(--green-main); }
+.hb-thumb.is-active { border-color: var(--green-dark); box-shadow: 0 0 0 2px var(--green-light); }
+@media (max-width: 600px) {
+  .hb-thumb { width: 58px; height: 58px; }
+}
+
+.hb-kontaktbereich {
+  background: var(--green-light); border: 1px solid var(--green-main);
+  border-radius: var(--radius-md); padding: 1.75rem 2rem; margin: 2rem 0 1rem;
+}
+.hb-kontaktbereich h2 { margin-top: 0; margin-bottom: 1.1rem; }
+.hb-kontaktbereich__info p { margin: 0 0 .55rem; font-size: .97rem; color: var(--text-dark); }
+.hb-kontaktbereich__info p strong { color: var(--green-dark); margin-right: .3rem; }
+.hb-kontaktbereich__info a { color: var(--green-dark); font-weight: 600; }
+.hb-kontaktbereich__actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-top: 1.25rem; }
+@media (max-width: 600px) {
+  .hb-kontaktbereich { padding: 1.4rem 1.25rem; }
+  .hb-kontaktbereich__actions { flex-direction: column; }
+  .hb-kontaktbereich__actions .btn { width: 100%; justify-content: center; }
+}
+
+#hb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#hb-grid .hb-card-footer { margin-top: auto; }
+
+.hb-kontakt-highlight { animation: hbKontaktPulse 2s ease-in-out; }
+@keyframes hbKontaktPulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); transform: scale(1); }
+  12%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 90%, transparent); transform: scale(1.015); }
+  55%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 90%, transparent); transform: scale(1.015); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); transform: scale(1); }
+}
+
+/* Hundeboerse-Uebersicht: eigenes Grid nur fuer diese Seite (zusaetzliche
+   Klasse .hb-overview-layout auf demselben Element wie .container). */
+.page-content .container.hb-overview-layout {
+  grid-template-columns: 1fr 290px;
+  grid-template-areas: "intro intro" "main sidebar";
+  gap: 2.5rem 3rem;
+}
+.hb-overview-layout .hb-overview-intro { grid-area: intro; }
+.hb-overview-layout .main-content { grid-area: main; }
+.hb-overview-layout .sidebar { grid-area: sidebar; }
+@media (max-width: 900px) {
+  .page-content .container.hb-overview-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "intro" "main" "sidebar";
+    gap: 3rem;
+  }
+}
+
+/* Formular "Hund / Wurf anbieten": nutzt .kontakt-form/.form-group/
+   .form-grid-2 oben, ergaenzt nur um Typ-Umschalter, Fehler-Zustaende,
+   Bild-Upload-Vorschau/Reihenfolge, Erfolgs-Box ("hb-form-"/"hb-img-"-
+   Praefix, siehe css/style.css-Vorbild). */
+.hb-form-section { margin-bottom: 1.5rem; }
+.hb-form-section h3 { margin-bottom: .4rem; color: var(--green-dark); }
+.hb-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.hb-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+
+.hb-typ-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.hb-typ-option {
+  display: flex; align-items: center; gap: .6rem; cursor: pointer;
+  border: 2px solid var(--border); border-radius: var(--radius-md);
+  padding: 1rem 1.1rem; font-weight: 600; color: var(--text-dark);
+  background: #fff; transition: border-color var(--transition), background var(--transition);
+}
+.hb-typ-option input { width: auto; margin: 0; accent-color: var(--green-main); }
+.hb-typ-option:has(input:checked) { border-color: var(--green-main); background: var(--green-light); }
+.hb-typ-option.is-active { border-color: var(--green-main); background: var(--green-light); }
+@media (max-width: 600px) { .hb-typ-toggle { grid-template-columns: 1fr; } }
+
+.hb-field-error input, .hb-field-error select, .hb-field-error textarea {
+  border-color: var(--color-danger) !important; background: var(--color-danger-bg);
+}
+.hb-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: block; }
+.hb-error-summary {
+  background: var(--color-danger-bg); border: 1px solid var(--color-danger); border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; color: var(--color-danger-text);
+}
+.hb-error-summary strong { display: block; margin-bottom: .5rem; }
+.hb-error-summary ul { margin: 0; padding-left: 1.2rem; }
+.hb-error-summary li { margin-bottom: .2rem; font-size: .88rem; }
+
+.hb-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: .85rem; margin-bottom: 1rem;
+}
+.hb-img-item {
+  position: relative; border-radius: var(--radius-md); overflow: hidden;
+  aspect-ratio: 1; background: var(--bg-light); border: 2px solid transparent;
+  cursor: grab;
+}
+.hb-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hb-img-item.hb-img-dragging { opacity: .4; }
+.hb-img-item.hb-img-dragover { border-color: var(--green-main); }
+.hb-img-item__main {
+  position: absolute; top: 0; left: 0; background: var(--green-main); color: #fff;
+  font-size: .68rem; font-weight: 700; padding: .25rem .55rem; border-radius: 0 0 var(--radius-sm) 0;
+}
+.hb-img-item__remove {
+  position: absolute; top: .3rem; right: .3rem; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; border: none; cursor: pointer; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+.hb-img-item__remove:hover { background: var(--color-danger); }
+.hb-img-add-label {
+  display: inline-flex; align-items: center; gap: .5rem; cursor: pointer;
+  border: 1px dashed var(--green-main); border-radius: var(--radius-sm);
+  padding: .7rem 1.1rem; font-size: .88rem; font-weight: 600; color: var(--green-dark);
+  background: var(--green-light); transition: opacity var(--transition);
+}
+.hb-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.hb-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+.hb-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
+.hb-img-limit-note.is-visible { display: block; }
+
+.hb-success-box {
+  background: var(--green-light); border: 1px solid var(--green-main);
+  border-radius: var(--radius-md); padding: 1.5rem 1.75rem; margin-top: 1.5rem;
+}
+.hb-success-box h3 { color: var(--green-dark); margin-bottom: .5rem; }
+.hb-success-box p { margin: 0; color: var(--text-body); font-size: .92rem; line-height: 1.7; }
+
+/* =========================================================
+   WAFFENBÖRSE (Phase 6B: Route -> Controller -> Eloquent -> MySQL -> Blade,
+   ersetzt waffenboerse/index.html + detail.html + anbieten.html). 1:1 aus
+   css/style.css uebernommen, kein Redesign - nutzt bewusst dieselben
+   Bausteine wie der Rest der Seite (.news__grid/.news-card,
+   .hb-overview-layout, .steckbrief, .hb-kontaktbereich/.hb-kontakt-
+   highlight) fuer Uebersicht/Detailseite (siehe waffenboerse/index.blade.php
+   und show.blade.php), eigene "wb-"/"wba-"-Klassen nur dort, wo die
+   Waffenboerse laut Alt-System-Kommentar bewusst von der Hundeboerse
+   entkoppelt bleiben sollte ("die Hundebörse darf laut Auftrag nicht
+   angefasst werden"). Die client-seitige Filterleiste (.wb-filter-bar/
+   .wb-filter-field) und die reinen Prototyp-/Entwicklungsmeldungs-Klassen
+   (.wba-devnote, .wba-warn-hint) wurden bewusst NICHT uebernommen, da diese
+   Funktionen in Phase 6B nicht mit portiert wurden (siehe
+   WaffenboerseController-Klassenkommentar bzw. WaffenboerseAnbietenRequest -
+   die alte PHP-Validierung fordert Erwerbsberechtigung/Versand serverseitig
+   nicht hart ein, der zugehoerige clientseitige Warnhinweis entfaellt daher
+   ebenfalls).
+   ========================================================= */
+.wb-detail-top {
+  display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem;
+  align-items: start; margin-bottom: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .wb-detail-top { grid-template-columns: 1fr; }
+}
+
+.wb-gallery { display: flex; flex-direction: column; gap: .6rem; }
+
+.wb-gallery .wb-main-image {
+  display: block; width: 100%; aspect-ratio: 3/2; object-fit: contain;
+  background: var(--bg-light); border: 1px solid var(--border); margin: 0;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+}
+.wb-main-image--empty { display: flex; align-items: center; justify-content: center; }
+.wb-main-image--empty img { margin: 0; box-shadow: none; border-radius: 0; }
+.wb-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.wb-thumb {
+  flex: 0 0 auto; width: 72px; height: 72px; padding: 0; overflow: hidden;
+  border: 2px solid transparent; border-radius: var(--radius-sm); background: none;
+  cursor: pointer; line-height: 0; transition: border-color .15s ease;
+}
+.wb-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  margin: 0; border-radius: 0; box-shadow: none;
+}
+.wb-thumb:hover { border-color: var(--green-main); }
+.wb-thumb.is-active { border-color: var(--green-dark); box-shadow: 0 0 0 2px var(--green-light); }
+@media (max-width: 600px) {
+  .wb-thumb { width: 58px; height: 58px; }
+}
+
+.wb-head { display: flex; flex-direction: column; gap: .45rem; }
+.wb-head__cat { align-self: flex-start; }
+#wb-detail-inhalt .wb-head__title { margin: 0; }
+#wb-detail-inhalt .wb-head__meta { margin: 0; color: var(--text-muted); font-size: .95rem; }
+.wb-meta-icon { display: inline-flex; align-items: center; gap: .3rem; }
+.wb-meta-icon svg { width: 13px; height: 13px; flex-shrink: 0; }
+#wb-detail-inhalt .wb-head__price { margin: .15rem 0 0; font-size: 1.4rem; font-weight: 800; color: var(--green-dark); }
+.wb-head .wb-erwerb-badge { align-self: flex-start; margin-top: .1rem; }
+.wb-head__cta { margin-top: .6rem; }
+
+#wb-grid .news-card > a { display: flex; flex-direction: column; height: 100%; }
+#wb-grid .wb-card-footer { margin-top: auto; }
+
+.wb-erwerb-badge {
+  display: inline-block;
+  background: var(--gold-light); color: var(--gold-darker); border: 1px solid var(--gold);
+  border-radius: var(--radius-sm); padding: .5rem .9rem;
+  font-size: .86rem; font-weight: 700;
+}
+.wb-rechtshinweis {
+  background: var(--bg-light); border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem; margin: 1.5rem 0; font-size: .85rem; color: var(--text-muted);
+}
+.wb-rechtshinweis p { margin: 0; line-height: 1.7; }
+
+.wba-form-section { margin-bottom: 1.5rem; }
+.wba-form-section h3 { margin-bottom: .4rem; color: var(--green-dark); }
+.wba-section-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.wba-optional-tag { font-weight: 400; font-size: .78rem; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+
+.wba-kaliber-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .6rem; }
+.wba-kaliber-row { display: flex; gap: .6rem; align-items: center; }
+.wba-kaliber-row .wba-kaliber-input { flex: 1 1 auto; }
+.wba-kaliber-remove {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-light); border: 1px solid var(--border); color: var(--text-muted);
+  cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.wba-kaliber-remove:hover { background: var(--color-danger); border-color: var(--color-danger); color: #fff; }
+.wba-kaliber-add {
+  display: inline-block; padding: .55rem 1.1rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .85rem; font-weight: 600;
+  cursor: pointer; background: none; transition: all var(--transition);
+}
+.wba-kaliber-add:hover { border-color: var(--green-main); background: var(--green-light); }
+
+.wba-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.wba-toggle-option {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; font-size: .92rem; color: var(--text-dark); transition: all var(--transition);
+}
+.wba-toggle-option input { width: auto; margin: 0; accent-color: var(--green-main); }
+.wba-toggle-option:has(input:checked) { border-color: var(--green-main); background: var(--green-light); }
+.wba-toggle-option.is-active { border-color: var(--green-main); background: var(--green-light); }
+@media (max-width: 600px) { .wba-toggle { grid-template-columns: 1fr; } }
+
+.wba-field-error input, .wba-field-error select, .wba-field-error textarea {
+  border-color: var(--color-danger) !important;
+}
+.wba-error-text { color: var(--color-danger); font-size: .8rem; margin-top: .35rem; display: none; }
+.wba-field-error .wba-error-text { display: block; }
+.wba-error-summary {
+  display: none; background: var(--color-danger-bg); border: 1px solid var(--color-danger); color: var(--color-danger-text);
+  border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+}
+.wba-error-summary.is-visible { display: block; }
+.wba-error-summary strong { display: block; margin-bottom: .5rem; }
+.wba-error-summary ul { margin: 0; padding-left: 1.2rem; }
+.wba-error-summary li { margin-bottom: .2rem; font-size: .88rem; }
+
+.wba-img-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem;
+  margin-bottom: 1rem;
+}
+.wba-img-item {
+  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+  border: 2px solid var(--border); background: var(--bg-light); cursor: grab;
+}
+.wba-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wba-img-item.wba-img-dragging { opacity: .4; }
+.wba-img-item.wba-img-dragover { border-color: var(--green-main); }
+.wba-img-item__main {
+  position: absolute; top: 0; left: 0; background: var(--green-main); color: #fff;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  padding: .2rem .5rem; border-radius: 0 0 var(--radius-sm) 0; z-index: 1;
+}
+.wba-img-item__remove {
+  position: absolute; top: .3rem; right: .3rem; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; line-height: 1;
+  font-size: .9rem; display: flex; align-items: center; justify-content: center; z-index: 1;
+}
+.wba-img-item__remove:hover { background: var(--color-danger); }
+.wba-img-add-label {
+  display: inline-block; padding: .6rem 1.2rem; border: 2px dashed var(--border);
+  border-radius: var(--radius-sm); color: var(--green-dark); font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+}
+.wba-img-add-label:hover { border-color: var(--green-main); background: var(--green-light); }
+.wba-img-add-label.is-disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.wba-img-count { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+.wba-img-limit-note { font-size: .8rem; color: var(--color-danger); margin-top: .5rem; display: none; }
+.wba-img-limit-note.is-visible { display: block; }
+
+.wba-success { display: none; text-align: center; padding: 2.5rem 1.5rem; }
+.wba-success.is-visible { display: block; }
+.wba-success h2 { color: var(--green-dark); margin-bottom: .75rem; }
+.wba-success p { color: var(--text-body); max-width: 560px; margin: 0 auto 1.75rem; line-height: 1.7; }
+.wba-success__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+.wb-intro-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+}
+.wb-intro-row .btn { flex-shrink: 0; }
+@media (max-width: 700px) {
+  .wb-intro-row { flex-direction: column; }
+  .wb-intro-row .btn { align-self: flex-start; }
+}
+
+.wb-cta-btn {
+  background: #c1611f; color: #fff; border-color: #c1611f;
+}
+.wb-cta-btn:hover {
+  background: #9c4e18; border-color: #9c4e18; color: #fff;
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
+}
+.wb-cta-btn:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px rgba(193,97,31,.3);
+}

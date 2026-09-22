@@ -18,6 +18,7 @@ use App\Http\Controllers\PersonenGremiumController;
 use App\Http\Controllers\RegistrySeiteController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TermineController;
+use App\Http\Controllers\WaffenboerseController;
 use Illuminate\Support\Facades\Route;
 
 // Phase 4 (Startseite + komplette Laravel-Navigation, Laravel-
@@ -74,6 +75,16 @@ Route::post('/hundeboerse/anbieten', [HundeboerseController::class, 'store'])
     ->name('hundeboerse.anbieten.store');
 Route::get('/hundeboerse/detail/{id}', [HundeboerseController::class, 'show'])->name('hundeboerse.show');
 
+// Phase 6B (Waffenboerse auf Laravel/MySQL): ersetzt waffenboerse/index.html
+// + detail.html + anbieten.html - siehe WaffenboerseController-
+// Klassenkommentar. Gleiches URL-/Throttle-Schema wie Hundeboerse oben.
+Route::get('/waffenboerse', [WaffenboerseController::class, 'index'])->name('waffenboerse.index');
+Route::get('/waffenboerse/anbieten', [WaffenboerseController::class, 'createForm'])->name('waffenboerse.anbieten');
+Route::post('/waffenboerse/anbieten', [WaffenboerseController::class, 'store'])
+    ->middleware('throttle:5,15')
+    ->name('waffenboerse.anbieten.store');
+Route::get('/waffenboerse/detail/{id}', [WaffenboerseController::class, 'show'])->name('waffenboerse.show');
+
 // Bewusst unter dem alten "/jaeger/"-Pfadpraefix belassen (entspricht der
 // bisherigen Verzeichnisstruktur jaeger/vorstand.html etc.) statt neue
 // Top-Level-Pfade zu erfinden - im Sinne von "alte URLs bleiben erhalten",
@@ -100,12 +111,12 @@ Route::get('/kreisjjaegermeister', [KreisjaegermeisterController::class, 'show']
 // Bewusst NICHT per pauschalem Catch-all geloest, sondern als explizite
 // Liste tatsaechlich vorher existierender Pfade - jedes Redirect-Ziel ist
 // eine echte, bereits registrierte Route (siehe Abschlussbericht). Alte
-// URLs, die zu einem noch nicht migrierten Sondermodul gehoeren
-// (Waffenboerse) oder zur weiterhin unveraendert erreichbaren Admin-/
-// Login-Infrastruktur, werden hier bewusst NICHT umgebogen (siehe
+// URLs, die zur weiterhin unveraendert erreichbaren Admin-/Login-
+// Infrastruktur gehoeren, werden hier bewusst NICHT umgebogen (siehe
 // Abschlussbericht) - sie bleiben als echte, im Webroot weiterhin
-// vorhandene Dateien unveraendert erreichbar. Hundeboerse (Phase 6A) ist
-// seitdem migriert und weiter unten mit eigenem Block erfasst.
+// vorhandene Dateien unveraendert erreichbar. Hundeboerse (Phase 6A) und
+// Waffenboerse (Phase 6B) sind seitdem migriert und weiter unten mit
+// eigenen Bloecken erfasst.
 Route::permanentRedirect('/index.html', '/');
 Route::permanentRedirect('/impressum.html', '/impressum');
 Route::permanentRedirect('/datenschutz.html', '/datenschutz');
@@ -182,6 +193,15 @@ Route::get('/partner/detail.html', [LegacyUrlController::class, 'partnerDetail']
 Route::permanentRedirect('/hundeboerse/index.html', '/hundeboerse');
 Route::permanentRedirect('/hundeboerse/anbieten.html', '/hundeboerse/anbieten');
 Route::get('/hundeboerse/detail.html', [LegacyUrlController::class, 'hundeboerseDetail']);
+
+// Phase 6B (Waffenboerse auf Laravel/MySQL): alte Waffenboerse-Pfade
+// (bislang echte Dateien im Webroot) auf die neuen Laravel-Routen -
+// "detail.html?id=" haengt vom Query-Parameter ab, siehe
+// LegacyUrlController::waffenboerseDetail(). Gleiches Schema wie
+// Hundeboerse oben.
+Route::permanentRedirect('/waffenboerse/index.html', '/waffenboerse');
+Route::permanentRedirect('/waffenboerse/anbieten.html', '/waffenboerse/anbieten');
+Route::get('/waffenboerse/detail.html', [LegacyUrlController::class, 'waffenboerseDetail']);
 
 // ---------------------------------------------------------------------
 // Phase 3 (Dynamische Seitenfamilien & Hundeausbildung, Laravel-
