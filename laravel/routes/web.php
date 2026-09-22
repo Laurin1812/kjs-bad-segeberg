@@ -40,9 +40,21 @@ Route::get('/service', [ServiceController::class, 'show'])->name('service');
 // (settings-Gruppe "navigation") verweist seit Phase 4 bereits auf
 // "/kontakt" (ebenso mehrere bereits migrierte Seiten, z.B. pages/
 // show.blade.php), bisher lief das aber auf eine echte 404, da keine Route
-// existierte. Siehe KontaktController-Klassenkommentar fuer die bewusste
-// Abgrenzung zum weiterhin nicht migrierten Kontaktformular-Sondermodul.
+// existierte. Siehe KontaktController-Klassenkommentar fuer die
+// mittlerweile (Phase 6C) abgeschlossene Kontaktformular-Migration.
 Route::get('/kontakt', [KontaktController::class, 'show'])->name('kontakt');
+
+// Phase 6C (Kontaktformular auf Laravel): ersetzt api/contact.php fuer
+// NEUE Einreichungen. Gleiches URL-/Throttle-Schema wie Hundeboerse/
+// Waffenboerse oben ("throttle:5,15" statt des alten dateibasierten
+// kjs_rate_limit_check() aus api/lib/rate_limit.php, das denselben
+// Grenzwert von 5 Anfragen / 15 Minuten je IP verwendete). Dieselbe URI
+// wie die GET-Route oben (PRG-Pattern: das Formular auf /kontakt sendet
+// per POST an /kontakt zurueck) - keine eigene "/kontakt/senden"-URL
+// erfunden.
+Route::post('/kontakt', [KontaktController::class, 'store'])
+    ->middleware('throttle:5,15')
+    ->name('kontakt.store');
 
 Route::get('/aktuelles', [AktuellesController::class, 'index'])->name('aktuelles.index');
 // URL-Schema bewusst modernisiert (siehe AktuellesController-Klassenkommentar
@@ -128,6 +140,19 @@ Route::permanentRedirect('/downloads/index.html', '/downloads');
 Route::permanentRedirect('/partner/index.html', '/partner');
 Route::permanentRedirect('/kontakt/index.html', '/kontakt');
 Route::permanentRedirect('/kreisjjaegermeister/index.html', '/kreisjjaegermeister');
+
+// Phase 6C: bewusst KEIN Redirect/keine Kompatibilitaetsroute fuer den
+// alten POST-Endpunkt "/api/contact.php" (siehe Auftrag Punkt 5: "Bei
+// alten POST-Endpunkten NICHT blind 301 verwenden"). Ein 301 auf einen
+// POST wuerde von Browsern nicht zuverlaessig mit erhaltener Methode/
+// erhaltenem Body weitergeleitet, und die alte statische Seite
+// (kontakt/index.html) sendet ohnehin weiterhin direkt an ihren
+// unveraendert vorhandenen PHP-Endpunkt - beide Wege laufen bis zum
+// eigentlichen Cutover unabhaengig nebeneinander her, ohne sich
+// gegenseitig zu beeinflussen. Die neue Laravel-Seite "/kontakt" hat mit
+// der obigen POST-Route ("kontakt.store") bereits ihren eigenen,
+// vollstaendigen nativen Endpunkt - eine zusaetzliche Kompatibilitaetsroute
+// waere unnoetige, dauerhafte Legacy-Schicht ohne echten Nutzen.
 
 // "jaeger/index.html" ist der einzige Sonderfall unter den festen Seiten:
 // ergibt NICHT das (nicht existierende) bereinigte "/jaeger", sondern die

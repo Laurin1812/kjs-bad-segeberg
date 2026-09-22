@@ -14,19 +14,16 @@ use Illuminate\Database\Eloquent\Model;
     'nachricht', 'status', 'mail_versendet', 'mail_fehler', 'bearbeitet_am',
 ])]
 // ══════════════════════════════════════════════════════════════════════
-// PHASE 8B - WICHTIG: DORMANT / BEWUSST UNGENUTZT
-// Dieses Model existiert seit Phase 1 (Migrationen+Models fuers neue
-// CMS-Schema), wird aber von KEINEM Controller/KEINER Route in
-// routes/api.php verwendet (siehe Phase-7-Analyse: grep nach
-// "Hundeboerse\\|Waffenboerse" in app/Http/Controllers/ findet nichts).
-// Die produktive Wahrheit fuer Hundeboerse/Waffenboerse/Kontakt bleiben
-// AUSSCHLIESSLICH die bestehenden PHP-Sondermodule (api/hundeboerse/*.php,
-// api/waffenboerse/*.php, api/kontakt/*.php) mit ihrer EIGENEN, separaten
-// MySQL-Datenbank (siehe database/schema.sql, config/db.example.php) -
-// NICHT diese Laravel-DB/dieses Model. Siehe
-// docs/deployment/dormante-boersen-tabellen.md fuer die vollstaendige
-// Begruendung, bevor hier jemals eine Verbindung zum echten Schreibweg
-// hergestellt wird.
+// PHASE 6C - AKTIVIERT (Kontaktformular vollstaendig auf Laravel)
+// Dieses Model war seit Phase 1 angelegt, aber bis Phase 6C DORMANT (siehe
+// Git-Historie dieses Kommentars). Seit Phase 6C ist es die produktive
+// Datenquelle fuer neue Kontaktanfragen: KontaktController::store()
+// erzeugt hier echte Zeilen ueber Eloquent/MySQL, die alte JSON-/PHP-
+// Laufzeit (api/contact.php) wird fuer NEUE Einreichungen nicht mehr
+// verwendet. Die Admin-Verwaltung (Liste/Status aendern, bisher
+// api/kontakt/admin/liste.php + status.php) ist weiterhin NICHT Teil
+// dieses Models/dieser Phase - siehe KontaktController-Klassenkommentar
+// fuer die vollstaendige Abgrenzung und die fuer Phase 7/8 offenen Punkte.
 // ══════════════════════════════════════════════════════════════════════
 class KontaktAnfrage extends Model
 {

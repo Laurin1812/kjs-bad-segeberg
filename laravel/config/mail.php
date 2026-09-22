@@ -115,4 +115,26 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Kontaktformular-Empfaenger (Phase 6C)
+    |--------------------------------------------------------------------------
+    |
+    | Ersetzt den alten "CONTACT_RECIPIENT"-Umgebungsvariablennamen aus
+    | api/lib/mail_config.php (kjs_load_mail_config()) 1:1 - bewusst
+    | derselbe Variablenname fuer operative Kontinuitaet beim spaeteren
+    | Setzen der echten Produktionsadresse auf dem Server. KEIN
+    | hartkodierter Fallback-Wert hier (anders als "from" oben, das die
+    | Laravel-Standardwerte behaelt) - eine erfundene/hartkodierte
+    | Empfaengeradresse waere ein Verstoss gegen "keine Mailadresse
+    | erfinden". Ist die Variable nicht gesetzt, behandelt
+    | KontaktController::store() dies als "server_not_configured"
+    | (identisch zum PHP-Original: kjs_load_mail_config() liefert dann
+    | null, die Anfrage wird trotzdem gespeichert, nur der Mailversand
+    | unterbleibt) statt eines Fehlers.
+    |
+    */
+
+    'contact_recipient' => env('CONTACT_RECIPIENT'),
+
 ];
