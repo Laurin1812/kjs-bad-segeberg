@@ -9,7 +9,6 @@ use App\Models\Download;
 use App\Models\DownloadKategorie;
 use App\Models\FaqFrage;
 use App\Models\FaqKategorie;
-use App\Models\GalerieBild;
 use App\Models\Hegering;
 use App\Models\Page;
 use App\Models\Partner;
@@ -17,13 +16,15 @@ use App\Models\PartnerVorteil;
 use App\Models\Person;
 use App\Models\Setting;
 use App\Models\Termin;
+use App\Support\BeitragKategorieUpdater;
+use App\Support\BeitragUpdater;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -184,65 +185,23 @@ class AdminListController extends Controller
         return is_array($item) && isset($item['_id']) && is_numeric($item['_id']) ? (int) $item['_id'] : null;
     }
 
-    /**
-     * Ersetzt die eingebetteten downloads[]/galerie[] eines einzelnen
-     * Owners (Beitrag/Page) komplett - anders als bei den Top-Level-Listen
-     * oben ist hier "alles loeschen, neu anlegen" unbedenklich (Auftrag
-     * Punkt 6: "sofern dadurch keine IDs/Beziehungen kaputtgehen koennten"):
-     * diese Zeilen haben keine eigene, dem Admin bekannte oder extern
-     * verlinkte ID, und nichts in der DB referenziert sie ihrerseits (reine
-     * Blattdaten) - identisch zum bisherigen Verhalten, bei dem die ganze
-     * Datei inkl. dieser Arrays ersetzt wurde.
-     */
-    private function replaceEmbeddedDownloads(Model $owner, mixed $items): void
-    {
-        Download::where('owner_type', $owner->getMorphClass())->where('owner_id', $owner->getKey())->delete();
-        if (! is_array($items)) {
-            return;
-        }
-        foreach (array_values($items) as $i => $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-            $pfad = trim((string) ($item['datei'] ?? ''));
-            $titel = trim((string) ($item['titel'] ?? ''));
-            if ($pfad === '' && $titel === '') {
-                continue;
-            }
-            Download::create([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->getKey(),
-                'titel' => $titel !== '' ? $titel : $pfad,
-                'pfad' => $pfad,
-                'vorschau' => (string) ($item['vorschau'] ?? '') ?: null,
-                'sortierung' => $i,
-            ]);
-        }
-    }
-
-    private function replaceEmbeddedGalerie(Model $owner, mixed $items): void
-    {
-        GalerieBild::where('owner_type', $owner->getMorphClass())->where('owner_id', $owner->getKey())->delete();
-        if (! is_array($items)) {
-            return;
-        }
-        foreach (array_values($items) as $i => $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-            $pfad = trim((string) ($item['bild'] ?? ''));
-            if ($pfad === '') {
-                continue;
-            }
-            GalerieBild::create([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->getKey(),
-                'pfad' => $pfad,
-                'titel' => (string) ($item['titel'] ?? '') ?: null,
-                'sortierung' => $i,
-            ]);
-        }
-    }
+    // Phase 7C (Admin-Modul "Aktuelles"): die beiden vormals hier lebenden
+    // privaten Methoden replaceEmbeddedDownloads()/replaceEmbeddedGalerie()
+    // ("alles loeschen, neu anlegen" fuer downloads[]/galerie[] eines
+    // einzelnen Owners - unbedenklich, da diese Zeilen keine eigene, extern
+    // bekannte ID haben, siehe Auftrag Punkt 6 "sofern dadurch keine IDs/
+    // Beziehungen kaputtgehen koennten") sind unveraendert nach
+    // App\Support\BeitragUpdater umgezogen (dort weiterhin generisch auf
+    // Illuminate\Database\Eloquent\Model gehalten), damit der neue
+    // server-gerenderte Aktuelles-Admin (Http\Controllers\Admin\
+    // AktuellesController) dieselbe Logik nutzen kann, statt eine dritte
+    // Kopie zu bekommen - siehe dortiger Klassenkommentar. aktuelles() unten
+    // nutzt seitdem BeitragUpdater::applyFields() (bundelt beide Aufrufe).
+    // service()/kreisjaegermeister() rufen BeitragUpdater::
+    // replaceEmbeddedDownloads()/replaceEmbeddedGalerie() an denselben
+    // Stellen wie zuvor weiterhin EINZELN auf (siehe dort) - reine
+    // Verschiebung, keine Verhaltensaenderung fuer diese beiden nicht zu
+    // Phase 7C gehoerenden Module.
 
     // ------------------------------------------------------------------
     // Aktuelles
@@ -296,13 +255,22 @@ class AdminListController extends Controller
                     $kat = BeitragKategorie::create(['typ' => 'aktuelles', 'name' => $name, 'sortierung' => $i]);
                     $kategorieMap[$name] = $kat->id;
                 }
+                // Nachbesserung Phase 7C: das eigentliche Get-or-Create
+                // (falls ein Beitrag eine Kategorie traegt, die nicht in
+                // der gerade gespeicherten Liste steht) laeuft seitdem ueber
+                // App\Support\BeitragKategorieUpdater::ensure() - dieselbe
+                // Methode, die auch der neue Blade-Admin fuer Anlegen/
+                // Loeschen einzelner Kategorien nutzt (siehe dortiger
+                // Klassenkommentar). $kategorieMap bleibt als lokaler
+                // Zwischenspeicher bestehen (vermeidet wiederholte Queries
+                // fuer denselben Namen innerhalb dieses Requests) - nur die
+                // Erzeugung selbst ist jetzt die geteilte Logik.
                 $ensureKategorie = function (string $name) use (&$kategorieMap) {
                     if ($name === '') {
                         return null;
                     }
                     if (! isset($kategorieMap[$name])) {
-                        $kat = BeitragKategorie::create(['typ' => 'aktuelles', 'name' => $name, 'sortierung' => count($kategorieMap)]);
-                        $kategorieMap[$name] = $kat->id;
+                        $kategorieMap[$name] = BeitragKategorieUpdater::ensure('aktuelles', $name)?->id;
                     }
 
                     return $kategorieMap[$name];
@@ -320,8 +288,18 @@ class AdminListController extends Controller
                     $existing = $legacyIndex !== null ? $existingByLegacyIndex->get($legacyIndex) : null;
 
                     $kategorieName = trim((string) ($item['kategorie'] ?? ''));
+                    // Phase 7C: die Feld-Anwendung (fill+save) sowie das
+                    // Ersetzen von downloads[]/galerie[] laufen seitdem
+                    // ueber App\Support\BeitragUpdater::applyFields() -
+                    // dieselbe Methode, die auch der neue Blade-Admin fuer
+                    // EINEN Beitrag nutzt (siehe dortiger Klassenkommentar).
+                    // "typ"/"slug"/"legacy_index"/"sortierung" bleiben
+                    // bewusst AUSSERHALB von applyFields() (identitaets-/
+                    // Sortier-Felder, die nur diese Methode hier kennt, da
+                    // sie aus der Position im Gesamt-Payload bzw. der
+                    // Upsert-Zuordnung stammen - applyFields() kennt nur den
+                    // fachlichen Inhalt EINES Beitrags).
                     $fields = [
-                        'typ' => 'aktuelles',
                         'titel' => (string) ($item['titel'] ?? ''),
                         'datum' => $this->parseDatum($item['datum'] ?? null),
                         'jahr' => isset($item['jahr']) && $item['jahr'] !== '' ? (int) $item['jahr'] : null,
@@ -331,28 +309,19 @@ class AdminListController extends Controller
                         'link' => (string) ($item['link'] ?? '') ?: null,
                         'galerie_titel' => (string) ($item['galerie_titel'] ?? '') ?: null,
                         'archiviert' => $this->toBool($item['archiviert'] ?? null, false),
-                        'sortierung' => $position,
+                        'downloads' => $item['downloads'] ?? null,
+                        'galerie' => $item['galerie'] ?? null,
                     ];
 
                     if ($existing) {
-                        $existing->update($fields);
                         $beitrag = $existing;
                     } else {
-                        $titel = $fields['titel'] !== '' ? $fields['titel'] : ('beitrag-'.$nextLegacyIndex);
-                        $slug = $titel;
-                        $baseSlug = \Illuminate\Support\Str::slug($slug) ?: 'beitrag';
-                        $candidate = $baseSlug;
-                        $n = 2;
-                        while (Beitrag::where('typ', 'aktuelles')->where('slug', $candidate)->exists()) {
-                            $candidate = $baseSlug.'-'.$n;
-                            $n++;
-                        }
-                        $beitrag = Beitrag::create($fields + ['slug' => $candidate, 'legacy_index' => $nextLegacyIndex]);
+                        $slug = BeitragUpdater::generateUniqueSlug('aktuelles', $fields['titel'], $nextLegacyIndex);
+                        $beitrag = new Beitrag(['typ' => 'aktuelles', 'slug' => $slug, 'legacy_index' => $nextLegacyIndex]);
                         $nextLegacyIndex++;
                     }
-
-                    $this->replaceEmbeddedDownloads($beitrag, $item['downloads'] ?? null);
-                    $this->replaceEmbeddedGalerie($beitrag, $item['galerie'] ?? null);
+                    $beitrag->sortierung = $position;
+                    BeitragUpdater::applyFields($beitrag, $fields);
                     $keepIds[] = $beitrag->id;
                 }
 
@@ -465,7 +434,7 @@ class AdminListController extends Controller
                         $beitrag = $existing;
                     } else {
                         $titel = $fields['titel'] !== '' ? $fields['titel'] : ('beitrag-'.$nextLegacyIndex);
-                        $baseSlug = \Illuminate\Support\Str::slug($titel) ?: 'beitrag';
+                        $baseSlug = Str::slug($titel) ?: 'beitrag';
                         $candidate = $baseSlug;
                         $n = 2;
                         while (Beitrag::where('typ', 'service')->where('slug', $candidate)->exists()) {
@@ -476,7 +445,7 @@ class AdminListController extends Controller
                         $nextLegacyIndex++;
                     }
 
-                    $this->replaceEmbeddedDownloads($beitrag, $item['downloads'] ?? null);
+                    BeitragUpdater::replaceEmbeddedDownloads($beitrag, $item['downloads'] ?? null);
                     $keepIds[] = $beitrag->id;
                 }
 
@@ -976,8 +945,8 @@ class AdminListController extends Controller
                 ]);
                 $page->save();
 
-                $this->replaceEmbeddedDownloads($page, $data['downloads'] ?? null);
-                $this->replaceEmbeddedGalerie($page, $data['galerie'] ?? null);
+                BeitragUpdater::replaceEmbeddedDownloads($page, $data['downloads'] ?? null);
+                BeitragUpdater::replaceEmbeddedGalerie($page, $data['galerie'] ?? null);
 
                 return $this->ok(ContentVersioning::bump(self::SECTION_KJM));
             });

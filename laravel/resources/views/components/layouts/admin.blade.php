@@ -28,7 +28,9 @@
         // die Sidebar auch auf der Bearbeiten-Unterseite als aktiv markiert
         // bleibt.
         ['label' => 'Inhalte (Seiten)', 'route' => 'admin.inhalte.index', 'routePattern' => 'admin.inhalte.*', 'icon' => '📄'],
-        ['label' => 'Aktuelles', 'icon' => '📰'],
+        // Phase 7C (Admin-Modul "Aktuelles"): zweiter echter Link, gleiches
+        // Muster wie "Inhalte (Seiten)" oben.
+        ['label' => 'Aktuelles', 'route' => 'admin.aktuelles.index', 'routePattern' => 'admin.aktuelles.*', 'icon' => '📰'],
         ['label' => 'Termine', 'icon' => '📅'],
         ['label' => 'Downloads', 'icon' => '📁'],
         ['label' => 'Partner', 'icon' => '🤝'],

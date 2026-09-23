@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AktuellesController as AdminAktuellesController;
 use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InhalteController;
@@ -350,5 +351,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('inhalte', [InhalteController::class, 'index'])->name('inhalte.index');
         Route::get('inhalte/{page}/bearbeiten', [InhalteController::class, 'edit'])->name('inhalte.bearbeiten');
         Route::put('inhalte/{page}', [InhalteController::class, 'update'])->name('inhalte.update');
+
+        // Phase 7C (Admin-Modul "Aktuelles") - zweites echtes Fachmodul,
+        // siehe Admin\AktuellesController-Klassenkommentar fuer den genauen
+        // Ausschnitt ("typ" = 'aktuelles', NICHT 'service'). Route-Reihenfolge
+        // bewusst wie bei Laravels resource()-Konvention (index/neu(create)/
+        // store/bearbeiten(edit)/update/loeschen(destroy)), aber einzeln
+        // registriert statt Route::resource(), da die deutschen URL-/Namens-
+        // Segmente ("neu"/"bearbeiten"/"loeschen" statt "create"/"edit"/
+        // "destroy") nicht dem Laravel-Standardschema entsprechen - exakt
+        // dasselbe Vorgehen wie bei "inhalte" oben.
+        Route::get('aktuelles', [AdminAktuellesController::class, 'index'])->name('aktuelles.index');
+        Route::get('aktuelles/neu', [AdminAktuellesController::class, 'neu'])->name('aktuelles.neu');
+        Route::post('aktuelles', [AdminAktuellesController::class, 'store'])->name('aktuelles.store');
+        Route::get('aktuelles/{beitrag}/bearbeiten', [AdminAktuellesController::class, 'edit'])->name('aktuelles.bearbeiten');
+        Route::put('aktuelles/{beitrag}', [AdminAktuellesController::class, 'update'])->name('aktuelles.update');
+        Route::delete('aktuelles/{beitrag}', [AdminAktuellesController::class, 'destroy'])->name('aktuelles.loeschen');
+
+        // Nachbesserung Phase 7C (Kategorie-Verwaltung, siehe Admin\
+        // AktuellesController-Klassenkommentar "Kategorien"): "kategorien"
+        // als literales Segment kollidiert nicht mit den {beitrag}-Routen
+        // oben (unterschiedliche Segmentanzahl/HTTP-Methoden je Route).
+        Route::post('aktuelles/kategorien', [AdminAktuellesController::class, 'kategorieAnlegen'])->name('aktuelles.kategorien.anlegen');
+        Route::delete('aktuelles/kategorien/{kategorie}', [AdminAktuellesController::class, 'kategorieLoeschen'])->name('aktuelles.kategorien.loeschen');
     });
 });

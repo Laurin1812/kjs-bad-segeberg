@@ -198,6 +198,11 @@ html, body.kjs-admin {
   font-size: .85rem; color: var(--admin-text-muted); line-height: 1.6;
 }
 
+/* Phase 7C (Admin-Modul "Aktuelles"): 1:1-Klassenname-Hand-Port aus
+   admin/admin.css (".text-muted", dort Zeile 640) - dieselbe generische
+   Text-Hilfsklasse, die in Phase 7A/7B noch nicht gebraucht wurde. */
+.text-muted { color: var(--admin-text-muted); }
+
 /* ── RESPONSIVES GRUNDLAYOUT (Auftragspunkt Teil 4) ───────────────
    Ab hier: Sidebar wandert unter die Topbar statt links daneben, die
    Topbar bekommt einen Menue-Knopf. Reines CSS (:target-freies
