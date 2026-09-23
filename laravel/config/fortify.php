@@ -171,11 +171,40 @@ return [
 
     'redirects' => [
         'login' => null,
-        'logout' => null,
+        // Phase 7A (Laravel-Admin-Grundlage): die einzigen beiden
+        // Aenderungen dieser Datei in Phase 7A (logout/password-reset
+        // unten) - Login-Erfolg selbst bleibt unveraendert bei
+        // Fortify::redirects('login', null), also weiterhin
+        // config('fortify.home') = '/admin/'.
+        //
+        // Ohne diesen Eintrag wuerde Laravel\Fortify\Http\Responses\
+        // LogoutResponse fest auf '/' (oeffentliche Startseite) umleiten
+        // (der in dieser Klasse hart codierte Default-Wert) - fuer den
+        // neuen, rein admin-internen Blade-Loginweg (siehe routes/web.php,
+        // Praefix "admin") ist die neue deutsche Login-Seite das
+        // sinnvollere Ziel nach "Abmelden", statt den abgemeldeten
+        // Redakteur erst auf die oeffentliche Website zu schicken. Betrifft
+        // ausschliesslich den neuen Blade-Weg - das bestehende admin.js
+        // ruft logout() weiterhin selbst per fetch() auf und wertet nur den
+        // HTTP-Status aus, nicht dieses Redirect-Ziel.
+        'logout' => '/admin/login',
         'password-confirmation' => null,
         'register' => null,
         'email-verification' => null,
-        'password-reset' => null,
+        // Ohne diesen Eintrag wuerde ein erfolgreicher Passwort-Reset zwar
+        // ebenfalls letztlich bei config('fortify.home') ('/admin/')
+        // landen (Laravel\Fortify\Http\Responses\PasswordResetResponse:
+        // config('fortify.views') ist hier "false", ruft daher bewusst
+        // NICHT route('login') auf - diese Route existiert bei
+        // deaktivierten Views gar nicht - und faellt dadurch ohnehin schon
+        // automatisch auf fortify.home zurueck). Weil '/admin/' selbst
+        // aber durch EnsureAdminWebSession weiter zur Login-Seite
+        // umgeleitet wird (Redakteur ist nach dem Reset noch nicht
+        // angemeldet), ginge die per session('status') mitgegebene
+        // Erfolgsmeldung ("Ihr Passwort wurde zurückgesetzt.") auf diesem
+        // Zwischen-Redirect verloren. Direktes Ziel = Login-Seite behebt
+        // das, ohne eigenen Code.
+        'password-reset' => '/admin/login',
     ],
 
     'passkeys' => [

@@ -15,7 +15,14 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            // Phase 7A (Laravel-Admin-Grundlage): "resources/css/admin.css"
+            // ist ein bewusst EIGENER, zweiter Vite-Eintrag statt eines
+            // Imports in app.css - der neue Blade-Admin (siehe
+            // components/layouts/admin.blade.php) teilt sich mit den
+            // oeffentlichen Seiten weder Layout noch Farbschema-Variablen
+            // (siehe admin.css-Kopfkommentar), beide Bereiche laden dadurch
+            // weiterhin nur genau das CSS, das sie tatsaechlich brauchen.
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/admin.css'],
             refresh: true,
         }),
     ],

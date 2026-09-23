@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthPageController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
 use App\Http\Controllers\DownloadsController;
@@ -285,3 +287,55 @@ if (! app()->environment('production')) {
         return view('preview.blade-fundament');
     })->name('preview.blade-fundament');
 }
+
+/*
+|--------------------------------------------------------------------------
+| KJS Bad Segeberg - Phase 7A (Laravel-Admin-Grundlage / Auth / Admin-Shell)
+|--------------------------------------------------------------------------
+|
+| Neue, server-gerenderte Blade-Oberflaeche unter "/admin" - ausdruecklich
+| GETRENNT von der bestehenden JSON-Admin-API unter "/api/admin/*" (siehe
+| routes/api.php, "Phase 4 Admin-Schreib-API"), die weiterhin unveraendert
+| vom bisherigen admin/admin.js bedient wird (siehe Auftrag: "Keine
+| komplette Admin-Migration in einem Commit" - admin.js/admin/index.html
+| bleiben in Phase 7A komplett unangetastet und weiter erreichbar).
+|
+| WICHTIG (Produktions-Hinweis, KEINE Aenderung in Phase 7A - siehe Auftrag
+| "Keine Produktion/Cutover-Arbeiten"): die .htaccess im Repo-Wurzel-
+| verzeichnis brueckt auf dem echten Apache-Host bislang NUR
+| "^/api/(content|admin)/" nach laravel/public/index.php durch (siehe
+| dortiger Abschnitt "Laravel-Bruecke fuer /api/content/* und /api/admin/*",
+| Phase 7). Die hier registrierten GET-Routen unter dem PLAIN Praefix
+| "/admin" (ohne "/api/"-Vorspann) durchlaufen dieses Rewrite NICHT und sind
+| dadurch auf dem echten Produktions-Apache-Host aktuell NICHT erreichbar -
+| in der lokalen Dev-/Test-Umgebung (php artisan serve, PHPUnit) sowie nach
+| einem spaeteren Cutover auf einen Webserver, der grundsaetzlich alles an
+| Laravel durchreicht, funktionieren sie unveraendert. Vor dem produktiven
+| Live-Schalten dieser neuen Oberflaeche (kuenftige Cutover-Phase) muss die
+| .htaccess-RewriteCond um "|/admin/" ergaenzt werden - hier bewusst nur
+| dokumentiert, nicht umgesetzt.
+|
+| Die POST-Ziele der Formulare unten (Login/Logout/Passwort-E-Mail/
+| Passwort-Update) sind von dieser Einschraenkung NICHT betroffen: sie
+| laufen bereits jetzt unter dem laengst gebrueckten Praefix "api/admin/
+| auth/*" (siehe config/fortify.php "paths"), exakt derselbe Grund, aus dem
+| dieser Praefix damals so gewaehlt wurde.
+|
+*/
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Drei deutsche Auth-Formularseiten - siehe AuthPageController-
+    // Klassenkommentar. Bewusst OHNE "guest:web"-Middleware (dessen
+    // Standard-Redirectziel waere die oeffentliche Startseite statt des
+    // Admin-Dashboards) - AuthPageController::login() erledigt die
+    // "bereits angemeldet"-Weiterleitung selbst.
+    Route::get('login', [AuthPageController::class, 'login'])->name('login');
+    Route::get('passwort-vergessen', [AuthPageController::class, 'passwortVergessen'])->name('password.request');
+    Route::get('passwort-zuruecksetzen/{token}', [AuthPageController::class, 'passwortZuruecksetzen'])->name('password.reset');
+
+    // Geschuetzter Bereich: alles ab hier verlangt eine gueltige Admin-
+    // Sitzung (siehe App\Http\Middleware\EnsureAdminWebSession). Noch KEINE
+    // fachlichen Module (siehe Auftrag "NICHT JETZT") - nur das Dashboard.
+    Route::middleware('admin.web')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    });
+});
