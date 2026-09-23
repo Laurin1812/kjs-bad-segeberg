@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AktuellesController as AdminAktuellesController;
 use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InhalteController;
+use App\Http\Controllers\Admin\TermineController as AdminTermineController;
 use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
 use App\Http\Controllers\DownloadsController;
@@ -374,5 +375,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // oben (unterschiedliche Segmentanzahl/HTTP-Methoden je Route).
         Route::post('aktuelles/kategorien', [AdminAktuellesController::class, 'kategorieAnlegen'])->name('aktuelles.kategorien.anlegen');
         Route::delete('aktuelles/kategorien/{kategorie}', [AdminAktuellesController::class, 'kategorieLoeschen'])->name('aktuelles.kategorien.loeschen');
+
+        // Phase 7D (Admin-Modul "Termine") - drittes echtes Fachmodul,
+        // analog zu "aktuelles" oben (Route-Reihenfolge nach demselben
+        // Muster, einzeln registriert statt Route::resource() wegen der
+        // deutschen URL-/Namens-Segmente).
+        Route::get('termine', [AdminTermineController::class, 'index'])->name('termine.index');
+        Route::get('termine/neu', [AdminTermineController::class, 'neu'])->name('termine.neu');
+        Route::post('termine', [AdminTermineController::class, 'store'])->name('termine.store');
+        Route::get('termine/{termin}/bearbeiten', [AdminTermineController::class, 'edit'])->name('termine.bearbeiten');
+        Route::put('termine/{termin}', [AdminTermineController::class, 'update'])->name('termine.update');
+        Route::delete('termine/{termin}', [AdminTermineController::class, 'destroy'])->name('termine.loeschen');
+
+        // Ein-Klick-Archivieren/Wiederherstellen direkt aus der Liste
+        // (admin.js' termineArchivToggle(), siehe TermineController-
+        // Klassenkommentar) - eigene Route (3 Segmente), kollidiert nicht
+        // mit der PUT-Update-Route oben (2 Segmente).
+        Route::put('termine/{termin}/archivieren', [AdminTermineController::class, 'archivToggle'])->name('termine.archivieren');
+
+        // Überschrift/Einleitungstext der öffentlichen Termine-Seite
+        // (admin.js' termineEinstSave()) - eigene Route, da kein einzelner
+        // Termin-Datensatz betroffen ist; POST + 2 Segmente kollidiert
+        // weder mit dem POST-Store (1 Segment) noch mit der PUT-Update-
+        // Route (anderes Verb).
+        Route::post('termine/einstellungen', [AdminTermineController::class, 'einstellungenSpeichern'])->name('termine.einstellungen');
     });
 });

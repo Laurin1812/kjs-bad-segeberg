@@ -31,7 +31,9 @@
         // Phase 7C (Admin-Modul "Aktuelles"): zweiter echter Link, gleiches
         // Muster wie "Inhalte (Seiten)" oben.
         ['label' => 'Aktuelles', 'route' => 'admin.aktuelles.index', 'routePattern' => 'admin.aktuelles.*', 'icon' => '📰'],
-        ['label' => 'Termine', 'icon' => '📅'],
+        // Phase 7D (Admin-Modul "Termine"): dritter echter Link, gleiches
+        // Muster wie "Aktuelles"/"Inhalte (Seiten)" oben.
+        ['label' => 'Termine', 'route' => 'admin.termine.index', 'routePattern' => 'admin.termine.*', 'icon' => '📅'],
         ['label' => 'Downloads', 'icon' => '📁'],
         ['label' => 'Partner', 'icon' => '🤝'],
         ['label' => 'Hundeausbildung', 'icon' => '🎓'],

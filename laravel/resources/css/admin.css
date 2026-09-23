@@ -260,6 +260,15 @@ html, body.kjs-admin {
 .field-select { cursor: pointer; }
 .field-input--invalid, .field-textarea--invalid { border-color: var(--admin-danger) !important; }
 
+/* Phase 7D (Admin-Modul "Termine"): 1:1-Klassenname-Hand-Port aus
+   admin/admin.css (".field-row-2", dort Zeile 320) - zweispaltiges
+   Feld-Raster (hier fuer PLZ/Ort), das in Phase 7A/7B/7C noch nicht
+   gebraucht wurde. */
+.field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) {
+  .field-row-2 { grid-template-columns: 1fr; }
+}
+
 .richtext-box {
   border: 1.5px solid var(--admin-border); border-radius: 6px; min-height: 140px;
   padding: .6rem .85rem; font-size: .9rem; line-height: 1.55;

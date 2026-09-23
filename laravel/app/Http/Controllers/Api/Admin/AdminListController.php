@@ -20,6 +20,7 @@ use App\Support\BeitragKategorieUpdater;
 use App\Support\BeitragUpdater;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
+use App\Support\TerminUpdater;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -485,7 +486,16 @@ class AdminListController extends Controller
                     }
                 }
 
-                $existingIds = Termin::pluck('id')->all();
+                // Phase 7D (Admin-Modul "Termine"): die eigentliche Feld-
+                // Zuweisung/Normalisierung laeuft seitdem ueber
+                // App\Support\TerminUpdater::applyFields() - dieselbe
+                // Methode, die auch der neue Blade-Admin (Http\Controllers\
+                // Admin\TermineController) fuer EINEN Termin nutzt (siehe
+                // dortiger Klassenkommentar). Das Datumsformat-Parsing
+                // ("TT.MM.JJJJ" -> ISO) bleibt bewusst HIER, da es nur fuer
+                // die alte JSON-Struktur gilt - TerminUpdater bekommt
+                // "datum" bereits als fertiges ISO-Datum oder null.
+                $existingById = Termin::all()->keyBy('id');
                 $keepIds = [];
                 foreach (array_values($items) as $item) {
                     if (! is_array($item)) {
@@ -511,12 +521,12 @@ class AdminListController extends Controller
                         'archiviert' => $this->toBool($item['archiviert'] ?? null, false),
                     ];
                     $id = $this->embeddedId($item);
-                    if ($id !== null && in_array($id, $existingIds, true)) {
-                        Termin::where('id', $id)->update($fields);
-                        $keepIds[] = $id;
-                    } else {
-                        $keepIds[] = Termin::create($fields)->id;
+                    $termin = $id !== null ? $existingById->get($id) : null;
+                    if (! $termin) {
+                        $termin = new Termin;
                     }
+                    TerminUpdater::applyFields($termin, $fields);
+                    $keepIds[] = $termin->id;
                 }
                 Termin::whereNotIn('id', $keepIds)->delete();
 
