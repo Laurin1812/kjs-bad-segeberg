@@ -23,7 +23,11 @@
 @php
     $kjsAdminNav = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => '📊'],
-        ['label' => 'Inhalte (Seiten)', 'icon' => '📄'],
+        // Phase 7B (Admin-Modul "Inhalte/Seiten"): erster echter Link -
+        // "routeIs('admin.inhalte.*')" statt eines exakten Vergleichs, damit
+        // die Sidebar auch auf der Bearbeiten-Unterseite als aktiv markiert
+        // bleibt.
+        ['label' => 'Inhalte (Seiten)', 'route' => 'admin.inhalte.index', 'routePattern' => 'admin.inhalte.*', 'icon' => '📄'],
         ['label' => 'Aktuelles', 'icon' => '📰'],
         ['label' => 'Termine', 'icon' => '📅'],
         ['label' => 'Downloads', 'icon' => '📁'],
@@ -71,7 +75,7 @@
         <div class="sidebar-section">Verwaltung</div>
         @foreach ($kjsAdminNav as $kjsNavItem)
             @if (isset($kjsNavItem['route']))
-                <a href="{{ route($kjsNavItem['route']) }}" class="nav-item @if (request()->routeIs($kjsNavItem['route'])) active @endif">
+                <a href="{{ route($kjsNavItem['route']) }}" class="nav-item @if (request()->routeIs($kjsNavItem['routePattern'] ?? $kjsNavItem['route'])) active @endif">
                     <span aria-hidden="true">{{ $kjsNavItem['icon'] }}</span>
                     <span>{{ $kjsNavItem['label'] }}</span>
                 </a>

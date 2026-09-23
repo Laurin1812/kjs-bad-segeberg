@@ -22,7 +22,13 @@ export default defineConfig({
             // oeffentlichen Seiten weder Layout noch Farbschema-Variablen
             // (siehe admin.css-Kopfkommentar), beide Bereiche laden dadurch
             // weiterhin nur genau das CSS, das sie tatsaechlich brauchen.
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/admin.css'],
+            // Phase 7B (Admin-Modul "Inhalte/Seiten"): "resources/js/
+            // admin-inhalte-editor.js" ist der vierte, ebenfalls eigene
+            // Eintrag - der per npm installierte TipTap-Rich-Text-Editor
+            // (siehe dortiger Klassenkommentar) wird NUR auf der Bearbeiten-
+            // Seite dieses einen Moduls eingebunden, nicht global in app.js/
+            // admin.css.
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/admin.css', 'resources/js/admin-inhalte-editor.js'],
             refresh: true,
         }),
     ],

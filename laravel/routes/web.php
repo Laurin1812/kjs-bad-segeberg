@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
 use App\Http\Controllers\DownloadsController;
@@ -333,9 +334,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('passwort-zuruecksetzen/{token}', [AuthPageController::class, 'passwortZuruecksetzen'])->name('password.reset');
 
     // Geschuetzter Bereich: alles ab hier verlangt eine gueltige Admin-
-    // Sitzung (siehe App\Http\Middleware\EnsureAdminWebSession). Noch KEINE
-    // fachlichen Module (siehe Auftrag "NICHT JETZT") - nur das Dashboard.
+    // Sitzung (siehe App\Http\Middleware\EnsureAdminWebSession).
     Route::middleware('admin.web')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Phase 7B (Admin-Modul "Inhalte/Seiten") - erstes echtes
+        // Fachmodul, siehe InhalteController-Klassenkommentar fuer den
+        // genauen Ausschnitt der Page-Familie, den es abdeckt (und den, den
+        // es bewusst NICHT abdeckt). Route-Model-Binding auf {page} (statt
+        // Slug-Segmenten wie bei der JSON-API) - fuer den Blade-Admin ist das
+        // die passendere Wahl (siehe Auftrag Teil 3 "Die tatsaechlich
+        // geeignete Route bitte anhand des Models waehlen"): jede Page-Zeile
+        // hat unabhaengig von Section/Parent/Registry-Herkunft dieselbe,
+        // eindeutige numerische ID.
+        Route::get('inhalte', [InhalteController::class, 'index'])->name('inhalte.index');
+        Route::get('inhalte/{page}/bearbeiten', [InhalteController::class, 'edit'])->name('inhalte.bearbeiten');
+        Route::put('inhalte/{page}', [InhalteController::class, 'update'])->name('inhalte.update');
     });
 });

@@ -216,3 +216,96 @@ html, body.kjs-admin {
   .panel-body { padding: 1rem; }
   .login-box { padding: 2rem 1.5rem; }
 }
+
+/* ── FORM (Phase 7B, Admin-Modul "Inhalte/Seiten") ────────────────
+   1:1-Klassennamen-Hand-Port aus admin/admin.css (form-card, field-Klassen,
+   item-Klassen, save-bar, btn-sm, btn-danger-outline) - siehe Auftrag "bestehenden
+   Admin visuell möglichst wiedererkennbar halten". Bewusst NICHT
+   uebernommen: Drag-Handle (.item-drag, kein Sortable.js in Phase 7B - siehe
+   Abschlussbericht), Bild-/Farb-/RAL-Picker, EasyMDE/TipTap-Bild-Kontextmenue
+   (Medienverwaltung ist laut Auftrag "NICHT JETZT"). */
+.form-card {
+  background: var(--admin-white); border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius); padding: 1.5rem;
+  margin-bottom: 1rem; box-shadow: var(--admin-shadow);
+}
+.form-card-title {
+  font-size: .8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--admin-text-muted); margin-bottom: 1.25rem;
+  padding-bottom: .75rem; border-bottom: 1px solid var(--admin-border);
+}
+.field-row { margin-bottom: 1.25rem; }
+.field-row:last-child { margin-bottom: 0; }
+.field-label {
+  display: block; font-size: .82rem; font-weight: 600;
+  color: var(--admin-text-muted); margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .04em;
+}
+.field-hint { font-size: .75rem; color: var(--admin-text-muted); margin: .25rem 0 .75rem; }
+.field-req { color: var(--admin-danger); }
+.field-input, .field-select, .field-textarea {
+  width: 100%; padding: .6rem .85rem;
+  border: 1.5px solid var(--admin-border); border-radius: 6px;
+  font-size: .9rem; font-family: inherit; color: var(--admin-text);
+  background: var(--admin-white); transition: border-color .15s;
+}
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  outline: none; border-color: var(--admin-green); box-shadow: 0 0 0 3px rgba(46,107,48,.1);
+}
+.field-textarea { resize: vertical; min-height: 80px; }
+.field-select { cursor: pointer; }
+.field-input--invalid, .field-textarea--invalid { border-color: var(--admin-danger) !important; }
+
+.richtext-box {
+  border: 1.5px solid var(--admin-border); border-radius: 6px; min-height: 140px;
+  padding: .6rem .85rem; font-size: .9rem; line-height: 1.55;
+}
+.richtext-box:focus-within { border-color: var(--admin-green); box-shadow: 0 0 0 3px rgba(46,107,48,.1); }
+.richtext-box p:first-child { margin-top: 0; }
+.richtext-box p:last-child { margin-bottom: 0; }
+.richtext-toolbar { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .5rem; }
+.richtext-toolbar button {
+  border: 1.5px solid var(--admin-border); background: var(--admin-white); border-radius: 6px;
+  padding: .3rem .55rem; font-size: .82rem; cursor: pointer; line-height: 1;
+}
+.richtext-toolbar button:hover { background: var(--admin-green-light); }
+.richtext-toolbar button.is-active { background: var(--admin-green-light); border-color: var(--admin-green); color: var(--admin-green-dark); }
+
+.item-card {
+  background: var(--admin-white); border: 1.5px solid var(--admin-border);
+  border-radius: var(--admin-radius); padding: 1rem 1.25rem;
+  margin-bottom: .75rem; display: flex; align-items: flex-start; gap: 1rem;
+}
+.item-body { flex: 1; min-width: 0; }
+.item-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+
+.save-bar {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  padding: 1rem 1.5rem; background: var(--admin-white);
+  border-top: 1px solid var(--admin-border); position: sticky; bottom: 0;
+}
+.save-status { font-size: .85rem; color: var(--admin-text-muted); flex: 1; }
+.save-status--error { color: var(--admin-danger); font-weight: 600; }
+
+.btn-sm { padding: .35rem .75rem; font-size: .8rem; }
+.btn-danger-outline { background: transparent; color: var(--admin-danger); border-color: var(--admin-danger); }
+.btn-danger-outline:hover { background: var(--admin-danger-bg); }
+
+.seiten-liste-section { margin-bottom: 2rem; }
+.seiten-liste-section h2 { font-size: 1rem; color: var(--admin-green-dark); margin: 0 0 .75rem; }
+.seiten-liste-tabelle { width: 100%; border-collapse: collapse; background: var(--admin-white); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); overflow: hidden; }
+.seiten-liste-tabelle th, .seiten-liste-tabelle td { padding: .6rem .9rem; text-align: left; font-size: .87rem; border-bottom: 1px solid var(--admin-border); }
+.seiten-liste-tabelle th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--admin-text-muted); background: var(--admin-bg); }
+.seiten-liste-tabelle tr:last-child td { border-bottom: none; }
+.seiten-liste-tabelle .ist-unterseite td:first-child { padding-left: 2rem; color: var(--admin-text-muted); }
+.seitentyp-badge {
+  display: inline-block; padding: .1rem .5rem; border-radius: 99px; font-size: .7rem;
+  font-weight: 600; background: var(--admin-green-light); color: var(--admin-green-dark);
+}
+
+@media (max-width: 640px) {
+  .seiten-liste-tabelle, .seiten-liste-tabelle thead, .seiten-liste-tabelle tbody, .seiten-liste-tabelle th, .seiten-liste-tabelle td, .seiten-liste-tabelle tr { display: block; }
+  .seiten-liste-tabelle thead { display: none; }
+  .seiten-liste-tabelle tr { border: 1px solid var(--admin-border); border-radius: var(--admin-radius); margin-bottom: .75rem; }
+  .seiten-liste-tabelle td { border-bottom: none; padding: .4rem .9rem; }
+  .seiten-liste-tabelle .ist-unterseite td:first-child { padding-left: .9rem; }
+}

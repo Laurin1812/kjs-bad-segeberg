@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
-use App\Models\PageLink;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
 use App\Support\KjsPagesConfig;
+use App\Support\PageUpdater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -102,75 +102,6 @@ class AdminPageController extends Controller
         ];
     }
 
-    private function toBool(mixed $value, bool $default = false): bool
-    {
-        if ($value === null) {
-            return $default;
-        }
-        if (is_bool($value)) {
-            return $value;
-        }
-        if (is_int($value) || is_float($value)) {
-            return (int) $value === 1;
-        }
-        if (is_string($value)) {
-            $v = strtolower(trim($value));
-            if (in_array($v, ['true', '1'], true)) {
-                return true;
-            }
-
-            return false;
-        }
-
-        return (bool) $value;
-    }
-
-    /**
-     * Uebertraegt alle Felder aus dem Payload auf eine BESTEHENDE Page -
-     * Spiegelbild von ImportContent::createPageFromFields(), aber als
-     * update() statt create() und bewusst OHNE "registry_veroeffentlicht"
-     * anzufassen (siehe Klassenkommentar bei importWeitere()/Migration
-     * 2026_09_16_000004: dieses Feld gehoert der REGISTRY-Ansicht, nicht der
-     * Einzelseite - ein Speichern der Einzelseite darf den dort separat
-     * hinterlegten Registry-Wert nicht ueberschreiben, sonst waere genau der
-     * in Phase 3 Runde 3 behobene Fehler wieder da).
-     */
-    private function applyFields(Page $page, array $data): void
-    {
-        $page->fill([
-            'titel' => (string) ($data['titel'] ?? '') ?: null,
-            'untertitel' => is_string($data['untertitel'] ?? null) ? $data['untertitel'] : null,
-            'nav_label' => (string) ($data['nav_label'] ?? '') ?: null,
-            'intro' => $data['intro'] ?? null,
-            'inhalt' => $data['inhalt'] ?? null,
-            'hero_bild' => (string) ($data['hero_bild'] ?? '') ?: null,
-            'bild' => (string) ($data['bild'] ?? '') ?: null,
-            'bild_alt' => (string) ($data['bild_alt'] ?? '') ?: null,
-            'vorschaubild' => (string) ($data['vorschaubild'] ?? '') ?: null,
-            'kurzbeschreibung' => $data['kurzbeschreibung'] ?? null,
-            'bild_groesse' => (string) ($data['bild_groesse'] ?? '') ?: null,
-            'bild_flat' => $this->toBool($data['bild_flat'] ?? null, false),
-            'kontakt_name' => (string) ($data['kontakt_name'] ?? '') ?: null,
-            'kontakt_email' => (string) ($data['kontakt_email'] ?? '') ?: null,
-            'kontakt_telefon' => (string) ($data['kontakt_telefon'] ?? '') ?: null,
-            'antrag_url' => (string) ($data['antrag_url'] ?? '') ?: null,
-            'unterseiten_titel' => (string) ($data['unterseiten_titel'] ?? '') ?: null,
-            'galerie_titel' => (string) ($data['galerie_titel'] ?? '') ?: null,
-            'gruppe' => (string) ($data['gruppe'] ?? '') ?: null,
-            'linkliste_titel' => (string) ($data['linkliste_titel'] ?? '') ?: null,
-            'hundeboerse_cta_titel' => (string) ($data['hundeboerse_cta_titel'] ?? '') ?: null,
-            'hundeboerse_cta_text' => (string) ($data['hundeboerse_cta_text'] ?? '') ?: null,
-            'hundeboerse_cta_button' => (string) ($data['hundeboerse_cta_button'] ?? '') ?: null,
-            'in_navigation' => $this->toBool($data['in_navigation'] ?? null, true),
-            'veroeffentlicht' => $this->toBool($data['veroeffentlicht'] ?? null, true),
-        ]);
-        $page->save();
-
-        $this->replaceEmbeddedDownloads($page, $data['downloads'] ?? null);
-        $this->replaceEmbeddedGalerie($page, $data['galerie'] ?? null);
-        $this->replacePageLinks($page, $data['linkliste'] ?? null);
-    }
-
     /**
      * Phase 6 Auftrag Punkt 5 ("Slug-Sicherheit"): serverseitige Prüfung,
      * unabhängig davon, was admin.js' makeSlug() clientseitig bereits erzeugt
@@ -227,8 +158,8 @@ class AdminPageController extends Controller
             'gruppe' => (string) ($data['gruppe'] ?? '') ?: null,
             'kontakt_name' => (string) ($data['kontakt_name'] ?? '') ?: null,
             'kontakt_email' => (string) ($data['kontakt_email'] ?? '') ?: null,
-            'in_navigation' => $this->toBool($data['in_navigation'] ?? null, true),
-            'veroeffentlicht' => $this->toBool($data['veroeffentlicht'] ?? null, true),
+            'in_navigation' => PageUpdater::toBool($data['in_navigation'] ?? null, true),
+            'veroeffentlicht' => PageUpdater::toBool($data['veroeffentlicht'] ?? null, true),
         ]);
     }
 
@@ -448,13 +379,14 @@ class AdminPageController extends Controller
 
         return DB::transaction(function () use ($page) {
             // Eingebettete Downloads/Galerie/Linkliste der Seite mit aufräumen
-            // (dieselben privaten Methoden wie applyFields() beim Speichern
-            // verwendet, mit leerem Array = "alles entfernen") - sonst blieben
-            // verwaiste Download-/Galerie-/Link-Zeilen mit einer owner_id
-            // zurueck, die auf keine Page-Zeile mehr zeigt.
-            $this->replaceEmbeddedDownloads($page, []);
-            $this->replaceEmbeddedGalerie($page, []);
-            $this->replacePageLinks($page, []);
+            // (dieselben Methoden wie PageUpdater::applyFields() beim
+            // Speichern verwendet, mit leerem Array = "alles entfernen",
+            // siehe PageUpdater-Klassenkommentar) - sonst blieben verwaiste
+            // Download-/Galerie-/Link-Zeilen mit einer owner_id zurueck, die
+            // auf keine Page-Zeile mehr zeigt.
+            PageUpdater::replaceEmbeddedDownloads($page, []);
+            PageUpdater::replaceEmbeddedGalerie($page, []);
+            PageUpdater::replacePageLinks($page, []);
             $page->delete();
 
             return response()->json(['success' => true]);
@@ -665,88 +597,20 @@ class AdminPageController extends Controller
         return $this->reordne($scope, $request->input('order'));
     }
 
-    private function replaceEmbeddedDownloads(Page $page, mixed $items): void
-    {
-        \App\Models\Download::where('owner_type', $page->getMorphClass())->where('owner_id', $page->id)->delete();
-        if (! is_array($items)) {
-            return;
-        }
-        foreach (array_values($items) as $i => $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-            $pfad = trim((string) ($item['datei'] ?? ''));
-            $titel = trim((string) ($item['titel'] ?? ''));
-            if ($pfad === '' && $titel === '') {
-                continue;
-            }
-            \App\Models\Download::create([
-                'owner_type' => $page->getMorphClass(),
-                'owner_id' => $page->id,
-                'titel' => $titel !== '' ? $titel : $pfad,
-                'pfad' => $pfad,
-                'vorschau' => (string) ($item['vorschau'] ?? '') ?: null,
-                'sortierung' => $i,
-            ]);
-        }
-    }
-
-    private function replaceEmbeddedGalerie(Page $page, mixed $items): void
-    {
-        \App\Models\GalerieBild::where('owner_type', $page->getMorphClass())->where('owner_id', $page->id)->delete();
-        if (! is_array($items)) {
-            return;
-        }
-        foreach (array_values($items) as $i => $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-            $pfad = trim((string) ($item['bild'] ?? ''));
-            if ($pfad === '') {
-                continue;
-            }
-            \App\Models\GalerieBild::create([
-                'owner_type' => $page->getMorphClass(),
-                'owner_id' => $page->id,
-                'pfad' => $pfad,
-                'titel' => (string) ($item['titel'] ?? '') ?: null,
-                'sortierung' => $i,
-            ]);
-        }
-    }
-
-    private function replacePageLinks(Page $page, mixed $items): void
-    {
-        PageLink::where('page_id', $page->id)->delete();
-        if (! is_array($items)) {
-            return;
-        }
-        foreach (array_values($items) as $i => $item) {
-            if (! is_array($item)) {
-                continue;
-            }
-            $href = trim((string) ($item['url'] ?? ''));
-            $label = trim((string) ($item['titel'] ?? ''));
-            if ($href === '' && $label === '') {
-                continue;
-            }
-            PageLink::create(['page_id' => $page->id, 'label' => $label, 'href' => $href, 'sortierung' => $i]);
-        }
-    }
-
-    /** Gemeinsamer Speicher-Ablauf: Version pruefen, Felder anwenden, Version erhoehen. */
+    /**
+     * Gemeinsamer Speicher-Ablauf: Version pruefen, Felder anwenden, Version
+     * erhoehen - Phase 7B: die eigentliche Logik lebt jetzt in
+     * PageUpdater::saveWithVersionCheck() (siehe dortiger Klassenkommentar),
+     * damit der neue Blade-Admin (Http\Controllers\Admin\InhalteController)
+     * sie ohne Duplikat mitbenutzen kann. Verhalten hier unveraendert.
+     */
     private function saveResolved(?Page $page, string $versionSection, array $data, ?int $expected): JsonResponse
     {
         if (! $page) {
             return $this->notFound();
         }
         try {
-            return DB::transaction(function () use ($page, $versionSection, $data, $expected) {
-                ContentVersioning::assertNotStale($versionSection, $expected);
-                $this->applyFields($page, $data);
-
-                return $this->ok(ContentVersioning::bump($versionSection));
-            });
+            return $this->ok(PageUpdater::saveWithVersionCheck($page, $versionSection, $data, $expected));
         } catch (ContentVersionConflictException $e) {
             return $this->conflictResponse($e);
         }
