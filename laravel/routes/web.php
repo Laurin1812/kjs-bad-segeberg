@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
 use App\Http\Controllers\Admin\HundeausbildungController as AdminHundeausbildungController;
+use App\Http\Controllers\Admin\HundeboerseController as AdminHundeboerseController;
 use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\Admin\KontaktanfragenController as AdminKontaktanfragenController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
@@ -462,5 +463,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // oben (InhalteController::IN_SCOPE_SECTIONS wurde um
         // 'hundeausbildung' erweitert) - keine eigenen Routen dafuer hier.
         Route::get('hundeausbildung', [AdminHundeausbildungController::class, 'index'])->name('hundeausbildung.index');
+
+        // Phase 7I (Admin-Modul "Hundeboerse") - achtes echtes Fachmodul,
+        // erstes mit echtem Moderations-Workflow (Status-Freigabe) und
+        // echtem Datei-Upload. Siehe Admin\HundeboerseController-
+        // Klassenkommentar fuer die vollstaendige Alt-Admin-/Datenmodell-
+        // Analyse. Bewusst kein Route::resource() (wie bei allen vorherigen
+        // Modulen), Namensmuster wie bei "partner" oben (neu/speichern/
+        // bearbeiten/aktualisieren/loeschen). "freigeben"/"archivieren":
+        // eigene Listen-Schnellaktions-Routen ohne Formularfelder (siehe
+        // Controller-Klassenkommentar) - "ablehnen" hat bewusst KEINE eigene
+        // Route, weil admin.js dafuer ausschliesslich den kombinierten
+        // Editor-Weg kennt (Speichern+Statuswechsel in einem Schritt, siehe
+        // update()).
+        Route::get('hundeboerse', [AdminHundeboerseController::class, 'index'])->name('hundeboerse.index');
+        Route::get('hundeboerse/neu', [AdminHundeboerseController::class, 'neu'])->name('hundeboerse.neu');
+        Route::post('hundeboerse', [AdminHundeboerseController::class, 'store'])->name('hundeboerse.speichern');
+        Route::get('hundeboerse/{hundeboerseAnzeige}/bearbeiten', [AdminHundeboerseController::class, 'edit'])->name('hundeboerse.bearbeiten');
+        Route::put('hundeboerse/{hundeboerseAnzeige}', [AdminHundeboerseController::class, 'update'])->name('hundeboerse.aktualisieren');
+        Route::delete('hundeboerse/{hundeboerseAnzeige}', [AdminHundeboerseController::class, 'destroy'])->name('hundeboerse.loeschen');
+        Route::put('hundeboerse/{hundeboerseAnzeige}/freigeben', [AdminHundeboerseController::class, 'freigeben'])->name('hundeboerse.freigeben');
+        Route::put('hundeboerse/{hundeboerseAnzeige}/archivieren', [AdminHundeboerseController::class, 'archivieren'])->name('hundeboerse.archivieren');
     });
 });

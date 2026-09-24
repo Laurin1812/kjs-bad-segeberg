@@ -9,6 +9,9 @@ use Illuminate\Http\UploadedFile;
  * auf Laravel/MySQL), erweitert in Phase 6B (Waffenboerse auf
  * Laravel/MySQL).
  *
+ * Erweitert in Phase 7I (Admin-Modul "Hundeboerse") um delete() - das
+ * Admin-Gegenstueck zu store(), siehe dort.
+ *
  * Server-seitiger Laravel-Port von api/lib/boerse_upload.php
  * (kjs_boerse_handle_image_uploads/kjs_boerse_generate_image_variants) fuer
  * oeffentliche Boersen-Einreichungen ("Anbieten"). Bewusst als eigene,
@@ -117,7 +120,7 @@ class BoerseUploads
      * Varianten wie neu eingereichte Bilder bekommen (keine Dopplung).
      *
      * @return array{pfad: string, titel: string}|null null, falls die
-     *               Quelldatei fehlt oder sich nicht als Bild lesen laesst.
+     *                                                 Quelldatei fehlt oder sich nicht als Bild lesen laesst.
      */
     public static function importLocalFile(string $sourcePath, string $modul, string $filename): ?array
     {
@@ -153,6 +156,43 @@ class BoerseUploads
             'pfad' => '/uploads/boersen/'.$modul.'/'.$filename,
             'titel' => '',
         ];
+    }
+
+    /**
+     * Phase 7I (Admin-Modul "Hundeboerse"): loescht ein per store() erzeugtes
+     * Bild (Original + ggf. thumb-/card-Varianten) wieder physisch von der
+     * Platte - Gegenstueck zu store(), bisher nicht benoetigt, da bis zu
+     * dieser Phase nirgends im Laravel-Code ein Bild wieder entfernt wurde
+     * (weder die oeffentliche Einreichung noch der Bestandsimport loeschen
+     * jemals Bilder).
+     *
+     * Sicherheitsgurt (siehe Klassenkommentar oben): "$pfad" stammt zwar aus
+     * der eigenen DB-Spalte (nie direkt aus einem Client-Request), trotzdem
+     * wird hier zusaetzlich geprueft, dass der Pfad tatsaechlich unterhalb
+     * von "uploads/boersen/" liegt und kein "..": eine zusaetzliche
+     * Absicherung ist guenstiger als eine spaetere Ueberraschung, sollte
+     * "pfad" jemals auf anderem Weg befuellt werden.
+     */
+    public static function delete(string $pfad): void
+    {
+        $relativ = ltrim($pfad, '/');
+        if (! str_starts_with($relativ, 'uploads/boersen/') || str_contains($relativ, '..')) {
+            return;
+        }
+
+        $vollpfad = public_path($relativ);
+        if (is_file($vollpfad)) {
+            @unlink($vollpfad);
+        }
+
+        $verzeichnis = dirname($vollpfad);
+        $dateiname = basename($vollpfad);
+        foreach (array_keys(self::VARIANTS) as $ordner) {
+            $variantenpfad = $verzeichnis.'/'.$ordner.'/'.$dateiname;
+            if (is_file($variantenpfad)) {
+                @unlink($variantenpfad);
+            }
+        }
     }
 
     /**

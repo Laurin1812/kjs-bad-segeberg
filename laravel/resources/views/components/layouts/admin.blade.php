@@ -48,7 +48,9 @@
         // echter Link, gleiches Muster wie "Kontaktanfragen"/"Partner"/
         // "Downloads"/"Termine"/"Aktuelles"/"Inhalte (Seiten)" oben.
         ['label' => 'Hundeausbildung', 'route' => 'admin.hundeausbildung.index', 'routePattern' => 'admin.hundeausbildung.*', 'icon' => '🎓'],
-        ['label' => 'Hundebörse', 'icon' => '🐕'],
+        // Phase 7I (Admin-Modul "Hundeboerse"): achter echter Link, gleiches
+        // Muster wie "Hundeausbildung"/"Kontaktanfragen"/... oben.
+        ['label' => 'Hundebörse', 'route' => 'admin.hundeboerse.index', 'routePattern' => 'admin.hundeboerse.*', 'icon' => '🐕'],
         ['label' => 'Waffenbörse', 'icon' => '🔫'],
         ['label' => 'Medien', 'icon' => '🖼️'],
         ['label' => 'Einstellungen', 'icon' => '⚙️'],

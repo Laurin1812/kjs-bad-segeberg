@@ -1,10 +1,26 @@
 # Dormante Laravel-Strukturen fuer Hundeboerse/Waffenboerse/Kontakt
 
+> **Nachtrag (Phase 6A/7I) - NUR Hundeboerse betreffend:** dieses Dokument
+> beschreibt den Stand VOR Phase 6A. Seit Phase 6A ist die Hundeboerse
+> ausdruecklich NICHT mehr dormant: die oeffentliche Seite
+> (App\Http\Controllers\HundeboerseController) UND seit Phase 7I der neue
+> Blade-Admin (App\Http\Controllers\Admin\HundeboerseController) lesen/
+> schreiben aktiv `hundeboerse_anzeigen`/`hundeboerse_bilder`/
+> `hundeboerse_zuchtverbaende`/`hundeboerse_meta` - siehe die
+> Klassenkommentare dieser beiden Controller fuer die vollstaendige, aktuelle
+> Einordnung (u.a. warum es dafuer trotzdem KEIN ContentVersioning und keinen
+> zweiten konkurrierenden Laravel-Schreibweg gibt). Der Rest dieses
+> Dokuments (Migrationen/Models/Begruendung/"NICHT geloescht") bleibt
+> unveraendert **fuer Waffenboerse und Kontakt** gueltig - beide sind
+> weiterhin dormant und nicht Teil von Phase 7I ("keine Waffenboerse
+> anfassen").
+
 **Kurzfassung:** Laravel besitzt seit Phase 1 vollstaendige Migrationen UND
-Eloquent-Models fuer Hundeboerse, Waffenboerse und Kontakt - diese sind
-aktuell **komplett ungenutzt (dormant)**. Die produktive Wahrheit fuer diese
-drei Bereiche sind und bleiben bis auf Weiteres die bestehenden PHP-
-Sondermodule mit ihrer eigenen, separaten MySQL-Datenbank.
+Eloquent-Models fuer Hundeboerse, Waffenboerse und Kontakt - diese waren zum
+Zeitpunkt der urspruenglichen Fassung dieses Dokuments **komplett ungenutzt
+(dormant)**. Die produktive Wahrheit fuer Waffenboerse und Kontakt sind und
+bleiben bis auf Weiteres die bestehenden PHP-Sondermodule mit ihrer eigenen,
+separaten MySQL-Datenbank - fuer Hundeboerse siehe den Nachtrag oben.
 
 ## Was existiert (dormant)
 

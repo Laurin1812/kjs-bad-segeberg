@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -133,6 +134,36 @@ class HundeboerseAnzeige extends Model
     }
 
     /**
+     * Phase 7I (Admin-Modul "Hundeboerse"): ISO-Form ("YYYY-MM-DD") von
+     * "birth_date"/"litter_date" fuer <input type="date">-Felder im
+     * Bearbeiten-Formular - Gegenstueck zu HundeboerseUpdater::
+     * normalizeDatum(), das umgekehrt aus ISO das hier gespeicherte
+     * "DD.MM.YYYY" erzeugt. Liefert null bei leerem/unbekanntem Format,
+     * damit das Datumsfeld dann einfach leer gerendert wird statt eines
+     * kaputten Werts.
+     */
+    public function birthDateIso(): ?string
+    {
+        return $this->isoDatum($this->birth_date);
+    }
+
+    public function litterDateIso(): ?string
+    {
+        return $this->isoDatum($this->litter_date);
+    }
+
+    private function isoDatum(?string $roh): ?string
+    {
+        if (! $roh || ! preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $roh, $m)) {
+            return null;
+        }
+
+        $geburt = Carbon::createSafe((int) $m[3], (int) $m[2], (int) $m[1]);
+
+        return $geburt?->format('Y-m-d');
+    }
+
+    /**
      * Server-seitiger Port von alterText() - Alter in Monaten/Jahren aus
      * dem gespeicherten Geburtsdatum ("DD.MM.YYYY").
      */
@@ -142,7 +173,7 @@ class HundeboerseAnzeige extends Model
             return '';
         }
 
-        $geburt = \Carbon\Carbon::createSafe((int) $m[3], (int) $m[2], (int) $m[1]);
+        $geburt = Carbon::createSafe((int) $m[3], (int) $m[2], (int) $m[1]);
         if (! $geburt) {
             return '';
         }
