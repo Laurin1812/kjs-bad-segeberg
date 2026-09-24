@@ -102,16 +102,18 @@ class AdminInhalteTest extends TestCase
         $response->assertSee('Jagdhornblasen');
     }
 
-    public function test_seitenliste_zeigt_keine_hundeausbildung_oder_kreisjaegermeister_seiten(): void
+    public function test_seitenliste_zeigt_keine_kreisjaegermeister_seiten(): void
     {
-        Page::create(['section' => 'hundeausbildung', 'slug' => 'hundeausbildung', 'titel' => 'Hundeausbildung-Hub']);
+        // "hundeausbildung" ist seit Phase 7H bewusst Teil dieser Liste
+        // (siehe InhalteController::IN_SCOPE_SECTIONS) - eigener
+        // Regressionsnachweis dafuer in Tests/Feature/Phase7H/
+        // AdminHundeausbildungTest.php, u.a. test_seitenliste_zeigt_jetzt_auch_hundeausbildung_seiten().
         Page::create(['section' => 'kreisjaegermeister', 'slug' => 'kreisjaegermeister', 'titel' => 'Kreisjägermeister-Grußwort']);
         $this->actingAs($this->admin(), 'web');
 
         $response = $this->get(route('admin.inhalte.index'));
 
         $response->assertOk();
-        $response->assertDontSee('Hundeausbildung-Hub');
         $response->assertDontSee('Kreisjägermeister-Grußwort');
     }
 
@@ -137,13 +139,15 @@ class AdminInhalteTest extends TestCase
         $response->assertSee('/downloads/merkblatt.pdf', false);
     }
 
-    public function test_bearbeiten_fuer_hundeausbildung_oder_kreisjaegermeister_seite_404(): void
+    public function test_bearbeiten_fuer_kreisjaegermeister_seite_404(): void
     {
-        $hub = Page::create(['section' => 'hundeausbildung', 'slug' => 'hundeausbildung', 'titel' => 'Hub']);
+        // "hundeausbildung" ist seit Phase 7H bewusst NICHT mehr Teil dieser
+        // 404-Regel (siehe InhalteController::IN_SCOPE_SECTIONS) - eigener
+        // Regressionsnachweis dafuer in Tests/Feature/Phase7H/
+        // AdminHundeausbildungTest.php.
         $kjm = Page::create(['section' => 'kreisjaegermeister', 'slug' => 'kreisjaegermeister', 'titel' => 'KJM']);
         $this->actingAs($this->admin(), 'web');
 
-        $this->get(route('admin.inhalte.bearbeiten', $hub))->assertNotFound();
         $this->get(route('admin.inhalte.bearbeiten', $kjm))->assertNotFound();
     }
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AktuellesController as AdminAktuellesController;
 use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
+use App\Http\Controllers\Admin\HundeausbildungController as AdminHundeausbildungController;
 use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\Admin\KontaktanfragenController as AdminKontaktanfragenController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
@@ -451,5 +452,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('kontaktanfragen', [AdminKontaktanfragenController::class, 'index'])->name('kontaktanfragen.index');
         Route::get('kontaktanfragen/{kontaktAnfrage}', [AdminKontaktanfragenController::class, 'anzeigen'])->name('kontaktanfragen.anzeigen');
         Route::put('kontaktanfragen/{kontaktAnfrage}/status', [AdminKontaktanfragenController::class, 'statusWechseln'])->name('kontaktanfragen.status');
+
+        // Phase 7H (Admin-Modul "Hundeausbildung/Jagdhundeschule") - siebtes
+        // echtes Fachmodul, siehe Admin\HundeausbildungController-
+        // Klassenkommentar fuer die Kurzanalyse ("keine eigene
+        // Facharchitektur, nur eine weitere Page-Familie"). Nur EINE Route:
+        // die gefilterte Einstiegsseite. Bearbeiten/Speichern laeuft ueber
+        // die bereits bestehenden admin.inhalte.bearbeiten/-update-Routen
+        // oben (InhalteController::IN_SCOPE_SECTIONS wurde um
+        // 'hundeausbildung' erweitert) - keine eigenen Routen dafuer hier.
+        Route::get('hundeausbildung', [AdminHundeausbildungController::class, 'index'])->name('hundeausbildung.index');
     });
 });

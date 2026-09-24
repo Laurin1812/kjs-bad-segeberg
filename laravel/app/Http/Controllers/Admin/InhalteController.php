@@ -14,7 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
- * KJS Bad Segeberg - Phase 7B (Admin-Modul "Inhalte / Seiten").
+ * KJS Bad Segeberg - Phase 7B (Admin-Modul "Inhalte / Seiten"), erweitert um
+ * Phase 7H (Admin-Modul "Hundeausbildung / Jagdhundeschule").
  *
  * Erstes echtes Fachmodul im neuen, server-gerenderten Blade-Admin (siehe
  * Phase 7A: Auth/Zugriffsschutz/Admin-Shell) - bildet GENAU den Ausschnitt
@@ -26,13 +27,23 @@ use Illuminate\View\View;
  *     Zusatzseiten + deren Unterseiten (parent_id).
  *   - section = weitere: "Weitere Themen"-Seiten (immer flach, kein
  *     fixedSlugs-Konzept).
+ *   - section = hundeausbildung (Phase 7H): Hub-Seite (parent_id = null,
+ *     "Jagdhundeschule"-Uebersicht) + ihre Kurs-Unterseiten (parent_id =
+ *     Hub-ID). Bei Phase 7B (Auftrag Teil 3/11) bewusst noch ausgeklammert,
+ *     obwohl technisch dieselbe Page-Tabelle/dasselbe PageUpdater/
+ *     ContentVersioning genutzt wird - Phase-7H-Analyse ergab: kein
+ *     separates Datenmodell, nur eine weitere Page-Familie, siehe
+ *     Admin\HundeausbildungController-Klassenkommentar fuer die
+ *     vollstaendige Abgrenzung. Einzige Besonderheit: die Kurs-Seiten haben
+ *     drei zusaetzliche, nur fuer sie relevante Felder (vorschaubild/
+ *     kurzbeschreibung/bild_flat fuer die Kachel-Vorschau der oeffentlichen
+ *     Uebersicht, siehe edit()/update() unten und admin/inhalte/bearbeiten.
+ *     blade.php) sowie eine von der generischen Formel abweichende
+ *     ContentVersioning-Schluesselbildung (siehe PageUpdater::
+ *     versionSectionFor()-Kommentar).
  *
  * Bewusst AUSSERHALB dieses Moduls (Auftrag Teil 3 "Sondermodule nicht in
- * dieses Modul hineinziehen" / Teil 11 "NICHT JETZT: Hundeausbildung"):
- *   - section = hundeausbildung (Hub + Kurse): eigenes, im Auftrag explizit
- *     ausgeschlossenes Modul, obwohl es technisch derselben Page-Familie
- *     angehoert und ueber denselben AdminPageController/dieselbe
- *     PagePermissions-Logik laeuft.
+ * dieses Modul hineinziehen"):
  *   - section = kreisjaegermeister: zwar ebenfalls eine Page-Zeile
  *     (Singleton), wird aber NICHT ueber AdminPageController/
  *     identity.page_permission verwaltet, sondern als eigenstaendiges
@@ -40,6 +51,15 @@ use Illuminate\View\View;
  *     mit einem eigenen, modulweiten Recht ("identity.permission:kjm") - ein
  *     strukturell anderer Verwaltungsweg, der hier bewusst nicht mit
  *     hineingezogen wird (siehe Abschlussbericht Punkt 6).
+ *
+ * Phase 7H fuegt AUSDRUECKLICH KEIN Neu-/Loeschen/Sortieren fuer Hunde-
+ * ausbildungs-Kurse hinzu, obwohl der bestehende JSON-Weg das anbietet
+ * (AdminPageController::storeHundeausbildungKurs()/
+ * destroyHundeausbildungKurs()/reorderHundeausbildungKurse()) - dieses Modul
+ * bietet fuer KEINE Section Neu-/Loeschen/Sortieren an (siehe Routen unten:
+ * nur index/edit/update), Hundeausbildung wird bewusst nicht anders/
+ * vollstaendiger behandelt als jaeger/aufgaben/verbraucher/weitere, um keine
+ * Sonderarchitektur nur fuer eine Section einzufuehren.
  *
  * SCHREIBLOGIK (Auftrag Teil 4): nutzt fuer das eigentliche Speichern
  * ausschliesslich App\Support\PageUpdater::saveWithVersionCheck() - exakt
@@ -68,7 +88,7 @@ use Illuminate\View\View;
 class InhalteController extends Controller
 {
     /** @var list<string> */
-    private const IN_SCOPE_SECTIONS = ['jaeger', 'aufgaben', 'verbraucher', 'weitere'];
+    private const IN_SCOPE_SECTIONS = ['jaeger', 'aufgaben', 'verbraucher', 'weitere', 'hundeausbildung'];
 
     public function index(): View
     {
@@ -115,6 +135,14 @@ class InhalteController extends Controller
             'hatUnterseitenSystem' => $page->parent_id === null,
             'zeigeAntragUrl' => $page->slug === 'mitglied-werden',
             'zeigeHundeboerseCta' => $page->slug === 'hundevermittlung',
+            // Phase 7H: Kachel-Vorschau (Vorschaubild/Kurzbeschreibung) +
+            // "ohne Rahmen" nur fuer Jagdhundeschule-KURSE (nicht den Hub
+            // selbst) - 1:1 admin.js' Bedingung "def.key.indexOf(
+            // 'jagdhundeschule') !== -1", die dort ebenfalls nur auf die
+            // dynamischen Kurs-Unterseiten zutrifft, nicht auf die
+            // Uebersichtsseite (form:'standard', eigener Key ohne
+            // "jagdhundeschule" darin).
+            'zeigeJagdhundeschuleFelder' => $page->section === 'hundeausbildung' && $page->parent_id !== null,
             'previewUrl' => $this->publicUrl($page),
             'currentVersion' => ContentVersioning::current(PageUpdater::versionSectionFor($page)),
         ]);
@@ -155,7 +183,23 @@ class InhalteController extends Controller
             'kontakt_name', 'kontakt_email',
             'unterseiten_titel', 'linkliste_titel', 'galerie_titel',
             'antrag_url', 'hundeboerse_cta_titel', 'hundeboerse_cta_text', 'hundeboerse_cta_button',
+            // Phase 7H: nur von der Blade-Maske gesendet, wenn
+            // $zeigeJagdhundeschuleFelder true war (siehe edit()) - fuer
+            // jede andere Seite fehlen diese Schluessel im Request, only()
+            // laesst sie dann folgerichtig weg, die Vorbelegung oben
+            // (currentFieldValues()) erhaelt den bestehenden Wert.
+            'vorschaubild', 'kurzbeschreibung',
         ]));
+        // "bild_flat" ist eine Checkbox - dieselbe Preservation-Regel wie bei
+        // PartnerController::validateData() ("aktiv"/"rahmenvertrag"): nur
+        // setzen, wenn der Schluessel ueberhaupt im Request vorhanden ist.
+        // Die Blade-Maske sendet ihn per verdecktem "0"-Fallback IMMER, wenn
+        // die Jagdhundeschule-Felder ueberhaupt gerendert wurden (siehe
+        // bearbeiten.blade.php) - fehlt er komplett, wurde die Maske fuer
+        // diese Seite gar nicht gezeigt, der bestehende Wert bleibt erhalten.
+        if ($request->has('bild_flat')) {
+            $data['bild_flat'] = $request->boolean('bild_flat');
+        }
         $data['downloads'] = $this->filterRows($request->input('downloads', []), ['titel', 'datei', 'vorschau']);
         $data['galerie'] = $this->filterRows($request->input('galerie', []), ['bild', 'titel']);
 
@@ -284,7 +328,10 @@ class InhalteController extends Controller
     private function seitentyp(Page $page): string
     {
         if ($page->parent_id !== null) {
-            return 'Unterseite';
+            return $page->section === 'hundeausbildung' ? 'Jagdhundeschule-Kurs' : 'Unterseite';
+        }
+        if ($page->section === 'hundeausbildung') {
+            return 'Jagdhundeschule-Übersicht';
         }
         if ($page->section === 'weitere') {
             return 'Weitere-Themen-Seite';
@@ -300,6 +347,7 @@ class InhalteController extends Controller
             'aufgaben' => 'Aufgaben',
             'verbraucher' => 'Verbraucher & Natur',
             'weitere' => 'Weitere Themen',
+            'hundeausbildung' => 'Hundeausbildung',
             default => $section,
         };
     }
@@ -308,11 +356,26 @@ class InhalteController extends Controller
      * Echte, bereits registrierte oeffentliche Route fuer eine Page-Zeile -
      * siehe routes/web.php ("/{section}/{slug}", "/weitere/{slug}",
      * "/{section}/{parentSlug}/{childSlug}"). Bewusst KEINE geratenen URLs:
-     * liefert null, wenn keine dieser drei bestehenden Routen zutrifft
-     * (Auftrag Teil 7 "Nur echte vorhandene Route verwenden").
+     * liefert null, wenn keine dieser bestehenden Routen zutrifft (Auftrag
+     * Teil 7 "Nur echte vorhandene Route verwenden").
+     *
+     * Phase 7H: section 'hundeausbildung' folgt NICHT dem generischen
+     * "{section}/{slug}"-/"{section}/{parentSlug}/{childSlug}"-Muster,
+     * sondern den eigens dafuer benannten Routen "hundeausbildung.hub"
+     * ("/aufgaben/hundeausbildung", der Hub) und "hundeausbildung.show"
+     * ("/aufgaben/jagdhundeschule/{slug}", ein Kurs) - siehe
+     * Http\Controllers\HundeausbildungController/routes/web.php. Muss vor
+     * der generischen parent_id-Pruefung abgefangen werden, sonst wuerde
+     * fuer einen Kurs faelschlich "/hundeausbildung/hundeausbildung/{slug}"
+     * (nicht existierende Route) zusammengebaut.
      */
     private function publicUrl(Page $page): ?string
     {
+        if ($page->section === 'hundeausbildung') {
+            return $page->parent_id === null
+                ? route('hundeausbildung.hub')
+                : route('hundeausbildung.show', $page->slug);
+        }
         if ($page->parent_id !== null) {
             $parent = $page->relationLoaded('parent') ? $page->parent : Page::find($page->parent_id);
             if (! $parent) {

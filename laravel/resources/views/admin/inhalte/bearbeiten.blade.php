@@ -77,6 +77,34 @@
                     <label class="field-label" for="f-bild_alt">Bild-Beschreibung</label>
                     <input class="field-input" type="text" id="f-bild_alt" name="bild_alt" value="{{ old('bild_alt', $page->bild_alt) }}">
                 </div>
+                @if ($zeigeJagdhundeschuleFelder)
+                    {{-- Phase 7H: 1:1 admin.js' renderStandard()-Zusatzbloecke fuer
+                         Jagdhundeschule-Kurse (nur dort ausgewertet vom
+                         oeffentlichen Template, siehe admin.js-Kommentar
+                         "Ohne Rahmen"/"Kachel-Vorschau"). --}}
+                    <div class="field-row" style="align-items:center;gap:.75rem;flex-direction:row;">
+                        <label class="field-label" style="min-width:160px;margin:0">Inhaltsbild ohne Rahmen/Schatten</label>
+                        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">
+                            {{-- Verdeckter "0"-Fallback VOR der Checkbox, siehe
+                                 PartnerController-Bearbeiten-Formular fuer dasselbe
+                                 Preservation-Muster ("aktiv"/"rahmenvertrag"). --}}
+                            <input type="hidden" name="bild_flat" value="0">
+                            <input type="checkbox" id="f-bild_flat" name="bild_flat" value="1" @checked(old('bild_flat', $page->bild_flat)) style="width:18px;height:18px;cursor:pointer;">
+                            <span style="font-size:.85rem;color:var(--admin-text-muted);">Für Logos oder Grafiken mit eigenem weißen Hintergrund aktivieren, damit kein sichtbarer Kasten gegen die weiße Seite entsteht.</span>
+                        </label>
+                    </div>
+                    <div style="border-top:1px solid var(--admin-border);margin-top:1rem;padding-top:1rem;">
+                        <p class="field-hint">🐕 <strong>Kachel-Vorschau</strong> — wird in der Jagdhundeschule-Übersicht angezeigt</p>
+                        <div class="field-row">
+                            <label class="field-label" for="f-vorschaubild">Vorschaubild (für Kachel-Übersicht)</label>
+                            <input class="field-input" type="text" id="f-vorschaubild" name="vorschaubild" value="{{ old('vorschaubild', $page->vorschaubild) }}" placeholder="/images/...">
+                        </div>
+                        <div class="field-row">
+                            <label class="field-label" for="f-kurzbeschreibung">Kurzbeschreibung (für Kachel-Übersicht)</label>
+                            <input class="field-input" type="text" id="f-kurzbeschreibung" name="kurzbeschreibung" value="{{ old('kurzbeschreibung', $page->kurzbeschreibung) }}" placeholder="Ein Satz, der die Seite beschreibt …">
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="form-card">

@@ -44,7 +44,10 @@
         // gleiches Muster wie "Partner"/"Downloads"/"Termine"/"Aktuelles"/
         // "Inhalte (Seiten)" oben.
         ['label' => 'Kontaktanfragen', 'route' => 'admin.kontaktanfragen.index', 'routePattern' => 'admin.kontaktanfragen.*', 'icon' => '✉️'],
-        ['label' => 'Hundeausbildung', 'icon' => '🎓'],
+        // Phase 7H (Admin-Modul "Hundeausbildung/Jagdhundeschule"): siebter
+        // echter Link, gleiches Muster wie "Kontaktanfragen"/"Partner"/
+        // "Downloads"/"Termine"/"Aktuelles"/"Inhalte (Seiten)" oben.
+        ['label' => 'Hundeausbildung', 'route' => 'admin.hundeausbildung.index', 'routePattern' => 'admin.hundeausbildung.*', 'icon' => '🎓'],
         ['label' => 'Hundebörse', 'icon' => '🐕'],
         ['label' => 'Waffenbörse', 'icon' => '🔫'],
         ['label' => 'Medien', 'icon' => '🖼️'],

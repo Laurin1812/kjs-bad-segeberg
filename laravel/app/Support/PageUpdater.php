@@ -107,9 +107,31 @@ class PageUpdater
      * Konflikterkennung (ContentVersioning) beide Oberflaechen gemeinsam
      * abdeckt, statt dass eine Seite ueber zwei getrennte Versionszaehler
      * liefe.
+     *
+     * Phase 7H (Admin-Modul "Hundeausbildung"): section 'hundeausbildung'
+     * MUSS vor der generischen parent_id-Pruefung abgefangen werden - der
+     * bestehende JSON-Schreibweg (AdminPageController::hundeausbildungHub()/
+     * hundeausbildungKurs()) verwendet fuer diese Familie bewusst EIGENE,
+     * von der generischen "sub:parentSlug:childSlug"-Bildung abweichende
+     * Schluessel (versionSection('hundeausbildung','hub') fuer den Hub statt
+     * dessen eigenem Slug, versionSection('hundeausbildung',$slug) fuer einen
+     * Kurs OHNE das sonst uebliche "sub:"-Praefix/den Eltern-Slug) - siehe
+     * dortige Kommentare "Hundeausbildung-Kurse nur innerhalb ihres Hub-
+     * Parents". Ohne diesen Sonderfall wuerde InhalteController (seit Phase
+     * 7H ebenfalls fuer diese Section zustaendig) einen ANDEREN Schluessel
+     * berechnen als der bestehende JSON-Weg fuer denselben Datensatz -
+     * die Konflikterkennung wuerde dann NICHT greifen, wenn dieselbe
+     * Hundeausbildungs-Seite einmal ueber admin.js und einmal ueber den
+     * neuen Blade-Admin gespeichert wird. Kein neues Konzept, nur dieselbe,
+     * bereits im alten JSON-Weg etablierte Schluesselbildung 1:1 uebernommen.
      */
     public static function versionSectionFor(Page $page): string
     {
+        if ($page->section === 'hundeausbildung') {
+            return $page->parent_id === null
+                ? 'page:hundeausbildung:hub'
+                : 'page:hundeausbildung:'.$page->slug;
+        }
         if ($page->parent_id !== null) {
             $parent = $page->relationLoaded('parent') ? $page->parent : Page::find($page->parent_id);
 
