@@ -54,7 +54,9 @@
         // Phase 7J (Admin-Modul "Waffenboerse"): neunter echter Link,
         // gleiches Muster wie "Hundebörse"/"Hundeausbildung"/... oben.
         ['label' => 'Waffenbörse', 'route' => 'admin.waffenboerse.index', 'routePattern' => 'admin.waffenboerse.*', 'icon' => '🔫'],
-        ['label' => 'Medien', 'icon' => '🖼️'],
+        // Phase 7K (Admin-Modul "Medien"): zehnter echter Link, gleiches
+        // Muster wie "Waffenbörse"/"Hundebörse"/... oben.
+        ['label' => 'Medien', 'route' => 'admin.medien.index', 'routePattern' => 'admin.medien.*', 'icon' => '🖼️'],
         ['label' => 'Einstellungen', 'icon' => '⚙️'],
         ['label' => 'Benutzer', 'icon' => '👤'],
     ];

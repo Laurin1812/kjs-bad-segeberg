@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\HundeausbildungController as AdminHundeausbildung
 use App\Http\Controllers\Admin\HundeboerseController as AdminHundeboerseController;
 use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\Admin\KontaktanfragenController as AdminKontaktanfragenController;
+use App\Http\Controllers\Admin\MedienController as AdminMedienController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\TermineController as AdminTermineController;
 use App\Http\Controllers\Admin\WaffenboerseController as AdminWaffenboerseController;
@@ -507,5 +508,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('waffenboerse/{waffenboerseAnzeige}', [AdminWaffenboerseController::class, 'destroy'])->name('waffenboerse.loeschen');
         Route::put('waffenboerse/{waffenboerseAnzeige}/freigeben', [AdminWaffenboerseController::class, 'freigeben'])->name('waffenboerse.freigeben');
         Route::put('waffenboerse/{waffenboerseAnzeige}/archivieren', [AdminWaffenboerseController::class, 'archivieren'])->name('waffenboerse.archivieren');
+
+        // Phase 7K (Admin-Modul "Medien") - zehntes echtes Fachmodul, siehe
+        // Admin\MedienController-Klassenkommentar fuer die vollstaendige
+        // Analyse ("Fall A": es gibt bereits eine echte zentrale
+        // Medienbibliothek, siehe App\Support\MediaLibrary). "archiv" bewusst
+        // VOR den dynamischen {dateiname}-Routen registriert (wie schon bei
+        // "waffenboerse/kategorien" oben) - auch wenn wegen unterschiedlicher
+        // HTTP-Methode/Segmentanzahl ohnehin keine echte Ueberschneidung
+        // besteht. "{typ}" ("bild"/"datei") ist das deutsche Pendant zum
+        // internen media_type-Wert ("image"/"pdf"), siehe Controller.
+        Route::get('medien', [AdminMedienController::class, 'index'])->name('medien.index');
+        Route::get('medien/archiv', [AdminMedienController::class, 'archiv'])->name('medien.archiv');
+        Route::post('medien/bilder', [AdminMedienController::class, 'bildHochladen'])->name('medien.bilder.hochladen');
+        Route::post('medien/dateien', [AdminMedienController::class, 'dateiHochladen'])->name('medien.dateien.hochladen');
+        Route::put('medien/{dateiname}/archivieren', [AdminMedienController::class, 'archivToggle'])->name('medien.archivieren');
+        Route::delete('medien/{typ}/{dateiname}', [AdminMedienController::class, 'loeschen'])
+            ->where('typ', 'bild|datei')
+            ->name('medien.loeschen');
     });
 });

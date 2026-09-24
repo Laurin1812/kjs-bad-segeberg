@@ -323,3 +323,32 @@ html, body.kjs-admin {
   .seiten-liste-tabelle td { border-bottom: none; padding: .4rem .9rem; }
   .seiten-liste-tabelle .ist-unterseite td:first-child { padding-left: .9rem; }
 }
+
+/* ── MEDIEN (Phase 7K, Admin-Modul "Medien") ──────────────────────
+   Neu gegenueber den bisherigen Modulen (keine der bestehenden Klassen
+   oben passt fuer eine Bild-/Datei-Kachelübersicht) - bewusst schlankes
+   Grid statt eines Akkordeons/einer Tabelle wie bei den Listen-Modulen,
+   damit Vorschaubilder tatsaechlich als solche erkennbar bleiben. */
+.medien-filter-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.5rem; }
+.medien-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+.medien-kachel {
+  background: var(--admin-white); border: 1.5px solid var(--admin-border);
+  border-radius: var(--admin-radius); padding: .75rem; text-align: center;
+}
+.medien-kachel__bild {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px;
+  background: var(--admin-bg); display: block; margin-bottom: .5rem;
+}
+.medien-kachel__datei-icon {
+  width: 100%; aspect-ratio: 1 / 1; border-radius: 6px; background: var(--admin-bg);
+  display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
+  margin-bottom: .5rem;
+}
+.medien-kachel__name {
+  font-size: .78rem; word-break: break-all; margin-bottom: .2rem; line-height: 1.3;
+}
+.medien-kachel__meta { font-size: .72rem; color: var(--admin-text-muted); margin-bottom: .6rem; }
+.medien-kachel__aktionen { display: flex; flex-wrap: wrap; gap: .3rem; justify-content: center; }
