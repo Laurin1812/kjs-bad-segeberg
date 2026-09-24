@@ -20,6 +20,8 @@ use App\Support\BeitragKategorieUpdater;
 use App\Support\BeitragUpdater;
 use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
+use App\Support\DownloadKategorieUpdater;
+use App\Support\DownloadUpdater;
 use App\Support\TerminUpdater;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -868,13 +870,21 @@ class AdminListController extends Controller
                     if (! is_array($kat)) {
                         continue;
                     }
-                    $katFields = ['titel' => (string) ($kat['titel'] ?? ''), 'sortierung' => $i];
+                    // Phase 7E: die eigentliche Feldzuweisung (titel/
+                    // sortierung) laeuft jetzt ueber die mit dem neuen
+                    // Blade-Admin (Http\Controllers\Admin\DownloadsController)
+                    // geteilte Schicht DownloadKategorieUpdater - der
+                    // Upsert-per-"_id"/Diff-Mechanismus selbst (dieser
+                    // gesamte downloads()-Methodenkoerper) bleibt unveraendert.
                     $katId = $this->embeddedId($kat);
-                    if ($katId !== null && in_array($katId, $existingKatIds, true)) {
-                        DownloadKategorie::where('id', $katId)->update($katFields);
-                    } else {
-                        $katId = DownloadKategorie::create($katFields)->id;
-                    }
+                    $kategorie = ($katId !== null && in_array($katId, $existingKatIds, true))
+                        ? DownloadKategorie::find($katId)
+                        : new DownloadKategorie;
+                    DownloadKategorieUpdater::applyFields($kategorie, [
+                        'titel' => $kat['titel'] ?? '',
+                        'sortierung' => $i,
+                    ]);
+                    $katId = $kategorie->id;
                     $keepKatIds[] = $katId;
 
                     $downloads = is_array($kat['downloads'] ?? null) ? $kat['downloads'] : [];
@@ -889,23 +899,25 @@ class AdminListController extends Controller
                         if ($url === '' && $name === '') {
                             continue;
                         }
-                        $dFields = [
-                            'kategorie_id' => $katId,
-                            'owner_type' => null,
-                            'owner_id' => null,
-                            'titel' => $name !== '' ? $name : $url,
-                            'beschreibung' => (string) ($d['beschreibung'] ?? '') ?: null,
-                            'typ' => (string) ($d['typ'] ?? '') ?: null,
+                        // "kategorie_id"/"owner_type"/"owner_id" sind KEINE
+                        // von DownloadUpdater verwalteten Felder (siehe
+                        // dortiger Klassenkommentar) - die gehoeren zur
+                        // Zuordnung/Herkunft eines Downloads, nicht zu seinen
+                        // fachlichen Werten, und werden deshalb weiterhin
+                        // hier direkt gesetzt.
+                        $dId = $this->embeddedId($d);
+                        $download = ($dId !== null && in_array($dId, $existingDlIds, true))
+                            ? Download::find($dId)
+                            : new Download(['owner_type' => null, 'owner_id' => null]);
+                        $download->kategorie_id = $katId;
+                        DownloadUpdater::applyFields($download, [
+                            'titel' => $name,
+                            'beschreibung' => $d['beschreibung'] ?? '',
+                            'typ' => $d['typ'] ?? '',
                             'pfad' => $url,
                             'sortierung' => $j,
-                        ];
-                        $dId = $this->embeddedId($d);
-                        if ($dId !== null && in_array($dId, $existingDlIds, true)) {
-                            Download::where('id', $dId)->update($dFields);
-                            $keepDlIds[] = $dId;
-                        } else {
-                            $keepDlIds[] = Download::create($dFields)->id;
-                        }
+                        ]);
+                        $keepDlIds[] = $download->id;
                     }
                     Download::where('kategorie_id', $katId)->whereNotIn('id', $keepDlIds)->delete();
                 }

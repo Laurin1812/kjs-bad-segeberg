@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AktuellesController as AdminAktuellesController;
 use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
 use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\Admin\TermineController as AdminTermineController;
 use App\Http\Controllers\AktuellesController;
@@ -399,5 +400,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // weder mit dem POST-Store (1 Segment) noch mit der PUT-Update-
         // Route (anderes Verb).
         Route::post('termine/einstellungen', [AdminTermineController::class, 'einstellungenSpeichern'])->name('termine.einstellungen');
+
+        // Phase 7E (Admin-Modul "Downloads", zentrale Download-Bibliothek) -
+        // viertes echtes Fachmodul, analog zu "termine"/"aktuelles" oben.
+        // Bewusst keine Route::resource() (Auftrag "keine neue Architektur")
+        // - einzelne deutsche Routen nach demselben Muster wie die anderen
+        // Module. Kategorie- und Download-Aktionen leben in einem einzigen
+        // Controller (siehe Admin\DownloadsController-Klassenkommentar),
+        // deshalb hier auch alle in einer Gruppe statt in Sub-Ressourcen.
+        Route::get('downloads', [AdminDownloadsController::class, 'index'])->name('downloads.index');
+
+        Route::post('downloads/kategorien', [AdminDownloadsController::class, 'kategorieAnlegen'])->name('downloads.kategorien.anlegen');
+        Route::put('downloads/kategorien/{kategorie}', [AdminDownloadsController::class, 'kategorieUmbenennen'])->name('downloads.kategorien.umbenennen');
+        Route::delete('downloads/kategorien/{kategorie}', [AdminDownloadsController::class, 'kategorieLoeschen'])->name('downloads.kategorien.loeschen');
+
+        Route::post('downloads/kategorien/{kategorie}/eintraege', [AdminDownloadsController::class, 'downloadAnlegen'])->name('downloads.eintraege.anlegen');
+        Route::put('downloads/eintraege/{download}', [AdminDownloadsController::class, 'downloadAktualisieren'])->name('downloads.eintraege.aktualisieren');
+        Route::delete('downloads/eintraege/{download}', [AdminDownloadsController::class, 'downloadLoeschen'])->name('downloads.eintraege.loeschen');
+
+        // Titel/Einleitungstext der oeffentlichen Downloads-Seite (admin.js'
+        // Downloads-Formularkopf) - eigene Route, kein einzelner Kategorie-/
+        // Download-Datensatz betroffen.
+        Route::post('downloads/einstellungen', [AdminDownloadsController::class, 'einstellungenSpeichern'])->name('downloads.einstellungen');
     });
 });
