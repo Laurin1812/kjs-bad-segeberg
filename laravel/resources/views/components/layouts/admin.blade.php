@@ -37,7 +37,9 @@
         // Phase 7E (Admin-Modul "Downloads"): vierter echter Link, gleiches
         // Muster wie "Termine"/"Aktuelles"/"Inhalte (Seiten)" oben.
         ['label' => 'Downloads', 'route' => 'admin.downloads.index', 'routePattern' => 'admin.downloads.*', 'icon' => '📁'],
-        ['label' => 'Partner', 'icon' => '🤝'],
+        // Phase 7F (Admin-Modul "Partner"): fuenfter echter Link, gleiches
+        // Muster wie "Downloads"/"Termine"/"Aktuelles"/"Inhalte (Seiten)" oben.
+        ['label' => 'Partner', 'route' => 'admin.partner.index', 'routePattern' => 'admin.partner.*', 'icon' => '🤝'],
         ['label' => 'Hundeausbildung', 'icon' => '🎓'],
         ['label' => 'Hundebörse', 'icon' => '🐕'],
         ['label' => 'Waffenbörse', 'icon' => '🔫'],

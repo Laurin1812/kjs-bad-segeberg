@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
 use App\Http\Controllers\Admin\InhalteController;
+use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\TermineController as AdminTermineController;
 use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
@@ -422,5 +423,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Downloads-Formularkopf) - eigene Route, kein einzelner Kategorie-/
         // Download-Datensatz betroffen.
         Route::post('downloads/einstellungen', [AdminDownloadsController::class, 'einstellungenSpeichern'])->name('downloads.einstellungen');
+
+        // Phase 7F (Admin-Modul "Partner") - fuenftes echtes Fachmodul,
+        // analog zu "termine" oben (kein Route::resource() - Auftrag "keine
+        // neue Architektur", einzelne deutsche Routen nach demselben Muster
+        // wie die anderen Module). "hoch"/"runter": siehe PartnerController-
+        // Klassenkommentar "Reihenfolge" (Ersatz fuer das alte Drag&Drop).
+        Route::get('partner', [AdminPartnerController::class, 'index'])->name('partner.index');
+        Route::get('partner/neu', [AdminPartnerController::class, 'neu'])->name('partner.neu');
+        Route::post('partner', [AdminPartnerController::class, 'store'])->name('partner.store');
+        Route::get('partner/{partner}/bearbeiten', [AdminPartnerController::class, 'edit'])->name('partner.bearbeiten');
+        Route::put('partner/{partner}', [AdminPartnerController::class, 'update'])->name('partner.aktualisieren');
+        Route::delete('partner/{partner}', [AdminPartnerController::class, 'destroy'])->name('partner.loeschen');
+        Route::put('partner/{partner}/hoch', [AdminPartnerController::class, 'hoch'])->name('partner.hoch');
+        Route::put('partner/{partner}/runter', [AdminPartnerController::class, 'runter'])->name('partner.runter');
     });
 });

@@ -12,7 +12,6 @@ use App\Models\FaqKategorie;
 use App\Models\Hegering;
 use App\Models\Page;
 use App\Models\Partner;
-use App\Models\PartnerVorteil;
 use App\Models\Person;
 use App\Models\Setting;
 use App\Models\Termin;
@@ -22,6 +21,7 @@ use App\Support\ContentVersionConflictException;
 use App\Support\ContentVersioning;
 use App\Support\DownloadKategorieUpdater;
 use App\Support\DownloadUpdater;
+use App\Support\PartnerUpdater;
 use App\Support\TerminUpdater;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -678,20 +678,17 @@ class AdminListController extends Controller
      * "external_id muss erhalten bleiben" - gilt hier von der ersten
      * Speicherung an).
      *
-     * "rahmenvertrag"/"vorteile" werden im bestehenden Admin-Formular als
-     * FREIER TEXT bearbeitet (fTextarea, siehe renderPartner()/personEdit-
-     * Aequivalent in admin.js) statt als echtes Boolean bzw. eine
-     * strukturierte Liste - das spiegelt exakt den heutigen, bereits vor
-     * Phase 4 bestehenden Realzustand wider (ImportContent::importPartner()-
-     * Klassenkommentar: "im REALEN Datenbestand bei allen 14 Partnern
-     * durchgaengig '' statt Boolean/Array"). Diese Diskrepanz zwischen
-     * Admin-UI (Freitext) und DB-Schema (boolean/eigene Tabelle) wird hier
-     * NICHT angetastet (keine ungefragte UI-Aenderung) - siehe
-     * Abschlussbericht "offene Punkte" fuer eine dokumentierte, bewusst
-     * unveraenderte Uebernahme: "rahmenvertrag" per toBool() (leer -> false,
-     * wie bisher), "vorteile" zeilenweise (eine Zeile Freitext = ein
-     * Vorteil) in partner_vorteile gespeichert, damit ein tatsaechlich
-     * eingegebener Text nicht kommentarlos verworfen wird.
+     * Phase 7F (Admin-Modul "Partner"): die eigentliche Feld-Zuweisung/
+     * -Normalisierung UND das Ersetzen der partner_vorteile-Zeilen laeuft
+     * seitdem ueber App\Support\PartnerUpdater::applyFields() - dieselbe
+     * Methode, die auch der neue Blade-Admin (Http\Controllers\Admin\
+     * PartnerController) fuer EINEN Partner nutzt (siehe dortiger
+     * Klassenkommentar). Die "_id"/external_id-Aufloesung (nur fuer die
+     * alte Vollarray-JSON-Struktur relevant) bleibt bewusst HIER.
+     *
+     * "rahmenvertrag"/"vorteile": siehe PartnerUpdater-Klassenkommentar fuer
+     * die (bewusst unveraenderte) Diskrepanz zwischen dem alten Admin-UI
+     * (Freitext) und dem DB-Schema (boolean/eigene Tabelle).
      */
     public function partner(Request $request): JsonResponse
     {
@@ -706,62 +703,37 @@ class AdminListController extends Controller
             return DB::transaction(function () use ($items, $expected) {
                 ContentVersioning::assertNotStale(self::SECTION_PARTNER, $expected);
 
-                $existingIds = Partner::pluck('id')->all();
+                $existingById = Partner::all()->keyBy('id');
                 $keepIds = [];
                 foreach (array_values($items) as $i => $item) {
                     if (! is_array($item)) {
                         continue;
                     }
-                    $rahmenvertragRoh = $item['rahmenvertrag'] ?? null;
-                    $fields = [
-                        'name' => (string) ($item['name'] ?? ''),
-                        'logo' => (string) ($item['logo'] ?? '') ?: null,
-                        'kurzbeschreibung' => (string) ($item['kurzbeschreibung'] ?? '') ?: null,
-                        'beschreibung' => $item['beschreibung'] ?? null,
-                        'ansprechpartner' => (string) ($item['ansprechpartner'] ?? '') ?: null,
-                        'telefon' => (string) ($item['telefon'] ?? '') ?: null,
-                        'email' => (string) ($item['email'] ?? '') ?: null,
-                        'website' => (string) ($item['website'] ?? '') ?: null,
-                        'rahmenvertrag' => is_string($rahmenvertragRoh) ? $this->toBool($rahmenvertragRoh, false) : $this->toBool($rahmenvertragRoh, false),
-                        'weitere_infos' => (string) ($item['weitere_infos'] ?? '') ?: null,
-                        'aktiv' => $this->toBool($item['aktiv'] ?? null, true),
-                        'sortierung' => $i,
-                    ];
 
                     $id = $this->embeddedId($item);
-                    if ($id !== null && in_array($id, $existingIds, true)) {
-                        Partner::where('id', $id)->update($fields);
-                        $partner = Partner::find($id);
-                    } else {
+                    $partner = $id !== null ? $existingById->get($id) : null;
+                    if (! $partner) {
                         $externalId = isset($item['id']) && is_string($item['id']) && trim($item['id']) !== ''
                             ? trim($item['id'])
                             : ('pn-'.now()->valueOf());
-                        $partner = Partner::create($fields + ['external_id' => $externalId]);
+                        $partner = new Partner(['external_id' => $externalId]);
                     }
 
-                    // "vorteile": siehe Methodenkommentar - Freitext, eine
-                    // Zeile je Vorteil.
-                    PartnerVorteil::where('partner_id', $partner->id)->delete();
-                    $vorteileRoh = $item['vorteile'] ?? null;
-                    if (is_string($vorteileRoh) && trim($vorteileRoh) !== '') {
-                        $zeilen = preg_split('/\r\n|\r|\n/', $vorteileRoh) ?: [];
-                        $j = 0;
-                        foreach ($zeilen as $zeile) {
-                            $zeile = trim($zeile);
-                            if ($zeile === '') {
-                                continue;
-                            }
-                            PartnerVorteil::create(['partner_id' => $partner->id, 'text' => $zeile, 'sortierung' => $j]);
-                            $j++;
-                        }
-                    } elseif (is_array($vorteileRoh)) {
-                        foreach (array_values($vorteileRoh) as $j => $text) {
-                            if (! is_string($text) || trim($text) === '') {
-                                continue;
-                            }
-                            PartnerVorteil::create(['partner_id' => $partner->id, 'text' => $text, 'sortierung' => $j]);
-                        }
-                    }
+                    PartnerUpdater::applyFields($partner, [
+                        'name' => $item['name'] ?? '',
+                        'logo' => $item['logo'] ?? '',
+                        'kurzbeschreibung' => $item['kurzbeschreibung'] ?? '',
+                        'beschreibung' => $item['beschreibung'] ?? null,
+                        'ansprechpartner' => $item['ansprechpartner'] ?? '',
+                        'telefon' => $item['telefon'] ?? '',
+                        'email' => $item['email'] ?? '',
+                        'website' => $item['website'] ?? '',
+                        'rahmenvertrag' => $item['rahmenvertrag'] ?? null,
+                        'weitere_infos' => $item['weitere_infos'] ?? '',
+                        'aktiv' => $item['aktiv'] ?? null,
+                        'sortierung' => $i,
+                        'vorteile' => $item['vorteile'] ?? null,
+                    ]);
 
                     $keepIds[] = $partner->id;
                 }
