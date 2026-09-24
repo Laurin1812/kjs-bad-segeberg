@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthPageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
 use App\Http\Controllers\Admin\InhalteController;
+use App\Http\Controllers\Admin\KontaktanfragenController as AdminKontaktanfragenController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\TermineController as AdminTermineController;
 use App\Http\Controllers\AktuellesController;
@@ -437,5 +438,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('partner/{partner}', [AdminPartnerController::class, 'destroy'])->name('partner.loeschen');
         Route::put('partner/{partner}/hoch', [AdminPartnerController::class, 'hoch'])->name('partner.hoch');
         Route::put('partner/{partner}/runter', [AdminPartnerController::class, 'runter'])->name('partner.runter');
+
+        // Phase 7G (Admin-Modul "Kontaktanfragen") - sechstes echtes
+        // Fachmodul, siehe Admin\KontaktanfragenController-Klassenkommentar
+        // fuer die vollstaendige Alt-Admin-Analyse. Bewusst kein
+        // Route::resource() (Auftrag "keine neue Architektur", wie bei allen
+        // vorherigen Modulen). "status": einzelne Toggle-Route analog zu
+        // "termine/{termin}/archivieren" oben (TermineController::
+        // archivToggle()). KEIN Loeschen (Nutzer-Korrektur): der Alt-Admin
+        // kennt fuer Kontaktanfragen bewusst keine Loeschfunktion - siehe
+        // Controller-Klassenkommentar "KEIN LOESCHEN".
+        Route::get('kontaktanfragen', [AdminKontaktanfragenController::class, 'index'])->name('kontaktanfragen.index');
+        Route::get('kontaktanfragen/{kontaktAnfrage}', [AdminKontaktanfragenController::class, 'anzeigen'])->name('kontaktanfragen.anzeigen');
+        Route::put('kontaktanfragen/{kontaktAnfrage}/status', [AdminKontaktanfragenController::class, 'statusWechseln'])->name('kontaktanfragen.status');
     });
 });

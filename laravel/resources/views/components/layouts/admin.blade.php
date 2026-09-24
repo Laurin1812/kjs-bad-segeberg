@@ -40,10 +40,13 @@
         // Phase 7F (Admin-Modul "Partner"): fuenfter echter Link, gleiches
         // Muster wie "Downloads"/"Termine"/"Aktuelles"/"Inhalte (Seiten)" oben.
         ['label' => 'Partner', 'route' => 'admin.partner.index', 'routePattern' => 'admin.partner.*', 'icon' => '🤝'],
+        // Phase 7G (Admin-Modul "Kontaktanfragen"): sechster echter Link,
+        // gleiches Muster wie "Partner"/"Downloads"/"Termine"/"Aktuelles"/
+        // "Inhalte (Seiten)" oben.
+        ['label' => 'Kontaktanfragen', 'route' => 'admin.kontaktanfragen.index', 'routePattern' => 'admin.kontaktanfragen.*', 'icon' => '✉️'],
         ['label' => 'Hundeausbildung', 'icon' => '🎓'],
         ['label' => 'Hundebörse', 'icon' => '🐕'],
         ['label' => 'Waffenbörse', 'icon' => '🔫'],
-        ['label' => 'Kontaktanfragen', 'icon' => '✉️'],
         ['label' => 'Medien', 'icon' => '🖼️'],
         ['label' => 'Einstellungen', 'icon' => '⚙️'],
         ['label' => 'Benutzer', 'icon' => '👤'],
