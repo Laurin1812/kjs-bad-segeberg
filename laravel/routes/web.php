@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\InhalteController;
 use App\Http\Controllers\Admin\KontaktanfragenController as AdminKontaktanfragenController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\TermineController as AdminTermineController;
+use App\Http\Controllers\Admin\WaffenboerseController as AdminWaffenboerseController;
 use App\Http\Controllers\AktuellesController;
 use App\Http\Controllers\DatenschutzController;
 use App\Http\Controllers\DownloadsController;
@@ -484,5 +485,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('hundeboerse/{hundeboerseAnzeige}', [AdminHundeboerseController::class, 'destroy'])->name('hundeboerse.loeschen');
         Route::put('hundeboerse/{hundeboerseAnzeige}/freigeben', [AdminHundeboerseController::class, 'freigeben'])->name('hundeboerse.freigeben');
         Route::put('hundeboerse/{hundeboerseAnzeige}/archivieren', [AdminHundeboerseController::class, 'archivieren'])->name('hundeboerse.archivieren');
+
+        // Phase 7J (Admin-Modul "Waffenboerse") - neuntes echtes Fachmodul,
+        // strukturell an "hundeboerse" oben angelehnt (siehe Admin\
+        // WaffenboerseController-Klassenkommentar fuer die vollstaendige
+        // Alt-Admin-/Datenmodell-Analyse und die bewussten Abweichungen).
+        // "kategorien.*": eigene, separate Unterseite fuer die echte
+        // Kategorienverwaltung (+ Neu/Loeschen, siehe Controller-
+        // Klassenkommentar "Kategorie") - bewusst VOR den {waffenboerseAnzeige}-
+        // Routen registriert, auch wenn wegen unterschiedlicher Segmentanzahl
+        // keine echte Ueberschneidung besteht.
+        Route::get('waffenboerse/kategorien', [AdminWaffenboerseController::class, 'kategorienIndex'])->name('waffenboerse.kategorien.index');
+        Route::post('waffenboerse/kategorien', [AdminWaffenboerseController::class, 'kategorieHinzufuegen'])->name('waffenboerse.kategorien.speichern');
+        Route::delete('waffenboerse/kategorien/{waffenboerseKategorie}', [AdminWaffenboerseController::class, 'kategorieLoeschen'])->name('waffenboerse.kategorien.loeschen');
+
+        Route::get('waffenboerse', [AdminWaffenboerseController::class, 'index'])->name('waffenboerse.index');
+        Route::get('waffenboerse/neu', [AdminWaffenboerseController::class, 'neu'])->name('waffenboerse.neu');
+        Route::post('waffenboerse', [AdminWaffenboerseController::class, 'store'])->name('waffenboerse.speichern');
+        Route::get('waffenboerse/{waffenboerseAnzeige}/bearbeiten', [AdminWaffenboerseController::class, 'edit'])->name('waffenboerse.bearbeiten');
+        Route::put('waffenboerse/{waffenboerseAnzeige}', [AdminWaffenboerseController::class, 'update'])->name('waffenboerse.aktualisieren');
+        Route::delete('waffenboerse/{waffenboerseAnzeige}', [AdminWaffenboerseController::class, 'destroy'])->name('waffenboerse.loeschen');
+        Route::put('waffenboerse/{waffenboerseAnzeige}/freigeben', [AdminWaffenboerseController::class, 'freigeben'])->name('waffenboerse.freigeben');
+        Route::put('waffenboerse/{waffenboerseAnzeige}/archivieren', [AdminWaffenboerseController::class, 'archivieren'])->name('waffenboerse.archivieren');
     });
 });

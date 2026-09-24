@@ -7,11 +7,14 @@ use Illuminate\Support\Facades\Schema;
 
 // 1:1 aus database/schema.sql. Optimistischer Versionszaehler, analog zu
 // hundeboerse_meta.
-// PHASE 8B - DORMANT / BEWUSST UNGENUTZT: diese Migration legt die
-// Tabellenstruktur in der LARAVEL-DB an, aber KEIN Controller/KEINE Route
-// nutzt sie aktuell (siehe Phase-7/8B-Analyse). Produktive Wahrheit fuer
-// Hundeboerse/Waffenboerse/Kontakt bleiben die bestehenden PHP-
-// Sondermodule mit ihrer EIGENEN, separaten MySQL-Datenbank. NICHT
+// WEITERHIN DORMANT (Korrektur in Phase 7J, anders als die uebrigen
+// waffenboerse_*-Migrationen): die Schwestertabellen (Anzeigen/Bilder/
+// Kaliber/Kategorien) sind seit Phase 6B aktiv genutzt (siehe deren
+// Migrationskommentare), diese Tabelle bleibt aber tatsaechlich ungenutzt -
+// anders als hundeboerse_meta (liefert dort "hero_bild" fuer den
+// oeffentlichen Seitenkopf, siehe HundeboerseController::heroBild())
+// liest/schreibt aktuell KEIN Laravel-Code diese Tabelle: sie hat nicht
+// einmal eine "hero_bild"-Spalte, nur den ungenutzten Versionszaehler. NICHT
 // loeschen/zurueckrollen - siehe docs/deployment/dormante-boersen-tabellen.md.
 
 return new class extends Migration

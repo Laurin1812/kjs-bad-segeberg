@@ -1,19 +1,36 @@
 # Dormante Laravel-Strukturen fuer Hundeboerse/Waffenboerse/Kontakt
 
-> **Nachtrag (Phase 6A/7I) - NUR Hundeboerse betreffend:** dieses Dokument
-> beschreibt den Stand VOR Phase 6A. Seit Phase 6A ist die Hundeboerse
-> ausdruecklich NICHT mehr dormant: die oeffentliche Seite
-> (App\Http\Controllers\HundeboerseController) UND seit Phase 7I der neue
-> Blade-Admin (App\Http\Controllers\Admin\HundeboerseController) lesen/
-> schreiben aktiv `hundeboerse_anzeigen`/`hundeboerse_bilder`/
-> `hundeboerse_zuchtverbaende`/`hundeboerse_meta` - siehe die
-> Klassenkommentare dieser beiden Controller fuer die vollstaendige, aktuelle
-> Einordnung (u.a. warum es dafuer trotzdem KEIN ContentVersioning und keinen
-> zweiten konkurrierenden Laravel-Schreibweg gibt). Der Rest dieses
-> Dokuments (Migrationen/Models/Begruendung/"NICHT geloescht") bleibt
-> unveraendert **fuer Waffenboerse und Kontakt** gueltig - beide sind
-> weiterhin dormant und nicht Teil von Phase 7I ("keine Waffenboerse
-> anfassen").
+> **Nachtrag (Phase 6A/7I) - Hundeboerse:** dieses Dokument beschreibt den
+> Stand VOR Phase 6A. Seit Phase 6A ist die Hundeboerse ausdruecklich NICHT
+> mehr dormant: die oeffentliche Seite (App\Http\Controllers\
+> HundeboerseController) UND seit Phase 7I der neue Blade-Admin
+> (App\Http\Controllers\Admin\HundeboerseController) lesen/schreiben aktiv
+> `hundeboerse_anzeigen`/`hundeboerse_bilder`/`hundeboerse_zuchtverbaende`/
+> `hundeboerse_meta` - siehe die Klassenkommentare dieser beiden Controller
+> fuer die vollstaendige, aktuelle Einordnung (u.a. warum es dafuer trotzdem
+> KEIN ContentVersioning und keinen zweiten konkurrierenden Laravel-
+> Schreibweg gibt).
+>
+> **Nachtrag (Phase 6B/7J) - Waffenboerse:** KORREKTUR eines Fehlers im
+> vorigen Nachtrag - dort stand faelschlich, Waffenboerse bleibe "weiterhin
+> dormant". Tatsaechlich ist die Waffenboerse bereits seit Phase 6B (also
+> VOR dem 7I-Nachtrag oben) ebenfalls NICHT mehr dormant: die oeffentliche
+> Seite (App\Http\Controllers\WaffenboerseController, siehe deren aktive
+> Routen in routes/web.php: `/waffenboerse`, `/waffenboerse/anbieten`,
+> `/waffenboerse/detail/{id}`) UND seit Phase 7J der neue Blade-Admin
+> (App\Http\Controllers\Admin\WaffenboerseController) lesen/schreiben aktiv
+> `waffenboerse_anzeigen`/`waffenboerse_bilder`/`waffenboerse_kaliber`/
+> `waffenboerse_kategorien` - siehe deren Klassenkommentare fuer die
+> vollstaendige Einordnung. Nur `waffenboerse_meta` bleibt tatsaechlich
+> ungenutzt (siehe WaffenboerseMeta-Klassenkommentar). Der Irrtum im 7I-
+> Nachtrag entstand, weil Phase 7I explizit "keine Waffenboerse anfassen"
+> vorgab und deshalb ungeprueft die Formulierung des urspruenglichen
+> Dokuments uebernommen wurde, statt den tatsaechlichen Code (Models/
+> Routen) direkt zu pruefen - das wurde in Phase 7J nachgeholt.
+>
+> Der Rest dieses Dokuments (Migrationen/Models/Begruendung/"NICHT
+> geloescht") bleibt unveraendert **nur noch fuer Kontakt** gueltig - das ist
+> weiterhin dormant und nicht Teil von Phase 7I/7J.
 
 **Kurzfassung:** Laravel besitzt seit Phase 1 vollstaendige Migrationen UND
 Eloquent-Models fuer Hundeboerse, Waffenboerse und Kontakt - diese waren zum

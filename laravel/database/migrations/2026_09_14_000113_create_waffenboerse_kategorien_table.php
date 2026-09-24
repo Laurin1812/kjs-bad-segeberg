@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Schema;
 // Im Admin ueber "+ Neu"/Papierkorb verwaltet (waffenboerseKategorieAdd/
 // -Delete in admin/admin.js) - bleibt unveraendert, schreibt kuenftig nur
 // nach MySQL statt in die JSON-Datei.
-// PHASE 8B - DORMANT / BEWUSST UNGENUTZT: diese Migration legt die
-// Tabellenstruktur in der LARAVEL-DB an, aber KEIN Controller/KEINE Route
-// nutzt sie aktuell (siehe Phase-7/8B-Analyse). Produktive Wahrheit fuer
-// Hundeboerse/Waffenboerse/Kontakt bleiben die bestehenden PHP-
-// Sondermodule mit ihrer EIGENEN, separaten MySQL-Datenbank. NICHT
-// loeschen/zurueckrollen - siehe docs/deployment/dormante-boersen-tabellen.md.
+// PHASE 6B - AKTIVIERT (Korrektur in Phase 7J): siehe Klassenkommentar der
+// Migration 2026_09_14_000110_create_waffenboerse_anzeigen_table.php fuer
+// die vollstaendige Begruendung. Die Kategorienverwaltung (+ Neu/Loeschen)
+// ist seit Phase 7J Teil des neuen Blade-Admins (Admin\WaffenboerseController::
+// kategorieHinzufuegen()/kategorieLoeschen()) statt wie hier urspruenglich
+// vermerkt admin.js/JSON.
 
 return new class extends Migration
 {

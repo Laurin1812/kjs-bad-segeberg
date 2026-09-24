@@ -51,7 +51,9 @@
         // Phase 7I (Admin-Modul "Hundeboerse"): achter echter Link, gleiches
         // Muster wie "Hundeausbildung"/"Kontaktanfragen"/... oben.
         ['label' => 'Hundebörse', 'route' => 'admin.hundeboerse.index', 'routePattern' => 'admin.hundeboerse.*', 'icon' => '🐕'],
-        ['label' => 'Waffenbörse', 'icon' => '🔫'],
+        // Phase 7J (Admin-Modul "Waffenboerse"): neunter echter Link,
+        // gleiches Muster wie "Hundebörse"/"Hundeausbildung"/... oben.
+        ['label' => 'Waffenbörse', 'route' => 'admin.waffenboerse.index', 'routePattern' => 'admin.waffenboerse.*', 'icon' => '🔫'],
         ['label' => 'Medien', 'icon' => '🖼️'],
         ['label' => 'Einstellungen', 'icon' => '⚙️'],
         ['label' => 'Benutzer', 'icon' => '👤'],
