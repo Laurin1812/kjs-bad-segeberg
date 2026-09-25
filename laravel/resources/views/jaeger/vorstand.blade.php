@@ -30,7 +30,7 @@
                         <div class="person-card">
                             <div class="person-card__avatar-wrap">
                                 @if ($m->bild)
-                                    <img src="{{ \App\Support\Images::cardUrl($m->bild) }}" data-full="{{ $m->bild }}" onerror="kjsImgFallback(this)" alt="{{ $m->name }}" style="width:100%;height:100%;object-fit:cover;">
+                                    <img src="{{ \App\Support\Images::cardUrl($m->bild) }}" data-full="{{ $m->bild }}" onerror="kjsImgFallback(this)" alt="{{ $m->name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
                                 @else
                                     <div class="person-card__avatar-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                                 @endif
