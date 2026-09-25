@@ -320,14 +320,29 @@ class AdminAuthUndShellTest extends TestCase
     // Navigation (Teil 5) - keine 404-Navigation.
     // -----------------------------------------------------------------
 
-    public function test_admin_shell_zeigt_noch_nicht_migrierte_module_als_deaktiviert_ohne_link(): void
+    /**
+     * Nachbesserung Phase 7L (letzter Baustein "Einstellungen"/"Benutzer",
+     * siehe Admin\EinstellungenController-/BenutzerController-
+     * Klassenkommentar): bis einschliesslich Phase 7K zeigte dieser Test
+     * noch, dass NOCH NICHT migrierte Module als nicht-klickbare "Folgt"-
+     * Platzhalter erscheinen (siehe Klassenkommentar admin.blade.php,
+     * Auftrag "keine 404-Navigation erzeugen") - seit Phase 7L ist die
+     * Migration aller Sidebar-Punkte abgeschlossen, es gibt keinen einzigen
+     * "Folgt"-Platzhalter mehr. Die Kernaussage des Tests bleibt (keine
+     * 404-Navigation), nur die erwartete Ausgangslage hat sich geaendert -
+     * dieselbe Umbenennung/Anpassung wie bei jedem vorherigen Fachmodul, das
+     * einen bis dahin offenen Platzhalter geschlossen hat.
+     */
+    public function test_admin_shell_zeigt_alle_module_als_echte_links_ohne_platzhalter(): void
     {
         $this->actingAs($this->admin(), 'web');
 
         $response = $this->get(route('admin.dashboard'));
 
         $response->assertOk();
-        $response->assertSee('Folgt');
-        $response->assertDontSee('href="/admin/aktuelles"', false);
+        $response->assertDontSee('Folgt');
+        $response->assertSee('href="'.route('admin.aktuelles.index').'"', false);
+        $response->assertSee('href="'.route('admin.einstellungen.index').'"', false);
+        $response->assertSee('href="'.route('admin.benutzer.index').'"', false);
     }
 }

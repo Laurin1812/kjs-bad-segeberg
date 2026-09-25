@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Admin\AktuellesController as AdminAktuellesController;
 use App\Http\Controllers\Admin\AuthPageController;
+use App\Http\Controllers\Admin\BenutzerController as AdminBenutzerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DownloadsController as AdminDownloadsController;
+use App\Http\Controllers\Admin\EinstellungenController as AdminEinstellungenController;
 use App\Http\Controllers\Admin\HundeausbildungController as AdminHundeausbildungController;
 use App\Http\Controllers\Admin\HundeboerseController as AdminHundeboerseController;
 use App\Http\Controllers\Admin\InhalteController;
@@ -526,5 +528,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('medien/{typ}/{dateiname}', [AdminMedienController::class, 'loeschen'])
             ->where('typ', 'bild|datei')
             ->name('medien.loeschen');
+
+        // Phase 7L (Admin-Modul "Einstellungen") - elftes echtes Fachmodul,
+        // siehe Admin\EinstellungenController-Klassenkommentar fuer die
+        // vollstaendige Analyse. "{gruppe}" ist die deutsche URL-Kurzform
+        // ("darstellung"/"kontakt"/"footer"/"impressum"), NICHT der interne
+        // Settings-"gruppe"-Wert (siehe Controller-Kommentar, warum).
+        Route::get('einstellungen', [AdminEinstellungenController::class, 'index'])->name('einstellungen.index');
+        Route::put('einstellungen/{gruppe}', [AdminEinstellungenController::class, 'update'])
+            ->where('gruppe', 'darstellung|kontakt|footer|impressum')
+            ->name('einstellungen.aktualisieren');
+
+        // Phase 7L (Admin-Modul "Benutzer") - zwoelftes und letztes echtes
+        // Fachmodul, siehe Admin\BenutzerController-Klassenkommentar fuer
+        // die vollstaendige Analyse/Schutzregeln. Namensmuster wie bei
+        // "hundeboerse"/"waffenboerse" oben (neu/speichern/bearbeiten/
+        // aktualisieren/loeschen), kein Route::resource() (Auftrag "keine
+        // neue Architektur").
+        Route::get('benutzer', [AdminBenutzerController::class, 'index'])->name('benutzer.index');
+        Route::get('benutzer/neu', [AdminBenutzerController::class, 'neu'])->name('benutzer.neu');
+        Route::post('benutzer', [AdminBenutzerController::class, 'store'])->name('benutzer.speichern');
+        Route::get('benutzer/{benutzer}/bearbeiten', [AdminBenutzerController::class, 'edit'])->name('benutzer.bearbeiten');
+        Route::put('benutzer/{benutzer}', [AdminBenutzerController::class, 'update'])->name('benutzer.aktualisieren');
+        Route::delete('benutzer/{benutzer}', [AdminBenutzerController::class, 'destroy'])->name('benutzer.loeschen');
     });
 });

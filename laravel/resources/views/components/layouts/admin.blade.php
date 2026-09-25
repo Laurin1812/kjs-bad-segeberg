@@ -57,8 +57,11 @@
         // Phase 7K (Admin-Modul "Medien"): zehnter echter Link, gleiches
         // Muster wie "Waffenbörse"/"Hundebörse"/... oben.
         ['label' => 'Medien', 'route' => 'admin.medien.index', 'routePattern' => 'admin.medien.*', 'icon' => '🖼️'],
-        ['label' => 'Einstellungen', 'icon' => '⚙️'],
-        ['label' => 'Benutzer', 'icon' => '👤'],
+        // Phase 7L (Admin-Module "Einstellungen"/"Benutzer"): elfter und
+        // zwoelfter (letzter) echter Link - ab hier gibt es keine
+        // "Folgt"-Platzhalter mehr in dieser Navigation.
+        ['label' => 'Einstellungen', 'route' => 'admin.einstellungen.index', 'routePattern' => 'admin.einstellungen.*', 'icon' => '⚙️'],
+        ['label' => 'Benutzer', 'route' => 'admin.benutzer.index', 'routePattern' => 'admin.benutzer.*', 'icon' => '👤'],
     ];
     $kjsAdminUser = \App\Support\AdminIdentity::currentUser(request());
 @endphp
