@@ -13,7 +13,20 @@
   "vorschaubild": "/images/1787160560314-f1.jpg",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1790568493172-Bauhunde1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1790568505724-Bauhunde2.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1790568519161-Bauhunde3.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Bauhundgespanne",
   "bild_flat": false
