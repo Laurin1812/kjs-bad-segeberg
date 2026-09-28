@@ -13,7 +13,16 @@
   "vorschaubild": "/images/1789789230638-St-berhunde.jpg",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1790568231413-St-ber1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1790568247960-St-ber2.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Stöberhundgespanne",
   "bild_flat": false
