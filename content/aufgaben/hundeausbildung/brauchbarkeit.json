@@ -13,7 +13,16 @@
   "vorschaubild": "/images/1789789846685-Herunterladen1.jpg",
   "kurzbeschreibung": "",
   "downloads": [],
-  "galerie": [],
+  "galerie": [
+    {
+      "bild": "/images/1789789846685-Herunterladen1.jpg",
+      "titel": ""
+    },
+    {
+      "bild": "/images/1789756735311-Gesellenpr-fung_1.jpg",
+      "titel": ""
+    }
+  ],
   "galerie_titel": "Bildergalerie",
   "nav_label": "Brauchbarkeit",
   "bild_flat": false
