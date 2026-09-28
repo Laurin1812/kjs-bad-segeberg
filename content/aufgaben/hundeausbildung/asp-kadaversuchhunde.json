@@ -12,7 +12,18 @@
   "kontakt_email": "",
   "vorschaubild": "/images/1790568910942-Kadavar1.jpg",
   "kurzbeschreibung": "",
-  "downloads": [],
+  "downloads": [
+    {
+      "titel": "Informationen Hundeführer ASP Kurs",
+      "datei": "/downloads/1790569588485-Informationen-Hundef-hrer-ASP-Kurs.pdf",
+      "vorschau": ""
+    },
+    {
+      "titel": "Bericht der ASP Kadaver Suchhundestaffel der KJS Segeberg 2023",
+      "datei": "/downloads/1790570171146-Bericht-der-ASP-Kadaver-Suchhundestaffel-der-KJS-Segeberg.pdf",
+      "vorschau": ""
+    }
+  ],
   "galerie": [
     {
       "bild": "/images/1790568910942-Kadavar1.jpg",
