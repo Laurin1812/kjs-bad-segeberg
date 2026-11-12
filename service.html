@@ -206,9 +206,48 @@
 
     const kontakt = (d.kontakt_name||d.kontakt_email) ? `<p><strong>Kontakt:</strong> ${d.kontakt_name||''}${d.kontakt_email?' &middot; <a href="mailto:'+d.kontakt_email+'">'+d.kontakt_email+'</a>':''}</p>` : '';
 
+    // ── Förderanträge ────────────────────────────────────────
+    var alleFoerder = Array.isArray(d.foerderantraege) ? d.foerderantraege : [];
+    var foerderHtml = '';
+    if (alleFoerder.length) {
+      // Nach Kategorie gruppieren
+      var fKats = [];
+      var fKatSeen = {};
+      alleFoerder.forEach(function(f) {
+        var k = (f.kategorie || '').trim() || '—';
+        if (!fKatSeen[k]) { fKatSeen[k] = true; fKats.push(k); }
+      });
+
+      var fSektionen = fKats.map(function(kat) {
+        var eintraege = alleFoerder.filter(function(f) {
+          return ((f.kategorie || '').trim() || '—') === kat;
+        });
+        var inhalt = eintraege.map(function(f) {
+          var downloads = (f.downloads || []).filter(function(dl) { return dl && dl.datei; });
+          return '<div class="service-beitrag">' +
+            '<div class="service-beitrag__titel">' + escHtml(f.titel || '') + '</div>' +
+            (f.beschreibung ? '<div class="service-beitrag__text">' + marked.parse(f.beschreibung) + '</div>' : '') +
+            (downloads.length ? '<div class="downloads-list">' + downloads.map(buildDownloadItem).join('') + '</div>' : '') +
+          '</div>';
+        }).join('');
+
+        // Nur anzeigen wenn Kategorie != '—' (kein Thema gesetzt)
+        if (kat === '—') {
+          return inhalt;
+        }
+        return '<details class="service-kategorie" open>' +
+          '<summary class="service-kategorie-titel">' + escHtml(kat) + '</summary>' +
+          '<div class="service-kategorie__body">' + inhalt + '</div>' +
+        '</details>';
+      }).join('');
+
+      foerderHtml = '<h2 style="margin-top:2.5rem;margin-bottom:1rem;">Förderanträge</h2>' + fSektionen;
+    }
+
     document.getElementById('page-main').innerHTML =
       jahrFilterHtml +
       (kategorienHtml || '<p>Aktuell sind keine Beiträge vorhanden.</p>') +
+      foerderHtml +
       kontakt;
 
     var jahrSelect = document.getElementById('service-jahr-select');
