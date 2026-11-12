@@ -156,6 +156,26 @@ class MediaUploadService
             throw new MediaValidationException('Bild konnte für die Vorschau-Erzeugung nicht dekodiert werden.');
         }
 
+        // EXIF-Orientierung korrigieren (Kameras schreiben Rotation als Metadatum,
+        // GD ignoriert es beim Dekodieren - ohne Korrektur erscheinen hochkant
+        // fotografierte Bilder in Card-/Thumb-Varianten um 90° gedreht).
+        if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($srcPath);
+            $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
+            if ($orientation > 1) {
+                $rotated = match ($orientation) {
+                    3 => imagerotate($src, 180, 0),
+                    6 => imagerotate($src, -90, 0),
+                    8 => imagerotate($src, 90, 0),
+                    default => null,
+                };
+                if ($rotated !== null && $rotated !== false) {
+                    imagedestroy($src);
+                    $src = $rotated;
+                }
+            }
+        }
+
         try {
             $srcW = imagesx($src);
             $srcH = imagesy($src);

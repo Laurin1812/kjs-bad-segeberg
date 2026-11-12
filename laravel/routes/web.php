@@ -524,6 +524,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('medien/archiv', [AdminMedienController::class, 'archiv'])->name('medien.archiv');
         Route::post('medien/bilder', [AdminMedienController::class, 'bildHochladen'])->name('medien.bilder.hochladen');
         Route::post('medien/dateien', [AdminMedienController::class, 'dateiHochladen'])->name('medien.dateien.hochladen');
+        Route::post('medien/dateien-ajax', [AdminMedienController::class, 'dateiHochladenJson'])->name('medien.dateien.ajax');
         Route::put('medien/{dateiname}/archivieren', [AdminMedienController::class, 'archivToggle'])->name('medien.archivieren');
         Route::delete('medien/{typ}/{dateiname}', [AdminMedienController::class, 'loeschen'])
             ->where('typ', 'bild|datei')

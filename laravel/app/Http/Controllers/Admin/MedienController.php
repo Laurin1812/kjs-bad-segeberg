@@ -12,6 +12,7 @@ use App\Support\MediaServiceUnavailableException;
 use App\Support\MediaStorage;
 use App\Support\MediaUploadService;
 use App\Support\MediaValidationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -146,6 +147,25 @@ class MedienController extends Controller
             return back()->withErrors(['medien' => $e->getMessage()]);
         } catch (Throwable) {
             return back()->withErrors(['medien' => 'PDF-Upload fehlgeschlagen.']);
+        }
+    }
+
+    /** POST admin/medien/dateien-ajax — JSON-Variante fuer inline-Upload in Formularen. */
+    public function dateiHochladenJson(Request $request, MediaUploadService $service): JsonResponse
+    {
+        if (! $request->hasFile('datei') || ! $request->file('datei')->isValid()) {
+            return response()->json(['ok' => false, 'fehler' => 'Keine gültige Datei.'], 422);
+        }
+
+        try {
+            $eintrag = $service->uploadPdf($request->file('datei'), $this->angemeldeterBenutzer($request));
+            $pfad = MediaStorage::downloadsUrlPrefix().'/'.$eintrag->path;
+
+            return response()->json(['ok' => true, 'pfad' => $pfad, 'name' => $eintrag->original_name]);
+        } catch (MediaValidationException|MediaServiceUnavailableException $e) {
+            return response()->json(['ok' => false, 'fehler' => $e->getMessage()], 422);
+        } catch (Throwable) {
+            return response()->json(['ok' => false, 'fehler' => 'Upload fehlgeschlagen.'], 500);
         }
     }
 

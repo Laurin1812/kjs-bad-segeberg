@@ -171,14 +171,60 @@
                     }
                 @endphp
                 @foreach ($downloadZeilen as $i => $zeile)
+                    @php $dlPfad = $zeile['datei'] ?? ''; $dlName = $dlPfad ? basename($dlPfad) : ''; @endphp
                     <div class="item-card">
                         <div class="item-body">
                             <input class="field-input" type="text" name="downloads[{{ $i }}][titel]" value="{{ $zeile['titel'] ?? '' }}" placeholder="Titel des Dokuments" style="margin-bottom:.5rem;">
-                            <input class="field-input" type="text" name="downloads[{{ $i }}][datei]" value="{{ $zeile['datei'] ?? '' }}" placeholder="Dateipfad (z.B. /downloads/...)" style="margin-bottom:.5rem;">
-                            <input class="field-input" type="text" name="downloads[{{ $i }}][vorschau]" value="{{ $zeile['vorschau'] ?? '' }}" placeholder="Vorschaubild-Pfad (optional)">
+                            <input type="hidden" name="downloads[{{ $i }}][datei]" class="kjs-dl-pfad" value="{{ $dlPfad }}">
+                            <input type="hidden" name="downloads[{{ $i }}][vorschau]" value="{{ $zeile['vorschau'] ?? '' }}">
+                            <div class="kjs-dl-row" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                                <span class="kjs-dl-name" style="color:var(--text-muted,#666);font-size:.875rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    {{ $dlName ?: '(noch keine Datei)' }}
+                                </span>
+                                <label style="cursor:pointer;display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .6rem;border:1px solid var(--border-color,#ccc);border-radius:.25rem;font-size:.875rem;white-space:nowrap;">
+                                    📤 Datei wählen
+                                    <input type="file" accept=".pdf" class="kjs-dl-input" style="display:none" data-csrf="{{ csrf_token() }}" data-url="{{ route('admin.medien.dateien.ajax') }}">
+                                </label>
+                                <span class="kjs-dl-status" style="font-size:.8rem;"></span>
+                            </div>
                         </div>
                     </div>
                 @endforeach
+                <script>
+                (function () {
+                    document.querySelectorAll('.kjs-dl-input').forEach(function (input) {
+                        input.addEventListener('change', function () {
+                            var file = input.files[0];
+                            if (!file) return;
+                            var card = input.closest('.item-card');
+                            var pfadInput = card.querySelector('.kjs-dl-pfad');
+                            var nameSpan = card.querySelector('.kjs-dl-name');
+                            var statusSpan = card.querySelector('.kjs-dl-status');
+                            statusSpan.textContent = 'Wird hochgeladen…';
+                            var fd = new FormData();
+                            fd.append('datei', file);
+                            fd.append('_token', input.dataset.csrf);
+                            fetch(input.dataset.url, { method: 'POST', body: fd })
+                                .then(function (r) { return r.json(); })
+                                .then(function (data) {
+                                    if (data.ok) {
+                                        pfadInput.value = data.pfad;
+                                        nameSpan.textContent = data.name || file.name;
+                                        statusSpan.textContent = '✓';
+                                        statusSpan.style.color = 'green';
+                                    } else {
+                                        statusSpan.textContent = '⚠ ' + (data.fehler || 'Fehler');
+                                        statusSpan.style.color = 'red';
+                                    }
+                                })
+                                .catch(function () {
+                                    statusSpan.textContent = '⚠ Upload fehlgeschlagen';
+                                    statusSpan.style.color = 'red';
+                                });
+                        });
+                    });
+                })();
+                </script>
             </div>
 
             <div class="form-card">
