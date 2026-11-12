@@ -1,8 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    KJS Admin – admin.js
    Vanilla JS SPA · Netlify Identity + git-gateway
+   Version: 2026-11-12b
    ═══════════════════════════════════════════════════════════════ */
 (function () {
+  // Versionsprüfung – erscheint in der Browser-Konsole (F12 → Konsole)
+  console.info('%c KJS Admin 2026-11-12b geladen ', 'background:#2d6a2d;color:#fff;padding:2px 6px;border-radius:3px;');
+
   'use strict';
 
   /* ────────────────────────────────────────────────────────────
@@ -2606,6 +2610,7 @@
   }
 
   function renderService(def, data) {
+    if (S.svcTab === 'foerderantraege') { renderFoerderantraege(def, data); return; }
     S.svcAnsicht = 'alle';
     var beitraege = data.beitraege || [];
     S.svcFilterJahr = S.svcFilterJahr || '';
@@ -2644,6 +2649,10 @@
       '<button type="button" class="btn btn-outline btn-sm" onclick="confirmNav(serviceArchivSeiteOeffnen)">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
       '<button class="btn btn-primary" onclick="confirmNav(serviceNeu)">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
+      '<div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">' +
+        '<button class="btn btn-primary btn-sm" disabled>📰 Beiträge</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="confirmNav(function(){S.svcTab=\'foerderantraege\';renderFoerderantraege(S.section,S.data)})">📋 Förderanträge</button>' +
+      '</div>' +
 
       // ── Seiteneinstellungen (Titel/Hero-Bild/Kontakt) ───────
       '<div class="form-card">' +
@@ -2851,6 +2860,100 @@
         serviceAktuelleAnsichtRendern();
       } catch (e) {
         if (entfernt.length) S.data.beitraege.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
+    });
+  };
+
+  // ── Förderanträge ────────────────────────────────────────────
+
+  function renderFoerderantraege(def, data) {
+    S.svcTab = 'foerderantraege';
+    var liste = data.foerderantraege || [];
+
+    var html = panelHeader(def.label,
+      '<button class="btn btn-primary" onclick="confirmNav(foerderantragNeu)">➕ Neuer Förderantrag</button>') +
+      '<div class="panel-body">' +
+      '<div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">' +
+        '<button class="btn btn-outline btn-sm" onclick="confirmNav(function(){S.svcTab=null;renderService(S.section,S.data)})">📰 Beiträge</button>' +
+        '<button class="btn btn-primary btn-sm" disabled>📋 Förderanträge</button>' +
+      '</div>' +
+      '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Jeder Förderantrag hat einen Titel, ein optionales Thema/Kategorie und beliebig viele anhängbare Formulare (PDF, Word …). Die Formulare werden als Download angeboten.</p>';
+
+    if (!liste.length) {
+      html += '<div class="form-card"><p class="text-muted">Noch keine Förderanträge angelegt.</p></div>';
+    }
+
+    liste.forEach(function(f, i) {
+      html += '<div class="item-card">' +
+        '<div class="item-body" style="cursor:default;">' +
+          '<div class="item-title">' + escHtml(f.titel || '(Kein Titel)') + '</div>' +
+          (f.kategorie ? '<div class="item-meta"><span class="item-badge">' + escHtml(f.kategorie) + '</span></div>' : '') +
+          ((f.downloads || []).length ? '<div class="item-meta" style="font-size:.8rem;color:var(--text-muted);">' + (f.downloads.length) + ' Formular' + (f.downloads.length !== 1 ? 'e' : '') + '</div>' : '') +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-sm btn-outline" onclick="confirmNav(function(){foerderantragEdit(' + i + ')})">Bearbeiten</button>' +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){foerderantragDelete(' + i + ')})">Löschen</button>' +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '</div>';
+    renderMain(html);
+  }
+  window.renderFoerderantraege = renderFoerderantraege;
+
+  window.foerderantragNeu = function() {
+    var data = S.data;
+    data.foerderantraege = data.foerderantraege || [];
+    data.foerderantraege.push({ titel: '', kategorie: '', beschreibung: '', downloads: [] });
+    foerderantragEdit(data.foerderantraege.length - 1);
+  };
+
+  window.foerderantragEdit = function(idx) {
+    var f = (S.data.foerderantraege || [])[idx];
+    if (!f) return;
+    var html = panelHeader('📋 Förderantrag bearbeiten',
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderFoerderantraege(S.section,S.data)})">← Zurück</button>' +
+        '<button class="btn btn-primary" onclick="foerderantragSave(' + idx + ')">💾 Speichern</button>',
+        true) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          fText('fa-titel', 'Titel (z. B. „Förderantrag Revierverbesserung")', f.titel) +
+          fText('fa-kategorie', 'Thema / Unterkategorie (optional)', f.kategorie) +
+          fMarkdown('fa-beschreibung', 'Beschreibung (optional)', f.beschreibung) +
+        '</div>' +
+        renderDownloadsCard(f) +
+      '</div>';
+    renderMain(html);
+    initMDE('fa-beschreibung');
+    initDownloadsSortable();
+  };
+
+  window.foerderantragSave = async function(idx) {
+    if (!guardSavePermission()) return;
+    var f = S.data.foerderantraege[idx];
+    f.titel        = gv('fa-titel');
+    f.kategorie    = gv('fa-kategorie');
+    f.beschreibung = getMDE();
+    f.downloads    = collectDownloadsList();
+    try {
+      await doSave(S.section.file, S.data, '📋 Service: Förderantrag gespeichert');
+      toast('✅ Förderantrag gespeichert!', 'ok');
+      S.dirty = false;
+      renderFoerderantraege(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.foerderantragDelete = function(idx) {
+    showConfirm('Förderantrag löschen', 'Diesen Förderantrag wirklich löschen?', async function() {
+      var entfernt = S.data.foerderantraege.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '📋 Service: Förderantrag gelöscht');
+        toast('🗑️ Förderantrag gelöscht', 'info');
+        renderFoerderantraege(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.foerderantraege.splice(idx, 0, entfernt[0]);
         await handleSaveError(e);
       }
     });
@@ -4218,18 +4321,18 @@
   var dlRowSeq = 0;
   function renderDownloadRow(d) {
     var datei = d.datei || '';
-    var fname = datei.split('/').pop();
+    var fname = datei.split('/').pop().replace(/^\d+-/, ''); // Timestamp-Prefix aus Anzeigename entfernen
     var imgId = 'dl-vorschau-' + (dlRowSeq++);
     return '<div class="item-card download-row" data-img-id="' + imgId + '">' +
       '<div class="item-drag">⠿</div>' +
       '<div class="item-body">' +
-        '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Anleitung Mai 2026)" style="margin-bottom:.35rem;">' +
-        '<div class="item-meta">📄 ' + escHtml(fname) +
-          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener">öffnen</a>' : '') +
+        '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Förderantrag Jagd 2026)">' +
+        '<div class="item-meta" style="margin-top:.3rem;">📄 ' + escHtml(fname) +
+          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener noreferrer">öffnen ↗</a>' : '') +
         '</div>' +
-        '<div style="margin-top:.5rem;">' + fImage(imgId, 'Vorschaubild (optional)', d.vorschau) + '</div>' +
       '</div>' +
       '<input type="hidden" class="dl-datei" value="' + escAttr(datei) + '">' +
+      '<input type="hidden" class="dl-vorschau-hidden" id="f-' + imgId + '" value="' + escAttr(d.vorschau || '') + '">' +
       '<div class="item-actions">' +
         '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.download-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
@@ -4242,12 +4345,16 @@
     return '<div class="form-card">' +
       '<div class="form-card-title">📄 Dokumente &amp; Downloads</div>' +
       '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
-        'Diese Dateien werden <strong>nicht</strong> in den Text oben eingefügt, sondern erscheinen automatisch ' +
-        'als eigene, beschriftete Download-Liste am Ende dieser Seite. Reihenfolge per Drag &amp; Drop änderbar.' +
+        'PDFs/Formulare anhängen. Reihenfolge per Drag &amp; Drop änderbar.' +
       '</p>' +
       '<div id="downloads-list">' + rows + '</div>' +
       '<p class="text-muted" id="downloads-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Dokumente hinzugefügt.</p>' +
-      '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\')">📄 PDF hinzufügen</button>' +
+      '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">' +
+        '<label class="btn btn-primary btn-sm" for="direct-pdf-upload" style="cursor:pointer;">📤 Datei hochladen</label>' +
+        '<input type="file" id="direct-pdf-upload" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none" onchange="directPdfUpload(this)">' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\')">📁 Bereits hochgeladen</button>' +
+      '</div>' +
+      '<p id="direct-pdf-status" style="font-size:.84rem;color:var(--text-muted);margin:.4rem 0 0;display:none;"></p>' +
     '</div>';
   }
 
@@ -4369,6 +4476,29 @@
     markDirty();
     toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
   }
+
+  // Direkter Upload vom Computer ohne Modal-Umweg.
+  // Unterstützt PDF + Word-Dokumente.
+  window.directPdfUpload = async function(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var status = id('direct-pdf-status');
+    if (status) { status.textContent = '⏳ Wird hochgeladen…'; status.style.display = ''; }
+    input.value = '';
+    var MAX = 10 * 1024 * 1024; // 10 MB
+    if (file.size > MAX) {
+      if (status) { status.textContent = '❌ Datei zu groß (max. 10 MB)'; }
+      return;
+    }
+    try {
+      var b64 = await fileToBase64(file);
+      var url = await apiUploadPdf(file.name, b64); // legt Datei unter /downloads/ ab (funktioniert für alle Typen)
+      if (status) { status.textContent = '✅ Hochgeladen!'; setTimeout(function(){ status.style.display='none'; }, 3000); }
+      addDownloadRow(url, file.name, 'downloads-list');
+    } catch(e) {
+      if (status) { status.textContent = '❌ Fehler: ' + (e.message || e); }
+    }
+  };
 
   /* ────────────────────────────────────────────────────────────
      BILDERGALERIE (Punkt 2, Frank-Wunsch) – gleiches Baukasten-Prinzip
@@ -7631,65 +7761,113 @@
       return original();
     }
 
-    return new Promise(function(resolve, reject) {
-      var objectUrl = URL.createObjectURL(file);
-      var img = new Image();
+    // createImageBitmap mit imageOrientation:'from-image' liefert immer das
+    // EXIF-korrigierte Bild – unabhängig vom Browser. So entstehen Card- und
+    // Thumbnail-Varianten nie mehr gedreht (klassischer Safari-EXIF-Bug).
+    // Browsers ohne createImageBitmap-Support (sehr alt) fallen per catch auf
+    // den bisherigen Pfad (new Image + drawImage) zurück – der in Chrome/Firefox
+    // seit je her korrekt arbeitet.
+    var bitmapPromise = (typeof createImageBitmap === 'function')
+      ? createImageBitmap(file, { imageOrientation: 'from-image' }).catch(function() { return null; })
+      : Promise.resolve(null);
 
-      img.onload = function() {
-        try {
-          var w = img.naturalWidth, h = img.naturalHeight;
-          var scale = Math.min(1, maxDimension / Math.max(w, h));
-          var tw = Math.max(1, Math.round(w * scale));
-          var th = Math.max(1, Math.round(h * scale));
+    return bitmapPromise.then(function(bitmap) {
+      if (bitmap) {
+        // createImageBitmap hat EXIF-korrigierte Dimensionen geliefert
+        return new Promise(function(resolve, reject) {
+          try {
+            var srcW = bitmap.width, srcH = bitmap.height;
+            var scale = Math.min(1, maxDimension / Math.max(srcW, srcH));
+            var tw = Math.max(1, Math.round(srcW * scale));
+            var th = Math.max(1, Math.round(srcH * scale));
 
-          var canvas = document.createElement('canvas');
-          canvas.width = tw; canvas.height = th;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, tw, th); // komplettes Bild, proportional skaliert - kein Ausschnitt
-          URL.revokeObjectURL(objectUrl);
+            var canvas = document.createElement('canvas');
+            canvas.width = tw; canvas.height = th;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0, tw, th);
+            bitmap.close();
 
-          var isPng = /image\/png/i.test(file.type);
-          var hasAlpha = false;
-          if (isPng) {
-            try {
-              var data = ctx.getImageData(0, 0, tw, th).data;
-              for (var i = 3; i < data.length; i += 4) {
-                if (data[i] < 255) { hasAlpha = true; break; }
-              }
-            } catch (e) {
-              hasAlpha = true; // im Zweifel PNG/Transparenz behalten
+            var isPng = /image\/png/i.test(file.type);
+            var hasAlpha = false;
+            if (isPng) {
+              try {
+                var data = ctx.getImageData(0, 0, tw, th).data;
+                for (var i = 3; i < data.length; i += 4) {
+                  if (data[i] < 255) { hasAlpha = true; break; }
+                }
+              } catch (e) { hasAlpha = true; }
             }
+
+            var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
+            var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
+            var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+
+            canvas.toBlob(function(blob) {
+              if (!blob || blob.size >= file.size) { original().then(resolve, reject); return; }
+              var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+              var reader = new FileReader();
+              reader.onload = function() { resolve({ base64: reader.result.split(',')[1], filename: newName }); };
+              reader.onerror = function() { original().then(resolve, reject); };
+              reader.readAsDataURL(blob);
+            }, outType, outQuality);
+          } catch (e) {
+            original().then(resolve, reject);
           }
+        });
+      }
 
-          var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
-          var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
-          var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+      // Fallback: createImageBitmap nicht verfügbar → new Image() (ältere Browser)
+      return new Promise(function(resolve, reject) {
+        var objectUrl = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function() {
+          try {
+            var srcW = img.naturalWidth, srcH = img.naturalHeight;
+            var scale = Math.min(1, maxDimension / Math.max(srcW, srcH));
+            var tw = Math.max(1, Math.round(srcW * scale));
+            var th = Math.max(1, Math.round(srcH * scale));
 
-          canvas.toBlob(function(blob) {
-            if (!blob || blob.size >= file.size) {
-              // Kein Gewinn (oder Canvas-Export fehlgeschlagen) -> Original behalten
-              original().then(resolve, reject);
-              return;
+            var canvas = document.createElement('canvas');
+            canvas.width = tw; canvas.height = th;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, tw, th);
+            URL.revokeObjectURL(objectUrl);
+
+            var isPng = /image\/png/i.test(file.type);
+            var hasAlpha = false;
+            if (isPng) {
+              try {
+                var data = ctx.getImageData(0, 0, tw, th).data;
+                for (var i = 3; i < data.length; i += 4) {
+                  if (data[i] < 255) { hasAlpha = true; break; }
+                }
+              } catch (e) { hasAlpha = true; }
             }
-            var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
-            var reader = new FileReader();
-            reader.onload = function() {
-              resolve({ base64: reader.result.split(',')[1], filename: newName });
-            };
-            reader.onerror = function() { original().then(resolve, reject); };
-            reader.readAsDataURL(blob);
-          }, outType, outQuality);
-        } catch (e) {
+
+            var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
+            var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
+            var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+
+            canvas.toBlob(function(blob) {
+              if (!blob || blob.size >= file.size) { original().then(resolve, reject); return; }
+              var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+              var reader = new FileReader();
+              reader.onload = function() { resolve({ base64: reader.result.split(',')[1], filename: newName }); };
+              reader.onerror = function() { original().then(resolve, reject); };
+              reader.readAsDataURL(blob);
+            }, outType, outQuality);
+          } catch (e) {
+            URL.revokeObjectURL(objectUrl);
+            original().then(resolve, reject);
+          }
+        };
+        img.onerror = function() {
           URL.revokeObjectURL(objectUrl);
-          original().then(resolve, reject); // nie den Upload wegen eines Verarbeitungsfehlers blockieren
-        }
-      };
-      img.onerror = function() {
-        URL.revokeObjectURL(objectUrl);
-        original().then(resolve, reject); // Datei nicht als Bild ladbar -> unverändert hochladen
-      };
-      img.src = objectUrl;
-    });
+          original().then(resolve, reject);
+        };
+        img.src = objectUrl;
+      });
+    }).catch(function() { return original(); });
   }
 
   function prepareImageForUpload(file) {
