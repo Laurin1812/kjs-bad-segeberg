@@ -1,8 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    KJS Admin – admin.js
    Vanilla JS SPA · Netlify Identity + git-gateway
+   Version: 2026-11-12b
    ═══════════════════════════════════════════════════════════════ */
 (function () {
+  // Versionsprüfung – erscheint in der Browser-Konsole (F12 → Konsole)
+  console.info('%c KJS Admin 2026-11-12b geladen ', 'background:#2d6a2d;color:#fff;padding:2px 6px;border-radius:3px;');
+
   'use strict';
 
   /* ────────────────────────────────────────────────────────────
@@ -4317,18 +4321,18 @@
   var dlRowSeq = 0;
   function renderDownloadRow(d) {
     var datei = d.datei || '';
-    var fname = datei.split('/').pop();
+    var fname = datei.split('/').pop().replace(/^\d+-/, ''); // Timestamp-Prefix aus Anzeigename entfernen
     var imgId = 'dl-vorschau-' + (dlRowSeq++);
     return '<div class="item-card download-row" data-img-id="' + imgId + '">' +
       '<div class="item-drag">⠿</div>' +
       '<div class="item-body">' +
-        '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Anleitung Mai 2026)" style="margin-bottom:.35rem;">' +
-        '<div class="item-meta">📄 ' + escHtml(fname) +
-          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener">öffnen</a>' : '') +
+        '<input class="field-input dl-titel" type="text" value="' + escAttr(d.titel || '') + '" placeholder="Beschriftung (z.B. Förderantrag Jagd 2026)">' +
+        '<div class="item-meta" style="margin-top:.3rem;">📄 ' + escHtml(fname) +
+          (datei ? ' &middot; <a href="' + escAttr(datei) + '" target="_blank" rel="noopener noreferrer">öffnen ↗</a>' : '') +
         '</div>' +
-        '<div style="margin-top:.5rem;">' + fImage(imgId, 'Vorschaubild (optional)', d.vorschau) + '</div>' +
       '</div>' +
       '<input type="hidden" class="dl-datei" value="' + escAttr(datei) + '">' +
+      '<input type="hidden" class="dl-vorschau-hidden" id="f-' + imgId + '" value="' + escAttr(d.vorschau || '') + '">' +
       '<div class="item-actions">' +
         '<button type="button" class="btn btn-sm btn-danger-outline" onclick="this.closest(\'.download-row\').remove();markDirty()">🗑️</button>' +
       '</div>' +
