@@ -7631,65 +7631,113 @@
       return original();
     }
 
-    return new Promise(function(resolve, reject) {
-      var objectUrl = URL.createObjectURL(file);
-      var img = new Image();
+    // createImageBitmap mit imageOrientation:'from-image' liefert immer das
+    // EXIF-korrigierte Bild – unabhängig vom Browser. So entstehen Card- und
+    // Thumbnail-Varianten nie mehr gedreht (klassischer Safari-EXIF-Bug).
+    // Browsers ohne createImageBitmap-Support (sehr alt) fallen per catch auf
+    // den bisherigen Pfad (new Image + drawImage) zurück – der in Chrome/Firefox
+    // seit je her korrekt arbeitet.
+    var bitmapPromise = (typeof createImageBitmap === 'function')
+      ? createImageBitmap(file, { imageOrientation: 'from-image' }).catch(function() { return null; })
+      : Promise.resolve(null);
 
-      img.onload = function() {
-        try {
-          var w = img.naturalWidth, h = img.naturalHeight;
-          var scale = Math.min(1, maxDimension / Math.max(w, h));
-          var tw = Math.max(1, Math.round(w * scale));
-          var th = Math.max(1, Math.round(h * scale));
+    return bitmapPromise.then(function(bitmap) {
+      if (bitmap) {
+        // createImageBitmap hat EXIF-korrigierte Dimensionen geliefert
+        return new Promise(function(resolve, reject) {
+          try {
+            var srcW = bitmap.width, srcH = bitmap.height;
+            var scale = Math.min(1, maxDimension / Math.max(srcW, srcH));
+            var tw = Math.max(1, Math.round(srcW * scale));
+            var th = Math.max(1, Math.round(srcH * scale));
 
-          var canvas = document.createElement('canvas');
-          canvas.width = tw; canvas.height = th;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, tw, th); // komplettes Bild, proportional skaliert - kein Ausschnitt
-          URL.revokeObjectURL(objectUrl);
+            var canvas = document.createElement('canvas');
+            canvas.width = tw; canvas.height = th;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0, tw, th);
+            bitmap.close();
 
-          var isPng = /image\/png/i.test(file.type);
-          var hasAlpha = false;
-          if (isPng) {
-            try {
-              var data = ctx.getImageData(0, 0, tw, th).data;
-              for (var i = 3; i < data.length; i += 4) {
-                if (data[i] < 255) { hasAlpha = true; break; }
-              }
-            } catch (e) {
-              hasAlpha = true; // im Zweifel PNG/Transparenz behalten
+            var isPng = /image\/png/i.test(file.type);
+            var hasAlpha = false;
+            if (isPng) {
+              try {
+                var data = ctx.getImageData(0, 0, tw, th).data;
+                for (var i = 3; i < data.length; i += 4) {
+                  if (data[i] < 255) { hasAlpha = true; break; }
+                }
+              } catch (e) { hasAlpha = true; }
             }
+
+            var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
+            var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
+            var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+
+            canvas.toBlob(function(blob) {
+              if (!blob || blob.size >= file.size) { original().then(resolve, reject); return; }
+              var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+              var reader = new FileReader();
+              reader.onload = function() { resolve({ base64: reader.result.split(',')[1], filename: newName }); };
+              reader.onerror = function() { original().then(resolve, reject); };
+              reader.readAsDataURL(blob);
+            }, outType, outQuality);
+          } catch (e) {
+            original().then(resolve, reject);
           }
+        });
+      }
 
-          var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
-          var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
-          var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+      // Fallback: createImageBitmap nicht verfügbar → new Image() (ältere Browser)
+      return new Promise(function(resolve, reject) {
+        var objectUrl = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function() {
+          try {
+            var srcW = img.naturalWidth, srcH = img.naturalHeight;
+            var scale = Math.min(1, maxDimension / Math.max(srcW, srcH));
+            var tw = Math.max(1, Math.round(srcW * scale));
+            var th = Math.max(1, Math.round(srcH * scale));
 
-          canvas.toBlob(function(blob) {
-            if (!blob || blob.size >= file.size) {
-              // Kein Gewinn (oder Canvas-Export fehlgeschlagen) -> Original behalten
-              original().then(resolve, reject);
-              return;
+            var canvas = document.createElement('canvas');
+            canvas.width = tw; canvas.height = th;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, tw, th);
+            URL.revokeObjectURL(objectUrl);
+
+            var isPng = /image\/png/i.test(file.type);
+            var hasAlpha = false;
+            if (isPng) {
+              try {
+                var data = ctx.getImageData(0, 0, tw, th).data;
+                for (var i = 3; i < data.length; i += 4) {
+                  if (data[i] < 255) { hasAlpha = true; break; }
+                }
+              } catch (e) { hasAlpha = true; }
             }
-            var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
-            var reader = new FileReader();
-            reader.onload = function() {
-              resolve({ base64: reader.result.split(',')[1], filename: newName });
-            };
-            reader.onerror = function() { original().then(resolve, reject); };
-            reader.readAsDataURL(blob);
-          }, outType, outQuality);
-        } catch (e) {
+
+            var outType = (isPng && hasAlpha) ? 'image/png' : 'image/jpeg';
+            var outExt  = (outType === 'image/png') ? '.png' : '.jpg';
+            var outQuality = (outType === 'image/jpeg') ? quality : undefined;
+
+            canvas.toBlob(function(blob) {
+              if (!blob || blob.size >= file.size) { original().then(resolve, reject); return; }
+              var newName = file.name.replace(/\.[^.]+$/, '') + outExt;
+              var reader = new FileReader();
+              reader.onload = function() { resolve({ base64: reader.result.split(',')[1], filename: newName }); };
+              reader.onerror = function() { original().then(resolve, reject); };
+              reader.readAsDataURL(blob);
+            }, outType, outQuality);
+          } catch (e) {
+            URL.revokeObjectURL(objectUrl);
+            original().then(resolve, reject);
+          }
+        };
+        img.onerror = function() {
           URL.revokeObjectURL(objectUrl);
-          original().then(resolve, reject); // nie den Upload wegen eines Verarbeitungsfehlers blockieren
-        }
-      };
-      img.onerror = function() {
-        URL.revokeObjectURL(objectUrl);
-        original().then(resolve, reject); // Datei nicht als Bild ladbar -> unverändert hochladen
-      };
-      img.src = objectUrl;
-    });
+          original().then(resolve, reject);
+        };
+        img.src = objectUrl;
+      });
+    }).catch(function() { return original(); });
   }
 
   function prepareImageForUpload(file) {
