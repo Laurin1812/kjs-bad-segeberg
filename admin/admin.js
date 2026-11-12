@@ -2606,6 +2606,7 @@
   }
 
   function renderService(def, data) {
+    if (S.svcTab === 'foerderantraege') { renderFoerderantraege(def, data); return; }
     S.svcAnsicht = 'alle';
     var beitraege = data.beitraege || [];
     S.svcFilterJahr = S.svcFilterJahr || '';
@@ -2644,6 +2645,10 @@
       '<button type="button" class="btn btn-outline btn-sm" onclick="confirmNav(serviceArchivSeiteOeffnen)">📁 Archivierte Beiträge (' + archivAnzahl + ')</button>' +
       '<button class="btn btn-primary" onclick="confirmNav(serviceNeu)">➕ Neuer Beitrag</button>') +
       '<div class="panel-body">' +
+      '<div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">' +
+        '<button class="btn btn-primary btn-sm" disabled>📰 Beiträge</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="confirmNav(function(){S.svcTab=\'foerderantraege\';renderFoerderantraege(S.section,S.data)})">📋 Förderanträge</button>' +
+      '</div>' +
 
       // ── Seiteneinstellungen (Titel/Hero-Bild/Kontakt) ───────
       '<div class="form-card">' +
@@ -2851,6 +2856,100 @@
         serviceAktuelleAnsichtRendern();
       } catch (e) {
         if (entfernt.length) S.data.beitraege.splice(idx, 0, entfernt[0]); // Löschung zurücknehmen - nicht gespeichert
+        await handleSaveError(e);
+      }
+    });
+  };
+
+  // ── Förderanträge ────────────────────────────────────────────
+
+  function renderFoerderantraege(def, data) {
+    S.svcTab = 'foerderantraege';
+    var liste = data.foerderantraege || [];
+
+    var html = panelHeader(def.label,
+      '<button class="btn btn-primary" onclick="confirmNav(foerderantragNeu)">➕ Neuer Förderantrag</button>') +
+      '<div class="panel-body">' +
+      '<div style="display:flex;gap:.5rem;margin-bottom:1.25rem;">' +
+        '<button class="btn btn-outline btn-sm" onclick="confirmNav(function(){S.svcTab=null;renderService(S.section,S.data)})">📰 Beiträge</button>' +
+        '<button class="btn btn-primary btn-sm" disabled>📋 Förderanträge</button>' +
+      '</div>' +
+      '<p class="text-muted" style="margin-bottom:1rem;font-size:.85rem;">Jeder Förderantrag hat einen Titel, ein optionales Thema/Kategorie und beliebig viele anhängbare Formulare (PDF, Word …). Die Formulare werden als Download angeboten.</p>';
+
+    if (!liste.length) {
+      html += '<div class="form-card"><p class="text-muted">Noch keine Förderanträge angelegt.</p></div>';
+    }
+
+    liste.forEach(function(f, i) {
+      html += '<div class="item-card">' +
+        '<div class="item-body" style="cursor:default;">' +
+          '<div class="item-title">' + escHtml(f.titel || '(Kein Titel)') + '</div>' +
+          (f.kategorie ? '<div class="item-meta"><span class="item-badge">' + escHtml(f.kategorie) + '</span></div>' : '') +
+          ((f.downloads || []).length ? '<div class="item-meta" style="font-size:.8rem;color:var(--text-muted);">' + (f.downloads.length) + ' Formular' + (f.downloads.length !== 1 ? 'e' : '') + '</div>' : '') +
+        '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-sm btn-outline" onclick="confirmNav(function(){foerderantragEdit(' + i + ')})">Bearbeiten</button>' +
+          '<button class="btn btn-sm btn-danger-outline" onclick="event.stopPropagation();confirmNav(function(){foerderantragDelete(' + i + ')})">Löschen</button>' +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '</div>';
+    renderMain(html);
+  }
+  window.renderFoerderantraege = renderFoerderantraege;
+
+  window.foerderantragNeu = function() {
+    var data = S.data;
+    data.foerderantraege = data.foerderantraege || [];
+    data.foerderantraege.push({ titel: '', kategorie: '', beschreibung: '', downloads: [] });
+    foerderantragEdit(data.foerderantraege.length - 1);
+  };
+
+  window.foerderantragEdit = function(idx) {
+    var f = (S.data.foerderantraege || [])[idx];
+    if (!f) return;
+    var html = panelHeader('📋 Förderantrag bearbeiten',
+        '<button class="btn btn-outline" onclick="confirmNav(function(){renderFoerderantraege(S.section,S.data)})">← Zurück</button>' +
+        '<button class="btn btn-primary" onclick="foerderantragSave(' + idx + ')">💾 Speichern</button>',
+        true) +
+      '<div class="panel-body">' +
+        '<div class="form-card">' +
+          fText('fa-titel', 'Titel (z. B. „Förderantrag Revierverbesserung")', f.titel) +
+          fText('fa-kategorie', 'Thema / Unterkategorie (optional)', f.kategorie) +
+          fMarkdown('fa-beschreibung', 'Beschreibung (optional)', f.beschreibung) +
+        '</div>' +
+        renderDownloadsCard(f) +
+      '</div>';
+    renderMain(html);
+    initMDE('fa-beschreibung');
+    initDownloadsSortable();
+  };
+
+  window.foerderantragSave = async function(idx) {
+    if (!guardSavePermission()) return;
+    var f = S.data.foerderantraege[idx];
+    f.titel        = gv('fa-titel');
+    f.kategorie    = gv('fa-kategorie');
+    f.beschreibung = getMDE();
+    f.downloads    = collectDownloadsList();
+    try {
+      await doSave(S.section.file, S.data, '📋 Service: Förderantrag gespeichert');
+      toast('✅ Förderantrag gespeichert!', 'ok');
+      S.dirty = false;
+      renderFoerderantraege(S.section, S.data);
+    } catch (e) { await handleSaveError(e); }
+  };
+
+  window.foerderantragDelete = function(idx) {
+    showConfirm('Förderantrag löschen', 'Diesen Förderantrag wirklich löschen?', async function() {
+      var entfernt = S.data.foerderantraege.splice(idx, 1);
+      try {
+        await doSave(S.section.file, S.data, '📋 Service: Förderantrag gelöscht');
+        toast('🗑️ Förderantrag gelöscht', 'info');
+        renderFoerderantraege(S.section, S.data);
+      } catch (e) {
+        if (entfernt.length) S.data.foerderantraege.splice(idx, 0, entfernt[0]);
         await handleSaveError(e);
       }
     });
