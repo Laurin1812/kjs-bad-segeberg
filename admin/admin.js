@@ -4341,12 +4341,16 @@
     return '<div class="form-card">' +
       '<div class="form-card-title">📄 Dokumente &amp; Downloads</div>' +
       '<p style="font-size:.84rem;color:var(--text-muted);margin:0 0 .75rem;">' +
-        'Diese Dateien werden <strong>nicht</strong> in den Text oben eingefügt, sondern erscheinen automatisch ' +
-        'als eigene, beschriftete Download-Liste am Ende dieser Seite. Reihenfolge per Drag &amp; Drop änderbar.' +
+        'PDFs/Formulare anhängen. Reihenfolge per Drag &amp; Drop änderbar.' +
       '</p>' +
       '<div id="downloads-list">' + rows + '</div>' +
       '<p class="text-muted" id="downloads-empty" style="font-size:.85rem;' + (rows ? 'display:none;' : '') + '">Noch keine Dokumente hinzugefügt.</p>' +
-      '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\')">📄 PDF hinzufügen</button>' +
+      '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">' +
+        '<label class="btn btn-primary btn-sm" for="direct-pdf-upload" style="cursor:pointer;">📤 Datei hochladen</label>' +
+        '<input type="file" id="direct-pdf-upload" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none" onchange="directPdfUpload(this)">' +
+        '<button type="button" class="btn btn-outline btn-sm" onclick="openPdfModal(\'downloads\')">📁 Bereits hochgeladen</button>' +
+      '</div>' +
+      '<p id="direct-pdf-status" style="font-size:.84rem;color:var(--text-muted);margin:.4rem 0 0;display:none;"></p>' +
     '</div>';
   }
 
@@ -4468,6 +4472,29 @@
     markDirty();
     toast('✅ Dokument hinzugefügt – Beschriftung prüfen & Seite speichern', 'ok');
   }
+
+  // Direkter Upload vom Computer ohne Modal-Umweg.
+  // Unterstützt PDF + Word-Dokumente.
+  window.directPdfUpload = async function(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var status = id('direct-pdf-status');
+    if (status) { status.textContent = '⏳ Wird hochgeladen…'; status.style.display = ''; }
+    input.value = '';
+    var MAX = 10 * 1024 * 1024; // 10 MB
+    if (file.size > MAX) {
+      if (status) { status.textContent = '❌ Datei zu groß (max. 10 MB)'; }
+      return;
+    }
+    try {
+      var b64 = await fileToBase64(file);
+      var url = await apiUploadPdf(file.name, b64); // legt Datei unter /downloads/ ab (funktioniert für alle Typen)
+      if (status) { status.textContent = '✅ Hochgeladen!'; setTimeout(function(){ status.style.display='none'; }, 3000); }
+      addDownloadRow(url, file.name, 'downloads-list');
+    } catch(e) {
+      if (status) { status.textContent = '❌ Fehler: ' + (e.message || e); }
+    }
+  };
 
   /* ────────────────────────────────────────────────────────────
      BILDERGALERIE (Punkt 2, Frank-Wunsch) – gleiches Baukasten-Prinzip
